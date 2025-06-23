@@ -118,7 +118,10 @@
                 <!-- Payment Method Selection -->
                 <div class="space-y-3">
                     <h4 class="font-semibold">Payment Method</h4>
-                    <Select.Root bind:value={selectedPaymentMethod}>
+                    <Select.Root
+                        type="single"
+                        bind:value={selectedPaymentMethod}
+                    >
                         <Select.Trigger>
                             {#if selectedPaymentMethod}
                                 {@const method = paymentMethods.find(
