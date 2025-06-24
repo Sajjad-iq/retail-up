@@ -12,9 +12,9 @@ import {
     Clock
 } from 'lucide-react';
 
-import { ProductGrid } from './ProductGrid';
-import { Cart } from './Cart';
-import { PaymentDialog } from './PaymentDialog';
+import { ProductGrid } from './products';
+import { Cart } from './cart';
+import { PaymentDialog } from './payment';
 import { useCart, useTransactions } from '../hooks/use-pos';
 import { formatPrice, formatTime } from '../lib/utils/pos-utils';
 import type { Transaction } from '../types/pos';
@@ -86,25 +86,8 @@ export function POSInterface() {
             {/* Main Content */}
             <div className="flex h-[calc(100vh-73px)]">
                 {/* Left Side - Products */}
-                <div className="flex-1 flex flex-col">
-                    {/* Search Bar */}
-                    <div className="p-4 border-b">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search products..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10"
-                                aria-label="Search products"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Product Grid */}
-                    <div className="flex-1 p-4">
-                        <ProductGrid searchQuery={searchQuery} />
-                    </div>
+                <div className="flex-1 flex flex-col p-4">
+                    <ProductGrid />
                 </div>
 
                 {/* Right Side - Cart & Actions */}
