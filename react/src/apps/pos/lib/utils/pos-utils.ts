@@ -13,11 +13,19 @@ export function formatPrice(price: number): string {
 
 /**
  * Format a date as a time string
- * @param date - The date to format
+ * @param date - The date to format (can be Date object or string)
  * @returns Formatted time string (e.g., "2:30 PM")
  */
-export function formatTime(date: Date): string {
-    return date.toLocaleTimeString([], {
+export function formatTime(date: Date | string): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+        console.warn('Invalid date provided to formatTime:', date);
+        return 'Invalid Time';
+    }
+
+    return dateObj.toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
     });
@@ -25,11 +33,19 @@ export function formatTime(date: Date): string {
 
 /**
  * Format a date as a readable string
- * @param date - The date to format
+ * @param date - The date to format (can be Date object or string)
  * @returns Formatted date string
  */
-export function formatDate(date: Date): string {
-    return date.toLocaleDateString();
+export function formatDate(date: Date | string): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+        console.warn('Invalid date provided to formatDate:', date);
+        return 'Invalid Date';
+    }
+
+    return dateObj.toLocaleDateString();
 }
 
 /**

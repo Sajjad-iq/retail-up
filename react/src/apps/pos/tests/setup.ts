@@ -1,21 +1,46 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, expect, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers);
+
+// Clean up after each test
+afterEach(() => {
+    cleanup();
+});
 
 // Mock IntersectionObserver
 (global as any).IntersectionObserver = class IntersectionObserver {
+    root = null;
+    rootMargin = '';
+    thresholds = [];
+    constructor() { }
+    disconnect() { }
+    observe() { }
+    unobserve() { }
+    takeRecords() { return []; }
+};
+
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
     constructor() { }
     disconnect() { }
     observe() { }
     unobserve() { }
 };
 
-// Mock ResizeObserver
-(global as any).ResizeObserver = class ResizeObserver {
-    constructor() { }
-    disconnect() { }
-    observe() { }
-    unobserve() { }
+// Mock localStorage
+const localStorageMock = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+    length: 0,
+    key: vi.fn(),
 };
+(global as any).localStorage = localStorageMock;
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

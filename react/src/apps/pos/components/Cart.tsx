@@ -19,6 +19,8 @@ import type { CartItem } from '../types/pos';
 interface CartProps {
     /** CSS class name for styling */
     className?: string;
+    /** Function to call when checkout is initiated */
+    onCheckout?: () => void;
 }
 
 /**
@@ -30,7 +32,7 @@ interface CartProps {
  * @param props - Component props
  * @returns Cart component
  */
-export function Cart({ className }: CartProps) {
+export function Cart({ className, onCheckout }: CartProps) {
     const {
         cart,
         subtotal,
@@ -143,6 +145,8 @@ export function Cart({ className }: CartProps) {
                             subtotal={formattedSubtotal}
                             tax={formattedTax}
                             total={formattedTotal}
+                            onCheckout={onCheckout}
+                            isEmpty={isEmpty}
                         />
                     </>
                 )}
@@ -253,6 +257,8 @@ interface CartSummaryProps {
     subtotal: string;
     tax: string;
     total: string;
+    onCheckout?: () => void;
+    isEmpty: boolean;
 }
 
 function CartSummary({ subtotal, tax, total }: CartSummaryProps) {
