@@ -12,9 +12,9 @@ import {
     Clock
 } from 'lucide-react';
 
-import { ProductGrid } from './products';
-import { Cart } from './cart';
-import { PaymentDialog } from './payment';
+import { ProductGrid } from '../components/products';
+import { Cart } from '../components/cart';
+import { PaymentDialog } from '../components/payment';
 import { useCart, useTransactions } from '../hooks/use-pos';
 import { formatPrice, formatTime } from '../lib/utils/pos-utils';
 import type { Transaction } from '../types/pos';
