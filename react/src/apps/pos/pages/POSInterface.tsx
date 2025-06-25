@@ -24,7 +24,6 @@ import type { Transaction } from '../types/pos';
  * Two-column layout with products on left, cart/actions on right.
  */
 export function POSInterface() {
-    const [searchQuery, setSearchQuery] = useState('');
     const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
     const { cart, formattedTotal, isEmpty } = useCart();
