@@ -13,7 +13,7 @@ import './App.css';
  */
 function App() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-full bg-background">
       <Routes>
         {/* Main POS Route */}
         <Route path="/pos" element={<POSInterface />} />

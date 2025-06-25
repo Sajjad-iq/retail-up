@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
     Store,
-    Search,
     CreditCard,
     Receipt,
     User,
@@ -48,7 +46,7 @@ export function POSInterface() {
     };
 
     return (
-        <div className="h-screen bg-background">
+        <div className="full grid grid-rows-[73px_1fr] bg-background">
             {/* Header */}
             <header className="border-b bg-card">
                 <div className="flex items-center justify-between p-4">
@@ -84,7 +82,7 @@ export function POSInterface() {
             </header>
 
             {/* Main Content */}
-            <div className="flex h-[calc(100vh-73px)]">
+            <div className="flex h-full">
                 {/* Left Side - Products */}
                 <div className="flex-1 flex flex-col p-4">
                     <ProductGrid />
