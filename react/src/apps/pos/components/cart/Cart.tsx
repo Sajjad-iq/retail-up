@@ -105,14 +105,14 @@ export function Cart({ className, onCheckout }: CartProps) {
                 </div>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col p-0">
+            <CardContent className="flex-1 flex flex-col p-0 overflow-auto">
                 {isEmpty ? (
                     <EmptyCartMessage />
                 ) : (
                     <>
                         {/* Cart Items */}
-                        <ScrollArea className="flex-1 px-6">
-                            <Table>
+                        <ScrollArea className="flex-1 px-6 overflow-auto">
+                            <Table className="overflow-auto">
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Item</TableHead>
