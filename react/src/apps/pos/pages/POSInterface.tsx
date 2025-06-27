@@ -29,7 +29,7 @@ import type { Transaction, Product, ReturnFormData } from '../types/pos';
  */
 export function POSInterface() {
     const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-    const [showBarcodeScanner, setShowBarcodeScanner] = useState(true);
+    const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
     const [showReturnDialog, setShowReturnDialog] = useState(false);
     const [showHoldDialog, setShowHoldDialog] = useState(false);
 
