@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { POSInterface } from '@/apps/pos/pages/POSInterface';
 import { InventoryInterface } from '@/apps/inventory/pages/InventoryInterface';
-import { AuthInterface } from '@/apps/auth/pages/AuthInterface';
+import { AdministrationPage, LoginPage } from '@/apps/auth/pages';
 import { AppLayout } from '@/components/layout/AppLayout';
 import './App.css';
 
@@ -16,19 +16,27 @@ import './App.css';
  */
 function App() {
   return (
-    <AppLayout>
-      <Routes>
-        {/* Main POS Route */}
-        <Route path="/" element={<POSInterface />} />
+    <Routes>
+      {/* Login Route - Standalone without AppLayout */}
+      <Route path="/login" element={<LoginPage />} />
 
-        {/* Inventory Management Route */}
-        <Route path="/inventory" element={<InventoryInterface />} />
+      {/* Main Application Routes - Wrapped in AppLayout */}
+      <Route path="/*" element={
+        <AppLayout>
+          <Routes>
+            {/* Main POS Route */}
+            <Route path="/" element={<POSInterface />} />
 
-        {/* User Management & Authentication Route */}
-        <Route path="/admin" element={<AuthInterface />} />
-      </Routes>
-    </AppLayout>
+            {/* Inventory Management Route */}
+            <Route path="/inventory" element={<InventoryInterface />} />
+
+            {/* User Management & Authentication Route */}
+            <Route path="/admin" element={<AdministrationPage />} />
+          </Routes>
+        </AppLayout>
+      } />
+    </Routes>
   );
 }
-
+// 
 export default App;

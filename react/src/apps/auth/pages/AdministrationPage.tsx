@@ -30,7 +30,7 @@ import { useAuth, useUsers, useRoles, useUserActivities, useAuthAnalytics } from
  * Main authentication and user management interface following the inventory design pattern.
  * Multi-tab layout with user management, role management, activities, and analytics.
  */
-export function AuthInterface() {
+export function AdministrationPage() {
     const [activeTab, setActiveTab] = useState('users');
     const [showAddUserDialog, setShowAddUserDialog] = useState(false);
     const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
@@ -46,7 +46,7 @@ export function AuthInterface() {
             setShowAddUserDialog(true);
         }
     };
-
+    //UsersAndRolesManagement.tsx
     const handleAddRole = () => {
         if (hasPermission('users.roles')) {
             setShowAddRoleDialog(true);
