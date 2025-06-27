@@ -1,12 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-    Shield,
-    Search,
     Plus,
     Users,
     Activity,
@@ -17,8 +13,7 @@ import {
     ShieldCheck,
     TrendingUp,
     TrendingDown,
-    AlertCircle,
-    Clock
+    AlertCircle
 } from 'lucide-react';
 
 import { UserManagement } from '../components/users/UserManagement';
@@ -36,7 +31,6 @@ import { useAuth, useUsers, useRoles, useUserActivities, useAuthAnalytics } from
  * Multi-tab layout with user management, role management, activities, and analytics.
  */
 export function AuthInterface() {
-    const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('users');
     const [showAddUserDialog, setShowAddUserDialog] = useState(false);
     const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
@@ -83,52 +77,7 @@ export function AuthInterface() {
     }
 
     return (
-        <div className="h-full grid grid-rows-[73px_1fr] bg-background">
-            {/* Header */}
-            <header className="border-b bg-card">
-                <div className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <Shield className="h-6 w-6 text-primary" />
-                            <h1 className="text-xl font-bold">User Management</h1>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">Admin</Badge>
-                    </div>
-
-                    {/* Search */}
-                    <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search users, roles..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9"
-                            />
-                        </div>
-                    </div>
-
-                    {/* User Info */}
-                    <div className="flex items-center gap-3">
-                        <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>Logged in as</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8">
-                                <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                                    {userInitials}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="hidden sm:block">
-                                <p className="text-sm font-medium">{userDisplayName}</p>
-                                <p className="text-xs text-muted-foreground">{currentUser?.role.name}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
+        <div className="h-full bg-background">
             {/* Main Content */}
             <div className="flex h-full">
                 {/* Left Side - Main Content */}
@@ -165,11 +114,11 @@ export function AuthInterface() {
                         {/* Tab Content */}
                         <div className="flex-1 overflow-hidden">
                             <TabsContent value="users" className="h-full m-0">
-                                <UserManagement searchQuery={searchQuery} />
+                                <UserManagement />
                             </TabsContent>
 
                             <TabsContent value="roles" className="h-full m-0">
-                                <RoleManagement searchQuery={searchQuery} />
+                                <RoleManagement />
                             </TabsContent>
 
                             <TabsContent value="activities" className="h-full m-0">

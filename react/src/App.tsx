@@ -1,7 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { POSInterface } from '@/apps/pos/pages/POSInterface';
 import { InventoryInterface } from '@/apps/inventory/pages/InventoryInterface';
 import { AuthInterface } from '@/apps/auth/pages/AuthInterface';
+import { AppLayout } from '@/components/layout/AppLayout';
 import './App.css';
 
 /**
@@ -9,15 +10,16 @@ import './App.css';
  * 
  * Root component that sets up routing and navigation for the retail application.
  * Includes POS interface, inventory management, and user authentication/admin dashboard.
+ * Now features a sidebar navigation layout.
  * 
  * @returns App component
  */
 function App() {
   return (
-    <div className="h-full bg-background">
+    <AppLayout>
       <Routes>
         {/* Main POS Route */}
-        <Route path="*" element={<POSInterface />} />
+        <Route path="/" element={<POSInterface />} />
 
         {/* Inventory Management Route */}
         <Route path="/inventory" element={<InventoryInterface />} />
@@ -25,7 +27,7 @@ function App() {
         {/* User Management & Authentication Route */}
         <Route path="/admin" element={<AuthInterface />} />
       </Routes>
-    </div>
+    </AppLayout>
   );
 }
 

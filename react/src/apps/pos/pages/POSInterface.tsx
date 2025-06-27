@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
-    Store,
     CreditCard,
     Receipt,
     User,
@@ -45,41 +42,7 @@ export function POSInterface() {
     };
 
     return (
-        <div className="full grid grid-rows-[73px_1fr] bg-background">
-            {/* Header */}
-            <header className="border-b bg-card">
-                <div className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <Store className="h-6 w-6 text-primary" />
-                            <h1 className="text-xl font-bold">RetailUp POS</h1>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">v1.0.0</Badge>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        {/* Today's Stats */}
-                        <div className="hidden md:flex items-center gap-6">
-                            <div className="text-center">
-                                <p className="text-xs text-muted-foreground">Today's Sales</p>
-                                <p className="text-sm font-semibold">{todaysSalesCount}</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-xs text-muted-foreground">Revenue</p>
-                                <p className="text-sm font-semibold">{todaysRevenue}</p>
-                            </div>
-                        </div>
-
-                        {/* User Avatar */}
-                        <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                                <User className="h-4 w-4" />
-                            </AvatarFallback>
-                        </Avatar>
-                    </div>
-                </div>
-            </header>
-
+        <div className="h-full bg-background">
             {/* Main Content */}
             <div className="flex h-full">
                 {/* Left Side - Products */}

@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Package,
-    Search,
     Plus,
     AlertTriangle,
     BarChart3,
     Settings,
-    User,
     TrendingUp,
     TrendingDown,
     Package2,
@@ -32,13 +28,11 @@ import { useInventoryItems, useInventoryAlerts, useInventoryAnalytics } from '..
  * Multi-tab layout with inventory grid, movements, alerts, and analytics.
  */
 export function InventoryInterface() {
-    const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('inventory');
     const [showAddItemDialog, setShowAddItemDialog] = useState(false);
 
-    const { totalItems, formattedTotalValue, activeItems } = useInventoryItems();
+    const { formattedTotalValue, activeItems } = useInventoryItems();
     const { unacknowledgedCount, criticalCount, lowStockCount } = useInventoryAlerts();
-    const { totalInventoryValue, profitMargin } = useInventoryAnalytics();
 
     const handleAddItem = () => {
         setShowAddItemDialog(true);
@@ -49,71 +43,7 @@ export function InventoryInterface() {
     };
 
     return (
-        <div className="full grid grid-rows-[73px_1fr] bg-background">
-            {/* Header */}
-            <header className="border-b bg-card">
-                <div className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <Package className="h-6 w-6 text-primary" />
-                            <h1 className="text-xl font-bold">Inventory Management</h1>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">v1.0.0</Badge>
-                    </div>
-
-                    {/* Search */}
-                    <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search inventory..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        {/* Today's Stats */}
-                        <div className="hidden lg:flex items-center gap-6">
-                            <div className="text-center">
-                                <p className="text-xs text-muted-foreground">Total Items</p>
-                                <p className="text-sm font-semibold">{totalItems}</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-xs text-muted-foreground">Total Value</p>
-                                <p className="text-sm font-semibold">{formattedTotalValue}</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-xs text-muted-foreground">Profit Margin</p>
-                                <p className="text-sm font-semibold">{profitMargin}</p>
-                            </div>
-                        </div>
-
-                        {/* Alert Badge */}
-                        {unacknowledgedCount > 0 && (
-                            <div className="relative">
-                                <AlertTriangle className="h-5 w-5 text-orange-500" />
-                                <Badge
-                                    variant="destructive"
-                                    className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                                >
-                                    {unacknowledgedCount}
-                                </Badge>
-                            </div>
-                        )}
-
-                        {/* User Avatar */}
-                        <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                                <User className="h-4 w-4" />
-                            </AvatarFallback>
-                        </Avatar>
-                    </div>
-                </div>
-            </header>
-
+        <div className="h-full bg-background">
             {/* Main Content */}
             <div className="flex h-full">
                 {/* Main Content Area */}
@@ -149,7 +79,7 @@ export function InventoryInterface() {
                         {/* Tab Content */}
                         <div className="flex-1 overflow-hidden">
                             <TabsContent value="inventory" className="h-full m-0">
-                                <InventoryGrid searchQuery={searchQuery} />
+                                <InventoryGrid />
                             </TabsContent>
 
                             <TabsContent value="movements" className="h-full m-0">
