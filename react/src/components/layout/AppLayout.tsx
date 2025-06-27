@@ -13,7 +13,8 @@ import {
     ShoppingCart,
     Package,
     Users,
-    Store
+    Store,
+    BarChart3
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -34,6 +35,11 @@ export function AppLayout({ children }: AppLayoutProps) {
             title: 'Inventory',
             href: '/inventory',
             icon: Package,
+        },
+        {
+            title: 'Reports',
+            href: '/reports',
+            icon: BarChart3,
         },
         {
             title: 'Administration',

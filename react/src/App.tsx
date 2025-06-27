@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { POSInterface } from '@/apps/pos/pages/POSInterface';
 import { InventoryInterface } from '@/apps/inventory/pages/InventoryInterface';
 import { AdministrationPage, LoginPage } from '@/apps/auth/pages';
+import { ReportingInterface } from '@/apps/reporting/pages/ReportingInterface';
 import { AppLayout } from '@/components/layout/AppLayout';
 import './App.css';
 
@@ -32,6 +33,9 @@ function App() {
 
             {/* User Management & Authentication Route */}
             <Route path="/admin" element={<AdministrationPage />} />
+
+            {/* Advanced Reporting & Analytics Route */}
+            <Route path="/reports" element={<ReportingInterface />} />
           </Routes>
         </AppLayout>
       } />
