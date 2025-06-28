@@ -93,11 +93,21 @@ export function PaymentDialog({ isOpen, onClose, onSuccess }: PaymentDialogProps
                 if (planResult.success) {
                     // Process down payment if any
                     if (downPayment > 0) {
-                        const paymentResult = await processPayment('cash', downPayment);
-                        if (paymentResult.success && 'transaction' in paymentResult && paymentResult.transaction) {
-                            setCompletedTransaction(paymentResult.transaction);
-                            onSuccess?.(paymentResult.transaction);
-                        }
+                        const downPaymentTransaction: Transaction = {
+                            id: `DOWN-${Date.now()}`,
+                            items: cart,
+                            customer: customer,
+                            subtotal: downPayment,
+                            discount: 0,
+                            tax: 0,
+                            total: downPayment,
+                            payments: [{ method: 'cash', amount: downPayment }],
+                            timestamp: new Date(),
+                            status: 'completed',
+                            cashier: 'Current User'
+                        };
+                        setCompletedTransaction(downPaymentTransaction);
+                        onSuccess?.(downPaymentTransaction);
                     } else {
                         // Create a virtual transaction for the payment plan
                         const virtualTransaction: Transaction = {
