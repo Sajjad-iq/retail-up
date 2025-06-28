@@ -270,9 +270,7 @@ export function ReturnDialog({ isOpen, onClose, onReturn, transactions }: Return
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="cash">Cash</SelectItem>
-                                                <SelectItem value="card">Card Refund</SelectItem>
-                                                <SelectItem value="giftcard">Store Credit</SelectItem>
+                                                <SelectItem value="cash">Cash Refund</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>

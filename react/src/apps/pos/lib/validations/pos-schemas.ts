@@ -34,7 +34,7 @@ export const customerSchema = z.object({
 /**
  * Payment method validation schema
  */
-export const paymentMethodSchema = z.enum(['cash', 'card', 'mobile'], {
+export const paymentMethodSchema = z.enum(['cash', 'installment'], {
     errorMap: () => ({ message: 'Invalid payment method' }),
 });
 
@@ -96,6 +96,8 @@ export const cashPaymentSchema = z.object({
     path: ['amountReceived'],
 });
 
+
+
 // Type exports
 export type ProductInput = z.infer<typeof productSchema>;
 export type CartItemInput = z.infer<typeof cartItemSchema>;
@@ -104,4 +106,4 @@ export type PaymentFormInput = z.infer<typeof paymentFormSchema>;
 export type TransactionInput = z.infer<typeof transactionSchema>;
 export type SearchQueryInput = z.infer<typeof searchQuerySchema>;
 export type QuantityUpdateInput = z.infer<typeof quantityUpdateSchema>;
-export type CashPaymentInput = z.infer<typeof cashPaymentSchema>; 
+export type CashPaymentInput = z.infer<typeof cashPaymentSchema>;

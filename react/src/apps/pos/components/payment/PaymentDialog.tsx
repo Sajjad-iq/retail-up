@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -8,8 +8,13 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle, Calendar, DollarSign } from 'lucide-react';
 import { useCart, useTransactions } from '../../hooks/use-pos';
+import { usePaymentPlans } from '@/apps/payment-plans/hooks/use-payment-plans';
 import { formatPrice, formatTime } from '../../lib/utils/pos-utils';
 import {
     PaymentMethodSelector,
@@ -34,19 +39,29 @@ interface PaymentDialogProps {
 export function PaymentDialog({ isOpen, onClose, onSuccess }: PaymentDialogProps) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [completedTransaction, setCompletedTransaction] = useState<Transaction | null>(null);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('card');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('cash');
     const [amountReceived, setAmountReceived] = useState<number>(0);
     const [customer, setCustomer] = useState<Customer | null>(null);
 
+    // Payment plan states
+    const [downPayment, setDownPayment] = useState<number>(0);
+    const [planDurationMonths, setPlanDurationMonths] = useState<number>(12);
+    const [interestRate, setInterestRate] = useState<number>(0);
+
     const { cart, subtotal, tax, total, formattedTotal, isEmpty, clearCart } = useCart();
     const { processPayment } = useTransactions();
+    const { createPlan } = usePaymentPlans();
 
     // Calculate change for cash payments
     const change = selectedPaymentMethod === 'cash' && amountReceived > 0
         ? Math.max(0, amountReceived - total)
         : 0;
 
-    const isValidPayment = selectedPaymentMethod !== 'cash' || amountReceived >= total;
+    const isValidPayment = selectedPaymentMethod === 'cash'
+        ? amountReceived >= total
+        : selectedPaymentMethod === 'installment'
+            ? customer && downPayment >= 0 && planDurationMonths > 0
+            : true;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,11 +69,64 @@ export function PaymentDialog({ isOpen, onClose, onSuccess }: PaymentDialogProps
 
         setIsProcessing(true);
         try {
-            const result = await processPayment(selectedPaymentMethod);
+            if (selectedPaymentMethod === 'installment') {
+                // Create payment plan
+                if (!customer) {
+                    console.error('Customer is required for payment plans');
+                    return;
+                }
 
-            if (result.success && result.transaction) {
-                setCompletedTransaction(result.transaction);
-                onSuccess?.(result.transaction);
+                const planResult = createPlan({
+                    customer: {
+                        id: customer.id,
+                        name: customer.name,
+                        email: customer.email || '',
+                        phone: customer.phone || ''
+                    },
+                    totalAmount: total,
+                    downPayment: downPayment,
+                    planDurationMonths: planDurationMonths,
+                    interestRate: interestRate,
+                    transactionId: `TXN-${Date.now()}`
+                });
+
+                if (planResult.success) {
+                    // Process down payment if any
+                    if (downPayment > 0) {
+                        const paymentResult = await processPayment('cash', downPayment);
+                        if (paymentResult.success && 'transaction' in paymentResult && paymentResult.transaction) {
+                            setCompletedTransaction(paymentResult.transaction);
+                            onSuccess?.(paymentResult.transaction);
+                        }
+                    } else {
+                        // Create a virtual transaction for the payment plan
+                        const virtualTransaction: Transaction = {
+                            id: `PLAN-${Date.now()}`,
+                            items: cart,
+                            customer: customer,
+                            subtotal: subtotal,
+                            discount: 0,
+                            tax: tax,
+                            total: total,
+                            payments: [{ method: 'installment', amount: total }],
+                            timestamp: new Date(),
+                            status: 'completed',
+                            cashier: 'Current User'
+                        };
+                        setCompletedTransaction(virtualTransaction);
+                        onSuccess?.(virtualTransaction);
+                    }
+                } else {
+                    console.error('Failed to create payment plan:', planResult.error);
+                }
+            } else {
+                // Normal payment processing
+                const result = await processPayment(selectedPaymentMethod);
+
+                if (result.success && 'transaction' in result && result.transaction) {
+                    setCompletedTransaction(result.transaction);
+                    onSuccess?.(result.transaction);
+                }
             }
         } catch (error) {
             console.error('Payment processing failed:', error);
@@ -75,10 +143,13 @@ export function PaymentDialog({ isOpen, onClose, onSuccess }: PaymentDialogProps
     };
 
     const resetForm = () => {
-        setSelectedPaymentMethod('card');
+        setSelectedPaymentMethod('cash');
         setAmountReceived(0);
         setCustomer(null);
         setCompletedTransaction(null);
+        setDownPayment(0);
+        setPlanDurationMonths(12);
+        setInterestRate(0);
     };
 
     const handleNewTransaction = () => {
@@ -114,10 +185,10 @@ export function PaymentDialog({ isOpen, onClose, onSuccess }: PaymentDialogProps
                         <div className="bg-muted p-4 rounded-lg space-y-2">
                             <div className="flex justify-between text-sm">
                                 <span>Payment Method:</span>
-                                <span className="capitalize">{completedTransaction.paymentMethod}</span>
+                                <span className="capitalize">{completedTransaction.payments[0]?.method}</span>
                             </div>
 
-                            {completedTransaction.paymentMethod === 'cash' && change > 0 && (
+                            {completedTransaction.payments[0]?.method === 'cash' && change > 0 && (
                                 <div className="flex justify-between text-sm">
                                     <span>Change:</span>
                                     <span className="font-medium">{formatPrice(change)}</span>
@@ -190,15 +261,94 @@ export function PaymentDialog({ isOpen, onClose, onSuccess }: PaymentDialogProps
                                 />
                             )}
 
-                            {selectedPaymentMethod !== 'cash' && (
-                                <div className="space-y-4">
-                                    <h4 className="font-medium text-sm">Payment Processing</h4>
-                                    <div className="p-4 bg-muted/50 rounded-md text-center text-sm text-muted-foreground">
-                                        {selectedPaymentMethod === 'card' && 'Insert or swipe card when ready'}
-                                        {selectedPaymentMethod === 'mobile' && 'Present device to terminal'}
-                                    </div>
-                                </div>
+                            {selectedPaymentMethod === 'installment' && (
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2 text-sm">
+                                            <Calendar className="h-4 w-4" />
+                                            Payment Plan Details
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="downPayment">Down Payment</Label>
+                                                <Input
+                                                    id="downPayment"
+                                                    type="number"
+                                                    min="0"
+                                                    max={total}
+                                                    step="0.01"
+                                                    value={downPayment || ''}
+                                                    onChange={(e) => setDownPayment(Number(e.target.value) || 0)}
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="duration">Duration (months)</Label>
+                                                <Select value={planDurationMonths.toString()} onValueChange={(value) => setPlanDurationMonths(Number(value))}>
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="6">6 months</SelectItem>
+                                                        <SelectItem value="12">12 months</SelectItem>
+                                                        <SelectItem value="18">18 months</SelectItem>
+                                                        <SelectItem value="24">24 months</SelectItem>
+                                                        <SelectItem value="36">36 months</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="interestRate">Interest Rate (%)</Label>
+                                            <Input
+                                                id="interestRate"
+                                                type="number"
+                                                min="0"
+                                                max="30"
+                                                step="0.1"
+                                                value={interestRate || ''}
+                                                onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+                                                placeholder="0.0"
+                                            />
+                                        </div>
+                                        <div className="bg-muted/50 p-3 rounded-md">
+                                            <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                                                <DollarSign className="h-4 w-4" />
+                                                Plan Summary
+                                            </div>
+                                            <div className="space-y-1 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span>Total Amount:</span>
+                                                    <span>{formatPrice(total)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Down Payment:</span>
+                                                    <span>{formatPrice(downPayment)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Remaining Balance:</span>
+                                                    <span>{formatPrice(total - downPayment)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Monthly Payment:</span>
+                                                    <span>
+                                                        {formatPrice(planDurationMonths > 0 ? (total - downPayment) / planDurationMonths : 0)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {!customer && (
+                                            <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded-md">
+                                                Customer information is required for payment plans
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
                             )}
+
+
                         </div>
                     </div>
 
@@ -216,7 +366,14 @@ export function PaymentDialog({ isOpen, onClose, onSuccess }: PaymentDialogProps
                             disabled={isProcessing || isEmpty || !isValidPayment}
                             className="flex-1"
                         >
-                            {isProcessing ? 'Processing...' : `Pay ${formattedTotal}`}
+                            {isProcessing
+                                ? 'Processing...'
+                                : selectedPaymentMethod === 'installment'
+                                    ? downPayment > 0
+                                        ? `Pay Down Payment ${formatPrice(downPayment)} & Create Plan`
+                                        : 'Create Payment Plan'
+                                    : `Pay ${formattedTotal}`
+                            }
                         </Button>
                     </DialogFooter>
                 </form>

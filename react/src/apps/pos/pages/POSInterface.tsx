@@ -140,7 +140,7 @@ export function POSInterface() {
                         </div>
 
                         {/* Additional Actions */}
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 gap-2">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -150,6 +150,10 @@ export function POSInterface() {
                                 <RotateCcw className="mr-2 h-4 w-4" />
                                 Return
                             </Button>
+                        </div>
+
+                        {/* Management Actions */}
+                        <div className="grid grid-cols-1 gap-2">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -235,6 +239,7 @@ export function POSInterface() {
                 onResumeTransaction={handleResumeTransaction}
                 onDeleteHeldTransaction={handleDeleteHeldTransaction}
             />
+
         </div>
     );
 } 

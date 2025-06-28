@@ -14,7 +14,8 @@ import {
     Package,
     Users,
     Store,
-    BarChart3
+    BarChart3,
+    Calendar
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -35,6 +36,11 @@ export function AppLayout({ children }: AppLayoutProps) {
             title: 'Inventory',
             href: '/inventory',
             icon: Package,
+        },
+        {
+            title: 'Payment Plans',
+            href: '/payment-plans',
+            icon: Calendar,
         },
         {
             title: 'Reports',

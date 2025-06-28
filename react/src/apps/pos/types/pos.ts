@@ -87,7 +87,7 @@ export interface Discount {
 /**
  * Payment method types
  */
-export type PaymentMethod = 'cash' | 'card' | 'mobile' | 'check' | 'giftcard' | 'loyalty';
+export type PaymentMethod = 'cash' | 'installment';
 
 /**
  * Payment details for a transaction
@@ -101,7 +101,10 @@ export interface PaymentDetail {
     reference?: string;
     /** Change given (for cash payments) */
     change?: number;
+
 }
+
+
 
 /**
  * Transaction status
@@ -278,6 +281,7 @@ export interface POSState {
     drawerOperations: CashDrawerOperation[];
     /** Receipt configuration */
     receiptConfig: ReceiptConfig;
+
 }
 
 /**

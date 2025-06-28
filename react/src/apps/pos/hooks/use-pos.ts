@@ -102,8 +102,8 @@ export function useTransactions() {
 
     const processPaymentWithValidation = async (paymentMethod: PaymentMethod) => {
         try {
-            const transaction = await processPayment(paymentMethod);
-            return { success: true, transaction };
+            const result = await processPayment(paymentMethod);
+            return result;
         } catch (error) {
             return {
                 success: false,
@@ -143,7 +143,8 @@ export function usePOSAnalytics() {
 
         // Payment method breakdown
         const paymentMethods = todaysTransactions.reduce((acc, t) => {
-            acc[t.paymentMethod] = (acc[t.paymentMethod] || 0) + 1;
+            const primaryPaymentMethod = t.payments[0]?.method || 'unknown';
+            acc[primaryPaymentMethod] = (acc[primaryPaymentMethod] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { CreditCard, Banknote, Smartphone, DollarSign } from 'lucide-react';
+import { Banknote, Calendar } from 'lucide-react';
 import type { PaymentMethod } from '../../types/pos';
 
 interface PaymentMethodSelectorProps {
@@ -12,7 +12,7 @@ interface PaymentMethodSelectorProps {
  * PaymentMethodSelector Component
  * 
  * Displays payment method options in a grid layout with icons.
- * Allows users to select between cash, card, mobile payment, and check.
+ * Allows users to select between cash and installment payment plans.
  */
 export function PaymentMethodSelector({
     selectedMethod,
@@ -24,8 +24,7 @@ export function PaymentMethodSelector({
         icon: React.ComponentType<any>
     }> = [
             { method: 'cash', label: 'Cash', icon: Banknote },
-            { method: 'card', label: 'Card', icon: CreditCard },
-            { method: 'mobile', label: 'Mobile Pay', icon: Smartphone },
+            { method: 'installment', label: 'Payment Plan', icon: Calendar },
         ];
 
     return (

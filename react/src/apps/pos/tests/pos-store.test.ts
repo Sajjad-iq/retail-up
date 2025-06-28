@@ -163,7 +163,7 @@ describe('POS Store', () => {
             });
 
             expect(transaction).toBeDefined();
-            expect(transaction!.paymentMethod).toBe('cash');
+            expect(transaction!.payments[0].method).toBe('cash');
             expect(transaction!.total).toBe(result.current.getCartTotal());
             expect(transaction!.items).toHaveLength(1);
             expect(result.current.cart).toHaveLength(0); // Cart should be cleared
@@ -178,11 +178,11 @@ describe('POS Store', () => {
             });
 
             await act(async () => {
-                await result.current.processPayment('card');
+                await result.current.processPayment('cash');
             });
 
             expect(result.current.transactions).toHaveLength(1);
-            expect(result.current.transactions[0].paymentMethod).toBe('card');
+            expect(result.current.transactions[0].payments[0].method).toBe('cash');
         });
     });
 

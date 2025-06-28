@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import type { Product, CartItem, Customer, Transaction, PaymentMethod } from '../types/pos';
+import type { Product, CartItem, Customer, Transaction, PaymentMethod, PaymentDetail } from '../types/pos';
 
 /**
  * Sample products data for demonstration
@@ -63,6 +63,7 @@ interface POSStore {
     currentCustomer: Customer | null;
     transactions: Transaction[];
 
+
     // Cart Actions
     addToCart: (product: Product, quantity?: number) => void;
     removeFromCart: (productId: string) => void;
@@ -73,7 +74,7 @@ interface POSStore {
     setCurrentCustomer: (customer: Customer | null) => void;
 
     // Transaction Actions
-    processPayment: (paymentMethod: PaymentMethod) => Promise<Transaction>;
+    processPayment: (paymentMethod: PaymentMethod) => Promise<{ success: boolean; transaction?: Transaction }>;
 
     // Computed getters
     getCartTotal: () => number;
@@ -170,22 +171,30 @@ export const usePOSStore = create<POSStore>()(
                 /**
                  * Process payment and create a transaction
                  */
-                processPayment: async (paymentMethod: PaymentMethod): Promise<Transaction> => {
+                processPayment: async (paymentMethod: PaymentMethod): Promise<{ success: boolean; transaction?: Transaction }> => {
                     return new Promise((resolve) => {
                         const state = get();
                         const subtotal = state.getCartSubtotal();
                         const tax = state.getCartTax();
                         const total = state.getCartTotal();
 
+                        // Create payment details
+                        const paymentDetails: PaymentDetail[] = [{
+                            method: paymentMethod,
+                            amount: total,
+                        }];
+
                         const transaction: Transaction = {
                             id: `TXN-${Date.now()}`,
                             items: [...state.cart],
                             customer: state.currentCustomer,
                             subtotal,
+                            discount: 0,
                             tax,
                             total,
-                            paymentMethod,
-                            timestamp: new Date()
+                            payments: paymentDetails,
+                            timestamp: new Date(),
+                            status: 'completed',
                         };
 
                         set((state) => ({
@@ -194,9 +203,11 @@ export const usePOSStore = create<POSStore>()(
                             currentCustomer: null
                         }));
 
-                        resolve(transaction);
+                        resolve({ success: true, transaction });
                     });
                 },
+
+
 
                 // Computed getters
                 /**
