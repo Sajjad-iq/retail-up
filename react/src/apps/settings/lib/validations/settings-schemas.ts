@@ -337,6 +337,7 @@ export const securitySettingsSchema = z.object({
     }),
 });
 
+
 /**
  * Settings form validation schema
  */

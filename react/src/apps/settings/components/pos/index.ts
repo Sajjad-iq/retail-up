@@ -1,0 +1,1 @@
+export { POSSettingsPanel } from './POSSettingsPanel'; 

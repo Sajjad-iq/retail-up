@@ -1,0 +1,1 @@
+export { PaymentsSettingsPanel } from './PaymentsSettingsPanel'; 

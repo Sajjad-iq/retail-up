@@ -1,0 +1,11 @@
+export { BusinessSettingsPanel } from './business';
+export { POSSettingsPanel } from './pos';
+export { InventorySettingsPanel } from './inventory';
+export { PaymentsSettingsPanel } from './payments';
+export { StaffSettingsPanel } from './staff';
+export { CustomersSettingsPanel } from './customers';
+export { NotificationsSettingsPanel } from './notifications';
+export { ReportsSettingsPanel } from './reports';
+export { AppearanceSettingsPanel } from './appearance';
+export { IntegrationsSettingsPanel } from './integrations';
+export { SystemSettingsPanel } from './system'; 
