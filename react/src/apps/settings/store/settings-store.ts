@@ -3,45 +3,49 @@ import { devtools, persist } from 'zustand/middleware';
 import type {
     AppSettings,
     SettingsCategory,
-    SettingsData,
-    GeneralSettings,
-    AppearanceSettings,
+    BusinessSettings,
+    POSSettings,
+    InventorySettings,
+    PaymentSettings,
+    StaffSettings,
+    CustomerSettings,
     NotificationSettings,
-    SecuritySettings,
-    SettingsActivity,
-    SettingsAction
+    ReportSettings,
+    AppearanceSettings,
+    IntegrationSettings,
+    SystemSettings,
+    SettingsUpdatePayload,
+    SettingsValidationResult
 } from '../types/settings';
 import {
     generateSettingsId,
-    generateActivityId,
     getDefaultSettings,
     validateSettingsData
 } from '../lib/utils/settings-utils';
 
 /**
- * Default general settings
+ * Settings activity log entry
  */
-const defaultGeneralSettings: GeneralSettings = {
-    appName: 'RetailUp',
-    companyName: 'My Store',
-    storeAddress: {
-        street: '123 Main St',
-        city: 'Anytown',
-        state: 'State',
-        postalCode: '12345',
-        country: 'United States'
-    },
-    contactInfo: {
-        phone: '+1 (555) 123-4567',
-        email: 'info@mystore.com',
-        website: 'https://mystore.com',
-        socialMedia: {
-            facebook: '',
-            twitter: '',
-            instagram: '',
-            linkedin: ''
-        }
-    },
+interface SettingsActivity {
+    id: string;
+    category: SettingsCategory;
+    action: 'created' | 'updated' | 'deleted' | 'reset' | 'imported' | 'exported';
+    previousValue?: any;
+    newValue?: any;
+    timestamp: Date;
+    details?: string;
+}
+
+/**
+ * Default business settings
+ */
+const defaultBusinessSettings: BusinessSettings = {
+    businessName: 'My Retail Store',
+    storeName: 'Main Store',
+    address: '123 Main Street\nAnytown, State 12345\nUnited States',
+    phone: '+1 (555) 123-4567',
+    email: 'info@mystore.com',
+    website: 'https://mystore.com',
     businessHours: {
         monday: { isOpen: true, openTime: '09:00', closeTime: '17:00' },
         tuesday: { isOpen: true, openTime: '09:00', closeTime: '17:00' },
@@ -49,21 +53,220 @@ const defaultGeneralSettings: GeneralSettings = {
         thursday: { isOpen: true, openTime: '09:00', closeTime: '17:00' },
         friday: { isOpen: true, openTime: '09:00', closeTime: '17:00' },
         saturday: { isOpen: true, openTime: '10:00', closeTime: '16:00' },
-        sunday: { isOpen: false }
+        sunday: { isOpen: false, openTime: '00:00', closeTime: '00:00' }
     },
-    currency: {
-        code: 'USD',
-        symbol: '$',
-        name: 'US Dollar',
-        decimalPlaces: 2
-    },
+    currency: 'USD',
     timezone: 'America/New_York',
-    language: 'en',
+    language: 'en'
+};
+
+/**
+ * Default POS settings
+ */
+const defaultPOSSettings: POSSettings = {
+    receiptSettings: {
+        autoPrint: true,
+        emailReceipts: true,
+        footerText: 'Thank you for your business!\nVisit us again soon.',
+        logoUrl: '',
+        includeBarcode: true,
+        paperSize: 'thermal'
+    },
+    hardware: {
+        barcodeScanner: true,
+        cashDrawer: true,
+        customerDisplay: false,
+        cardReader: true,
+        weightScale: false,
+        printerPort: 'COM1'
+    },
+    interface: {
+        gridSize: 'medium',
+        showProductImages: true,
+        enableQuickKeys: true,
+        soundEffects: true
+    }
+};
+
+/**
+ * Default inventory settings
+ */
+const defaultInventorySettings: InventorySettings = {
+    stockTracking: {
+        autoTrackInventory: true,
+        lowStockAlerts: true,
+        lowStockThreshold: 10,
+        criticalStockThreshold: 3,
+        outOfStockAlerts: true,
+        trackSerialNumbers: false,
+        trackExpirationDates: false
+    },
+    productSettings: {
+        autoGenerateSKU: true,
+        requireProductImages: false,
+        defaultCategory: 'general',
+        enableVariants: true,
+        requireBarcode: false,
+        defaultTaxRate: 8.25
+    },
+    supplierSettings: {
+        autoReorder: false,
+        reorderThreshold: 5,
+        defaultLeadTime: 7,
+        requirePurchaseOrders: false
+    }
+};
+
+/**
+ * Default payment settings
+ */
+const defaultPaymentSettings: PaymentSettings = {
+    paymentMethods: {
+        cash: true,
+        creditDebit: true,
+        digitalWallets: false,
+        storeCredit: true,
+        checks: false,
+        layaway: false,
+        giftCards: true
+    },
     taxSettings: {
-        defaultTaxRate: 8.25,
-        taxInclusive: false,
-        taxCategories: [],
-        taxExemptions: []
+        salesTaxRate: 8.25,
+        taxIdNumber: '',
+        taxInclusivePricing: false,
+        automaticTaxCalculation: true,
+        taxExemptCategories: [],
+        multipleJurisdictions: false
+    },
+    financialSettings: {
+        baseCurrency: 'USD',
+        accountingMethod: 'cash',
+        fiscalYearStart: '01-01',
+        automaticDeposits: false,
+        tipHandling: 'cash'
+    }
+};
+
+/**
+ * Default staff settings
+ */
+const defaultStaffSettings: StaffSettings = {
+    userManagement: {
+        requireEmployeePIN: true,
+        trackEmployeeSales: true,
+        allowManagerOverrides: true,
+        employeeDiscounts: false,
+        timeClock: false,
+        performanceTracking: true
+    },
+    security: {
+        sessionTimeout: 30,
+        passwordPolicy: {
+            minLength: 8,
+            requireUppercase: true,
+            requireNumbers: true,
+            requireSymbols: false,
+            expirationDays: 90
+        },
+        auditLogging: true,
+        twoFactorAuth: false,
+        dataEncryption: true,
+        loginAttempts: 5
+    },
+    accessControl: {
+        roles: [],
+        permissions: [],
+        departmentAccess: false,
+        timeBasedAccess: false
+    }
+};
+
+/**
+ * Default customer settings
+ */
+const defaultCustomerSettings: CustomerSettings = {
+    customerData: {
+        collectEmails: true,
+        collectPhones: false,
+        collectAddresses: false,
+        requireCustomerInfo: false,
+        privacyCompliance: true,
+        dataRetentionPeriod: 365
+    },
+    loyaltyProgram: {
+        enabled: true,
+        pointsPerDollar: 1,
+        dollarValuePerPoint: 0.01,
+        tierSystem: false,
+        pointExpiration: 365,
+        welcomeBonus: 100,
+        birthdayRewards: true
+    },
+    marketing: {
+        emailMarketing: true,
+        smsMarketing: false,
+        promotionalOffers: true,
+        surveyRequests: false,
+        reviewRequests: true
+    }
+};
+
+/**
+ * Default notification settings
+ */
+const defaultNotificationSettings: NotificationSettings = {
+    email: true,
+    push: true,
+    sms: false,
+    dashboard: true,
+    alerts: {
+        lowStock: true,
+        dailySummary: true,
+        systemErrors: true,
+        newOrders: true,
+        paymentFailures: true,
+        securityAlerts: true,
+        maintenanceAlerts: false,
+        performanceAlerts: false
+    },
+    schedule: {
+        immediateAlerts: ['systemErrors', 'securityAlerts', 'paymentFailures'],
+        dailyDigest: true,
+        weeklyReports: false,
+        monthlyReports: true,
+        quietHours: {
+            start: '22:00',
+            end: '08:00'
+        }
+    }
+};
+
+/**
+ * Default report settings
+ */
+const defaultReportSettings: ReportSettings = {
+    generation: {
+        autoGenerateDaily: true,
+        autoGenerateWeekly: false,
+        autoGenerateMonthly: true,
+        defaultPeriod: 'month',
+        reportEmail: '',
+        includeCharts: true
+    },
+    analytics: {
+        trackCustomerBehavior: true,
+        salesForecasting: false,
+        inventoryAnalytics: true,
+        employeePerformance: true,
+        profitAnalysis: true,
+        dataRetention: 365
+    },
+    exportOptions: {
+        allowedFormats: ['pdf', 'excel', 'csv'],
+        emailReports: true,
+        cloudStorage: false,
+        automaticBackup: true,
+        shareWithAccountant: false
     }
 };
 
@@ -72,87 +275,126 @@ const defaultGeneralSettings: GeneralSettings = {
  */
 const defaultAppearanceSettings: AppearanceSettings = {
     theme: 'system',
-    primaryColor: '#3B82F6',
-    accentColor: '#10B981',
-    fontFamily: 'Inter',
-    fontSize: 'medium',
-    sidebarPosition: 'left',
-    compactMode: false,
-    showAnimations: true
-};
-
-/**
- * Default notification settings
- */
-const defaultNotificationSettings: NotificationSettings = {
-    emailNotifications: {
-        enabled: true,
-        sales: true,
-        inventory: true,
-        system: true,
-        customer: false
+    colorScheme: {
+        primary: '#3B82F6',
+        secondary: '#64748B',
+        accent: '#10B981',
+        background: '#FFFFFF',
+        surface: '#F8FAFC'
     },
-    pushNotifications: {
-        enabled: true,
-        sales: true,
-        inventory: true,
-        system: true,
-        customer: false
+    layout: {
+        sidebarWidth: 'standard',
+        compactMode: false,
+        gridDensity: 'standard',
+        showSidebar: true
     },
-    smsNotifications: {
-        enabled: false,
-        criticalOnly: true
-    },
-    inAppNotifications: {
-        enabled: true,
-        desktop: true,
-        sound: true,
-        badges: true
-    },
-    frequency: 'immediate',
-    quietHours: {
-        enabled: false,
-        startTime: '22:00',
-        endTime: '08:00',
-        daysOfWeek: ['saturday', 'sunday']
+    display: {
+        fontSize: 'medium',
+        fontFamily: 'Inter',
+        animations: true,
+        reducedMotion: false,
+        highContrast: false
     }
 };
 
 /**
- * Default security settings
+ * Default integration settings
  */
-const defaultSecuritySettings: SecuritySettings = {
-    twoFactorAuth: {
-        enabled: false,
-        method: 'email'
+const defaultIntegrationSettings: IntegrationSettings = {
+    accounting: {
+        provider: 'none',
+        apiKey: '',
+        syncFrequency: 'daily',
+        syncSales: false,
+        syncInventory: false,
+        syncCustomers: false
     },
-    sessionSettings: {
-        timeout: 60,
-        rememberMeDuration: 30,
-        concurrentSessions: 3
+    ecommerce: {
+        provider: 'none',
+        storeUrl: '',
+        apiCredentials: '',
+        syncInventory: false,
+        syncOrders: false,
+        autoFulfillment: false
     },
-    passwordPolicy: {
-        minLength: 8,
-        requireUppercase: true,
-        requireLowercase: true,
-        requireNumbers: true,
-        requireSpecialChars: false,
-        historyCount: 5
+    marketing: {
+        emailProvider: 'none',
+        smsProvider: 'none',
+        socialMedia: {
+            facebook: false,
+            instagram: false,
+            twitter: false,
+            googleMyBusiness: false
+        },
+        analytics: {
+            googleAnalytics: false,
+            facebookPixel: false,
+            customAnalytics: false
+        }
     },
-    loginAttempts: {
-        maxAttempts: 5,
-        lockoutDuration: 30,
-        resetAfter: 60
+    paymentProcessors: {
+        primaryProcessor: {
+            provider: 'none',
+            merchantId: '',
+            apiKey: '',
+            isActive: false,
+            supportedMethods: []
+        },
+        backupProcessor: {
+            provider: 'none',
+            merchantId: '',
+            apiKey: '',
+            isActive: false,
+            supportedMethods: []
+        },
+        fees: {
+            creditCardRate: 2.9,
+            debitCardRate: 1.9,
+            transactionFee: 0.30,
+            monthlyFee: 0
+        },
+        limits: {
+            dailyLimit: 10000,
+            transactionLimit: 2000,
+            monthlyLimit: 100000,
+            requireSignature: 25
+        }
+    }
+};
+
+/**
+ * Default system settings
+ */
+const defaultSystemSettings: SystemSettings = {
+    dataManagement: {
+        automaticBackup: true,
+        dataRetentionPeriod: 365,
+        cloudSync: true,
+        dataExportSchedule: 'weekly',
+        archiveOldData: true,
+        gdprCompliance: true
     },
-    dataEncryption: {
-        encryptionAtRest: true,
-        encryptionInTransit: true,
-        algorithm: 'AES-256'
+    backup: {
+        frequency: 'daily',
+        retention: 30,
+        cloudProvider: 'local',
+        encryption: true,
+        compression: true,
+        verifyIntegrity: true
     },
-    auditLogging: {
-        enabled: true,
+    maintenance: {
+        autoUpdates: false,
+        maintenanceWindow: '02:00',
+        updateChannel: 'stable',
+        notifyBeforeUpdates: true,
+        rollbackEnabled: true
+    },
+    performance: {
+        cacheEnabled: true,
+        imageCaching: true,
+        databaseOptimization: true,
         logLevel: 'info',
-        retentionDays: 90
+        maxConcurrentUsers: 50
     }
 };
 
@@ -161,7 +403,7 @@ const defaultSecuritySettings: SecuritySettings = {
  */
 interface SettingsStore {
     // State
-    settings: Record<SettingsCategory, any>;
+    settings: AppSettings;
     activities: SettingsActivity[];
     loading: {
         settings: boolean;
@@ -183,7 +425,7 @@ interface SettingsStore {
     // Activity Actions
     logActivity: (
         category: SettingsCategory,
-        action: SettingsAction,
+        action: 'created' | 'updated' | 'deleted' | 'reset' | 'imported' | 'exported',
         previousValue?: any,
         newValue?: any,
         details?: string
@@ -201,6 +443,13 @@ interface SettingsStore {
 }
 
 /**
+ * Generate activity ID
+ */
+const generateActivityId = (): string => {
+    return `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+/**
  * Create the settings store
  */
 export const useSettingsStore = create<SettingsStore>()(
@@ -209,16 +458,17 @@ export const useSettingsStore = create<SettingsStore>()(
             (set, get) => ({
                 // Initial state
                 settings: {
-                    general: defaultGeneralSettings,
-                    appearance: defaultAppearanceSettings,
+                    business: defaultBusinessSettings,
+                    pos: defaultPOSSettings,
+                    inventory: defaultInventorySettings,
+                    payments: defaultPaymentSettings,
+                    staff: defaultStaffSettings,
+                    customers: defaultCustomerSettings,
                     notifications: defaultNotificationSettings,
-                    security: defaultSecuritySettings,
-                    payment: {},
-                    inventory: {},
-                    pos: {},
-                    reporting: {},
-                    integrations: {},
-                    backup: {}
+                    reports: defaultReportSettings,
+                    appearance: defaultAppearanceSettings,
+                    integrations: defaultIntegrationSettings,
+                    system: defaultSystemSettings
                 },
                 activities: [],
                 loading: {
@@ -340,9 +590,17 @@ export const useSettingsStore = create<SettingsStore>()(
                         const settings = get().settings;
                         const exportData = {
                             version: '1.0',
-                            timestamp: new Date().toISOString(),
-                            settings
+                            exportDate: new Date().toISOString(),
+                            settings,
+                            metadata: {
+                                appVersion: '1.0.0',
+                                storeName: settings.business.storeName,
+                                totalCategories: Object.keys(settings).length
+                            }
                         };
+
+                        // Log activity
+                        get().logActivity('system', 'exported', null, null, 'Settings exported to file');
 
                         return JSON.stringify(exportData, null, 2);
                     } catch (error) {
@@ -373,7 +631,7 @@ export const useSettingsStore = create<SettingsStore>()(
                         }));
 
                         // Log activity
-                        get().logActivity('general', 'imported', null, importData.settings);
+                        get().logActivity('system', 'imported', null, importData.settings);
 
                     } catch (error) {
                         set(state => ({
@@ -390,7 +648,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 // Activity Actions
                 logActivity: (
                     category: SettingsCategory,
-                    action: SettingsAction,
+                    action: 'created' | 'updated' | 'deleted' | 'reset' | 'imported' | 'exported',
                     previousValue?: any,
                     newValue?: any,
                     details?: string
@@ -417,7 +675,7 @@ export const useSettingsStore = create<SettingsStore>()(
 
                 getSetting: (category: SettingsCategory, key: string) => {
                     const categorySettings = get().settings[category];
-                    return categorySettings?.[key];
+                    return categorySettings?.[key as keyof typeof categorySettings];
                 },
 
                 setSetting: (category: SettingsCategory, key: string, value: any) => {
@@ -445,23 +703,24 @@ export const useSettingsStore = create<SettingsStore>()(
 
                         set(state => ({
                             settings: {
-                                general: defaultGeneralSettings,
-                                appearance: defaultAppearanceSettings,
+                                business: defaultBusinessSettings,
+                                pos: defaultPOSSettings,
+                                inventory: defaultInventorySettings,
+                                payments: defaultPaymentSettings,
+                                staff: defaultStaffSettings,
+                                customers: defaultCustomerSettings,
                                 notifications: defaultNotificationSettings,
-                                security: defaultSecuritySettings,
-                                payment: {},
-                                inventory: {},
-                                pos: {},
-                                reporting: {},
-                                integrations: {},
-                                backup: {}
+                                reports: defaultReportSettings,
+                                appearance: defaultAppearanceSettings,
+                                integrations: defaultIntegrationSettings,
+                                system: defaultSystemSettings
                             },
                             loading: { ...state.loading, saving: false },
                             isDirty: false
                         }));
 
                         // Log activity
-                        get().logActivity('general', 'reset', null, null, 'All settings reset to defaults');
+                        get().logActivity('system', 'reset', null, null, 'All settings reset to defaults');
 
                     } catch (error) {
                         set(state => ({
