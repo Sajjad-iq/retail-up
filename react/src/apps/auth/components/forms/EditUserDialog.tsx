@@ -28,7 +28,7 @@ import { Eye, EyeOff, AlertCircle, UserCheck, Loader2 } from 'lucide-react';
 import { useUsers, useRoles } from '../../hooks/use-auth';
 import { editUserFormSchema, type EditUserFormInput } from '../../lib/validations/auth-schemas';
 import { generateSecurePassword } from '../../lib/utils/auth-utils';
-import type { User, UserStatus } from '../../types/auth';
+import type { User } from '../../types/auth';
 
 /**
  * EditUserDialog component props

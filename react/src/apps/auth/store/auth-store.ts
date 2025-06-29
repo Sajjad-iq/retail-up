@@ -10,7 +10,6 @@ import type {
     UserFormData,
     RoleFormData,
     PasswordChangeFormData,
-    PermissionCategory,
     UserAction
 } from '../types/auth';
 import {
@@ -19,7 +18,6 @@ import {
     generateActivityId,
     generateSessionToken,
     isSessionExpired,
-    formatDateTime
 } from '../lib/utils/auth-utils';
 
 /**
@@ -583,7 +581,7 @@ export const useAuthStore = create<AuthStore>()(
                 /**
                  * Change user password
                  */
-                changePassword: async (userId: string, passwordData: PasswordChangeFormData) => {
+                changePassword: async (userId: string) => {
                     set(state => ({ loading: { ...state.loading, saving: true } }));
 
                     return new Promise((resolve) => {

@@ -18,8 +18,6 @@ import {
 } from '../lib/utils/auth-utils';
 import type {
     User,
-    Role,
-    Permission,
     LoginCredentials,
     UserFormData,
     RoleFormData,
@@ -341,7 +339,6 @@ export function useRoles() {
 export function useUserActivities() {
     const {
         activities,
-        currentUser,
         getTodaysActivities,
         logActivity
     } = useAuthStore();

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { UserStatus } from '../../types/auth';
 
 /**
  * Helper function to validate password strength

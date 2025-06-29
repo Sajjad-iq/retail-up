@@ -1,31 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Grid3X3,
     List,
     Search,
     Filter,
-    MoreHorizontal,
-    UserCheck,
     UserX,
-    UserPlus,
-    Mail,
-    Phone,
-    Building,
-    Calendar,
-    Key,
-    RotateCcw,
-    Edit,
-    Trash2,
-    CheckCircle,
-    XCircle,
-    AlertTriangle,
-    Clock,
     SortAsc,
     SortDesc
 } from 'lucide-react';
@@ -34,7 +16,7 @@ import { UserTable } from './UserTable';
 import { UserCard } from './UserCard';
 import { EditUserDialog } from '../forms/EditUserDialog';
 import { ChangePasswordDialog } from '../forms/ChangePasswordDialog';
-import { useUsers, useRoles, useAuth, useAuthFormatters } from '../../hooks/use-auth';
+import { useUsers, useRoles, useAuth } from '../../hooks/use-auth';
 import type { User, UserFilters, UserStatus } from '../../types/auth';
 import React from 'react';
 

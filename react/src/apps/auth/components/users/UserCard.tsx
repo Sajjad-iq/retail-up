@@ -22,10 +22,8 @@ import {
     XCircle,
     AlertTriangle,
     Clock,
-    Mail,
     Phone,
     Building,
-    Calendar,
     User
 } from 'lucide-react';
 

@@ -19,7 +19,6 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, AlertCircle, Lock, Loader2 } from 'lucide-react';
 

@@ -64,7 +64,7 @@ export function UserTable({
     onToggleStatus
 }: UserTableProps) {
     const { hasPermission, currentUser } = useAuth();
-    const { formatUserStatus, getUserStatusColor, getUserInitials, formatLastLogin, formatDate } = useAuthFormatters();
+    const { formatUserStatus, getUserInitials, formatLastLogin, formatDate } = useAuthFormatters();
 
     /**
      * Get status indicator for table display
@@ -86,7 +86,6 @@ export function UserTable({
      * Get status badge for user status
      */
     const getStatusBadge = (status: string) => {
-        const color = getUserStatusColor(status as any);
         const variant = status === 'active' ? 'default' :
             status === 'suspended' ? 'destructive' :
                 status === 'pending' ? 'secondary' : 'outline';

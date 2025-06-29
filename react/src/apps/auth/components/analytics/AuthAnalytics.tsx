@@ -85,7 +85,7 @@ export function AuthAnalytics() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {analytics.roleDistribution.map((role, index) => (
+                            {analytics.roleDistribution.map((role) => (
                                 <div key={role.role} className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium">{role.role}</span>
@@ -158,7 +158,7 @@ export function AuthAnalytics() {
                 </CardHeader>
                 <CardContent>
                     <div className="h-32 flex items-end justify-between gap-2">
-                        {analytics.loginActivity.map((day, index) => (
+                        {analytics.loginActivity.map((day) => (
                             <div key={day.date} className="flex flex-col items-center flex-1">
                                 <div
                                     className="bg-primary rounded-t w-full min-h-[4px]"

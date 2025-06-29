@@ -35,11 +35,11 @@ export function AdministrationPage() {
     const [showAddUserDialog, setShowAddUserDialog] = useState(false);
     const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
 
-    const { currentUser, hasPermission, isAdmin, userDisplayName, userInitials } = useAuth();
+    const { hasPermission, isAdmin } = useAuth();
     const { totalUsers, activeUserCount, usersRequiringPasswordChange } = useUsers();
     const { totalRoles, customRoles } = useRoles();
-    const { todaysLoginCount, todaysUserManagementCount } = useUserActivities();
-    const { activeUsers, loginsToday, newUsersThisMonth } = useAuthAnalytics();
+    const { todaysUserManagementCount } = useUserActivities();
+    const { loginsToday, newUsersThisMonth } = useAuthAnalytics();
 
     const handleAddUser = () => {
         if (hasPermission('users.manage')) {

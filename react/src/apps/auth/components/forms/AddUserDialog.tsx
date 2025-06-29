@@ -28,7 +28,6 @@ import { Eye, EyeOff, AlertCircle, UserPlus, Loader2 } from 'lucide-react';
 import { useUsers, useRoles } from '../../hooks/use-auth';
 import { createUserFormSchema, type CreateUserFormInput } from '../../lib/validations/auth-schemas';
 import { generateSecurePassword } from '../../lib/utils/auth-utils';
-import type { UserStatus } from '../../types/auth';
 
 /**
  * AddUserDialog component props

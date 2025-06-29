@@ -1,6 +1,5 @@
 import type {
     User,
-    Role,
     Permission,
     UserStatus,
     PermissionCategory,

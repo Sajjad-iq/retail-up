@@ -7,12 +7,9 @@ import {
     Shield,
     ShieldCheck,
     Users,
-    Settings,
     Search,
-    Plus,
     Edit,
-    Trash2,
-    MoreHorizontal
+    Trash2
 } from 'lucide-react';
 
 import { useRoles, useAuth } from '../../hooks/use-auth';
@@ -35,7 +32,7 @@ interface RoleManagementProps {
 export function RoleManagement({ searchQuery = '' }: RoleManagementProps) {
     const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
-    const { roles, rolesWithCounts, groupedPermissions, deleteRole, loading } = useRoles();
+    const { roles, rolesWithCounts, deleteRole, loading } = useRoles();
     const { hasPermission } = useAuth();
 
     // Filter roles based on search

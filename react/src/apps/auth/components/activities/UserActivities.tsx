@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Activity, Clock, User, LogIn, LogOut, UserPlus, Edit } from 'lucide-react';
+import { Activity, Clock, LogIn, LogOut, UserPlus, Edit } from 'lucide-react';
 
 import { useUserActivities, useAuthFormatters } from '../../hooks/use-auth';
 
