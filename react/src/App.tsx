@@ -4,6 +4,7 @@ import { InventoryInterface } from '@/apps/inventory/pages/InventoryInterface';
 import { AdministrationPage, LoginPage } from '@/apps/auth/pages';
 import { ReportingInterface } from '@/apps/reporting/pages/ReportingInterface';
 import { PaymentPlansInterface } from '@/apps/payment-plans/pages';
+import { SettingsInterface } from '@/apps/settings/pages';
 import { AppLayout } from '@/components/layout/AppLayout';
 import './App.css';
 
@@ -40,6 +41,9 @@ function App() {
 
             {/* Advanced Reporting & Analytics Route */}
             <Route path="/reports" element={<ReportingInterface />} />
+
+            {/* Application Settings Route */}
+            <Route path="/settings" element={<SettingsInterface />} />
           </Routes>
         </AppLayout>
       } />

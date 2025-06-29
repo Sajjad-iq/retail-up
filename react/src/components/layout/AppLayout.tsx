@@ -15,7 +15,8 @@ import {
     Users,
     Store,
     BarChart3,
-    Calendar
+    Calendar,
+    Settings
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -51,6 +52,11 @@ export function AppLayout({ children }: AppLayoutProps) {
             title: 'Administration',
             href: '/admin',
             icon: Users,
+        },
+        {
+            title: 'Settings',
+            href: '/settings',
+            icon: Settings,
         },
     ];
 
