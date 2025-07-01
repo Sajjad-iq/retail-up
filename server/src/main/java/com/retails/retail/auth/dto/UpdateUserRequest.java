@@ -21,28 +21,28 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UpdateUserRequest {
 
-    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
+    @Size(min = ValidationConstants.NAME_MIN_LENGTH, max = ValidationConstants.NAME_MAX_LENGTH, message = ValidationConstants.NAME_SIZE)
     private String name;
 
-    @Email(message = "Please enter a valid email address")
+    @Email(message = ValidationConstants.EMAIL_INVALID)
     private String email;
 
-    @Pattern(regexp = "^\\+?[\\d\\s\\-\\(\\)]{10,}$", message = "Please enter a valid phone number")
+    @Pattern(regexp = ValidationConstants.PHONE_PATTERN, message = ValidationConstants.PHONE_INVALID)
     private String phone;
 
-    @Size(max = 50, message = "Department must not exceed 50 characters")
+    @Size(max = ValidationConstants.DEPARTMENT_MAX_LENGTH, message = ValidationConstants.DEPARTMENT_SIZE)
     private String department;
 
-    @Size(min = 2, max = 20, message = "Employee ID must be between 2 and 20 characters")
+    @Size(min = ValidationConstants.EMPLOYEE_ID_MIN_LENGTH, max = ValidationConstants.EMPLOYEE_ID_MAX_LENGTH, message = ValidationConstants.EMPLOYEE_ID_SIZE)
     private String employeeId;
 
     private UUID roleId;
 
-    @Pattern(regexp = "^(active|inactive|suspended|pending)$", message = "Invalid status value")
+    @Pattern(regexp = ValidationConstants.STATUS_PATTERN, message = ValidationConstants.STATUS_INVALID)
     private String status;
 
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$", message = "Password must contain uppercase, lowercase, number, and special character")
+    @Size(min = ValidationConstants.PASSWORD_MIN_LENGTH, message = ValidationConstants.PASSWORD_SIZE)
+    @Pattern(regexp = ValidationConstants.PASSWORD_PATTERN, message = ValidationConstants.PASSWORD_PATTERN_MESSAGE)
     private String password;
 
     private Boolean mustChangePassword;
