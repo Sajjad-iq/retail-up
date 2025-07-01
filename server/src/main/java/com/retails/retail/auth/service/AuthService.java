@@ -22,14 +22,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Authentication service
- * Handles login, logout, password changes, and session management
+ * Service for authentication operations
+ * Handles login, logout, password reset, and token management
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class AuthService {
+public class AuthService extends BaseAuthService {
 
     private final UserRepository userRepository;
     private final UserActivityRepository userActivityRepository;
@@ -67,7 +67,7 @@ public class AuthService {
 
             // Log activity
             logActivity(user.getId(), UserActivity.UserAction.LOGIN, null, "Successful login",
-                    getClientIpAddress(httpRequest), getUserAgent(httpRequest));
+                    httpRequest);
 
             // Convert to DTO
             UserDto userDto = UserDto.fromEntity(user);
@@ -80,7 +80,7 @@ public class AuthService {
             // Log failed login attempt
             userRepository.findByEmailIgnoreCase(request.getEmail())
                     .ifPresent(user -> logActivity(user.getId(), UserActivity.UserAction.ACCESS_DENIED,
-                            null, "Failed login attempt", getClientIpAddress(httpRequest), getUserAgent(httpRequest)));
+                            null, "Failed login attempt", httpRequest));
 
             log.warn("Failed login attempt for email: {} - {}", request.getEmail(), e.getMessage());
             throw new BadCredentialsException("Invalid credentials");
@@ -97,7 +97,7 @@ public class AuthService {
             userRepository.findByEmailIgnoreCase(email)
                     .ifPresent(user -> {
                         logActivity(user.getId(), UserActivity.UserAction.LOGOUT, null, "User logout",
-                                getClientIpAddress(httpRequest), getUserAgent(httpRequest));
+                                httpRequest);
                         log.info("User logged out: {} ({})", user.getName(), user.getEmail());
                     });
         }
@@ -134,7 +134,7 @@ public class AuthService {
 
         // Log activity
         logActivity(user.getId(), UserActivity.UserAction.CHANGE_PASSWORD, null, "Password changed",
-                getClientIpAddress(httpRequest), getUserAgent(httpRequest));
+                httpRequest);
 
         log.info("Password changed for user: {} ({})", user.getName(), user.getEmail());
     }
@@ -159,7 +159,7 @@ public class AuthService {
         String adminEmail = authentication != null ? authentication.getName() : "system";
 
         logActivity(user.getId(), UserActivity.UserAction.RESET_PASSWORD, null,
-                "Password reset by: " + adminEmail, getClientIpAddress(httpRequest), getUserAgent(httpRequest));
+                "Password reset by: " + adminEmail, httpRequest);
 
         log.info("Password reset for user: {} ({}) by: {}", user.getName(), user.getEmail(), adminEmail);
 
@@ -203,28 +203,6 @@ public class AuthService {
     }
 
     /**
-     * Log user activity
-     */
-    private void logActivity(UUID userId, UserActivity.UserAction action, String resource,
-            String details, String ipAddress, String userAgent) {
-        try {
-            UserActivity activity = UserActivity.builder()
-                    .userId(userId)
-                    .action(action)
-                    .resource(resource)
-                    .details(details)
-                    .ipAddress(ipAddress)
-                    .userAgent(userAgent)
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
-            userActivityRepository.save(activity);
-        } catch (Exception e) {
-            log.error("Failed to log user activity", e);
-        }
-    }
-
-    /**
      * Generate temporary password
      */
     private String generateTemporaryPassword() {
@@ -236,29 +214,5 @@ public class AuthService {
         }
 
         return password.toString();
-    }
-
-    /**
-     * Get client IP address
-     */
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-
-        return request.getRemoteAddr();
-    }
-
-    /**
-     * Get user agent
-     */
-    private String getUserAgent(HttpServletRequest request) {
-        return request.getHeader("User-Agent");
     }
 }

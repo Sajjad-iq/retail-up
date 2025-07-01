@@ -1,5 +1,6 @@
 package com.retails.retail.auth.dto;
 
+import com.retails.retail.auth.lib.ValidationConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -21,32 +22,32 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateUserRequest {
 
-    @NotBlank(message = "Name is required")
-    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
+    @NotBlank(message = ValidationConstants.NAME_REQUIRED)
+    @Size(min = ValidationConstants.NAME_MIN_LENGTH, max = ValidationConstants.NAME_MAX_LENGTH, message = ValidationConstants.NAME_SIZE)
     private String name;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Please enter a valid email address")
+    @NotBlank(message = ValidationConstants.EMAIL_REQUIRED)
+    @Email(message = ValidationConstants.EMAIL_INVALID)
     private String email;
 
-    @Pattern(regexp = "^\\+?[\\d\\s\\-\\(\\)]{10,}$", message = "Please enter a valid phone number")
+    @Pattern(regexp = ValidationConstants.PHONE_PATTERN, message = ValidationConstants.PHONE_INVALID)
     private String phone;
 
-    @Size(max = 50, message = "Department must not exceed 50 characters")
+    @Size(max = ValidationConstants.DEPARTMENT_MAX_LENGTH, message = ValidationConstants.DEPARTMENT_SIZE)
     private String department;
 
-    @Size(min = 2, max = 20, message = "Employee ID must be between 2 and 20 characters")
+    @Size(min = ValidationConstants.EMPLOYEE_ID_MIN_LENGTH, max = ValidationConstants.EMPLOYEE_ID_MAX_LENGTH, message = ValidationConstants.EMPLOYEE_ID_SIZE)
     private String employeeId;
 
-    @NotBlank(message = "Role is required")
+    @NotBlank(message = ValidationConstants.ROLE_REQUIRED)
     private UUID roleId;
 
-    @Pattern(regexp = "^(active|inactive|suspended|pending)$", message = "Invalid status value")
+    @Pattern(regexp = ValidationConstants.STATUS_PATTERN, message = ValidationConstants.STATUS_INVALID)
     private String status = "active";
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$", message = "Password must contain uppercase, lowercase, number, and special character")
+    @NotBlank(message = ValidationConstants.PASSWORD_REQUIRED)
+    @Size(min = ValidationConstants.PASSWORD_MIN_LENGTH, message = ValidationConstants.PASSWORD_SIZE)
+    @Pattern(regexp = ValidationConstants.PASSWORD_PATTERN, message = ValidationConstants.PASSWORD_PATTERN_MESSAGE)
     private String password;
 
     private Boolean mustChangePassword = false;

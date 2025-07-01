@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class UserService {
+public class UserService extends BaseAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -417,42 +417,5 @@ public class UserService {
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
-    }
-
-    private void logActivity(UUID userId, UserActivity.UserAction action, String resource,
-            String details, HttpServletRequest request) {
-        try {
-            UserActivity activity = UserActivity.builder()
-                    .userId(userId)
-                    .action(action)
-                    .resource(resource)
-                    .details(details)
-                    .ipAddress(getClientIpAddress(request))
-                    .userAgent(getUserAgent(request))
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
-            userActivityRepository.save(activity);
-        } catch (Exception e) {
-            log.error("Failed to log user activity", e);
-        }
-    }
-
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-
-        return request.getRemoteAddr();
-    }
-
-    private String getUserAgent(HttpServletRequest request) {
-        return request.getHeader("User-Agent");
     }
 }

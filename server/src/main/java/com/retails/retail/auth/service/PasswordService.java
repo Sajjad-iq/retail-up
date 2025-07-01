@@ -22,13 +22,13 @@ import java.util.regex.Pattern;
 
 /**
  * Service for password management operations
- * Handles password changes, resets, recovery, and password policy enforcement
+ * Handles password changes, resets, validation, and policies
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class PasswordService {
+public class PasswordService extends BaseAuthService {
 
     private final UserRepository userRepository;
     private final UserActivityRepository userActivityRepository;
@@ -394,36 +394,5 @@ public class PasswordService {
             shuffled.append(c);
         }
         return shuffled.toString();
-    }
-
-    private void logActivity(UUID userId, UserActivity.UserAction action, String resource,
-            String details, HttpServletRequest request) {
-        try {
-            UserActivity activity = UserActivity.builder()
-                    .userId(userId)
-                    .action(action)
-                    .resource(resource)
-                    .details(details)
-                    .ipAddress(getClientIpAddress(request))
-                    .userAgent(getUserAgent(request))
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
-            userActivityRepository.save(activity);
-        } catch (Exception e) {
-            log.error("Failed to log password activity", e);
-        }
-    }
-
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
-    }
-
-    private String getUserAgent(HttpServletRequest request) {
-        return request.getHeader("User-Agent");
     }
 }

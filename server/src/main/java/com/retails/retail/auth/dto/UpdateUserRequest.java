@@ -1,5 +1,6 @@
 package com.retails.retail.auth.dto;
 
+import com.retails.retail.auth.lib.ValidationConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

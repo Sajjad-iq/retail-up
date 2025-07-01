@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class RoleService {
+public class RoleService extends BaseAuthService {
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -159,44 +159,6 @@ public class RoleService {
 
         log.info("Role updated successfully: {}", role.getName());
         return RoleDto.fromEntity(role);
-    }
-
-    // Private helper methods
-    private void logActivity(UserActivity.UserAction action, String resource, String details,
-            HttpServletRequest request) {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated()) {
-                String email = auth.getName();
-                User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
-                if (user != null) {
-                    UserActivity activity = UserActivity.builder()
-                            .userId(user.getId())
-                            .action(action)
-                            .resource(resource)
-                            .details(details)
-                            .ipAddress(getClientIpAddress(request))
-                            .userAgent(getUserAgent(request))
-                            .timestamp(LocalDateTime.now())
-                            .build();
-                    userActivityRepository.save(activity);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed to log activity", e);
-        }
-    }
-
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
-    }
-
-    private String getUserAgent(HttpServletRequest request) {
-        return request.getHeader("User-Agent");
     }
 
     /**
