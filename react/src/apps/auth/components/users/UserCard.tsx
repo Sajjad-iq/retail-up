@@ -24,7 +24,8 @@ import {
     Clock,
     Phone,
     Building,
-    User
+    User,
+    Shield
 } from 'lucide-react';
 
 import { useAuth, useAuthFormatters } from '../../hooks/use-auth';
@@ -92,22 +93,6 @@ export function UserCard({
         return (
             <Badge variant={variant as any} className="text-xs">
                 {formatUserStatus(user.status)}
-            </Badge>
-        );
-    };
-
-    /**
-     * Get role badge
-     */
-    const getRoleBadge = () => {
-        const roleColor = user.role.color || '#6B7280';
-        return (
-            <Badge
-                variant="outline"
-                className="text-xs"
-                style={{ borderColor: roleColor, color: roleColor }}
-            >
-                {user.role.name}
             </Badge>
         );
     };
@@ -204,9 +189,16 @@ export function UserCard({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                {/* Role and Status */}
+                {/* Role */}
+                <div className="flex items-center gap-2">
+                    <Shield className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-sm">
+                        {user.permissions?.length || 0} permissions
+                    </span>
+                </div>
+
+                {/* Status */}
                 <div className="flex items-center justify-between">
-                    {getRoleBadge()}
                     {getStatusBadge()}
                 </div>
 

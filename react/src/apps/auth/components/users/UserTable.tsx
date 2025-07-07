@@ -97,22 +97,6 @@ export function UserTable({
         );
     };
 
-    /**
-     * Get role badge
-     */
-    const getRoleBadge = (user: User) => {
-        const roleColor = user.role.color || '#6B7280';
-        return (
-            <Badge
-                variant="outline"
-                className="text-xs"
-                style={{ borderColor: roleColor, color: roleColor }}
-            >
-                {user.role.name}
-            </Badge>
-        );
-    };
-
     const handleEdit = (user: User) => {
         onEdit?.(user);
     };
@@ -144,7 +128,7 @@ export function UserTable({
                     <TableRow>
                         <TableHead className="w-[30px]">Status</TableHead>
                         <TableHead className="min-w-[250px]">User</TableHead>
-                        <TableHead>Role</TableHead>
+                        <TableHead>Permissions</TableHead>
                         <TableHead>Department</TableHead>
                         <TableHead>Employee ID</TableHead>
                         <TableHead>Contact</TableHead>
@@ -189,7 +173,13 @@ export function UserTable({
 
                             {/* Role */}
                             <TableCell>
-                                {getRoleBadge(user)}
+                                <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-sm font-medium">
+                                            {user.permissions?.length || 0} permissions
+                                        </span>
+                                    </div>
+                                </div>
                             </TableCell>
 
                             {/* Department */}

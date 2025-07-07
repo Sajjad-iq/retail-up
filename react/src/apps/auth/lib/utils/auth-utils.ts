@@ -63,14 +63,10 @@ export function getUserStatusColor(status: UserStatus): string {
  * Check if user has specific permission
  * @param user - User object
  * @param permissionName - Permission name to check
- * @returns True if user has permission
+ * @returns True if user has the permission
  */
 export function hasPermission(user: User, permissionName: string): boolean {
-    if (!user.role || !user.role.permissions) {
-        return false;
-    }
-
-    return user.role.permissions.some(permission => permission.name === permissionName);
+    return user.permissions?.some(permission => permission.name === permissionName) || false;
 }
 
 /**
@@ -99,7 +95,7 @@ export function hasAllPermissions(user: User, permissionNames: string[]): boolea
  * @returns True if user is admin
  */
 export function isAdmin(user: User): boolean {
-    return hasPermission(user, 'admin.full_access') || user.role.name.toLowerCase() === 'admin';
+    return hasPermission(user, 'admin.full_access');
 }
 
 /**
@@ -231,7 +227,7 @@ export function filterUsersByQuery(users: User[], query: string): User[] {
     return users.filter(user =>
         user.name.toLowerCase().includes(searchTerm) ||
         user.email.toLowerCase().includes(searchTerm) ||
-        user.role.name.toLowerCase().includes(searchTerm) ||
+        user.role?.name.toLowerCase().includes(searchTerm) ||
         user.department?.toLowerCase().includes(searchTerm) ||
         user.employeeId?.toLowerCase().includes(searchTerm)
     );
@@ -265,8 +261,8 @@ export function sortUsers(
                 bValue = b.email.toLowerCase();
                 break;
             case 'role':
-                aValue = a.role.name.toLowerCase();
-                bValue = b.role.name.toLowerCase();
+                aValue = a.role?.name.toLowerCase() || '';
+                bValue = b.role?.name.toLowerCase() || '';
                 break;
             case 'status':
                 aValue = a.status;
@@ -438,8 +434,7 @@ export function getActivityIcon(activity: UserActivity): string {
             return 'UserCheck';
         case 'delete_user':
             return 'UserX';
-        case 'create_role':
-            return 'Shield';
+
         case 'update_role':
             return 'ShieldCheck';
         case 'delete_role':

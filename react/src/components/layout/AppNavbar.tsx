@@ -125,7 +125,10 @@ export function AppNavbar({ onSearchChange }: AppNavbarProps) {
                                         {isAuthenticated && userDisplayName ? userDisplayName : 'Guest User'}
                                     </p>
                                     <p className="text-xs leading-none text-muted-foreground">
-                                        {isAuthenticated && currentUser?.role?.name ? currentUser.role.name : 'No role assigned'}
+                                        {isAuthenticated && currentUser?.permissions ?
+                                            `${currentUser.permissions.length} permissions` :
+                                            'No permissions assigned'
+                                        }
                                     </p>
                                 </div>
                             </DropdownMenuLabel>

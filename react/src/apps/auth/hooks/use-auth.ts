@@ -20,7 +20,6 @@ import type {
     User,
     LoginCredentials,
     UserFormData,
-    RoleFormData,
     PasswordChangeFormData,
     UserFilters,
     AuthAnalytics
@@ -140,7 +139,7 @@ export function useUsers() {
 
         // Apply role filter
         if (filters.role && filters.role !== 'all') {
-            filteredUsers = filteredUsers.filter(user => user.role.id === filters.role);
+            filteredUsers = filteredUsers.filter(user => user.role?.id === filters.role);
         }
 
         // Apply status filter
@@ -256,7 +255,6 @@ export function useRoles() {
         users,
         loading,
         errors,
-        addRole,
         updateRole,
         deleteRole,
         getRoleById,
@@ -279,19 +277,9 @@ export function useRoles() {
         };
     }, [roles, permissions, users, getUsersByRole]);
 
-    const addRoleWithValidation = async (roleData: RoleFormData) => {
-        try {
-            const role = await addRole(roleData);
-            return { success: true, role };
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to add role'
-            };
-        }
-    };
 
-    const updateRoleWithValidation = async (id: string, roleData: Partial<RoleFormData>) => {
+
+    const updateRoleWithValidation = async (id: string, roleData: Partial<any>) => {
         try {
             const role = await updateRole(id, roleData);
             return { success: true, role };
@@ -324,7 +312,6 @@ export function useRoles() {
         error: errors.roles,
 
         // Actions
-        addRole: addRoleWithValidation,
         updateRole: updateRoleWithValidation,
         deleteRole: deleteRoleWithValidation,
         getRoleById,
@@ -438,7 +425,8 @@ export function useAuthAnalytics() {
 
         // Role distribution
         const roleCounts = users.reduce((acc, user) => {
-            acc[user.role.name] = (acc[user.role.name] || 0) + 1;
+            const roleName = user.role?.name || 'No Role';
+            acc[roleName] = (acc[roleName] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
 

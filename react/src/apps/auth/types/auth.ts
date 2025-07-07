@@ -12,8 +12,10 @@ export interface User {
     phone?: string;
     /** User's avatar URL */
     avatar?: string;
-    /** User's role */
-    role: Role;
+    /** User's role (optional, since permissions can be assigned directly) */
+    role?: Role;
+    /** Direct permissions assigned to this user */
+    permissions: Permission[];
     /** User's status */
     status: UserStatus;
     /** User's department */
@@ -145,7 +147,6 @@ export type UserAction =
     | 'create_user'
     | 'update_user'
     | 'delete_user'
-    | 'create_role'
     | 'update_role'
     | 'delete_role'
     | 'change_password'
@@ -202,7 +203,7 @@ export interface AuthState {
 }
 
 /**
- * Form data for creating/editing users
+ * User form data interface
  */
 export interface UserFormData {
     /** User name */
@@ -215,8 +216,8 @@ export interface UserFormData {
     department?: string;
     /** Employee ID */
     employeeId?: string;
-    /** Role ID */
-    roleId: string;
+    /** Direct permission IDs assigned to this user */
+    permissionIds: string[];
     /** User status */
     status: UserStatus;
     /** Password (for new users) */
@@ -225,19 +226,7 @@ export interface UserFormData {
     mustChangePassword: boolean;
 }
 
-/**
- * Form data for creating/editing roles
- */
-export interface RoleFormData {
-    /** Role name */
-    name: string;
-    /** Role description */
-    description?: string;
-    /** Role color */
-    color?: string;
-    /** Permission IDs */
-    permissionIds: string[];
-}
+
 
 /**
  * Password change form data

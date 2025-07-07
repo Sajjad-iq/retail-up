@@ -140,10 +140,10 @@ export function UserManagement({ searchQuery = '' }: UserManagementProps) {
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search users by name, email, role..."
+                            placeholder="Search users by name, email, department..."
                             value={filters.query || ''}
-                            onChange={(e) => handleFilterChange('query', e.target.value)}
-                            className="pl-9"
+                            onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+                            className="max-w-sm"
                         />
                     </div>
                     <div className="flex items-center gap-2">
@@ -170,20 +170,6 @@ export function UserManagement({ searchQuery = '' }: UserManagementProps) {
                         <Filter className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Filters:</span>
                     </div>
-
-                    <Select value={filters.role || 'all'} onValueChange={(value) => handleFilterChange('role', value === 'all' ? undefined : value)}>
-                        <SelectTrigger className="w-32">
-                            <SelectValue placeholder="All Roles" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Roles</SelectItem>
-                            {roles.map(role => (
-                                <SelectItem key={role.id} value={role.id}>
-                                    {role.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
 
                     <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value as UserStatus)}>
                         <SelectTrigger className="w-32">
@@ -218,7 +204,6 @@ export function UserManagement({ searchQuery = '' }: UserManagementProps) {
                         <SelectContent>
                             <SelectItem value="name">Name</SelectItem>
                             <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="role">Role</SelectItem>
                             <SelectItem value="status">Status</SelectItem>
                             <SelectItem value="lastLoginAt">Last Login</SelectItem>
                             <SelectItem value="createdAt">Created</SelectItem>

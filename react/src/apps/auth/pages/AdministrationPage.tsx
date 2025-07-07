@@ -3,41 +3,37 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-    Plus,
     Users,
     Activity,
     BarChart3,
     Settings,
     UserCheck,
     UserPlus,
-    ShieldCheck,
     TrendingUp,
     TrendingDown,
     AlertCircle
 } from 'lucide-react';
 
 import { UserManagement } from '../components/users/UserManagement';
-import { RoleManagement } from '../components/roles/RoleManagement';
+
 import { UserActivities } from '../components/activities/UserActivities';
 import { AuthAnalytics } from '../components/analytics/AuthAnalytics';
 import { AddUserDialog } from '../components/forms/AddUserDialog';
-import { AddRoleDialog } from '../components/forms/AddRoleDialog';
-import { useAuth, useUsers, useRoles, useUserActivities, useAuthAnalytics } from '../hooks/use-auth';
+
+import { useAuth, useUsers, useUserActivities, useAuthAnalytics } from '../hooks/use-auth';
 
 /**
  * AuthInterface Component
  * 
  * Main authentication and user management interface following the inventory design pattern.
- * Multi-tab layout with user management, role management, activities, and analytics.
+ * Multi-tab layout with user management, activities, and analytics.
  */
 export function AdministrationPage() {
     const [activeTab, setActiveTab] = useState('users');
     const [showAddUserDialog, setShowAddUserDialog] = useState(false);
-    const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
 
     const { hasPermission, isAdmin } = useAuth();
     const { totalUsers, activeUserCount, usersRequiringPasswordChange } = useUsers();
-    const { totalRoles, customRoles } = useRoles();
     const { todaysUserManagementCount } = useUserActivities();
     const { loginsToday, newUsersThisMonth } = useAuthAnalytics();
 
@@ -46,19 +42,9 @@ export function AdministrationPage() {
             setShowAddUserDialog(true);
         }
     };
-    //UsersAndRolesManagement.tsx
-    const handleAddRole = () => {
-        if (hasPermission('users.roles')) {
-            setShowAddRoleDialog(true);
-        }
-    };
 
     const handleUserAdded = () => {
         setShowAddUserDialog(false);
-    };
-
-    const handleRoleAdded = () => {
-        setShowAddRoleDialog(false);
     };
 
     // Check if user has access to this interface
@@ -93,13 +79,7 @@ export function AdministrationPage() {
                                         {totalUsers}
                                     </Badge>
                                 </TabsTrigger>
-                                <TabsTrigger value="roles" className="text-xs">
-                                    <ShieldCheck className="h-4 w-4 mr-1" />
-                                    Roles
-                                    <Badge variant="secondary" className="ml-2 text-xs">
-                                        {totalRoles}
-                                    </Badge>
-                                </TabsTrigger>
+
                                 <TabsTrigger value="activities" className="text-xs">
                                     <Activity className="h-4 w-4 mr-1" />
                                     Activities
@@ -117,9 +97,7 @@ export function AdministrationPage() {
                                 <UserManagement />
                             </TabsContent>
 
-                            <TabsContent value="roles" className="h-full m-0">
-                                <RoleManagement />
-                            </TabsContent>
+
 
                             <TabsContent value="activities" className="h-full m-0">
                                 <UserActivities />
@@ -149,16 +127,6 @@ export function AdministrationPage() {
                             >
                                 <UserPlus className="mr-2 h-4 w-4" />
                                 Add User
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full justify-start"
-                                size="sm"
-                                onClick={handleAddRole}
-                                disabled={!hasPermission('users.roles')}
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add Role
                             </Button>
                         </div>
                     </div>
@@ -232,14 +200,6 @@ export function AdministrationPage() {
                                 <span>Total Users:</span>
                                 <span>{totalUsers}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span>System Roles:</span>
-                                <span>{totalRoles - customRoles.length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Custom Roles:</span>
-                                <span>{customRoles.length}</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -250,12 +210,6 @@ export function AdministrationPage() {
                 isOpen={showAddUserDialog}
                 onClose={() => setShowAddUserDialog(false)}
                 onSuccess={handleUserAdded}
-            />
-
-            <AddRoleDialog
-                isOpen={showAddRoleDialog}
-                onClose={() => setShowAddRoleDialog(false)}
-                onSuccess={handleRoleAdded}
             />
         </div>
     );

@@ -42,8 +42,7 @@ export function UserActivities() {
                 return 'Updated user';
             case 'delete_user':
                 return 'Deleted user';
-            case 'create_role':
-                return 'Created role';
+
             case 'update_role':
                 return 'Updated role';
             case 'delete_role':
@@ -139,7 +138,7 @@ export function UserActivities() {
                                             </Avatar>
                                             <span className="font-medium text-sm">{activity.user.name}</span>
                                             <Badge variant="outline" className="text-xs">
-                                                {activity.user.role.name}
+                                                {activity.user.permissions?.length || 0} permissions
                                             </Badge>
                                         </div>
 

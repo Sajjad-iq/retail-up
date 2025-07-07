@@ -72,31 +72,26 @@ export function AuthAnalytics() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1">
-                {/* Role Distribution */}
+                {/* Permission Distribution */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Shield className="h-5 w-5" />
-                            Role Distribution
-                        </CardTitle>
-                        <CardDescription>
-                            User count by role assignment
-                        </CardDescription>
+                        <CardTitle className="text-base">Permission Distribution</CardTitle>
+                        <CardDescription>Most common permissions assigned to users</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {analytics.roleDistribution.map((role) => (
-                                <div key={role.role} className="space-y-2">
+                            {analytics.roleDistribution.slice(0, 5).map((item) => (
+                                <div key={item.role} className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium">{role.role}</span>
+                                        <span className="text-sm font-medium">{item.role}</span>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">{role.count} users</span>
-                                            <Badge variant="outline" className="text-xs">
-                                                {role.percentage}%
-                                            </Badge>
+                                            <span className="text-sm text-muted-foreground">{item.count} users</span>
+                                            <span className="text-xs font-medium">
+                                                {item.percentage}%
+                                            </span>
                                         </div>
                                     </div>
-                                    <Progress value={role.percentage} className="h-2" />
+                                    <Progress value={item.percentage} className="h-2" />
                                 </div>
                             ))}
                         </div>
@@ -130,7 +125,9 @@ export function AuthAnalytics() {
                                             </Badge>
                                             <div>
                                                 <div className="font-medium text-sm">{user.name}</div>
-                                                <div className="text-xs text-muted-foreground">{user.role.name}</div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {user.permissions?.length || 0} permissions
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="text-right">
