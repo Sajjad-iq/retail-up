@@ -43,10 +43,7 @@ export function UserActivities() {
             case 'delete_user':
                 return 'Deleted user';
 
-            case 'update_role':
-                return 'Updated role';
-            case 'delete_role':
-                return 'Deleted role';
+
             case 'change_password':
                 return 'Changed password';
             case 'reset_password':
@@ -70,7 +67,7 @@ export function UserActivities() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div className="text-center">
                             <div className="text-2xl font-bold text-green-600">
                                 {todaysActivities.filter(a => a.action === 'login').length}
@@ -85,9 +82,9 @@ export function UserActivities() {
                         </div>
                         <div className="text-center">
                             <div className="text-2xl font-bold text-purple-600">
-                                {todaysActivities.filter(a => a.action.includes('role')).length}
+                                {todaysActivities.filter(a => a.action.includes('password')).length}
                             </div>
-                            <div className="text-sm text-muted-foreground">Role Actions</div>
+                            <div className="text-sm text-muted-foreground">Password Actions</div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl font-bold text-orange-600">

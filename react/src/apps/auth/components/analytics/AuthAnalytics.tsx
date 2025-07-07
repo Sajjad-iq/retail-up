@@ -80,10 +80,10 @@ export function AuthAnalytics() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {analytics.roleDistribution.slice(0, 5).map((item) => (
-                                <div key={item.role} className="space-y-2">
+                            {analytics.permissionDistribution.slice(0, 5).map((item) => (
+                                <div key={item.permission} className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium">{item.role}</span>
+                                        <span className="text-sm font-medium">{item.permission}</span>
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm text-muted-foreground">{item.count} users</span>
                                             <span className="text-xs font-medium">

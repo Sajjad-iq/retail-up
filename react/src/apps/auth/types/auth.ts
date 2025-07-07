@@ -12,8 +12,6 @@ export interface User {
     phone?: string;
     /** User's avatar URL */
     avatar?: string;
-    /** User's role (optional, since permissions can be assigned directly) */
-    role?: Role;
     /** Direct permissions assigned to this user */
     permissions: Permission[];
     /** User's status */
@@ -30,28 +28,6 @@ export interface User {
     lastLoginAt?: Date;
     /** Whether user must change password on next login */
     mustChangePassword: boolean;
-}
-
-/**
- * Role interface representing user roles and permissions
- */
-export interface Role {
-    /** Unique identifier for the role */
-    id: string;
-    /** Role name */
-    name: string;
-    /** Role description */
-    description?: string;
-    /** Role color for UI */
-    color?: string;
-    /** Permissions assigned to this role */
-    permissions: Permission[];
-    /** Whether this is a system role (cannot be deleted) */
-    isSystem: boolean;
-    /** Date when role was created */
-    createdAt: Date;
-    /** Date when role was last updated */
-    updatedAt: Date;
 }
 
 /**
@@ -147,8 +123,6 @@ export type UserAction =
     | 'create_user'
     | 'update_user'
     | 'delete_user'
-    | 'update_role'
-    | 'delete_role'
     | 'change_password'
     | 'reset_password'
     | 'access_denied';
@@ -181,8 +155,6 @@ export interface AuthState {
     session: AuthSession | null;
     /** All users (admin view) */
     users: User[];
-    /** All roles */
-    roles: Role[];
     /** All permissions */
     permissions: Permission[];
     /** User activities */
@@ -191,14 +163,12 @@ export interface AuthState {
     loading: {
         auth: boolean;
         users: boolean;
-        roles: boolean;
         saving: boolean;
     };
     /** Error states */
     errors: {
         auth: string | null;
         users: string | null;
-        roles: string | null;
     };
 }
 
@@ -246,14 +216,12 @@ export interface PasswordChangeFormData {
 export interface UserFilters {
     /** Search query */
     query?: string;
-    /** Role filter */
-    role?: string;
     /** Status filter */
     status?: UserStatus;
     /** Department filter */
     department?: string;
     /** Sort by field */
-    sortBy?: 'name' | 'email' | 'role' | 'status' | 'lastLoginAt' | 'createdAt';
+    sortBy?: 'name' | 'email' | 'status' | 'lastLoginAt' | 'createdAt';
     /** Sort direction */
     sortOrder?: 'asc' | 'desc';
 }
@@ -272,18 +240,18 @@ export interface AuthAnalytics {
     newUsersThisMonth: number;
     /** Most active users */
     mostActiveUsers: User[];
-    /** Role distribution */
-    roleDistribution: RoleDistribution[];
+    /** Permission distribution */
+    permissionDistribution: PermissionDistribution[];
     /** Login activity by day */
     loginActivity: LoginActivityData[];
 }
 
 /**
- * Role distribution data
+ * Permission distribution data
  */
-export interface RoleDistribution {
-    /** Role name */
-    role: string;
+export interface PermissionDistribution {
+    /** Permission name */
+    permission: string;
     /** User count */
     count: number;
     /** Percentage */

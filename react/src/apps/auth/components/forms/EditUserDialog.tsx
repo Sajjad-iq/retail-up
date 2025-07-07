@@ -27,7 +27,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Eye, EyeOff, AlertCircle, UserCheck, Loader2, Shield, Check } from 'lucide-react';
 
-import { useUsers, useRoles } from '../../hooks/use-auth';
+import { useUsers } from '../../hooks/use-auth';
+import { useAuthStore } from '../../store/auth-store';
+import { groupPermissionsByCategory } from '../../lib/utils/auth-utils';
 import { editUserFormSchema, type EditUserFormInput } from '../../lib/validations/auth-schemas';
 import { generateSecurePassword } from '../../lib/utils/auth-utils';
 import type { User } from '../../types/auth';
@@ -58,7 +60,8 @@ export function EditUserDialog({ isOpen, user, onClose, onSuccess }: EditUserDia
     const [submitError, setSubmitError] = useState<string>('');
 
     const { updateUser, loading } = useUsers();
-    const { permissions, groupedPermissions } = useRoles();
+    const { permissions } = useAuthStore();
+    const groupedPermissions = groupPermissionsByCategory(permissions);
 
     const form = useForm<EditUserFormInput>({
         resolver: zodResolver(editUserFormSchema),

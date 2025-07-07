@@ -137,10 +137,7 @@ export function useUsers() {
             filteredUsers = filterUsersByQuery(filteredUsers, filters.query);
         }
 
-        // Apply role filter
-        if (filters.role && filters.role !== 'all') {
-            filteredUsers = filteredUsers.filter(user => user.role?.id === filters.role);
-        }
+
 
         // Apply status filter
         if (filters.status) {
@@ -244,80 +241,7 @@ export function useUsers() {
     };
 }
 
-/**
- * Custom hook for role management operations
- * Provides role state and management functionality
- */
-export function useRoles() {
-    const {
-        roles,
-        permissions,
-        users,
-        loading,
-        errors,
-        updateRole,
-        deleteRole,
-        getRoleById,
-        getUsersByRole
-    } = useAuthStore();
 
-    const computedValues = useMemo(() => {
-        const rolesWithCounts = roles.map(role => ({
-            ...role,
-            userCount: getUsersByRole(role.id).length,
-            isInUse: getUsersByRole(role.id).length > 0
-        }));
-
-        return {
-            totalRoles: roles.length,
-            systemRoles: roles.filter(r => r.isSystem),
-            customRoles: roles.filter(r => !r.isSystem),
-            rolesWithCounts,
-            groupedPermissions: groupPermissionsByCategory(permissions)
-        };
-    }, [roles, permissions, users, getUsersByRole]);
-
-
-
-    const updateRoleWithValidation = async (id: string, roleData: Partial<any>) => {
-        try {
-            const role = await updateRole(id, roleData);
-            return { success: true, role };
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to update role'
-            };
-        }
-    };
-
-    const deleteRoleWithValidation = async (id: string) => {
-        try {
-            await deleteRole(id);
-            return { success: true };
-        } catch (error) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to delete role'
-            };
-        }
-    };
-
-    return {
-        // State
-        roles,
-        permissions,
-        ...computedValues,
-        loading: loading.roles || loading.saving,
-        error: errors.roles,
-
-        // Actions
-        updateRole: updateRoleWithValidation,
-        deleteRole: deleteRoleWithValidation,
-        getRoleById,
-        getUsersByRole,
-    };
-}
 
 /**
  * Custom hook for user activities and audit trail
@@ -385,7 +309,7 @@ export function useAuthAnalytics() {
     const {
         users,
         activities,
-        roles,
+        permissions,
         getActiveUsers,
         getTodaysActivities
     } = useAuthStore();
@@ -423,18 +347,22 @@ export function useAuthAnalytics() {
             })
             .filter(Boolean) as (User & { activityCount: number })[];
 
-        // Role distribution
-        const roleCounts = users.reduce((acc, user) => {
-            const roleName = user.role?.name || 'No Role';
-            acc[roleName] = (acc[roleName] || 0) + 1;
+        // Permission distribution
+        const permissionCounts = users.reduce((acc, user) => {
+            user.permissions?.forEach(permission => {
+                acc[permission.name] = (acc[permission.name] || 0) + 1;
+            });
             return acc;
         }, {} as Record<string, number>);
 
-        const roleDistribution = Object.entries(roleCounts).map(([role, count]) => ({
-            role,
-            count,
-            percentage: Math.round((count / users.length) * 100)
-        }));
+        const permissionDistribution = Object.entries(permissionCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 10) // Top 10 permissions
+            .map(([permission, count]) => ({
+                permission,
+                count,
+                percentage: Math.round((count / users.length) * 100)
+            }));
 
         // Login activity by day (last 7 days)
         const loginActivity = Array.from({ length: 7 }, (_, i) => {
@@ -459,12 +387,12 @@ export function useAuthAnalytics() {
             loginsToday: uniqueLoginsToday,
             newUsersThisMonth,
             mostActiveUsers,
-            roleDistribution,
+            permissionDistribution,
             loginActivity
         };
 
         return authAnalytics;
-    }, [users, activities, roles, getActiveUsers, getTodaysActivities]);
+    }, [users, activities, permissions, getActiveUsers, getTodaysActivities]);
 
     return analytics;
 }

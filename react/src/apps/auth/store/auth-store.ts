@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import type {
     User,
-    Role,
     Permission,
     AuthSession,
     UserActivity,
@@ -13,7 +12,6 @@ import type {
 } from '../types/auth';
 import {
     generateUserId,
-    generateRoleId,
     generateActivityId,
     generateSessionToken,
     isSessionExpired,
@@ -100,14 +98,6 @@ const samplePermissions: Permission[] = [
         category: 'users',
         isSystem: true
     },
-    {
-        id: 'perm-usr-003',
-        name: 'users.roles',
-        label: 'Manage Roles',
-        description: 'Edit, delete roles',
-        category: 'users',
-        isSystem: true
-    },
 
     // Reports Permissions
     {
@@ -153,58 +143,6 @@ const samplePermissions: Permission[] = [
         description: 'Complete system administration access',
         category: 'admin',
         isSystem: true
-    }
-];
-
-/**
- * Sample roles data for demonstration
- */
-const sampleRoles: Role[] = [
-    {
-        id: 'role-001',
-        name: 'Admin',
-        description: 'System administrator with full access',
-        color: '#DC2626',
-        permissions: samplePermissions,
-        isSystem: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-    },
-    {
-        id: 'role-002',
-        name: 'Manager',
-        description: 'Store manager with most permissions',
-        color: '#7C3AED',
-        permissions: samplePermissions.filter(p => !p.name.includes('admin.')),
-        isSystem: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-    },
-    {
-        id: 'role-003',
-        name: 'Cashier',
-        description: 'Front-of-house staff for POS operations',
-        color: '#059669',
-        permissions: samplePermissions.filter(p =>
-            p.category === 'pos' ||
-            (p.category === 'inventory' && p.name === 'inventory.view')
-        ),
-        isSystem: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-    },
-    {
-        id: 'role-004',
-        name: 'Stock Clerk',
-        description: 'Inventory management staff',
-        color: '#DC7D00',
-        permissions: samplePermissions.filter(p =>
-            p.category === 'inventory' ||
-            (p.category === 'pos' && p.name === 'pos.view')
-        ),
-        isSystem: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
     }
 ];
 
@@ -280,19 +218,16 @@ interface AuthStore {
     currentUser: User | null;
     session: AuthSession | null;
     users: User[];
-    roles: Role[];
     permissions: Permission[];
     activities: UserActivity[];
     loading: {
         auth: boolean;
         users: boolean;
-        roles: boolean;
         saving: boolean;
     };
     errors: {
         auth: string | null;
         users: string | null;
-        roles: string | null;
     };
 
     // Auth Actions
@@ -308,27 +243,21 @@ interface AuthStore {
     changePassword: (userId: string, passwordData: PasswordChangeFormData) => Promise<void>;
     resetPassword: (userId: string) => Promise<string>;
 
-    // Role Actions
-    updateRole: (id: string, roleData: Partial<any>) => Promise<Role>;
-    deleteRole: (id: string) => Promise<void>;
-
     // Activity Actions
     logActivity: (action: UserAction, resource?: string, details?: string) => void;
 
     // Utility Actions
     getUserById: (id: string) => User | undefined;
-    getRoleById: (id: string) => Role | undefined;
     getPermissionById: (id: string) => Permission | undefined;
 
     // Computed getters
     getActiveUsers: () => User[];
     getTodaysActivities: () => UserActivity[];
-    getUsersByRole: (roleId: string) => User[];
 }
 
 /**
  * Main Auth store using Zustand
- * Provides state management for authentication, users, roles, and permissions
+ * Provides state management for authentication, users, and permissions
  */
 export const useAuthStore = create<AuthStore>()(
     devtools(
@@ -338,19 +267,16 @@ export const useAuthStore = create<AuthStore>()(
                 currentUser: sampleUsers[0],
                 session: null,
                 users: sampleUsers,
-                roles: sampleRoles,
                 permissions: samplePermissions,
                 activities: [],
                 loading: {
                     auth: false,
                     users: false,
-                    roles: false,
                     saving: false,
                 },
                 errors: {
                     auth: null,
                     users: null,
-                    roles: null,
                 },
 
                 // Auth Actions
@@ -419,7 +345,7 @@ export const useAuthStore = create<AuthStore>()(
                     set({
                         currentUser: null,
                         session: null,
-                        errors: { auth: null, users: null, roles: null }
+                        errors: { auth: null, users: null }
                     });
                 },
 
@@ -654,107 +580,6 @@ export const useAuthStore = create<AuthStore>()(
                     });
                 },
 
-                // Role Actions
-
-                /**
-                 * Update an existing role
-                 */
-                updateRole: async (id: string, roleData: Partial<any>) => {
-                    set(state => ({ loading: { ...state.loading, saving: true } }));
-
-                    return new Promise((resolve) => {
-                        setTimeout(() => {
-                            const state = get();
-                            const roleIndex = state.roles.findIndex(r => r.id === id);
-
-                            if (roleIndex === -1) {
-                                throw new Error('Role not found');
-                            }
-
-                            const currentRole = state.roles[roleIndex];
-
-                            if (currentRole.isSystem) {
-                                throw new Error('Cannot modify system roles');
-                            }
-
-                            let permissions = currentRole.permissions;
-                            if (roleData.permissionIds) {
-                                permissions = roleData.permissionIds
-                                    .map((permId: string) => state.getPermissionById(permId))
-                                    .filter(Boolean) as Permission[];
-                            }
-
-                            const updatedRole: Role = {
-                                ...currentRole,
-                                ...roleData,
-                                permissions,
-                                updatedAt: new Date()
-                            };
-
-                            const updatedRoles = [...state.roles];
-                            updatedRoles[roleIndex] = updatedRole;
-
-                            // Update users with this role
-                            const updatedUsers = state.users.map(user =>
-                                user.permissions?.some(p => p.id === id) ? { ...user, permissions: updatedRole.permissions } : user
-                            );
-
-                            set(state => ({
-                                roles: updatedRoles,
-                                users: updatedUsers,
-                                currentUser: state.currentUser?.permissions?.some(p => p.id === id)
-                                    ? { ...state.currentUser, permissions: updatedRole.permissions }
-                                    : state.currentUser,
-                                loading: { ...state.loading, saving: false }
-                            }));
-
-                            // Log activity
-                            get().logActivity('update_role', updatedRole.name);
-
-                            resolve(updatedRole);
-                        }, 500);
-                    });
-                },
-
-                /**
-                 * Delete a role
-                 */
-                deleteRole: async (id: string) => {
-                    set(state => ({ loading: { ...state.loading, saving: true } }));
-
-                    return new Promise((resolve) => {
-                        setTimeout(() => {
-                            const state = get();
-                            const role = state.getRoleById(id);
-
-                            if (!role) {
-                                throw new Error('Role not found');
-                            }
-
-                            if (role.isSystem) {
-                                throw new Error('Cannot delete system roles');
-                            }
-
-                            const usersWithRole = state.users.filter(user =>
-                                user.permissions?.some(p => p.id === id)
-                            );
-                            if (usersWithRole.length > 0) {
-                                throw new Error(`Cannot delete role. ${usersWithRole.length} users are assigned to this role.`);
-                            }
-
-                            set(state => ({
-                                roles: state.roles.filter(r => r.id !== id),
-                                loading: { ...state.loading, saving: false }
-                            }));
-
-                            // Log activity
-                            get().logActivity('delete_role', role.name);
-
-                            resolve();
-                        }, 500);
-                    });
-                },
-
                 // Activity Actions
                 /**
                  * Log user activity
@@ -787,13 +612,6 @@ export const useAuthStore = create<AuthStore>()(
                 },
 
                 /**
-                 * Get role by ID
-                 */
-                getRoleById: (id: string) => {
-                    return get().roles.find(role => role.id === id);
-                },
-
-                /**
                  * Get permission by ID
                  */
                 getPermissionById: (id: string) => {
@@ -817,19 +635,11 @@ export const useAuthStore = create<AuthStore>()(
                         activity => new Date(activity.timestamp).toDateString() === today
                     );
                 },
-
-                /**
-                 * Get users by role
-                 */
-                getUsersByRole: (roleId: string) => {
-                    return get().users.filter(user => user.permissions?.some(p => p.id === roleId));
-                },
             }),
             {
                 name: 'auth-storage',
                 partialize: (state) => ({
                     users: state.users,
-                    roles: state.roles.filter(r => !r.isSystem), // Don't persist system roles
                     activities: state.activities.slice(0, 100), // Persist only recent activities
                     // Don't persist session and currentUser for security
                 }),

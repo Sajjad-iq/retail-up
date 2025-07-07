@@ -227,7 +227,6 @@ export function filterUsersByQuery(users: User[], query: string): User[] {
     return users.filter(user =>
         user.name.toLowerCase().includes(searchTerm) ||
         user.email.toLowerCase().includes(searchTerm) ||
-        user.role?.name.toLowerCase().includes(searchTerm) ||
         user.department?.toLowerCase().includes(searchTerm) ||
         user.employeeId?.toLowerCase().includes(searchTerm)
     );
@@ -260,10 +259,7 @@ export function sortUsers(
                 aValue = a.email.toLowerCase();
                 bValue = b.email.toLowerCase();
                 break;
-            case 'role':
-                aValue = a.role?.name.toLowerCase() || '';
-                bValue = b.role?.name.toLowerCase() || '';
-                break;
+
             case 'status':
                 aValue = a.status;
                 bValue = b.status;
@@ -384,13 +380,7 @@ export function generateUserId(): string {
     return `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-/**
- * Generate unique role ID
- * @returns Unique role ID
- */
-export function generateRoleId(): string {
-    return `role-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
+
 
 /**
  * Generate unique activity ID
@@ -435,10 +425,7 @@ export function getActivityIcon(activity: UserActivity): string {
         case 'delete_user':
             return 'UserX';
 
-        case 'update_role':
-            return 'ShieldCheck';
-        case 'delete_role':
-            return 'ShieldX';
+
         case 'change_password':
             return 'Key';
         case 'reset_password':

@@ -16,7 +16,7 @@ import { UserTable } from './UserTable';
 import { UserCard } from './UserCard';
 import { EditUserDialog } from '../forms/EditUserDialog';
 import { ChangePasswordDialog } from '../forms/ChangePasswordDialog';
-import { useUsers, useRoles, useAuth } from '../../hooks/use-auth';
+import { useUsers, useAuth } from '../../hooks/use-auth';
 import type { User, UserFilters, UserStatus } from '../../types/auth';
 import React from 'react';
 
@@ -41,7 +41,6 @@ export function UserManagement({ searchQuery = '' }: UserManagementProps) {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [filters, setFilters] = useState<UserFilters>({
         query: searchQuery,
-        role: 'all',
         status: undefined,
         department: 'all',
         sortBy: 'name',
@@ -49,7 +48,6 @@ export function UserManagement({ searchQuery = '' }: UserManagementProps) {
     });
 
     const { users, filterUsers, updateUser, deleteUser, resetPassword, loading } = useUsers();
-    const { roles } = useRoles();
     const { hasPermission } = useAuth();
 
     // Update filters when search query changes
@@ -85,7 +83,6 @@ export function UserManagement({ searchQuery = '' }: UserManagementProps) {
     const clearFilters = () => {
         setFilters({
             query: searchQuery,
-            role: 'all',
             status: undefined,
             department: 'all',
             sortBy: 'name',
