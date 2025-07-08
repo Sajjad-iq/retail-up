@@ -26,7 +26,7 @@ import java.util.Map;
  * @since 2024-12-19
  */
 @Slf4j
-@RestControllerAdvice
+// @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**

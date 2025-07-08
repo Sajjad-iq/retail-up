@@ -107,13 +107,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
 
+        log.debug("Checking if should filter path: {}", path);
+
         // Skip filter for public endpoints
-        return path.startsWith("/api/auth/login") ||
-                path.startsWith("/api/auth/register") ||
+        boolean shouldSkip = path.startsWith("/api/auth/login") ||
+                path.startsWith("/api/auth/logout") ||
+                path.startsWith("/api/auth/refresh") ||
                 path.startsWith("/api/health") ||
                 path.startsWith("/actuator") ||
                 path.startsWith("/swagger-ui") ||
+                path.contains("/swagger-ui") ||
+                path.equals("/swagger-ui.html") ||
                 path.startsWith("/v3/api-docs") ||
-                path.startsWith("/api-docs");
+                path.startsWith("/api-docs") ||
+                path.startsWith("/swagger-resources") ||
+                path.startsWith("/webjars") ||
+                path.startsWith("/configuration") ||
+                path.startsWith("/h2-console") ||
+                path.endsWith(".css") ||
+                path.endsWith(".js") ||
+                path.endsWith(".png") ||
+                path.endsWith(".ico") ||
+                path.endsWith(".html") ||
+                path.equals("/favicon.ico");
+
+        log.debug("Path: {} - Should skip filter: {}", path, shouldSkip);
+        return shouldSkip;
     }
 }

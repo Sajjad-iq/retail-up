@@ -11,7 +11,9 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -68,25 +70,38 @@ public class SecurityConfig {
                 // Configure CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Configure exception handling
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                // Configure headers for H2 console (development only)
+                .headers(headers -> headers.frameOptions().disable())
 
                 // Configure session management
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Configure authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // Public endpoints - MUST BE FIRST!
                         .requestMatchers(
-                                "/api/auth/login",
-                                "/api/auth/logout",
-                                "/api/auth/refresh",
+                                "/api/auth/**",
                                 "/api/health",
                                 "/actuator/**",
+                                "/h2-console/**",
+                                // Swagger endpoints
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/api-docs/**")
+                                "/swagger-ui.htm", // Handle both .htm and .html
+                                "/swagger-ui/index.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs",
+                                "/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/configuration/**",
+                                // Static resources
+                                "/favicon.ico",
+                                "/*.css",
+                                "/*.js",
+                                "/*.png",
+                                "/*.ico",
+                                "/*.html")
                         .permitAll()
 
                         // Admin endpoints
@@ -104,8 +119,9 @@ public class SecurityConfig {
                         // All other requests require authentication
                         .anyRequest().authenticated());
 
-        // Add JWT authentication filter
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        // Don't add JWT filter for now to test basic access
+        // http.addFilterBefore(jwtAuthenticationFilter,
+        // UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
