@@ -40,7 +40,7 @@ public class AuthSession {
     /**
      * Session token (JWT)
      */
-    @Column(name = "token", nullable = false, unique = true, length = 1000)
+    @Column(name = "token", nullable = false, unique = true, length = 3000)
     private String token;
 
     /**
