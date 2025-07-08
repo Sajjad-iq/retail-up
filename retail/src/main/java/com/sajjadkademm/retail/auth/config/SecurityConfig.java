@@ -109,12 +109,11 @@ public class SecurityConfig {
                                 "/*.html")
                         .permitAll()
 
-                        // Temporarily allow all other endpoints for debugging
-                        .anyRequest().permitAll());
+                        // All other endpoints require authentication
+                        .anyRequest().authenticated());
 
-        // Temporarily disable JWT filter for debugging
-        // http.addFilterBefore(jwtAuthenticationFilter,
-        // UsernamePasswordAuthenticationFilter.class);
+        // Add JWT filter before username/password authentication filter
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
