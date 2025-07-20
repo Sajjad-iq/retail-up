@@ -1,8 +1,6 @@
 package com.sajjadkademm.retail.auth.dto;
 
 import com.sajjadkademm.retail.auth.entities.User;
-import com.sajjadkademm.retail.auth.validation.PasswordConstraint;
-import com.sajjadkademm.retail.auth.validation.PhoneConstraint;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -47,14 +45,12 @@ public class CreateUserRequest {
      * User's password
      */
     @NotBlank(message = "Password is required")
-    @PasswordConstraint(message = "Password must contain uppercase, lowercase, number, and special character")
     @Schema(description = "User's password", example = "SecurePassword123!")
     private String password;
 
     /**
      * User's phone number
      */
-    @PhoneConstraint(message = "Please enter a valid phone number")
     @Schema(description = "User's phone number", example = "+1-555-0123")
     private String phone;
 
