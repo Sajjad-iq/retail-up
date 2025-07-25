@@ -1,3 +1,8 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "Codegeex.SidebarUI.LanguagePreference": "English",
+    "Codegeex.RepoIndex": true,
+    "Codegeex.Comment.LanguagePreference": "English",
+    "Codegeex.Chat.LanguagePreference": "English",
+    "Codegeex.CommitMessage.LanguagePreference": "English"
 }
