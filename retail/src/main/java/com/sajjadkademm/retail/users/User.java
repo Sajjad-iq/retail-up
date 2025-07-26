@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 
 import jakarta.persistence.Column;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,9 +44,11 @@ public class User {
     @Column(name = "status", nullable = false)
     private UserStatus status;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = true)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = true)
     private LocalDateTime updatedAt;
 
