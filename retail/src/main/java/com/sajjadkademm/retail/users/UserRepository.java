@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, String> {
     // Find user by email for authentication
     Optional<User> findByEmail(String email);
 

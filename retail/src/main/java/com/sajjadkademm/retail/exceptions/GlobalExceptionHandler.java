@@ -118,6 +118,110 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle 404 Not Found exceptions
+     */
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex, WebRequest request) {
+        log.warn("Resource not found: {}", ex.getMessage());
+
+        Map<String, Object> response = Map.of(
+                "error", "Not Found",
+                "message", ex.getMessage(),
+                "status", HttpStatus.NOT_FOUND.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    /**
+     * Handle 401 Unauthorized exceptions
+     */
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex,
+            WebRequest request) {
+        log.warn("Unauthorized access: {}", ex.getMessage());
+
+        Map<String, Object> response = Map.of(
+                "error", "Unauthorized",
+                "message", ex.getMessage(),
+                "status", HttpStatus.UNAUTHORIZED.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    /**
+     * Handle 403 Forbidden exceptions
+     */
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> handleForbiddenException(ForbiddenException ex, WebRequest request) {
+        log.warn("Forbidden access: {}", ex.getMessage());
+
+        Map<String, Object> response = Map.of(
+                "error", "Forbidden",
+                "message", ex.getMessage(),
+                "status", HttpStatus.FORBIDDEN.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    /**
+     * Handle 400 Bad Request exceptions
+     */
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequestException(BadRequestException ex, WebRequest request) {
+        log.warn("Bad request: {}", ex.getMessage());
+
+        Map<String, Object> response = Map.of(
+                "error", "Bad Request",
+                "message", ex.getMessage(),
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /**
+     * Handle 409 Conflict exceptions
+     */
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflictException(ConflictException ex, WebRequest request) {
+        log.warn("Conflict: {}", ex.getMessage());
+
+        Map<String, Object> response = Map.of(
+                "error", "Conflict",
+                "message", ex.getMessage(),
+                "status", HttpStatus.CONFLICT.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    /**
+     * Handle 500 Internal Server Error exceptions
+     */
+    @ExceptionHandler(InternalServerErrorException.class)
+    public ResponseEntity<Map<String, Object>> handleInternalServerErrorException(InternalServerErrorException ex,
+            WebRequest request) {
+        log.error("Internal server error: {}", ex.getMessage(), ex);
+
+        Map<String, Object> response = Map.of(
+                "error", "Internal Server Error",
+                "message", ex.getMessage(),
+                "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    /**
      * Handle validation errors from @Valid annotations
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -3,6 +3,9 @@ package com.sajjadkademm.retail.auth;
 import com.sajjadkademm.retail.auth.dto.LoginRequest;
 import com.sajjadkademm.retail.auth.dto.LoginResponse;
 import com.sajjadkademm.retail.auth.dto.RegisterRequest;
+import com.sajjadkademm.retail.exceptions.ConflictException;
+import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.UserService;
@@ -14,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -24,6 +26,7 @@ public class AuthService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final JwtUtil jwtUtil;
 
     /**
      * Authenticate user with email/phone and password
@@ -35,33 +38,27 @@ public class AuthService {
         Optional<User> userOpt = findUserByEmailOrPhone(request.getEmailOrPhone());
 
         if (userOpt.isEmpty()) {
-            return LoginResponse.builder()
-                    .message("User not found")
-                    .build();
+            throw new NotFoundException("User not found with identifier: " + request.getEmailOrPhone());
         }
 
         User user = userOpt.get();
 
         // Check if user is active
         if (user.getStatus() != UserStatus.ACTIVE) {
-            return LoginResponse.builder()
-                    .message("Account is not active")
-                    .build();
+            throw new UnauthorizedException("Account is not active");
         }
 
         // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return LoginResponse.builder()
-                    .message("Invalid credentials")
-                    .build();
+            throw new UnauthorizedException("Invalid credentials");
         }
 
         // Update last login time
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
-        // Generate token (simple UUID for now, can be replaced with JWT)
-        String token = UUID.randomUUID().toString();
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getName());
 
         log.info("Login successful for user: {}", user.getEmail());
 
@@ -83,16 +80,12 @@ public class AuthService {
 
         // Check if email already exists
         if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
-            return LoginResponse.builder()
-                    .message("Email already exists")
-                    .build();
+            throw new ConflictException("Email already exists: " + request.getEmail());
         }
 
         // Check if phone already exists
         if (userRepository.existsByPhone(request.getPhone())) {
-            return LoginResponse.builder()
-                    .message("Phone number already exists")
-                    .build();
+            throw new ConflictException("Phone number already exists: " + request.getPhone());
         }
 
         // Create new user
@@ -107,8 +100,8 @@ public class AuthService {
         // Save user using UserService
         User savedUser = userService.createUser(newUser);
 
-        // Generate token
-        String token = UUID.randomUUID().toString();
+        // Generate JWT token
+        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getName());
 
         log.info("Registration successful for user: {}", savedUser.getEmail());
 
@@ -147,24 +140,31 @@ public class AuthService {
      * Change user password
      */
     public boolean changePassword(String userId, String oldPassword, String newPassword) {
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("User not found with id: " + userId);
+        }
+
+        // Verify old password
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new UnauthorizedException("Old password is incorrect");
+        }
+
+        // Update password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userService.updateUser(userId, user);
+
+        return true;
+    }
+
+    /**
+     * Validate JWT token
+     */
+    public boolean validateToken(String token) {
         try {
-            User user = userService.getUserById(Long.parseLong(userId));
-            if (user == null) {
-                return false;
-            }
-
-            // Verify old password
-            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-                return false;
-            }
-
-            // Update password
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userService.updateUser(Long.parseLong(userId), user);
-
-            return true;
+            return jwtUtil.validateToken(token);
         } catch (Exception e) {
-            log.error("Error changing password for user: {}", userId, e);
+            log.error("Error validating token: {}", e.getMessage());
             return false;
         }
     }

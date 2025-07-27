@@ -1,11 +1,14 @@
 package com.sajjadkademm.retail.config;
 
+import com.sajjadkademm.retail.auth.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,6 +28,12 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
     /**
      * Configure security filter chain with CSRF disabled and CORS enabled
      */
@@ -37,10 +46,23 @@ public class SecurityConfig {
                 // Configure CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+                // Configure session management
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Add JWT filter
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
                 // Configure authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // Allow all requests for now (can be restricted later)
-                        .anyRequest().permitAll());
+                        // Allow authentication endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // Allow actuator endpoints
+                        .requestMatchers("/actuator/**").permitAll()
+                        // Allow Swagger UI
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
+                        // Require authentication for other endpoints
+                        .anyRequest().authenticated());
 
         return http.build();
     }
