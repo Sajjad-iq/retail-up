@@ -10,7 +10,11 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.persistence.RollbackException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -25,8 +29,12 @@ import java.util.Map;
  * @since 2024-12-19
  */
 @Slf4j
-// @RestControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    public GlobalExceptionHandler() {
+        log.info("GlobalExceptionHandler initialized and ready to handle exceptions");
+    }
 
     /**
      * Handle authentication failures
@@ -315,6 +323,73 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle RollbackException and extract ConstraintViolationException
+     */
+    @ExceptionHandler(RollbackException.class)
+    public ResponseEntity<Map<String, Object>> handleRollbackException(RollbackException ex, WebRequest request) {
+        log.warn("Transaction rollback: {}", ex.getMessage());
+
+        // Check if the cause is a ConstraintViolationException
+        Throwable cause = ex.getCause();
+        if (cause instanceof jakarta.validation.ConstraintViolationException) {
+            jakarta.validation.ConstraintViolationException constraintEx = (jakarta.validation.ConstraintViolationException) cause;
+
+            Map<String, String> fieldErrors = new HashMap<>();
+            constraintEx.getConstraintViolations().forEach(violation -> {
+                String fieldName = violation.getPropertyPath().toString();
+                String message = violation.getMessage();
+                fieldErrors.put(fieldName, message);
+            });
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Validation Failed");
+            response.put("message", "Request validation failed due to database constraints");
+            response.put("fieldErrors", fieldErrors);
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+            response.put("timestamp", LocalDateTime.now().toString());
+            response.put("path", request.getDescription(false));
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // If it's not a ConstraintViolationException, handle as generic rollback
+        Map<String, Object> response = Map.of(
+                "error", "Transaction Failed",
+                "message", "Database transaction failed",
+                "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    /**
+     * Handle ConstraintViolationException for database validation errors
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolationException(ConstraintViolationException ex,
+            WebRequest request) {
+        log.warn("Database validation failed: {}", ex.getMessage());
+
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            String fieldName = violation.getPropertyPath().toString();
+            String message = violation.getMessage();
+            fieldErrors.put(fieldName, message);
+        });
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Validation Failed");
+        response.put("message", "Request validation failed due to database constraints");
+        response.put("fieldErrors", fieldErrors);
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /**
      * Handle generic runtime exceptions
      */
     @ExceptionHandler(RuntimeException.class)
@@ -347,4 +422,23 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
+
+    /**
+     * Handle HttpMessageNotReadableException for missing request body errors
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex,
+            WebRequest request) {
+        log.warn("Missing request body: {}", ex.getMessage());
+
+        Map<String, Object> response = Map.of(
+                "error", "Bad Request",
+                "message", "Request body is missing or invalid",
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "timestamp", LocalDateTime.now().toString(),
+                "path", request.getDescription(false));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
 }

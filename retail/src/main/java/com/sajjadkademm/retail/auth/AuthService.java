@@ -76,7 +76,6 @@ public class AuthService {
      * Register new user
      */
     public LoginResponse register(RegisterRequest request) {
-        log.info("Attempting registration for user: {}", request.getEmail());
 
         // Check if email already exists
         if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
@@ -94,7 +93,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .status(request.getStatus())
+                .status(UserStatus.ACTIVE)
                 .build();
 
         // Save user using UserService
@@ -102,8 +101,6 @@ public class AuthService {
 
         // Generate JWT token
         String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getName());
-
-        log.info("Registration successful for user: {}", savedUser.getEmail());
 
         return LoginResponse.builder()
                 .token(token)
@@ -134,6 +131,20 @@ public class AuthService {
      */
     public boolean userExists(String emailOrPhone) {
         return findUserByEmailOrPhone(emailOrPhone).isPresent();
+    }
+
+    /**
+     * Check if phone number exists
+     */
+    public boolean phoneExists(String phone) {
+        return userRepository.existsByPhone(phone);
+    }
+
+    /**
+     * Check if email exists
+     */
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     /**
