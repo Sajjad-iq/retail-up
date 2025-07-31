@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -21,90 +20,32 @@ public class SystemSettingsController {
     private final SystemSettingsService systemSettingsService;
 
     /**
-     * Get all system settings for an organization
+     * Get system settings for an organization
      */
-    @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<SystemSettingsResponse>> getSystemSettings(@PathVariable String organizationId) {
-        List<SystemSettingsResponse> response = systemSettingsService.getSystemSettings(organizationId);
+    @GetMapping("/{organizationId}")
+    public ResponseEntity<SystemSettingsResponse> getSystemSettings(@PathVariable String organizationId) {
+        SystemSettingsResponse response = systemSettingsService.getSystemSettings(organizationId);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Get specific system setting by key
+     * Update system settings
      */
-    @GetMapping("/organization/{organizationId}/key/{key}")
-    public ResponseEntity<SystemSettingsResponse> getSystemSettingByKey(
-            @PathVariable String organizationId,
-            @PathVariable String key) {
-        SystemSettingsResponse response = systemSettingsService.getSystemSettingByKey(organizationId, key);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Create or update system setting
-     */
-    @PostMapping("/organization/{organizationId}")
-    public ResponseEntity<SystemSettingsResponse> createOrUpdateSystemSetting(
+    @PutMapping("/{organizationId}")
+    public ResponseEntity<SystemSettingsResponse> updateSystemSettings(
             @PathVariable String organizationId,
             @Valid @RequestBody SystemSettingsRequest request,
-            @RequestHeader(value = "User-ID", required = false) String userId) {
-        SystemSettingsResponse response = systemSettingsService.createOrUpdateSystemSetting(organizationId, request,
-                userId);
+            @RequestHeader(value = "User-ID", required = true) String userId) {
+        SystemSettingsResponse response = systemSettingsService.updateSystemSettings(organizationId, request, userId);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Update system setting by key
+     * Reset system settings to defaults
      */
-    @PutMapping("/organization/{organizationId}/key/{key}")
-    public ResponseEntity<SystemSettingsResponse> updateSystemSettingByKey(
-            @PathVariable String organizationId,
-            @PathVariable String key,
-            @Valid @RequestBody SystemSettingsRequest request,
-            @RequestHeader(value = "User-ID", required = false) String userId) {
-        SystemSettingsResponse response = systemSettingsService.updateSystemSettingByKey(organizationId, key, request,
-                userId);
+    @PostMapping("/{organizationId}/reset")
+    public ResponseEntity<SystemSettingsResponse> resetSystemSettingsToDefaults(@PathVariable String organizationId) {
+        SystemSettingsResponse response = systemSettingsService.resetToDefaults(organizationId);
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Delete system setting by key
-     */
-    @DeleteMapping("/organization/{organizationId}/key/{key}")
-    public ResponseEntity<Void> deleteSystemSettingByKey(
-            @PathVariable String organizationId,
-            @PathVariable String key) {
-        systemSettingsService.deleteSystemSettingByKey(organizationId, key);
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Get system settings by category (e.g., "security", "performance", "backup")
-     */
-    @GetMapping("/organization/{organizationId}/category/{category}")
-    public ResponseEntity<List<SystemSettingsResponse>> getSystemSettingsByCategory(
-            @PathVariable String organizationId,
-            @PathVariable String category) {
-        List<SystemSettingsResponse> response = systemSettingsService.getSystemSettingsByCategory(organizationId,
-                category);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Get default system settings for an organization
-     */
-    @GetMapping("/organization/{organizationId}/defaults")
-    public ResponseEntity<List<SystemSettingsResponse>> getDefaultSystemSettings(@PathVariable String organizationId) {
-        List<SystemSettingsResponse> response = systemSettingsService.getDefaultSystemSettings(organizationId);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Initialize default system settings for a new organization
-     */
-    @PostMapping("/organization/{organizationId}/initialize")
-    public ResponseEntity<Void> initializeDefaultSystemSettings(@PathVariable String organizationId) {
-        systemSettingsService.initializeDefaultSettings(organizationId);
-        return ResponseEntity.ok().build();
     }
 }

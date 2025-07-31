@@ -1,7 +1,9 @@
 package com.sajjadkademm.retail.settings.pos.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,18 +14,65 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class POSSettingsRequest {
 
-    @NotBlank(message = "Settings key is required")
-    @Size(min = 1, max = 100, message = "Key must be between 1 and 100 characters")
-    private String key;
+    // Payment Settings
+    @NotNull(message = "Cash payment enabled is required")
+    private Boolean cashPaymentEnabled;
 
-    private String value;
+    @NotNull(message = "Card payment enabled is required")
+    private Boolean cardPaymentEnabled;
 
-    @Size(max = 500, message = "Description must not exceed 500 characters")
-    private String description;
+    @Pattern(regexp = "^(automatic|manual)$", message = "Change calculation method must be automatic or manual")
+    @NotNull(message = "Change calculation method is required")
+    private String changeCalculationMethod;
 
-    @NotBlank(message = "Setting type is required")
-    @Size(min = 2, max = 50, message = "Setting type must be between 2 and 50 characters")
-    private String settingType; // e.g., "payment", "receipt", "tax", "general"
+    @NotNull(message = "Allow partial payments is required")
+    private Boolean allowPartialPayments;
 
-    private Boolean isDefault = false;
+    @NotNull(message = "Require exact change is required")
+    private Boolean requireExactChange;
+
+    // Receipt Settings
+    @NotNull(message = "Auto print receipts is required")
+    private Boolean autoPrintReceipts;
+
+    @NotNull(message = "Receipt template HTML is required")
+    private String receiptTemplateHtml;
+
+    @NotNull(message = "Receipt header template HTML is required")
+    private String receiptHeaderTemplateHtml;
+
+    @NotNull(message = "Receipt footer template HTML is required")
+    private String receiptFooterTemplateHtml;
+
+    @Min(value = 58, message = "Receipt paper width must be at least 58mm")
+    @Max(value = 112, message = "Receipt paper width cannot exceed 112mm")
+    @NotNull(message = "Receipt paper width is required")
+    private Integer receiptPaperWidthMm;
+
+    // Transaction Settings
+    @NotNull(message = "Hold transactions enabled is required")
+    private Boolean holdTransactionsEnabled;
+
+    @NotNull(message = "Returns enabled is required")
+    private Boolean returnsEnabled;
+
+    @NotNull(message = "Discounts enabled is required")
+    private Boolean discountsEnabled;
+
+    // Customer Settings
+    @NotNull(message = "Customer lookup enabled is required")
+    private Boolean customerLookupEnabled;
+
+    @NotNull(message = "Require customer info is required")
+    private Boolean requireCustomerInfo;
+
+    // Display Settings
+    @NotNull(message = "Show product images is required")
+    private Boolean showProductImages;
+
+    @NotNull(message = "Show stock levels is required")
+    private Boolean showStockLevels;
+
+    // Audit Fields
+    private String updatedBy;
 }

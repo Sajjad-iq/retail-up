@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 
 import com.sajjadkademm.retail.organizations.Organization;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,9 +30,7 @@ import lombok.Builder;
 @AllArgsConstructor
 @Builder
 @Table(name = "system_settings", indexes = {
-        @Index(name = "idx_system_settings_organization_id", columnList = "organization_id"),
-        @Index(name = "idx_system_settings_key", columnList = "key_name"),
-        @Index(name = "idx_system_settings_organization_key", columnList = "organization_id,key_name")
+        @Index(name = "idx_system_settings_organization_id", columnList = "organization_id")
 })
 public class SystemSetting {
     @Id
@@ -44,22 +41,32 @@ public class SystemSetting {
     @NotNull(message = "Organization ID is required")
     private String organizationId;
 
-    @Column(name = "key_name", nullable = false)
-    @NotBlank(message = "Setting key is required")
-    private String key;
+    @Column(name = "two_factor_auth_enabled", nullable = false)
+    private Boolean twoFactorAuthEnabled = false;
+    // Backup Settings
+    @Column(name = "auto_backup_enabled", nullable = false)
+    private Boolean autoBackupEnabled = true;
 
-    @Column(name = "value", nullable = true, columnDefinition = "TEXT")
-    private String value;
+    @Column(name = "backup_retention_days", nullable = false)
+    private Integer backupRetentionDays = 30;
 
-    @Column(name = "description", nullable = true)
-    private String description;
+    // General Settings
+    @Column(name = "timezone", nullable = false)
+    private String timezone = "UTC";
 
-    @Column(name = "setting_type", nullable = false)
-    @NotBlank(message = "Setting type is required")
-    private String settingType; // e.g., "security", "performance", "backup", "general"
+    @Column(name = "language", nullable = false)
+    private String language = "en";
 
-    @Column(name = "is_default", nullable = false)
-    private Boolean isDefault = false;
+    @Column(name = "currency", nullable = false)
+    private String currency = "USD";
+
+    // Notification Settings
+    @Column(name = "email_notifications_enabled", nullable = false)
+    private Boolean emailNotificationsEnabled = true;
+
+    // Audit Fields
+    @Column(name = "updated_by", nullable = true)
+    private String updatedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -69,7 +76,7 @@ public class SystemSetting {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_system_settings_organization"))
     private Organization organization;
 }

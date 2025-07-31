@@ -15,11 +15,25 @@ public class SystemSettingsResponse {
 
     private String id;
     private String organizationId;
-    private String key;
-    private String value;
-    private String description;
-    private String settingType;
-    private Boolean isDefault;
+
+    private Boolean twoFactorAuthEnabled;
+
+    // Backup Settings
+    private Boolean autoBackupEnabled;
+    private Integer backupRetentionDays;
+    private Integer backupFrequencyHours;
+    private Boolean backupCompressionEnabled;
+
+    // General Settings
+    private String timezone;
+    private String language;
+    private String currency;
+
+    // Notification Settings
+    private Boolean emailNotificationsEnabled;
+
+    // Audit Fields
+    private String updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
