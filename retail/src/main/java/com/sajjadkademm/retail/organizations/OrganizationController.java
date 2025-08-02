@@ -1,6 +1,7 @@
 package com.sajjadkademm.retail.organizations;
 
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
+import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.OrganizationResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,17 @@ public class OrganizationController {
             @Valid @RequestBody CreateOrganizationRequest request,
             @RequestHeader(value = "User-ID", required = false) String userId) {
         OrganizationResponse response = organizationService.createOrganization(request, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update organization endpoint
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<OrganizationResponse> updateOrganization(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateOrganizationRequest request) {
+        OrganizationResponse response = organizationService.updateOrganization(id, request);
         return ResponseEntity.ok(response);
     }
 

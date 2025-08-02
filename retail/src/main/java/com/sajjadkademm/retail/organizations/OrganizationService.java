@@ -4,6 +4,7 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
+import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.OrganizationResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,31 @@ public class OrganizationService {
         Organization organization = Organization.builder()
                 .name(request.getName())
                 .domain(request.getDomain())
+                .description(request.getDescription())
+                .address(request.getAddress())
+                .phone(request.getPhone())
+                .email(request.getEmail())
                 .createdBy(createdBy)
                 .build();
 
         Organization savedOrganization = organizationRepository.save(organization);
         return mapToResponse(savedOrganization);
+    }
+
+    /**
+     * Update an existing organization
+     */
+    public OrganizationResponse updateOrganization(String id, UpdateOrganizationRequest request) {
+        Organization organization = organizationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Organization not found with ID: " + id));
+
+        // Update organization fields
+        organization.setName(request.getName());
+        organization.setDescription(request.getDescription());
+        organization.setAddress(request.getAddress());
+
+        Organization updatedOrganization = organizationRepository.save(organization);
+        return mapToResponse(updatedOrganization);
     }
 
     /**
@@ -94,6 +115,10 @@ public class OrganizationService {
                 .id(organization.getId())
                 .name(organization.getName())
                 .domain(organization.getDomain())
+                .description(organization.getDescription())
+                .address(organization.getAddress())
+                .phone(organization.getPhone())
+                .email(organization.getEmail())
                 .createdAt(organization.getCreatedAt())
                 .updatedAt(organization.getUpdatedAt())
                 .createdBy(organization.getCreatedBy())

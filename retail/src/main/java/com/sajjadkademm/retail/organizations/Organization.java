@@ -16,6 +16,7 @@ import com.sajjadkademm.retail.users.User;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -49,8 +50,22 @@ public class Organization {
     @Size(min = 3, max = 255, message = "Domain must be between 3 and 255 characters")
     private String domain;
 
-    @Column(name = "settings", nullable = true, columnDefinition = "TEXT")
-    private String settings; // JSON string for organization settings
+    @Column(name = "description", nullable = true, length = 500)
+    @Size(max = 500, message = "Description must not exceed 500 characters")
+    private String description;
+
+    @Column(name = "address", nullable = true, length = 255)
+    @Size(max = 255, message = "Address must not exceed 255 characters")
+    private String address;
+
+    @Column(name = "phone", nullable = true, length = 20)
+    @Size(max = 20, message = "Phone must not exceed 20 characters")
+    private String phone;
+
+    @Column(name = "email", nullable = true, length = 255)
+    @Email(message = "Email should be valid")
+    @Size(max = 255, message = "Email must not exceed 255 characters")
+    private String email;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

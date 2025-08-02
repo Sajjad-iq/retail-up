@@ -15,6 +15,10 @@ public class OrganizationResponse {
     private String id;
     private String name;
     private String domain;
+    private String description;
+    private String address;
+    private String phone;
+    private String email;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
