@@ -6,13 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import java.time.LocalDateTime;
-
-import com.sajjadkademm.retail.users.User;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -71,8 +66,4 @@ public class Organization {
 
     @Column(name = "created_by", nullable = false)
     private String createdBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", insertable = false, updatable = false)
-    private User createdByUser;
 }

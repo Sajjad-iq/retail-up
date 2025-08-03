@@ -62,6 +62,7 @@ public class OrganizationController {
     public ResponseEntity<Organization> createOrganization(
             @Parameter(description = "Organization creation request", required = true, content = @Content(schema = @Schema(implementation = CreateOrganizationRequest.class), examples = @ExampleObject(name = "Create Organization Request", value = """
                     {
+                        "userId": "user123",
                         "name": "Acme Corporation",
                         "domain": "acme.com",
                         "description": "A leading retail company specializing in electronics and home appliances",
