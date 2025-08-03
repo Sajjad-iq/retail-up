@@ -16,9 +16,11 @@ public class UpdateOrganizationRequest {
     @Size(min = 2, max = 100, message = "Organization name must be between 2 and 100 characters")
     private String name;
 
+    @NotBlank(message = "Description is required")
     @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
 
+    @NotBlank(message = "Address is required")
     @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;
 

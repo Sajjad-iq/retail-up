@@ -16,9 +16,9 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
     @Query("SELECT o FROM Organization o WHERE o.name LIKE %:searchTerm%")
     List<Organization> searchOrganizations(@Param("searchTerm") String searchTerm);
 
-    // Check if name exists
-    boolean existsByName(String name);
-
     // Check if domain exists
     boolean existsByDomain(String domain);
+
+    // Check if phone exists
+    boolean existsByPhone(String phone);
 }

@@ -1,16 +1,15 @@
 package com.sajjadkademm.retail.settings.pos.service;
 
 import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
 import com.sajjadkademm.retail.settings.pos.repository.POSSettingRepository;
 import com.sajjadkademm.retail.settings.pos.dto.POSSettingsRequest;
 import com.sajjadkademm.retail.settings.pos.dto.POSSettingsResponse;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class POSSettingsService {
@@ -78,7 +77,7 @@ public class POSSettingsService {
         /**
          * Create default POS settings
          */
-        private POSSetting createDefaultPOSSettings(String organizationId) {
+        public POSSetting createDefaultPOSSettings(String organizationId) {
                 return POSSetting.builder()
                                 .organizationId(organizationId)
                                 // Payment Settings
@@ -104,6 +103,20 @@ public class POSSettingsService {
                                 .showProductImages(true)
                                 .showStockLevels(true)
                                 .build();
+        }
+
+        /**
+         * Create and save default POS settings for a new organization
+         */
+        public POSSetting createAndSaveDefaultPOSSettings(String organizationId, String createdBy) {
+                try {
+                        POSSetting defaultSettings = createDefaultPOSSettings(organizationId);
+                        defaultSettings.setUpdatedBy(createdBy);
+                        POSSetting savedSettings = posSettingRepository.save(defaultSettings);
+                        return savedSettings;
+                } catch (Exception e) {
+                        throw new BadRequestException("Failed to create default POS settings: " + e.getMessage(), e);
+                }
         }
 
         /**

@@ -6,9 +6,13 @@ import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.OrganizationResponse;
+import com.sajjadkademm.retail.settings.inventory.service.InventorySettingsService;
+import com.sajjadkademm.retail.settings.pos.service.POSSettingsService;
+import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,38 +20,66 @@ import java.util.stream.Collectors;
 @Service
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
+    private final InventorySettingsService inventorySettingsService;
+    private final POSSettingsService posSettingsService;
+    private final SystemSettingsService systemSettingsService;
 
     @Autowired
-    public OrganizationService(OrganizationRepository organizationRepository) {
+    public OrganizationService(OrganizationRepository organizationRepository,
+            InventorySettingsService inventorySettingsService,
+            POSSettingsService posSettingsService,
+            SystemSettingsService systemSettingsService) {
         this.organizationRepository = organizationRepository;
+        this.inventorySettingsService = inventorySettingsService;
+        this.posSettingsService = posSettingsService;
+        this.systemSettingsService = systemSettingsService;
     }
 
     /**
-     * Create a new organization
+     * Create a new organization with default settings
+     * If organization creation fails OR any settings creation fails, the entire
+     * transaction will be rolled back
      */
+    @Transactional(rollbackFor = { Exception.class })
     public OrganizationResponse createOrganization(CreateOrganizationRequest request, String createdBy) {
-        // Check if organization with same name already exists
-        if (organizationRepository.existsByName(request.getName())) {
-            throw new ConflictException("Organization with name " + request.getName() + " already exists");
+        try {
+            // Check if organization with same phone already exists
+            if (organizationRepository.existsByPhone(request.getPhone())) {
+                throw new ConflictException("Organization with phone " + request.getPhone() + " already exists");
+            }
+
+            // Check if organization with same domain already exists
+            if (organizationRepository.existsByDomain(request.getDomain())) {
+                throw new ConflictException("Organization with domain " + request.getDomain() + " already exists");
+            }
+
+            Organization organization = Organization.builder()
+                    .name(request.getName())
+                    .domain(request.getDomain())
+                    .description(request.getDescription())
+                    .address(request.getAddress())
+                    .phone(request.getPhone())
+                    .createdBy(createdBy)
+                    .build();
+
+            // Save the organization first
+            Organization savedOrganization = organizationRepository.save(organization);
+
+            // Create and save default settings for the organization
+            // If any of these fail, the entire transaction will be rolled back
+            inventorySettingsService.createAndSaveDefaultInventorySettings(savedOrganization.getId(), createdBy);
+            posSettingsService.createAndSaveDefaultPOSSettings(savedOrganization.getId(), createdBy);
+            systemSettingsService.createAndSaveDefaultSystemSettings(savedOrganization.getId(), createdBy);
+
+            return mapToResponse(savedOrganization);
+
+        } catch (ConflictException e) {
+            throw e;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to create organization: " + e.getMessage(), e);
         }
-
-        // Check if organization with same domain already exists
-        if (organizationRepository.existsByDomain(request.getDomain())) {
-            throw new ConflictException("Organization with domain " + request.getDomain() + " already exists");
-        }
-
-        Organization organization = Organization.builder()
-                .name(request.getName())
-                .domain(request.getDomain())
-                .description(request.getDescription())
-                .address(request.getAddress())
-                .phone(request.getPhone())
-                .email(request.getEmail())
-                .createdBy(createdBy)
-                .build();
-
-        Organization savedOrganization = organizationRepository.save(organization);
-        return mapToResponse(savedOrganization);
     }
 
     /**
@@ -118,11 +150,9 @@ public class OrganizationService {
                 .description(organization.getDescription())
                 .address(organization.getAddress())
                 .phone(organization.getPhone())
-                .email(organization.getEmail())
                 .createdAt(organization.getCreatedAt())
                 .updatedAt(organization.getUpdatedAt())
                 .createdBy(organization.getCreatedBy())
                 .build();
     }
-
 }

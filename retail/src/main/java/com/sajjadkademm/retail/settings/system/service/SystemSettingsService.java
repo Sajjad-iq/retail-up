@@ -1,16 +1,15 @@
 package com.sajjadkademm.retail.settings.system.service;
 
 import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsResponse;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SystemSettingsService {
@@ -68,7 +67,7 @@ public class SystemSettingsService {
         /**
          * Create default system settings
          */
-        private SystemSetting createDefaultSystemSettings(String organizationId) {
+        public SystemSetting createDefaultSystemSettings(String organizationId) {
                 return SystemSetting.builder()
                                 .organizationId(organizationId)
                                 .twoFactorAuthEnabled(false)
@@ -82,6 +81,20 @@ public class SystemSettingsService {
                                 // Notification Settings
                                 .emailNotificationsEnabled(true)
                                 .build();
+        }
+
+        /**
+         * Create and save default system settings for a new organization
+         */
+        public SystemSetting createAndSaveDefaultSystemSettings(String organizationId, String createdBy) {
+                try {
+                        SystemSetting defaultSettings = createDefaultSystemSettings(organizationId);
+                        defaultSettings.setUpdatedBy(createdBy);
+                        SystemSetting savedSettings = systemSettingRepository.save(defaultSettings);
+                        return savedSettings;
+                } catch (Exception e) {
+                        throw new BadRequestException("Failed to create default system settings: " + e.getMessage(), e);
+                }
         }
 
         /**

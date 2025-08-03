@@ -27,6 +27,7 @@ public class CreateOrganizationRequest {
     @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;
 
+    @NotBlank(message = "Phone is required")
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;
 

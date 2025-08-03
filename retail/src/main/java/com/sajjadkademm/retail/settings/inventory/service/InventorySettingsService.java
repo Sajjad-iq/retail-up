@@ -1,16 +1,15 @@
 package com.sajjadkademm.retail.settings.inventory.service;
 
 import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.inventory.entity.InventorySetting;
 import com.sajjadkademm.retail.settings.inventory.repository.InventorySettingRepository;
 import com.sajjadkademm.retail.settings.inventory.dto.InventorySettingsRequest;
 import com.sajjadkademm.retail.settings.inventory.dto.InventorySettingsResponse;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InventorySettingsService {
@@ -79,6 +78,21 @@ public class InventorySettingsService {
                                 .batchTrackingEnabled(true)
                                 .expiryDateTrackingEnabled(true)
                                 .build();
+        }
+
+        /**
+         * Create and save default inventory settings for a new organization
+         */
+        public InventorySetting createAndSaveDefaultInventorySettings(String organizationId, String createdBy) {
+                try {
+                        InventorySetting defaultSettings = createDefaultInventorySettings(organizationId);
+                        defaultSettings.setUpdatedBy(createdBy);
+                        InventorySetting savedSettings = inventorySettingRepository.save(defaultSettings);
+                        return savedSettings;
+                } catch (Exception e) {
+                        throw new BadRequestException("Failed to create default inventory settings: " + e.getMessage(),
+                                        e);
+                }
         }
 
         /**
