@@ -31,19 +31,44 @@ public class OpenApiConfig {
         public OpenAPI customOpenAPI() {
                 return new OpenAPI()
                                 .info(new Info()
-                                                .title("Retail Authentication API")
-                                                .description("Spring Boot Authentication Module for Retail Application")
+                                                .title("Retail Management System API")
+                                                .description("""
+                                                                Comprehensive REST API for Retail Management System.
+
+                                                                ## Features
+                                                                - **Authentication & Authorization**: User login, registration, and JWT token management
+                                                                - **Organization Management**: Multi-tenant organization setup and management
+                                                                - **System Settings**: Global system configuration management
+                                                                - **POS Settings**: Point of Sale system configuration
+                                                                - **Inventory Settings**: Inventory management system configuration
+
+                                                                ## Authentication
+                                                                Most endpoints require Bearer token authentication. Include the JWT token in the Authorization header:
+                                                                ```
+                                                                Authorization: Bearer <your-jwt-token>
+                                                                ```
+
+                                                                ## API Structure
+                                                                - `/api/auth/*` - Authentication and authorization endpoints
+                                                                - `/api/organizations/*` - Organization management endpoints
+                                                                - `/api/settings/*` - Settings management endpoints
+                                                                - `/health` - Application health check
+                                                                """)
                                                 .version("1.0.0")
                                                 .contact(new Contact()
                                                                 .name("Sajjad Kadem")
-                                                                .email("your.email@example.com"))
+                                                                .email("sajjad.kadem@example.com")
+                                                                .url("https://github.com/sajjadkadem"))
                                                 .license(new License()
                                                                 .name("MIT License")
                                                                 .url("https://opensource.org/licenses/MIT")))
                                 .servers(List.of(
                                                 new Server()
                                                                 .url("http://localhost:" + serverPort)
-                                                                .description("Development Server")))
+                                                                .description("Development Server"),
+                                                new Server()
+                                                                .url("https://api.retail-up.com")
+                                                                .description("Production Server")))
                                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                                 .components(new Components()
                                                 .addSecuritySchemes("Bearer Authentication",
@@ -52,6 +77,7 @@ public class OpenApiConfig {
                                                                                 .scheme("bearer")
                                                                                 .bearerFormat("JWT")
                                                                                 .in(SecurityScheme.In.HEADER)
-                                                                                .name("Authorization")));
+                                                                                .name("Authorization")
+                                                                                .description("JWT token for authentication")));
         }
 }
