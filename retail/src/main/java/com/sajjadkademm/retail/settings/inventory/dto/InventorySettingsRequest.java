@@ -3,6 +3,9 @@ package com.sajjadkademm.retail.settings.inventory.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +15,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventorySettingsRequest {
+
+    @NotBlank(message = "User ID is required")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "User ID must contain only alphanumeric characters, hyphens, and underscores")
+    @Size(min = 1, max = 50, message = "User ID must be between 1 and 50 characters")
+    private String userId;
 
     // Stock Management Settings
     @NotNull(message = "Negative stock allowed is required")

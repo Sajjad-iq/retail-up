@@ -1,6 +1,5 @@
 package com.sajjadkademm.retail.settings.inventory.controller;
 
-import com.sajjadkademm.retail.auth.JwtUtil;
 import com.sajjadkademm.retail.settings.inventory.dto.InventorySettingsRequest;
 import com.sajjadkademm.retail.settings.inventory.entity.InventorySetting;
 import com.sajjadkademm.retail.settings.inventory.service.InventorySettingsService;
@@ -10,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +36,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class InventorySettingsController {
 
         private final InventorySettingsService inventorySettingsService;
-        private final JwtUtil jwtUtil;
 
         /**
          * Get inventory settings for an organization
@@ -108,6 +105,7 @@ public class InventorySettingsController {
                         @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
                         @Parameter(description = "Inventory settings update request", required = true, content = @Content(schema = @Schema(implementation = InventorySettingsRequest.class), examples = @ExampleObject(name = "Update Inventory Settings Request", value = """
                                         {
+                                            "userId": "user123",
                                             "negativeStockAllowed": true,
                                             "barcodeRequired": false,
                                             "skuRequired": true,
@@ -118,23 +116,11 @@ public class InventorySettingsController {
                                             "expiryAlertsEnabled": true,
                                             "expiryAlertDays": 14,
                                             "batchTrackingEnabled": false,
-                                            "expiryDateTrackingEnabled": true,
-                                            "updatedBy": "user123"
+                                            "expiryDateTrackingEnabled": true
                                         }
-                                        """))) @Valid @RequestBody InventorySettingsRequest request,
-                        HttpServletRequest httpRequest) {
+                                        """))) @Valid @RequestBody InventorySettingsRequest request) {
 
-                // Extract user ID from JWT token
-                String authHeader = httpRequest.getHeader("Authorization");
-                String userId = null;
-
-                if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                        String token = authHeader.substring(7);
-                        userId = jwtUtil.extractUserId(token);
-                }
-
-                InventorySetting response = inventorySettingsService.updateInventorySettings(organizationId, request,
-                                userId);
+                InventorySetting response = inventorySettingsService.updateInventorySettings(organizationId, request);
                 return ResponseEntity.ok(response);
         }
 

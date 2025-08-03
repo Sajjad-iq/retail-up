@@ -39,7 +39,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class SystemSettingsController {
 
     private final SystemSettingsService systemSettingsService;
-    private final JwtUtil jwtUtil;
 
     /**
      * Get system settings for an organization
@@ -101,28 +100,18 @@ public class SystemSettingsController {
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
             @Parameter(description = "System settings update request", required = true, content = @Content(schema = @Schema(implementation = SystemSettingsRequest.class), examples = @ExampleObject(name = "Update System Settings Request", value = """
                     {
+                        "userId": "user123",
                         "twoFactorAuthEnabled": false,
                         "autoBackupEnabled": true,
                         "backupRetentionDays": 60,
                         "timezone": "Europe/London",
                         "language": "en",
                         "currency": "EUR",
-                        "emailNotificationsEnabled": false,
-                        "updatedBy": "user123"
+                        "emailNotificationsEnabled": false
                     }
-                    """))) @Valid @RequestBody SystemSettingsRequest request,
-            HttpServletRequest httpRequest) {
+                    """))) @Valid @RequestBody SystemSettingsRequest request) {
 
-        // Extract user ID from JWT token
-        String authHeader = httpRequest.getHeader("Authorization");
-        String userId = null;
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            userId = jwtUtil.extractUserId(token);
-        }
-
-        SystemSetting response = systemSettingsService.updateSystemSettings(organizationId, request, userId);
+        SystemSetting response = systemSettingsService.updateSystemSettings(organizationId, request);
         return ResponseEntity.ok(response);
     }
 

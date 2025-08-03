@@ -5,8 +5,12 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
+import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.users.User;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class SystemSettingsService {
 
         private final SystemSettingRepository systemSettingRepository;
+        @Autowired
+        private final UserService userService;
 
         /**
          * Get system settings for an organization
@@ -27,11 +33,12 @@ public class SystemSettingsService {
         /**
          * Update specific system settings
          */
-        public SystemSetting updateSystemSettings(String organizationId, SystemSettingsRequest request,
-                        String userId) {
+        public SystemSetting updateSystemSettings(String organizationId, SystemSettingsRequest request) {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
+
+                User user = userService.getUserById(request.getUserId());
 
                 setting.setTwoFactorAuthEnabled(request.getTwoFactorAuthEnabled());
                 setting.setAutoBackupEnabled(request.getAutoBackupEnabled());
@@ -40,7 +47,7 @@ public class SystemSettingsService {
                 setting.setLanguage(request.getLanguage());
                 setting.setCurrency(request.getCurrency());
                 setting.setEmailNotificationsEnabled(request.getEmailNotificationsEnabled());
-                setting.setUpdatedBy(userId);
+                setting.setUpdatedBy(user.getId());
 
                 return systemSettingRepository.save(setting);
         }

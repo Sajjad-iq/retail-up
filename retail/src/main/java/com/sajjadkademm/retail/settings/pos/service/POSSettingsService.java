@@ -5,6 +5,8 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
 import com.sajjadkademm.retail.settings.pos.repository.POSSettingRepository;
 import com.sajjadkademm.retail.settings.pos.dto.POSSettingsRequest;
+import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.users.UserService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class POSSettingsService {
 
         private final POSSettingRepository posSettingRepository;
+        private final UserService userService;
 
         /**
          * Get POS settings for an organization
@@ -27,10 +30,13 @@ public class POSSettingsService {
         /**
          * Update POS settings
          */
-        public POSSetting updatePOSSettings(String organizationId, POSSettingsRequest request, String userId) {
+        public POSSetting updatePOSSettings(String organizationId, POSSettingsRequest request) {
                 POSSetting setting = posSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "POS settings not found for organization: " + organizationId));
+
+                // Validate that the user exists
+                User user = userService.getUserById(request.getUserId());
 
                 setting.setCashPaymentEnabled(request.getCashPaymentEnabled());
                 setting.setCardPaymentEnabled(request.getCardPaymentEnabled());
@@ -49,7 +55,7 @@ public class POSSettingsService {
                 setting.setRequireCustomerInfo(request.getRequireCustomerInfo());
                 setting.setShowProductImages(request.getShowProductImages());
                 setting.setShowStockLevels(request.getShowStockLevels());
-                setting.setUpdatedBy(userId);
+                setting.setUpdatedBy(user.getId());
 
                 return posSettingRepository.save(setting);
         }

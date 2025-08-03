@@ -120,6 +120,7 @@ public class POSSettingsController {
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
             @Parameter(description = "POS settings update request", required = true, content = @Content(schema = @Schema(implementation = POSSettingsRequest.class), examples = @ExampleObject(name = "Update POS Settings Request", value = """
                     {
+                        "userId": "user123",
                         "cashPaymentEnabled": true,
                         "cardPaymentEnabled": true,
                         "changeCalculationMethod": "manual",
@@ -136,22 +137,11 @@ public class POSSettingsController {
                         "customerLookupEnabled": false,
                         "requireCustomerInfo": true,
                         "showProductImages": false,
-                        "showStockLevels": true,
-                        "updatedBy": "user123"
+                        "showStockLevels": true
                     }
-                    """))) @Valid @RequestBody POSSettingsRequest request,
-            HttpServletRequest httpRequest) {
+                    """))) @Valid @RequestBody POSSettingsRequest request) {
 
-        // Extract user ID from JWT token
-        String authHeader = httpRequest.getHeader("Authorization");
-        String userId = null;
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            userId = jwtUtil.extractUserId(token);
-        }
-
-        POSSetting response = posSettingsService.updatePOSSettings(organizationId, request, userId);
+        POSSetting response = posSettingsService.updatePOSSettings(organizationId, request);
         return ResponseEntity.ok(response);
     }
 

@@ -68,7 +68,7 @@ public class OrganizationService {
                     .description(request.getDescription())
                     .address(request.getAddress())
                     .phone(request.getPhone())
-                    .createdBy(request.getUserId())
+                    .createdBy(user)
                     .build();
 
             // Save the organization first

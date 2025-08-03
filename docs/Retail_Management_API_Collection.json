@@ -18,16 +18,11 @@
                             {
                                 "key": "Content-Type",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "User-ID",
-                                "value": "user123",
-                                "description": "User ID creating the organization"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"Acme Corporation\",\n    \"domain\": \"acme.com\",\n    \"description\": \"A leading retail company specializing in electronics and home appliances\",\n    \"address\": \"123 Business Street, New York, NY 10001\",\n    \"phone\": \"+1-555-123-4567\",\n    \"email\": \"contact@acme.com\"\n}"
+                            "raw": "{\n    \"userId\": \"user123\",\n    \"name\": \"Acme Corporation\",\n    \"domain\": \"acme.com\",\n    \"description\": \"A leading retail company specializing in electronics and home appliances\",\n    \"address\": \"123 Business Street, New York, NY 10001\",\n    \"phone\": \"+1-555-123-4567\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/organizations",
@@ -204,7 +199,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"twoFactorAuthEnabled\": false,\n    \"autoBackupEnabled\": true,\n    \"backupRetentionDays\": 60,\n    \"timezone\": \"Europe/London\",\n    \"language\": \"en\",\n    \"currency\": \"EUR\",\n    \"emailNotificationsEnabled\": false,\n    \"updatedBy\": \"user123\"\n}"
+                            "raw": "{\n    \"userId\": \"user123\",\n    \"twoFactorAuthEnabled\": false,\n    \"autoBackupEnabled\": true,\n    \"backupRetentionDays\": 60,\n    \"timezone\": \"Europe/London\",\n    \"language\": \"en\",\n    \"currency\": \"EUR\",\n    \"emailNotificationsEnabled\": false\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/settings/system/org123",
@@ -294,7 +289,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"cashPaymentEnabled\": true,\n    \"cardPaymentEnabled\": true,\n    \"changeCalculationMethod\": \"manual\",\n    \"allowPartialPayments\": true,\n    \"requireExactChange\": false,\n    \"autoPrintReceipts\": false,\n    \"receiptTemplateHtml\": \"<div>Updated Template</div>\",\n    \"receiptHeaderTemplateHtml\": \"<div>Updated Header</div>\",\n    \"receiptFooterTemplateHtml\": \"<div>Updated Footer</div>\",\n    \"receiptPaperWidthMm\": 58,\n    \"holdTransactionsEnabled\": false,\n    \"returnsEnabled\": true,\n    \"discountsEnabled\": false,\n    \"customerLookupEnabled\": false,\n    \"requireCustomerInfo\": true,\n    \"showProductImages\": false,\n    \"showStockLevels\": true,\n    \"updatedBy\": \"user123\"\n}"
+                            "raw": "{\n    \"userId\": \"user123\",\n    \"cashPaymentEnabled\": true,\n    \"cardPaymentEnabled\": true,\n    \"changeCalculationMethod\": \"manual\",\n    \"allowPartialPayments\": true,\n    \"requireExactChange\": false,\n    \"autoPrintReceipts\": false,\n    \"receiptTemplateHtml\": \"<div>Updated Template</div>\",\n    \"receiptHeaderTemplateHtml\": \"<div>Updated Header</div>\",\n    \"receiptFooterTemplateHtml\": \"<div>Updated Footer</div>\",\n    \"receiptPaperWidthMm\": 58,\n    \"holdTransactionsEnabled\": false,\n    \"returnsEnabled\": true,\n    \"discountsEnabled\": false,\n    \"customerLookupEnabled\": false,\n    \"requireCustomerInfo\": true,\n    \"showProductImages\": false,\n    \"showStockLevels\": true\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/settings/pos/org123",
@@ -384,7 +379,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"negativeStockAllowed\": true,\n    \"barcodeRequired\": false,\n    \"skuRequired\": true,\n    \"requireCostPrice\": false,\n    \"lowStockAlertsEnabled\": true,\n    \"lowStockThreshold\": 5,\n    \"outOfStockAlertsEnabled\": false,\n    \"expiryAlertsEnabled\": true,\n    \"expiryAlertDays\": 14,\n    \"batchTrackingEnabled\": false,\n    \"expiryDateTrackingEnabled\": true,\n    \"updatedBy\": \"user123\"\n}"
+                            "raw": "{\n    \"userId\": \"user123\",\n    \"negativeStockAllowed\": true,\n    \"barcodeRequired\": false,\n    \"skuRequired\": true,\n    \"requireCostPrice\": false,\n    \"lowStockAlertsEnabled\": true,\n    \"lowStockThreshold\": 5,\n    \"outOfStockAlertsEnabled\": false,\n    \"expiryAlertsEnabled\": true,\n    \"expiryAlertDays\": 14,\n    \"batchTrackingEnabled\": false,\n    \"expiryDateTrackingEnabled\": true\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/settings/inventory/org123",

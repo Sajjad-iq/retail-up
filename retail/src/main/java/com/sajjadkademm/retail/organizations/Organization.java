@@ -1,12 +1,16 @@
 package com.sajjadkademm.retail.organizations;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
 import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +18,9 @@ import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.sajjadkademm.retail.users.User;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,25 +42,25 @@ public class Organization {
     private String id;
 
     @Column(name = "name", nullable = false)
-    @NotBlank(message = "Organization name is required")
-    @Size(min = 2, max = 100, message = "Organization name must be between 2 and 100 characters")
+    @NotBlank
+    @Size(min = 2, max = 100)
     private String name;
 
     @Column(name = "domain", nullable = false, unique = true, updatable = false)
-    @NotBlank(message = "Organization domain is required")
-    @Size(min = 3, max = 255, message = "Domain must be between 3 and 255 characters")
+    @NotBlank
+    @Size(min = 3, max = 255)
     private String domain;
 
-    @Column(name = "description", nullable = true, length = 500)
-    @Size(max = 500, message = "Description must not exceed 500 characters")
+    @Column(name = "description", length = 500)
+    @Size(max = 500)
     private String description;
 
-    @Column(name = "address", nullable = true, length = 255)
-    @Size(max = 255, message = "Address must not exceed 255 characters")
+    @Column(name = "address", length = 255)
+    @Size(max = 255)
     private String address;
 
     @Column(name = "phone", nullable = false, length = 20)
-    @Size(max = 20, message = "Phone must not exceed 20 characters")
+    @Size(max = 20)
     private String phone;
 
     @CreationTimestamp
@@ -64,6 +71,7 @@ public class Organization {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_by", nullable = false)
-    private String createdBy;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
+    private User createdBy;
 }

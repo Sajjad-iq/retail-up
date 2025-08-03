@@ -5,8 +5,12 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.inventory.entity.InventorySetting;
 import com.sajjadkademm.retail.settings.inventory.repository.InventorySettingRepository;
 import com.sajjadkademm.retail.settings.inventory.dto.InventorySettingsRequest;
+import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.users.User;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class InventorySettingsService {
 
         private final InventorySettingRepository inventorySettingRepository;
+        @Autowired
+        private final UserService userService;
 
         /**
          * Get inventory settings for an organization
@@ -28,12 +34,15 @@ public class InventorySettingsService {
          * Update inventory settings
          */
         public InventorySetting updateInventorySettings(String organizationId,
-                        InventorySettingsRequest request, String userId) {
+                        InventorySettingsRequest request) {
                 InventorySetting setting = inventorySettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "Inventory settings not found for organization: " + organizationId));
 
-                updateInventorySetting(setting, request, userId);
+                // Validate that the user exists
+                User user = userService.getUserById(request.getUserId());
+
+                updateInventorySetting(setting, request, user.getId());
                 return inventorySettingRepository.save(setting);
         }
 
