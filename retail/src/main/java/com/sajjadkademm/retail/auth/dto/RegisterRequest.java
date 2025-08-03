@@ -22,8 +22,7 @@ public class RegisterRequest {
     @Email(message = "Invalid email address")
     private String email;
 
-    @NotBlank(message = "Phone is required")
-    @Size(min = 10, max = 15, message = "Phone must be between 10 and 15 digits")
+    @Size(min = 10, max = 20, message = "Phone must be between 10 and 20 digits")
     private String phone;
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
