@@ -5,7 +5,6 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.inventory.entity.InventorySetting;
 import com.sajjadkademm.retail.settings.inventory.repository.InventorySettingRepository;
 import com.sajjadkademm.retail.settings.inventory.dto.InventorySettingsRequest;
-import com.sajjadkademm.retail.settings.inventory.dto.InventorySettingsResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,32 +18,29 @@ public class InventorySettingsService {
         /**
          * Get inventory settings for an organization
          */
-        public InventorySettingsResponse getInventorySettings(String organizationId) {
-                InventorySetting setting = inventorySettingRepository.findByOrganizationId(organizationId)
+        public InventorySetting getInventorySettings(String organizationId) {
+                return inventorySettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "Inventory settings not found for organization: " + organizationId));
-
-                return mapToResponse(setting);
         }
 
         /**
          * Update inventory settings
          */
-        public InventorySettingsResponse updateInventorySettings(String organizationId,
+        public InventorySetting updateInventorySettings(String organizationId,
                         InventorySettingsRequest request, String userId) {
                 InventorySetting setting = inventorySettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "Inventory settings not found for organization: " + organizationId));
 
                 updateInventorySetting(setting, request, userId);
-                InventorySetting updatedSetting = inventorySettingRepository.save(setting);
-                return mapToResponse(updatedSetting);
+                return inventorySettingRepository.save(setting);
         }
 
         /**
          * Reset inventory settings to defaults
          */
-        public InventorySettingsResponse resetToDefaults(String organizationId) {
+        public InventorySetting resetToDefaults(String organizationId) {
                 InventorySetting setting = inventorySettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "Inventory settings not found for organization: " + organizationId));
@@ -53,8 +49,7 @@ public class InventorySettingsService {
                 defaultSettings.setId(setting.getId());
                 defaultSettings.setCreatedAt(setting.getCreatedAt());
 
-                InventorySetting savedSetting = inventorySettingRepository.save(defaultSettings);
-                return mapToResponse(savedSetting);
+                return inventorySettingRepository.save(defaultSettings);
         }
 
         /**
@@ -87,8 +82,7 @@ public class InventorySettingsService {
                 try {
                         InventorySetting defaultSettings = createDefaultInventorySettings(organizationId);
                         defaultSettings.setUpdatedBy(createdBy);
-                        InventorySetting savedSettings = inventorySettingRepository.save(defaultSettings);
-                        return savedSettings;
+                        return inventorySettingRepository.save(defaultSettings);
                 } catch (Exception e) {
                         throw new BadRequestException("Failed to create default inventory settings: " + e.getMessage(),
                                         e);
@@ -118,33 +112,5 @@ public class InventorySettingsService {
 
                 // Audit Fields
                 setting.setUpdatedBy(request.getUpdatedBy() != null ? request.getUpdatedBy() : userId);
-        }
-
-        /**
-         * Map entity to response DTO
-         */
-        private InventorySettingsResponse mapToResponse(InventorySetting setting) {
-                return InventorySettingsResponse.builder()
-                                .id(setting.getId())
-                                .organizationId(setting.getOrganizationId())
-                                // Stock Management Settings
-                                .negativeStockAllowed(setting.getNegativeStockAllowed())
-                                .barcodeRequired(setting.getBarcodeRequired())
-                                .skuRequired(setting.getSkuRequired())
-                                .requireCostPrice(setting.getRequireCostPrice())
-                                // Alert Settings
-                                .lowStockAlertsEnabled(setting.getLowStockAlertsEnabled())
-                                .lowStockThreshold(setting.getLowStockThreshold())
-                                .outOfStockAlertsEnabled(setting.getOutOfStockAlertsEnabled())
-                                .expiryAlertsEnabled(setting.getExpiryAlertsEnabled())
-                                .expiryAlertDays(setting.getExpiryAlertDays())
-                                // Tracking Settings
-                                .batchTrackingEnabled(setting.getBatchTrackingEnabled())
-                                .expiryDateTrackingEnabled(setting.getExpiryDateTrackingEnabled())
-                                // Audit Fields
-                                .updatedBy(setting.getUpdatedBy())
-                                .createdAt(setting.getCreatedAt())
-                                .updatedAt(setting.getUpdatedAt())
-                                .build();
         }
 }

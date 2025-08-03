@@ -3,6 +3,7 @@ package com.sajjadkademm.retail.organizations.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateOrganizationRequest {
+
+    @NotBlank(message = "User ID is required")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "User ID must contain only alphanumeric characters, hyphens, and underscores")
+    @Size(min = 20, max = 255, message = "User ID must be between 20 and 255 characters")
+    private String userId;
 
     @NotBlank(message = "Organization name is required")
     @Size(min = 2, max = 100, message = "Organization name must be between 2 and 100 characters")

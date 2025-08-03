@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.settings.pos.controller;
 
 import com.sajjadkademm.retail.auth.JwtUtil;
 import com.sajjadkademm.retail.settings.pos.dto.POSSettingsRequest;
-import com.sajjadkademm.retail.settings.pos.dto.POSSettingsResponse;
+import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
 import com.sajjadkademm.retail.settings.pos.service.POSSettingsService;
 
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class POSSettingsController {
      */
     @Operation(summary = "Get POS Settings", description = "Retrieve POS settings for a specific organization", operationId = "getPOSSettings")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "POS settings retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = POSSettingsResponse.class), examples = @ExampleObject(name = "POS Settings", value = """
+            @ApiResponse(responseCode = "200", description = "POS settings retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = POSSetting.class), examples = @ExampleObject(name = "POS Settings", value = """
                     {
                         "id": "pos123",
                         "organizationId": "org123",
@@ -55,9 +55,9 @@ public class POSSettingsController {
                         "allowPartialPayments": false,
                         "requireExactChange": true,
                         "autoPrintReceipts": true,
-                        "receiptTemplateHtml": "<div>Receipt Template</div>",
-                        "receiptHeaderTemplateHtml": "<div>Header</div>",
-                        "receiptFooterTemplateHtml": "<div>Footer</div>",
+                        "receiptTemplateHtml": "templates/receipt-main.html",
+                        "receiptHeaderTemplateHtml": "templates/receipt-header.html",
+                        "receiptFooterTemplateHtml": "templates/receipt-footer.html",
                         "receiptPaperWidthMm": 80,
                         "holdTransactionsEnabled": true,
                         "returnsEnabled": true,
@@ -74,9 +74,9 @@ public class POSSettingsController {
             @ApiResponse(responseCode = "404", description = "POS settings not found for organization", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @GetMapping("/{organizationId}")
-    public ResponseEntity<POSSettingsResponse> getPOSSettings(
+    public ResponseEntity<POSSetting> getPOSSettings(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        POSSettingsResponse response = posSettingsService.getPOSSettings(organizationId);
+        POSSetting response = posSettingsService.getPOSSettings(organizationId);
         return ResponseEntity.ok(response);
     }
 
@@ -85,7 +85,7 @@ public class POSSettingsController {
      */
     @Operation(summary = "Update POS Settings", description = "Update POS settings for a specific organization", operationId = "updatePOSSettings", security = @SecurityRequirement(name = "Bearer Authentication"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "POS settings updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = POSSettingsResponse.class), examples = @ExampleObject(name = "Updated POS Settings", value = """
+            @ApiResponse(responseCode = "200", description = "POS settings updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = POSSetting.class), examples = @ExampleObject(name = "Updated POS Settings", value = """
                     {
                         "id": "pos123",
                         "organizationId": "org123",
@@ -95,9 +95,9 @@ public class POSSettingsController {
                         "allowPartialPayments": true,
                         "requireExactChange": false,
                         "autoPrintReceipts": false,
-                        "receiptTemplateHtml": "<div>Updated Template</div>",
-                        "receiptHeaderTemplateHtml": "<div>Updated Header</div>",
-                        "receiptFooterTemplateHtml": "<div>Updated Footer</div>",
+                        "receiptTemplateHtml": "templates/updated-receipt-main.html",
+                        "receiptHeaderTemplateHtml": "templates/updated-receipt-header.html",
+                        "receiptFooterTemplateHtml": "templates/updated-receipt-footer.html",
                         "receiptPaperWidthMm": 58,
                         "holdTransactionsEnabled": false,
                         "returnsEnabled": true,
@@ -116,7 +116,7 @@ public class POSSettingsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @PutMapping("/{organizationId}")
-    public ResponseEntity<POSSettingsResponse> updatePOSSettings(
+    public ResponseEntity<POSSetting> updatePOSSettings(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
             @Parameter(description = "POS settings update request", required = true, content = @Content(schema = @Schema(implementation = POSSettingsRequest.class), examples = @ExampleObject(name = "Update POS Settings Request", value = """
                     {
@@ -126,9 +126,9 @@ public class POSSettingsController {
                         "allowPartialPayments": true,
                         "requireExactChange": false,
                         "autoPrintReceipts": false,
-                        "receiptTemplateHtml": "<div>Updated Template</div>",
-                        "receiptHeaderTemplateHtml": "<div>Updated Header</div>",
-                        "receiptFooterTemplateHtml": "<div>Updated Footer</div>",
+                        "receiptTemplateHtml": "templates/updated-receipt-main.html",
+                        "receiptHeaderTemplateHtml": "templates/updated-receipt-header.html",
+                        "receiptFooterTemplateHtml": "templates/updated-receipt-footer.html",
                         "receiptPaperWidthMm": 58,
                         "holdTransactionsEnabled": false,
                         "returnsEnabled": true,
@@ -151,7 +151,7 @@ public class POSSettingsController {
             userId = jwtUtil.extractUserId(token);
         }
 
-        POSSettingsResponse response = posSettingsService.updatePOSSettings(organizationId, request, userId);
+        POSSetting response = posSettingsService.updatePOSSettings(organizationId, request, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -160,7 +160,7 @@ public class POSSettingsController {
      */
     @Operation(summary = "Reset POS Settings to Defaults", description = "Reset POS settings to default values for a specific organization", operationId = "resetPOSSettingsToDefaults", security = @SecurityRequirement(name = "Bearer Authentication"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "POS settings reset to defaults successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = POSSettingsResponse.class), examples = @ExampleObject(name = "Reset POS Settings", value = """
+            @ApiResponse(responseCode = "200", description = "POS settings reset to defaults successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = POSSetting.class), examples = @ExampleObject(name = "Reset POS Settings", value = """
                     {
                         "id": "pos123",
                         "organizationId": "org123",
@@ -168,11 +168,11 @@ public class POSSettingsController {
                         "cardPaymentEnabled": true,
                         "changeCalculationMethod": "automatic",
                         "allowPartialPayments": false,
-                        "requireExactChange": true,
+                        "requireExactChange": false,
                         "autoPrintReceipts": true,
-                        "receiptTemplateHtml": "<div>Default Template</div>",
-                        "receiptHeaderTemplateHtml": "<div>Default Header</div>",
-                        "receiptFooterTemplateHtml": "<div>Default Footer</div>",
+                        "receiptTemplateHtml": "templates/receipt-main.html",
+                        "receiptHeaderTemplateHtml": "templates/receipt-header.html",
+                        "receiptFooterTemplateHtml": "templates/receipt-footer.html",
                         "receiptPaperWidthMm": 80,
                         "holdTransactionsEnabled": true,
                         "returnsEnabled": true,
@@ -190,9 +190,9 @@ public class POSSettingsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @PostMapping("/{organizationId}/reset")
-    public ResponseEntity<POSSettingsResponse> resetPOSSettingsToDefaults(
+    public ResponseEntity<POSSetting> resetPOSSettingsToDefaults(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        POSSettingsResponse response = posSettingsService.resetToDefaults(organizationId);
+        POSSetting response = posSettingsService.resetToDefaults(organizationId);
         return ResponseEntity.ok(response);
     }
 }

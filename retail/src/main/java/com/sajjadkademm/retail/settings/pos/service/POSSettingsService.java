@@ -5,7 +5,6 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
 import com.sajjadkademm.retail.settings.pos.repository.POSSettingRepository;
 import com.sajjadkademm.retail.settings.pos.dto.POSSettingsRequest;
-import com.sajjadkademm.retail.settings.pos.dto.POSSettingsResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,18 +18,16 @@ public class POSSettingsService {
         /**
          * Get POS settings for an organization
          */
-        public POSSettingsResponse getPOSSettings(String organizationId) {
-                POSSetting setting = posSettingRepository.findByOrganizationId(organizationId)
+        public POSSetting getPOSSettings(String organizationId) {
+                return posSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "POS settings not found for organization: " + organizationId));
-
-                return mapToResponse(setting);
         }
 
         /**
          * Update POS settings
          */
-        public POSSettingsResponse updatePOSSettings(String organizationId, POSSettingsRequest request, String userId) {
+        public POSSetting updatePOSSettings(String organizationId, POSSettingsRequest request, String userId) {
                 POSSetting setting = posSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "POS settings not found for organization: " + organizationId));
@@ -54,14 +51,13 @@ public class POSSettingsService {
                 setting.setShowStockLevels(request.getShowStockLevels());
                 setting.setUpdatedBy(userId);
 
-                POSSetting updatedSetting = posSettingRepository.save(setting);
-                return mapToResponse(updatedSetting);
+                return posSettingRepository.save(setting);
         }
 
         /**
          * Reset POS settings to defaults
          */
-        public POSSettingsResponse resetToDefaults(String organizationId) {
+        public POSSetting resetToDefaults(String organizationId) {
                 POSSetting setting = posSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "POS settings not found for organization: " + organizationId));
@@ -70,8 +66,7 @@ public class POSSettingsService {
                 defaultSettings.setId(setting.getId());
                 defaultSettings.setCreatedAt(setting.getCreatedAt());
 
-                POSSetting savedSetting = posSettingRepository.save(defaultSettings);
-                return mapToResponse(savedSetting);
+                return posSettingRepository.save(defaultSettings);
         }
 
         /**
@@ -112,46 +107,9 @@ public class POSSettingsService {
                 try {
                         POSSetting defaultSettings = createDefaultPOSSettings(organizationId);
                         defaultSettings.setUpdatedBy(createdBy);
-                        POSSetting savedSettings = posSettingRepository.save(defaultSettings);
-                        return savedSettings;
+                        return posSettingRepository.save(defaultSettings);
                 } catch (Exception e) {
                         throw new BadRequestException("Failed to create default POS settings: " + e.getMessage(), e);
                 }
-        }
-
-        /**
-         * Map POSSetting entity to POSSettingsResponse DTO
-         */
-        private POSSettingsResponse mapToResponse(POSSetting setting) {
-                return POSSettingsResponse.builder()
-                                .id(setting.getId())
-                                .organizationId(setting.getOrganizationId())
-                                // Payment Settings
-                                .cashPaymentEnabled(setting.getCashPaymentEnabled())
-                                .cardPaymentEnabled(setting.getCardPaymentEnabled())
-                                .changeCalculationMethod(setting.getChangeCalculationMethod())
-                                .allowPartialPayments(setting.getAllowPartialPayments())
-                                .requireExactChange(setting.getRequireExactChange())
-                                // Receipt Settings
-                                .autoPrintReceipts(setting.getAutoPrintReceipts())
-                                .receiptTemplateHtml(setting.getReceiptTemplateHtml())
-                                .receiptHeaderTemplateHtml(setting.getReceiptHeaderTemplateHtml())
-                                .receiptFooterTemplateHtml(setting.getReceiptFooterTemplateHtml())
-                                .receiptPaperWidthMm(setting.getReceiptPaperWidthMm())
-                                // Transaction Settings
-                                .holdTransactionsEnabled(setting.getHoldTransactionsEnabled())
-                                .returnsEnabled(setting.getReturnsEnabled())
-                                .discountsEnabled(setting.getDiscountsEnabled())
-                                // Customer Settings
-                                .customerLookupEnabled(setting.getCustomerLookupEnabled())
-                                .requireCustomerInfo(setting.getRequireCustomerInfo())
-                                // Display Settings
-                                .showProductImages(setting.getShowProductImages())
-                                .showStockLevels(setting.getShowStockLevels())
-                                // Audit Fields
-                                .updatedBy(setting.getUpdatedBy())
-                                .createdAt(setting.getCreatedAt())
-                                .updatedAt(setting.getUpdatedAt())
-                                .build();
         }
 }

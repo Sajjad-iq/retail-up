@@ -5,7 +5,6 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
-import com.sajjadkademm.retail.settings.system.dto.SystemSettingsResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,18 +18,16 @@ public class SystemSettingsService {
         /**
          * Get system settings for an organization
          */
-        public SystemSettingsResponse getSystemSettings(String organizationId) {
-                SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
+        public SystemSetting getSystemSettings(String organizationId) {
+                return systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
-
-                return mapToResponse(setting);
         }
 
         /**
          * Update specific system settings
          */
-        public SystemSettingsResponse updateSystemSettings(String organizationId, SystemSettingsRequest request,
+        public SystemSetting updateSystemSettings(String organizationId, SystemSettingsRequest request,
                         String userId) {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
@@ -44,14 +41,14 @@ public class SystemSettingsService {
                 setting.setCurrency(request.getCurrency());
                 setting.setEmailNotificationsEnabled(request.getEmailNotificationsEnabled());
                 setting.setUpdatedBy(userId);
-                SystemSetting updatedSetting = systemSettingRepository.save(setting);
-                return mapToResponse(updatedSetting);
+
+                return systemSettingRepository.save(setting);
         }
 
         /**
          * Reset system settings to defaults
          */
-        public SystemSettingsResponse resetToDefaults(String organizationId) {
+        public SystemSetting resetToDefaults(String organizationId) {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
@@ -60,8 +57,7 @@ public class SystemSettingsService {
                 defaultSettings.setId(setting.getId());
                 defaultSettings.setCreatedAt(setting.getCreatedAt());
 
-                SystemSetting savedSetting = systemSettingRepository.save(defaultSettings);
-                return mapToResponse(savedSetting);
+                return systemSettingRepository.save(defaultSettings);
         }
 
         /**
@@ -90,34 +86,9 @@ public class SystemSettingsService {
                 try {
                         SystemSetting defaultSettings = createDefaultSystemSettings(organizationId);
                         defaultSettings.setUpdatedBy(createdBy);
-                        SystemSetting savedSettings = systemSettingRepository.save(defaultSettings);
-                        return savedSettings;
+                        return systemSettingRepository.save(defaultSettings);
                 } catch (Exception e) {
                         throw new BadRequestException("Failed to create default system settings: " + e.getMessage(), e);
                 }
-        }
-
-        /**
-         * Map SystemSetting entity to SystemSettingsResponse DTO
-         */
-        private SystemSettingsResponse mapToResponse(SystemSetting setting) {
-                return SystemSettingsResponse.builder()
-                                .id(setting.getId())
-                                .organizationId(setting.getOrganizationId())
-                                .twoFactorAuthEnabled(setting.getTwoFactorAuthEnabled())
-                                // Backup Settings
-                                .autoBackupEnabled(setting.getAutoBackupEnabled())
-                                .backupRetentionDays(setting.getBackupRetentionDays())
-                                // General Settings
-                                .timezone(setting.getTimezone())
-                                .language(setting.getLanguage())
-                                .currency(setting.getCurrency())
-                                // Notification Settings
-                                .emailNotificationsEnabled(setting.getEmailNotificationsEnabled())
-                                // Audit Fields
-                                .updatedBy(setting.getUpdatedBy())
-                                .createdAt(setting.getCreatedAt())
-                                .updatedAt(setting.getUpdatedAt())
-                                .build();
         }
 }

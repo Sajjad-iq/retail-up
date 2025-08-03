@@ -2,7 +2,6 @@ package com.sajjadkademm.retail.organizations;
 
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
-import com.sajjadkademm.retail.organizations.dto.OrganizationResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,30 +42,34 @@ public class OrganizationController {
      */
     @Operation(summary = "Create Organization", description = "Create a new organization with the provided details", operationId = "createOrganization")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Organization created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrganizationResponse.class), examples = @ExampleObject(name = "Created Organization", value = """
+            @ApiResponse(responseCode = "200", description = "Organization created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class), examples = @ExampleObject(name = "Created Organization", value = """
                     {
                         "id": "org123",
                         "name": "Acme Corporation",
                         "domain": "acme.com",
-                        "status": "ACTIVE",
+                        "description": "A leading retail company specializing in electronics and home appliances",
+                        "address": "123 Business Street, New York, NY 10001",
+                        "phone": "+1-555-123-4567",
                         "createdAt": "2024-12-19T10:30:00",
-                        "updatedAt": "2024-12-19T10:30:00"
+                        "updatedAt": "2024-12-19T10:30:00",
+                        "createdBy": "user123"
                     }
                     """))),
             @ApiResponse(responseCode = "400", description = "Bad request - validation errors", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))),
             @ApiResponse(responseCode = "409", description = "Conflict - organization with same domain already exists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @PostMapping
-    public ResponseEntity<OrganizationResponse> createOrganization(
+    public ResponseEntity<Organization> createOrganization(
             @Parameter(description = "Organization creation request", required = true, content = @Content(schema = @Schema(implementation = CreateOrganizationRequest.class), examples = @ExampleObject(name = "Create Organization Request", value = """
                     {
                         "name": "Acme Corporation",
                         "domain": "acme.com",
-                        "description": "A leading retail company"
+                        "description": "A leading retail company specializing in electronics and home appliances",
+                        "address": "123 Business Street, New York, NY 10001",
+                        "phone": "+1-555-123-4567"
                     }
-                    """))) @Valid @RequestBody CreateOrganizationRequest request,
-            @Parameter(description = "User ID creating the organization", example = "user123") @RequestHeader(value = "User-ID", required = false) String userId) {
-        OrganizationResponse response = organizationService.createOrganization(request, userId);
+                    """))) @Valid @RequestBody CreateOrganizationRequest request) {
+        Organization response = organizationService.createOrganization(request);
         return ResponseEntity.ok(response);
     }
 
@@ -75,29 +78,33 @@ public class OrganizationController {
      */
     @Operation(summary = "Update Organization", description = "Update an existing organization's information", operationId = "updateOrganization")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Organization updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrganizationResponse.class), examples = @ExampleObject(name = "Updated Organization", value = """
+            @ApiResponse(responseCode = "200", description = "Organization updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class), examples = @ExampleObject(name = "Updated Organization", value = """
                     {
                         "id": "org123",
                         "name": "Acme Corporation Updated",
                         "domain": "acme.com",
-                        "status": "ACTIVE",
+                        "description": "Updated description for the leading retail company",
+                        "address": "456 Updated Business Ave, New York, NY 10002",
+                        "phone": "+1-555-123-4567",
                         "createdAt": "2024-12-19T10:30:00",
-                        "updatedAt": "2024-12-19T11:30:00"
+                        "updatedAt": "2024-12-19T11:30:00",
+                        "createdBy": "user123"
                     }
                     """))),
             @ApiResponse(responseCode = "404", description = "Organization not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))),
             @ApiResponse(responseCode = "400", description = "Bad request - validation errors", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @PutMapping("/{id}")
-    public ResponseEntity<OrganizationResponse> updateOrganization(
+    public ResponseEntity<Organization> updateOrganization(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String id,
             @Parameter(description = "Organization update request", required = true, content = @Content(schema = @Schema(implementation = UpdateOrganizationRequest.class), examples = @ExampleObject(name = "Update Organization Request", value = """
                     {
                         "name": "Acme Corporation Updated",
-                        "description": "Updated description"
+                        "description": "Updated description for the leading retail company",
+                        "address": "456 Updated Business Ave, New York, NY 10002"
                     }
                     """))) @Valid @RequestBody UpdateOrganizationRequest request) {
-        OrganizationResponse response = organizationService.updateOrganization(id, request);
+        Organization response = organizationService.updateOrganization(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -106,22 +113,25 @@ public class OrganizationController {
      */
     @Operation(summary = "Get Organization by ID", description = "Retrieve organization details by its unique identifier", operationId = "getOrganizationById")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Organization found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrganizationResponse.class), examples = @ExampleObject(name = "Organization Details", value = """
+            @ApiResponse(responseCode = "200", description = "Organization found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class), examples = @ExampleObject(name = "Organization Details", value = """
                     {
                         "id": "org123",
                         "name": "Acme Corporation",
                         "domain": "acme.com",
-                        "status": "ACTIVE",
+                        "description": "A leading retail company specializing in electronics and home appliances",
+                        "address": "123 Business Street, New York, NY 10001",
+                        "phone": "+1-555-123-4567",
                         "createdAt": "2024-12-19T10:30:00",
-                        "updatedAt": "2024-12-19T10:30:00"
+                        "updatedAt": "2024-12-19T10:30:00",
+                        "createdBy": "user123"
                     }
                     """))),
             @ApiResponse(responseCode = "404", description = "Organization not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<OrganizationResponse> getOrganizationById(
+    public ResponseEntity<Organization> getOrganizationById(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String id) {
-        OrganizationResponse response = organizationService.getOrganizationById(id);
+        Organization response = organizationService.getOrganizationById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -130,30 +140,36 @@ public class OrganizationController {
      */
     @Operation(summary = "Get All Organizations", description = "Retrieve a list of all organizations", operationId = "getAllOrganizations")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of organizations retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrganizationResponse.class, type = "array"), examples = @ExampleObject(name = "Organizations List", value = """
+            @ApiResponse(responseCode = "200", description = "List of organizations retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class, type = "array"), examples = @ExampleObject(name = "Organizations List", value = """
                     [
                         {
                             "id": "org123",
                             "name": "Acme Corporation",
                             "domain": "acme.com",
-                            "status": "ACTIVE",
+                            "description": "A leading retail company",
+                            "address": "123 Business Street, New York, NY 10001",
+                            "phone": "+1-555-123-4567",
                             "createdAt": "2024-12-19T10:30:00",
-                            "updatedAt": "2024-12-19T10:30:00"
+                            "updatedAt": "2024-12-19T10:30:00",
+                            "createdBy": "user123"
                         },
                         {
                             "id": "org456",
                             "name": "Tech Solutions",
                             "domain": "techsolutions.com",
-                            "status": "ACTIVE",
+                            "description": "Technology solutions provider",
+                            "address": "789 Tech Blvd, San Francisco, CA 94102",
+                            "phone": "+1-555-987-6543",
                             "createdAt": "2024-12-19T11:30:00",
-                            "updatedAt": "2024-12-19T11:30:00"
+                            "updatedAt": "2024-12-19T11:30:00",
+                            "createdBy": "user456"
                         }
                     ]
                     """)))
     })
     @GetMapping
-    public ResponseEntity<List<OrganizationResponse>> getAllOrganizations() {
-        List<OrganizationResponse> response = organizationService.getAllOrganizations();
+    public ResponseEntity<List<Organization>> getAllOrganizations() {
+        List<Organization> response = organizationService.getAllOrganizations();
         return ResponseEntity.ok(response);
     }
 
@@ -162,23 +178,26 @@ public class OrganizationController {
      */
     @Operation(summary = "Search Organizations", description = "Search organizations by name or domain", operationId = "searchOrganizations")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrganizationResponse.class, type = "array"), examples = @ExampleObject(name = "Search Results", value = """
+            @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class, type = "array"), examples = @ExampleObject(name = "Search Results", value = """
                     [
                         {
                             "id": "org123",
                             "name": "Acme Corporation",
                             "domain": "acme.com",
-                            "status": "ACTIVE",
+                            "description": "A leading retail company",
+                            "address": "123 Business Street, New York, NY 10001",
+                            "phone": "+1-555-123-4567",
                             "createdAt": "2024-12-19T10:30:00",
-                            "updatedAt": "2024-12-19T10:30:00"
+                            "updatedAt": "2024-12-19T10:30:00",
+                            "createdBy": "user123"
                         }
                     ]
                     """)))
     })
     @GetMapping("/search")
-    public ResponseEntity<List<OrganizationResponse>> searchOrganizations(
+    public ResponseEntity<List<Organization>> searchOrganizations(
             @Parameter(description = "Search query for organization name or domain", required = true, example = "acme") @RequestParam String q) {
-        List<OrganizationResponse> response = organizationService.searchOrganizations(q);
+        List<Organization> response = organizationService.searchOrganizations(q);
         return ResponseEntity.ok(response);
     }
 

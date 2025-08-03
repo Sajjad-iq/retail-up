@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.settings.system.controller;
 
 import com.sajjadkademm.retail.auth.JwtUtil;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
-import com.sajjadkademm.retail.settings.system.dto.SystemSettingsResponse;
+import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 
 import lombok.RequiredArgsConstructor;
@@ -46,15 +46,13 @@ public class SystemSettingsController {
      */
     @Operation(summary = "Get System Settings", description = "Retrieve system settings for a specific organization", operationId = "getSystemSettings")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "System settings retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SystemSettingsResponse.class), examples = @ExampleObject(name = "System Settings", value = """
+            @ApiResponse(responseCode = "200", description = "System settings retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SystemSetting.class), examples = @ExampleObject(name = "System Settings", value = """
                     {
                         "id": "sys123",
                         "organizationId": "org123",
                         "twoFactorAuthEnabled": true,
                         "autoBackupEnabled": true,
                         "backupRetentionDays": 30,
-                        "backupFrequencyHours": 24,
-                        "backupCompressionEnabled": true,
                         "timezone": "America/New_York",
                         "language": "en",
                         "currency": "USD",
@@ -67,9 +65,9 @@ public class SystemSettingsController {
             @ApiResponse(responseCode = "404", description = "System settings not found for organization", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @GetMapping("/{organizationId}")
-    public ResponseEntity<SystemSettingsResponse> getSystemSettings(
+    public ResponseEntity<SystemSetting> getSystemSettings(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        SystemSettingsResponse response = systemSettingsService.getSystemSettings(organizationId);
+        SystemSetting response = systemSettingsService.getSystemSettings(organizationId);
         return ResponseEntity.ok(response);
     }
 
@@ -78,15 +76,13 @@ public class SystemSettingsController {
      */
     @Operation(summary = "Update System Settings", description = "Update system settings for a specific organization", operationId = "updateSystemSettings", security = @SecurityRequirement(name = "Bearer Authentication"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "System settings updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SystemSettingsResponse.class), examples = @ExampleObject(name = "Updated System Settings", value = """
+            @ApiResponse(responseCode = "200", description = "System settings updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SystemSetting.class), examples = @ExampleObject(name = "Updated System Settings", value = """
                     {
                         "id": "sys123",
                         "organizationId": "org123",
                         "twoFactorAuthEnabled": false,
                         "autoBackupEnabled": true,
                         "backupRetentionDays": 60,
-                        "backupFrequencyHours": 12,
-                        "backupCompressionEnabled": true,
                         "timezone": "Europe/London",
                         "language": "en",
                         "currency": "EUR",
@@ -101,7 +97,7 @@ public class SystemSettingsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @PutMapping("/{organizationId}")
-    public ResponseEntity<SystemSettingsResponse> updateSystemSettings(
+    public ResponseEntity<SystemSetting> updateSystemSettings(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
             @Parameter(description = "System settings update request", required = true, content = @Content(schema = @Schema(implementation = SystemSettingsRequest.class), examples = @ExampleObject(name = "Update System Settings Request", value = """
                     {
@@ -126,7 +122,7 @@ public class SystemSettingsController {
             userId = jwtUtil.extractUserId(token);
         }
 
-        SystemSettingsResponse response = systemSettingsService.updateSystemSettings(organizationId, request, userId);
+        SystemSetting response = systemSettingsService.updateSystemSettings(organizationId, request, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -135,15 +131,13 @@ public class SystemSettingsController {
      */
     @Operation(summary = "Reset System Settings to Defaults", description = "Reset system settings to default values for a specific organization", operationId = "resetSystemSettingsToDefaults", security = @SecurityRequirement(name = "Bearer Authentication"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "System settings reset to defaults successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SystemSettingsResponse.class), examples = @ExampleObject(name = "Reset System Settings", value = """
+            @ApiResponse(responseCode = "200", description = "System settings reset to defaults successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SystemSetting.class), examples = @ExampleObject(name = "Reset System Settings", value = """
                     {
                         "id": "sys123",
                         "organizationId": "org123",
                         "twoFactorAuthEnabled": true,
                         "autoBackupEnabled": true,
                         "backupRetentionDays": 30,
-                        "backupFrequencyHours": 24,
-                        "backupCompressionEnabled": true,
                         "timezone": "UTC",
                         "language": "en",
                         "currency": "USD",
@@ -157,9 +151,9 @@ public class SystemSettingsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class)))
     })
     @PostMapping("/{organizationId}/reset")
-    public ResponseEntity<SystemSettingsResponse> resetSystemSettingsToDefaults(
+    public ResponseEntity<SystemSetting> resetSystemSettingsToDefaults(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        SystemSettingsResponse response = systemSettingsService.resetToDefaults(organizationId);
+        SystemSetting response = systemSettingsService.resetToDefaults(organizationId);
         return ResponseEntity.ok(response);
     }
 }
