@@ -150,8 +150,6 @@ public class OrganizationService {
                 .description(organization.getDescription())
                 .address(organization.getAddress())
                 .phone(organization.getPhone())
-                .createdAt(organization.getCreatedAt())
-                .updatedAt(organization.getUpdatedAt())
                 .createdBy(organization.getCreatedBy())
                 .build();
     }
