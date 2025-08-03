@@ -3,6 +3,7 @@ package com.sajjadkademm.retail.auth;
 import com.sajjadkademm.retail.auth.dto.LoginRequest;
 import com.sajjadkademm.retail.auth.dto.LoginResponse;
 import com.sajjadkademm.retail.auth.dto.RegisterRequest;
+import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
@@ -10,6 +11,8 @@ import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.users.dto.AccountType;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -58,15 +61,12 @@ public class AuthService {
         userRepository.save(user);
 
         // Generate JWT token
-        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getName());
-
-        log.info("Login successful for user: {}", user.getEmail());
+        String token = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName());
 
         return LoginResponse.builder()
                 .token(token)
                 .userId(user.getId())
                 .name(user.getName())
-                .email(user.getEmail())
                 .phone(user.getPhone())
                 .message("Login successful")
                 .build();
@@ -77,11 +77,6 @@ public class AuthService {
      */
     public LoginResponse register(RegisterRequest request) {
 
-        // Check if email already exists
-        if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("Email already exists: " + request.getEmail());
-        }
-
         // Check if phone already exists
         if (userRepository.existsByPhone(request.getPhone())) {
             throw new ConflictException("Phone number already exists: " + request.getPhone());
@@ -90,23 +85,22 @@ public class AuthService {
         // Create new user
         User newUser = User.builder()
                 .name(request.getName())
-                .email(request.getEmail())
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .status(UserStatus.ACTIVE)
+                .accountType(AccountType.USER)
                 .build();
 
         // Save user using UserService
         User savedUser = userService.createUser(newUser);
 
         // Generate JWT token
-        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getName());
+        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getPhone(), savedUser.getName());
 
         return LoginResponse.builder()
                 .token(token)
                 .userId(savedUser.getId())
                 .name(savedUser.getName())
-                .email(savedUser.getEmail())
                 .phone(savedUser.getPhone())
                 .message("Registration successful")
                 .build();

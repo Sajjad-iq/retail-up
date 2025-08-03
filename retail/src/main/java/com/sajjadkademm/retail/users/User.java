@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
 
 import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.users.dto.AccountType;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
@@ -40,14 +41,13 @@ public class User {
     @NotBlank(message = "Name is required")
     private String name;
 
-    @Column(name = "email", nullable = true, unique = true)
+    @Column(name = "phone", nullable = true, unique = true)
+    @Size(min = 10, max = 20)
+    private String phone;
+
+    @Column(name = "email", nullable = true)
     @Email(message = "Invalid email address")
     private String email;
-
-    @Column(name = "phone", nullable = false, unique = true)
-    @NotBlank(message = "Phone is required")
-    @Size(min = 10, max = 15, message = "Phone must be between 10 and 15 digits")
-    private String phone;
 
     @Column(name = "password", nullable = false)
     @NotBlank(message = "Password is required")
@@ -57,6 +57,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Status is required")
     private UserStatus status;
+
+    @Column(name = "account_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Account type is required")
+    private AccountType accountType;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = true)

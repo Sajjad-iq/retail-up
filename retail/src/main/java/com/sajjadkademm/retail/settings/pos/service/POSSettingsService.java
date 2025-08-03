@@ -6,7 +6,7 @@ import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
 import com.sajjadkademm.retail.settings.pos.repository.POSSettingRepository;
 import com.sajjadkademm.retail.settings.pos.dto.POSSettingsRequest;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.users.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class POSSettingsService {
 
         private final POSSettingRepository posSettingRepository;
-        private final UserService userService;
+        private final UserRepository userRepository;
 
         /**
          * Get POS settings for an organization
@@ -35,8 +35,9 @@ public class POSSettingsService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "POS settings not found for organization: " + organizationId));
 
-                // Validate that the user exists
-                User user = userService.getUserById(request.getUserId());
+                User user = userRepository.findById(request.getUserId())
+                                .orElseThrow(() -> new NotFoundException(
+                                                "User not found with ID: " + request.getUserId()));
 
                 setting.setCashPaymentEnabled(request.getCashPaymentEnabled());
                 setting.setCardPaymentEnabled(request.getCardPaymentEnabled());

@@ -40,7 +40,6 @@ public class UserService {
 
         User user = optionalUser.get();
         user.setName(userDetails.getName());
-        user.setEmail(userDetails.getEmail());
         user.setPassword(userDetails.getPassword());
         user.setPhone(userDetails.getPhone());
         user.setStatus(userDetails.getStatus());

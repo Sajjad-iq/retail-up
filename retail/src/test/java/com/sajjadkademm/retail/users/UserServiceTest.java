@@ -35,7 +35,6 @@ class UserServiceTest {
         testUser = User.builder()
                 .id("user-123")
                 .name("Test User")
-                .email("test@example.com")
                 .phone("1234567890")
                 .password("encoded-password")
                 .status(UserStatus.ACTIVE)
@@ -46,7 +45,6 @@ class UserServiceTest {
         updatedUser = User.builder()
                 .id("user-123")
                 .name("Updated User")
-                .email("updated@example.com")
                 .phone("9876543210")
                 .password("new-encoded-password")
                 .status(UserStatus.INACTIVE)
@@ -99,7 +97,6 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals("user-123", result.getId());
         assertEquals("Test User", result.getName());
-        assertEquals("test@example.com", result.getEmail());
         assertEquals("1234567890", result.getPhone());
         assertEquals(UserStatus.ACTIVE, result.getStatus());
         verify(userRepository).findById("user-123");
@@ -120,7 +117,6 @@ class UserServiceTest {
         // Given
         User newUser = User.builder()
                 .name("New User")
-                .email("new@example.com")
                 .phone("5555555555")
                 .password("password123")
                 .status(UserStatus.ACTIVE)
@@ -151,7 +147,6 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals("user-123", result.getId());
         assertEquals("Updated User", result.getName());
-        assertEquals("updated@example.com", result.getEmail());
         assertEquals("9876543210", result.getPhone());
         assertEquals(UserStatus.INACTIVE, result.getStatus());
 
@@ -177,7 +172,6 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User savedUser = invocation.getArgument(0);
             assertEquals("Updated User", savedUser.getName());
-            assertEquals("updated@example.com", savedUser.getEmail());
             assertEquals("9876543210", savedUser.getPhone());
             assertEquals("new-encoded-password", savedUser.getPassword());
             assertEquals(UserStatus.INACTIVE, savedUser.getStatus());
