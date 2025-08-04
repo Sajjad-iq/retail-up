@@ -57,7 +57,6 @@ public class InventorySettingsController {
                                             "expiryAlertDays": 30,
                                             "batchTrackingEnabled": true,
                                             "expiryDateTrackingEnabled": true,
-                                            "updatedBy": "user123",
                                             "createdAt": "2024-12-19T10:30:00",
                                             "updatedAt": "2024-12-19T10:30:00"
                                         }
@@ -91,7 +90,6 @@ public class InventorySettingsController {
                                             "expiryAlertDays": 14,
                                             "batchTrackingEnabled": false,
                                             "expiryDateTrackingEnabled": true,
-                                            "updatedBy": "user123",
                                             "createdAt": "2024-12-19T10:30:00",
                                             "updatedAt": "2024-12-19T11:30:00"
                                         }
@@ -105,7 +103,6 @@ public class InventorySettingsController {
                         @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
                         @Parameter(description = "Inventory settings update request", required = true, content = @Content(schema = @Schema(implementation = InventorySettingsRequest.class), examples = @ExampleObject(name = "Update Inventory Settings Request", value = """
                                         {
-                                            "userId": "user123",
                                             "negativeStockAllowed": true,
                                             "barcodeRequired": false,
                                             "skuRequired": true,
@@ -144,7 +141,6 @@ public class InventorySettingsController {
                                             "expiryAlertDays": 30,
                                             "batchTrackingEnabled": true,
                                             "expiryDateTrackingEnabled": true,
-                                            "updatedBy": "user123",
                                             "createdAt": "2024-12-19T10:30:00",
                                             "updatedAt": "2024-12-19T12:30:00"
                                         }

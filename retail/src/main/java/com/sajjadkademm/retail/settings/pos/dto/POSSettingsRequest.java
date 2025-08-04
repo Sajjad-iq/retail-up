@@ -16,11 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class POSSettingsRequest {
 
-    @NotBlank(message = "User ID is required")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "User ID must contain only alphanumeric characters, hyphens, and underscores")
-    @Size(min = 1, max = 50, message = "User ID must be between 1 and 50 characters")
-    private String userId;
-
     // Payment Settings
     @NotNull(message = "Cash payment enabled is required")
     private Boolean cashPaymentEnabled;

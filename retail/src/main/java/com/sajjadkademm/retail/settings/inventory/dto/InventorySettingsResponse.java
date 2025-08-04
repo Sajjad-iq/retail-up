@@ -34,7 +34,6 @@ public class InventorySettingsResponse {
     private Boolean expiryDateTrackingEnabled;
 
     // Audit Fields
-    private String updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

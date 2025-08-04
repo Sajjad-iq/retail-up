@@ -5,8 +5,6 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
-import com.sajjadkademm.retail.users.UserRepository;
-import com.sajjadkademm.retail.users.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 public class SystemSettingsService {
 
         private final SystemSettingRepository systemSettingRepository;
-        private final UserRepository userRepository;
 
         /**
          * Get system settings for an organization
@@ -36,10 +33,6 @@ public class SystemSettingsService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
 
-                User user = userRepository.findById(request.getUserId())
-                                .orElseThrow(() -> new NotFoundException(
-                                                "User not found with ID: " + request.getUserId()));
-
                 setting.setTwoFactorAuthEnabled(request.getTwoFactorAuthEnabled());
                 setting.setAutoBackupEnabled(request.getAutoBackupEnabled());
                 setting.setBackupRetentionDays(request.getBackupRetentionDays());
@@ -47,7 +40,6 @@ public class SystemSettingsService {
                 setting.setLanguage(request.getLanguage());
                 setting.setCurrency(request.getCurrency());
                 setting.setEmailNotificationsEnabled(request.getEmailNotificationsEnabled());
-                setting.setUpdatedBy(user.getId());
 
                 return systemSettingRepository.save(setting);
         }
@@ -92,7 +84,6 @@ public class SystemSettingsService {
         public SystemSetting createAndSaveDefaultSystemSettings(String organizationId, String createdBy) {
                 try {
                         SystemSetting defaultSettings = createDefaultSystemSettings(organizationId);
-                        defaultSettings.setUpdatedBy(createdBy);
                         return systemSettingRepository.save(defaultSettings);
                 } catch (Exception e) {
                         throw new BadRequestException("Failed to create default system settings: " + e.getMessage(), e);

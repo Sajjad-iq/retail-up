@@ -5,8 +5,6 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.inventory.entity.InventorySetting;
 import com.sajjadkademm.retail.settings.inventory.repository.InventorySettingRepository;
 import com.sajjadkademm.retail.settings.inventory.dto.InventorySettingsRequest;
-import com.sajjadkademm.retail.users.UserRepository;
-import com.sajjadkademm.retail.users.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 public class InventorySettingsService {
 
         private final InventorySettingRepository inventorySettingRepository;
-        private final UserRepository userRepository;
 
         /**
          * Get inventory settings for an organization
@@ -37,11 +34,7 @@ public class InventorySettingsService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "Inventory settings not found for organization: " + organizationId));
 
-                User user = userRepository.findById(request.getUserId())
-                                .orElseThrow(() -> new NotFoundException(
-                                                "User not found with ID: " + request.getUserId()));
-
-                updateInventorySetting(setting, request, user.getId());
+                updateInventorySetting(setting, request);
                 return inventorySettingRepository.save(setting);
         }
 
@@ -89,7 +82,6 @@ public class InventorySettingsService {
         public InventorySetting createAndSaveDefaultInventorySettings(String organizationId, String createdBy) {
                 try {
                         InventorySetting defaultSettings = createDefaultInventorySettings(organizationId);
-                        defaultSettings.setUpdatedBy(createdBy);
                         return inventorySettingRepository.save(defaultSettings);
                 } catch (Exception e) {
                         throw new BadRequestException("Failed to create default inventory settings: " + e.getMessage(),
@@ -100,7 +92,7 @@ public class InventorySettingsService {
         /**
          * Update inventory setting with request data
          */
-        private void updateInventorySetting(InventorySetting setting, InventorySettingsRequest request, String userId) {
+        private void updateInventorySetting(InventorySetting setting, InventorySettingsRequest request) {
                 // Stock Management Settings
                 setting.setNegativeStockAllowed(request.getNegativeStockAllowed());
                 setting.setBarcodeRequired(request.getBarcodeRequired());
@@ -117,8 +109,5 @@ public class InventorySettingsService {
                 // Tracking Settings
                 setting.setBatchTrackingEnabled(request.getBatchTrackingEnabled());
                 setting.setExpiryDateTrackingEnabled(request.getExpiryDateTrackingEnabled());
-
-                // Audit Fields
-                setting.setUpdatedBy(request.getUpdatedBy() != null ? request.getUpdatedBy() : userId);
         }
 }

@@ -38,7 +38,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class POSSettingsController {
 
     private final POSSettingsService posSettingsService;
-    private final JwtUtil jwtUtil;
 
     /**
      * Get POS settings for an organization
@@ -66,7 +65,6 @@ public class POSSettingsController {
                         "requireCustomerInfo": false,
                         "showProductImages": true,
                         "showStockLevels": true,
-                        "updatedBy": "user123",
                         "createdAt": "2024-12-19T10:30:00",
                         "updatedAt": "2024-12-19T10:30:00"
                     }
@@ -106,7 +104,6 @@ public class POSSettingsController {
                         "requireCustomerInfo": true,
                         "showProductImages": false,
                         "showStockLevels": true,
-                        "updatedBy": "user123",
                         "createdAt": "2024-12-19T10:30:00",
                         "updatedAt": "2024-12-19T11:30:00"
                     }
@@ -120,7 +117,6 @@ public class POSSettingsController {
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
             @Parameter(description = "POS settings update request", required = true, content = @Content(schema = @Schema(implementation = POSSettingsRequest.class), examples = @ExampleObject(name = "Update POS Settings Request", value = """
                     {
-                        "userId": "user123",
                         "cashPaymentEnabled": true,
                         "cardPaymentEnabled": true,
                         "changeCalculationMethod": "manual",
@@ -171,7 +167,6 @@ public class POSSettingsController {
                         "requireCustomerInfo": false,
                         "showProductImages": true,
                         "showStockLevels": true,
-                        "updatedBy": "user123",
                         "createdAt": "2024-12-19T10:30:00",
                         "updatedAt": "2024-12-19T12:30:00"
                     }

@@ -5,8 +5,6 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
 import com.sajjadkademm.retail.settings.pos.repository.POSSettingRepository;
 import com.sajjadkademm.retail.settings.pos.dto.POSSettingsRequest;
-import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class POSSettingsService {
 
         private final POSSettingRepository posSettingRepository;
-        private final UserRepository userRepository;
 
         /**
          * Get POS settings for an organization
@@ -35,10 +32,6 @@ public class POSSettingsService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "POS settings not found for organization: " + organizationId));
 
-                User user = userRepository.findById(request.getUserId())
-                                .orElseThrow(() -> new NotFoundException(
-                                                "User not found with ID: " + request.getUserId()));
-
                 setting.setCashPaymentEnabled(request.getCashPaymentEnabled());
                 setting.setCardPaymentEnabled(request.getCardPaymentEnabled());
                 setting.setChangeCalculationMethod(request.getChangeCalculationMethod());
@@ -56,7 +49,6 @@ public class POSSettingsService {
                 setting.setRequireCustomerInfo(request.getRequireCustomerInfo());
                 setting.setShowProductImages(request.getShowProductImages());
                 setting.setShowStockLevels(request.getShowStockLevels());
-                setting.setUpdatedBy(user.getId());
 
                 return posSettingRepository.save(setting);
         }
@@ -113,7 +105,6 @@ public class POSSettingsService {
         public POSSetting createAndSaveDefaultPOSSettings(String organizationId, String createdBy) {
                 try {
                         POSSetting defaultSettings = createDefaultPOSSettings(organizationId);
-                        defaultSettings.setUpdatedBy(createdBy);
                         return posSettingRepository.save(defaultSettings);
                 } catch (Exception e) {
                         throw new BadRequestException("Failed to create default POS settings: " + e.getMessage(), e);

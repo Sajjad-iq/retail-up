@@ -65,9 +65,6 @@ public class SystemSetting {
     private Boolean emailNotificationsEnabled = true;
 
     // Audit Fields
-    @Column(name = "updated_by", nullable = true)
-    private String updatedBy;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

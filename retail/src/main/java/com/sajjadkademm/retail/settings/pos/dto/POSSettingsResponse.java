@@ -44,7 +44,6 @@ public class POSSettingsResponse {
     private Boolean showStockLevels;
 
     // Audit Fields
-    private String updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

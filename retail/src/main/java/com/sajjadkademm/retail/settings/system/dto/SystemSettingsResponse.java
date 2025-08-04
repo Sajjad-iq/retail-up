@@ -33,7 +33,6 @@ public class SystemSettingsResponse {
     private Boolean emailNotificationsEnabled;
 
     // Audit Fields
-    private String updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
