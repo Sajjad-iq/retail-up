@@ -3,7 +3,6 @@ package com.sajjadkademm.retail.auth;
 import com.sajjadkademm.retail.auth.dto.LoginRequest;
 import com.sajjadkademm.retail.auth.dto.LoginResponse;
 import com.sajjadkademm.retail.auth.dto.RegisterRequest;
-import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
@@ -78,8 +77,13 @@ public class AuthService {
     public LoginResponse register(RegisterRequest request) {
 
         // Check if phone already exists
-        if (userRepository.existsByPhone(request.getPhone())) {
-            throw new ConflictException("Phone number already exists: " + request.getPhone());
+        if (userRepository.existsByPhone(request.getPhone()) || request.getPhone().isEmpty()) {
+            throw new ConflictException("Phone number already exists or is empty: " + request.getPhone());
+        }
+
+        // Check if email already exists
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("Email already exists: " + request.getEmail());
         }
 
         // Create new user
