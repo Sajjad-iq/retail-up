@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 
 import com.sajjadkademm.retail.organizations.Organization;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,26 +44,34 @@ public class SystemSetting {
     private String organizationId;
 
     @Column(name = "two_factor_auth_enabled", nullable = false)
+    @NotNull(message = "Two factor auth enabled is required")
     private Boolean twoFactorAuthEnabled = false;
     // Backup Settings
     @Column(name = "auto_backup_enabled", nullable = false)
+    @NotNull(message = "Auto backup enabled is required")
     private Boolean autoBackupEnabled = true;
 
     @Column(name = "backup_retention_days", nullable = false)
+    @Min(value = 1, message = "Backup retention days must be at least 1")
+    @Max(value = 365, message = "Backup retention days cannot exceed 365")
     private Integer backupRetentionDays = 30;
 
     // General Settings
     @Column(name = "timezone", nullable = false)
+    @NotNull(message = "Timezone is required")
     private String timezone = "UTC";
 
     @Column(name = "language", nullable = false)
+    @NotNull(message = "Language is required")
     private String language = "en";
 
     @Column(name = "currency", nullable = false)
+    @NotNull(message = "Currency is required")
     private String currency = "USD";
 
     // Notification Settings
     @Column(name = "email_notifications_enabled", nullable = false)
+    @NotNull(message = "Email notifications enabled is required")
     private Boolean emailNotificationsEnabled = true;
 
     // Audit Fields

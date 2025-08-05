@@ -67,7 +67,6 @@ public class InventoryItemService {
             InventoryItem item = InventoryItem.builder()
                     .name(request.getName())
                     .description(request.getDescription())
-                    .sku(request.getSku())
                     .barcode(request.getBarcode())
                     .category(request.getCategory())
                     .brand(request.getBrand())

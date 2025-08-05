@@ -84,12 +84,12 @@ public class InventoryItem {
     @Column(name = "current_stock", nullable = false)
     @NotNull
     @Min(value = 0, message = "Current stock cannot be negative")
-    private Integer currentStock = 0;
+    private Integer currentStock;
 
     @Column(name = "minimum_stock", nullable = false)
     @NotNull
     @Min(value = 0, message = "Minimum stock cannot be negative")
-    private Integer minimumStock = 0;
+    private Integer minimumStock;
 
     @Column(name = "maximum_stock")
     @Min(value = 0, message = "Maximum stock cannot be negative")
@@ -106,7 +106,7 @@ public class InventoryItem {
 
     @Column(name = "is_active", nullable = false)
     @NotNull
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     @Column(name = "inventory_id", nullable = false)
     @NotNull(message = "Inventory ID is required")

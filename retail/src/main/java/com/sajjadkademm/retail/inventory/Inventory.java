@@ -62,7 +62,7 @@ public class Inventory {
 
     @Column(name = "is_active", nullable = false)
     @NotNull
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     @Column(name = "organization_id", nullable = false)
     @NotNull(message = "Organization ID is required")

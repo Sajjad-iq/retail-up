@@ -1,5 +1,6 @@
-package com.sajjadkademm.retail.auth;
+package com.sajjadkademm.retail.config.filters;
 
+import com.sajjadkademm.retail.config.utils.JwtUtil;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import jakarta.servlet.FilterChain;

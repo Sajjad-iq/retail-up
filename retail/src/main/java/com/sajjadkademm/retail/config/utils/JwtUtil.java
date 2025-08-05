@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.auth;
+package com.sajjadkademm.retail.config.utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

@@ -3,6 +3,7 @@ package com.sajjadkademm.retail.auth;
 import com.sajjadkademm.retail.auth.dto.LoginRequest;
 import com.sajjadkademm.retail.auth.dto.LoginResponse;
 import com.sajjadkademm.retail.auth.dto.RegisterRequest;
+import com.sajjadkademm.retail.config.utils.JwtUtil;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;

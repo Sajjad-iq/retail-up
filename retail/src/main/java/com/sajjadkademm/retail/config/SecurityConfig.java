@@ -1,6 +1,5 @@
 package com.sajjadkademm.retail.config;
 
-import com.sajjadkademm.retail.auth.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +11,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.sajjadkademm.retail.config.filters.JwtAuthenticationFilter;
 
 import java.util.Arrays;
 import java.util.List;
