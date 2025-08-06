@@ -1,16 +1,19 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
+import java.util.Map;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -139,76 +142,89 @@ public class InventoryItemController {
         }
 
         /**
-         * Get all items in an inventory endpoint
+         * Unified endpoint for getting inventory items with filtering and pagination
          */
-        @Operation(summary = "Get Items by Inventory", description = "Retrieve all items in a specific inventory", operationId = "getItemsByInventory")
-        @ApiResponse(responseCode = "200", description = "List of items retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class, type = "array")))
+        @Operation(summary = "Get Inventory Items", description = "Retrieve inventory items with comprehensive filtering, searching, and pagination support", operationId = "getInventoryItems")
+        @ApiResponse(responseCode = "200", description = "Inventory items retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PagedResponse.class)))
         @GetMapping("/inventory/{inventoryId}")
-        public ResponseEntity<List<InventoryItem>> getItemsByInventory(
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                List<InventoryItem> response = inventoryItemService.getItemsByInventory(inventoryId);
-                return ResponseEntity.ok(response);
-        }
-
-        /**
-         * Get active items in an inventory endpoint
-         */
-        @Operation(summary = "Get Active Items by Inventory", description = "Retrieve all active items in a specific inventory", operationId = "getActiveItemsByInventory")
-        @ApiResponse(responseCode = "200", description = "List of active items retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class, type = "array")))
-        @GetMapping("/inventory/{inventoryId}/active")
-        public ResponseEntity<List<InventoryItem>> getActiveItemsByInventory(
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                List<InventoryItem> response = inventoryItemService.getActiveItemsByInventory(inventoryId);
-                return ResponseEntity.ok(response);
-        }
-
-        /**
-         * Get items by category within an inventory endpoint
-         */
-        @Operation(summary = "Get Items by Category", description = "Retrieve items by category within an inventory", operationId = "getItemsByCategory")
-        @ApiResponse(responseCode = "200", description = "List of items by category retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class, type = "array")))
-        @GetMapping("/inventory/{inventoryId}/category/{category}")
-        public ResponseEntity<List<InventoryItem>> getItemsByCategory(
+        public ResponseEntity<PagedResponse<InventoryItem>> getInventoryItems(
                         @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId,
-                        @Parameter(description = "Category", required = true, example = "Electronics") @PathVariable String category) {
-                List<InventoryItem> response = inventoryItemService.getItemsByCategory(inventoryId, category);
-                return ResponseEntity.ok(response);
-        }
 
-        /**
-         * Get low stock items endpoint
-         */
-        @Operation(summary = "Get Low Stock Items", description = "Retrieve items with current stock at or below minimum stock level", operationId = "getLowStockItems")
-        @ApiResponse(responseCode = "200", description = "List of low stock items retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class, type = "array")))
-        @GetMapping("/inventory/{inventoryId}/low-stock")
-        public ResponseEntity<List<InventoryItem>> getLowStockItems(
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                List<InventoryItem> response = inventoryItemService.getLowStockItems(inventoryId);
-                return ResponseEntity.ok(response);
-        }
+                        // Pagination parameters
+                        @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (max 100)", example = "20") @RequestParam(defaultValue = "20") int size,
+                        @Parameter(description = "Sort field", example = "createdAt") @RequestParam(defaultValue = "createdAt") String sortBy,
+                        @Parameter(description = "Sort direction (asc/desc)", example = "desc") @RequestParam(defaultValue = "desc") String sortDirection,
 
-        /**
-         * Get out of stock items endpoint
-         */
-        @Operation(summary = "Get Out of Stock Items", description = "Retrieve items with zero current stock", operationId = "getOutOfStockItems")
-        @ApiResponse(responseCode = "200", description = "List of out of stock items retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class, type = "array")))
-        @GetMapping("/inventory/{inventoryId}/out-of-stock")
-        public ResponseEntity<List<InventoryItem>> getOutOfStockItems(
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                List<InventoryItem> response = inventoryItemService.getOutOfStockItems(inventoryId);
-                return ResponseEntity.ok(response);
-        }
+                        // Search parameter
+                        @Parameter(description = "Search query for item name, SKU, or barcode", example = "laptop") @RequestParam(required = false) String search,
 
-        /**
-         * Search items endpoint
-         */
-        @Operation(summary = "Search Items", description = "Search items by name, SKU, or barcode within an inventory", operationId = "searchItems")
-        @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class, type = "array")))
-        @GetMapping("/inventory/{inventoryId}/search")
-        public ResponseEntity<List<InventoryItem>> searchItems(
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId,
-                        @Parameter(description = "Search query for item name, SKU, or barcode", required = true, example = "laptop") @RequestParam String q) {
-                List<InventoryItem> response = inventoryItemService.searchItems(inventoryId, q);
+                        // Basic filters
+                        @Parameter(description = "Category filter", example = "Electronics") @RequestParam(required = false) String category,
+                        @Parameter(description = "Brand filter", example = "Samsung") @RequestParam(required = false) String brand,
+                        @Parameter(description = "Supplier filter", example = "TechSupplier") @RequestParam(required = false) String supplier,
+                        @Parameter(description = "Location filter", example = "Warehouse A") @RequestParam(required = false) String location,
+                        @Parameter(description = "Color filter", example = "Black") @RequestParam(required = false) String color,
+                        @Parameter(description = "Size filter", example = "Large") @RequestParam(required = false) String itemSize,
+
+                        // Status filters
+                        @Parameter(description = "Active items only", example = "true") @RequestParam(required = false) Boolean activeOnly,
+                        @Parameter(description = "Perishable items filter", example = "true") @RequestParam(required = false) Boolean perishable,
+                        @Parameter(description = "Low stock items only", example = "true") @RequestParam(required = false) Boolean lowStock,
+                        @Parameter(description = "Out of stock items only", example = "true") @RequestParam(required = false) Boolean outOfStock,
+                        @Parameter(description = "Items with active discounts only", example = "true") @RequestParam(required = false) Boolean hasDiscount,
+
+                        // Stock range filters
+                        @Parameter(description = "Minimum stock quantity", example = "10") @RequestParam(required = false) Integer minStock,
+                        @Parameter(description = "Maximum stock quantity", example = "100") @RequestParam(required = false) Integer maxStock,
+
+                        // Price range filters
+                        @Parameter(description = "Minimum cost price", example = "10.00") @RequestParam(required = false) java.math.BigDecimal minCostPrice,
+                        @Parameter(description = "Maximum cost price", example = "500.00") @RequestParam(required = false) java.math.BigDecimal maxCostPrice,
+                        @Parameter(description = "Minimum selling price", example = "15.00") @RequestParam(required = false) java.math.BigDecimal minSellingPrice,
+                        @Parameter(description = "Maximum selling price", example = "750.00") @RequestParam(required = false) java.math.BigDecimal maxSellingPrice,
+
+                        // Date filters
+                        @Parameter(description = "Created after date", example = "2024-01-01") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate createdAfter,
+                        @Parameter(description = "Created before date", example = "2024-12-31") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate createdBefore,
+                        @Parameter(description = "Expiry after date", example = "2024-06-01") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate expiryAfter,
+                        @Parameter(description = "Expiry before date", example = "2024-12-31") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate expiryBefore,
+
+                        // Expiry status filters
+                        @Parameter(description = "Expiry status (expiring, expired, fresh)", example = "expiring") @RequestParam(required = false) String expiryStatus,
+                        @Parameter(description = "Days for expiry calculation", example = "7") @RequestParam(defaultValue = "7") int expiryDays) {
+
+                // Create filter request from parameters
+                FilterRequest filterRequest = new FilterRequest();
+                filterRequest.setCategory(category);
+                filterRequest.setBrand(brand);
+                filterRequest.setSupplierName(supplier);
+                filterRequest.setLocation(location);
+                filterRequest.setColor(color);
+                filterRequest.setSize(itemSize);
+                filterRequest.setSearchTerm(search);
+                filterRequest.setIsActive(activeOnly);
+                filterRequest.setIsPerishable(perishable);
+                filterRequest.setLowStock(lowStock);
+                filterRequest.setOutOfStock(outOfStock);
+                filterRequest.setHasDiscount(hasDiscount);
+                filterRequest.setMinStock(minStock);
+                filterRequest.setMaxStock(maxStock);
+                filterRequest.setMinCostPrice(minCostPrice);
+                filterRequest.setMaxCostPrice(maxCostPrice);
+                filterRequest.setMinSellingPrice(minSellingPrice);
+                filterRequest.setMaxSellingPrice(maxSellingPrice);
+                filterRequest.setCreatedAfter(createdAfter);
+                filterRequest.setCreatedBefore(createdBefore);
+                filterRequest.setExpiryAfter(expiryAfter);
+                filterRequest.setExpiryBefore(expiryBefore);
+                filterRequest.setExpiryStatus(expiryStatus);
+                filterRequest.setExpiryDays(expiryDays);
+                filterRequest.setSortBy(sortBy);
+                filterRequest.setSortDirection(sortDirection);
+
+                PagedResponse<InventoryItem> response = inventoryItemService.filterItemsPaginated(inventoryId,
+                                filterRequest, page, size, sortBy, sortDirection);
                 return ResponseEntity.ok(response);
         }
 
@@ -315,89 +331,7 @@ public class InventoryItemController {
                 return ResponseEntity.ok(item);
         }
 
-        @GetMapping("/brand/{brand}")
-        @Operation(summary = "Get items by brand", description = "Retrieve all items of a specific brand in an inventory")
-        @ApiResponse(responseCode = "200", description = "Items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsByBrand(
-                        @PathVariable String brand,
-                        @RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getItemsByBrand(inventoryId, brand);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/supplier/{supplierName}")
-        @Operation(summary = "Get items by supplier", description = "Retrieve all items from a specific supplier in an inventory")
-        @ApiResponse(responseCode = "200", description = "Items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsBySupplier(
-                        @PathVariable String supplierName,
-                        @RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getItemsBySupplier(inventoryId, supplierName);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/location/{location}")
-        @Operation(summary = "Get items by location", description = "Retrieve all items in a specific location within an inventory")
-        @ApiResponse(responseCode = "200", description = "Items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsByLocation(
-                        @PathVariable String location,
-                        @RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getItemsByLocation(inventoryId, location);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/color/{color}")
-        @Operation(summary = "Get items by color", description = "Retrieve all items of a specific color in an inventory")
-        @ApiResponse(responseCode = "200", description = "Items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsByColor(
-                        @PathVariable String color,
-                        @RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getItemsByColor(inventoryId, color);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/size/{size}")
-        @Operation(summary = "Get items by size", description = "Retrieve all items of a specific size in an inventory")
-        @ApiResponse(responseCode = "200", description = "Items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsBySize(
-                        @PathVariable String size,
-                        @RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getItemsBySize(inventoryId, size);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/perishable")
-        @Operation(summary = "Get perishable items", description = "Retrieve all perishable items in an inventory")
-        @ApiResponse(responseCode = "200", description = "Perishable items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getPerishableItems(@RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getPerishableItems(inventoryId);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/expiring-soon")
-        @Operation(summary = "Get items expiring soon", description = "Retrieve items that will expire within specified days")
-        @ApiResponse(responseCode = "200", description = "Items expiring soon retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsExpiringSoon(
-                        @RequestParam String inventoryId,
-                        @RequestParam(defaultValue = "7") int days) {
-                List<InventoryItem> items = inventoryItemService.getItemsExpiringSoon(inventoryId, days);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/expired")
-        @Operation(summary = "Get expired items", description = "Retrieve all expired items in an inventory")
-        @ApiResponse(responseCode = "200", description = "Expired items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getExpiredItems(@RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getExpiredItems(inventoryId);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/discounted")
-        @Operation(summary = "Get items with active discounts", description = "Retrieve all items with currently active discounts")
-        @ApiResponse(responseCode = "200", description = "Discounted items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsWithActiveDiscounts(@RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getItemsWithActiveDiscounts(inventoryId);
-                return ResponseEntity.ok(items);
-        }
+        // Individual filtration endpoints consolidated into /filter endpoint above
 
         @PutMapping("/{id}/sales")
         @Operation(summary = "Update sales data", description = "Update sales-related data for an inventory item")
@@ -436,21 +370,4 @@ public class InventoryItemController {
                 return ResponseEntity.ok(totalCost);
         }
 
-        @GetMapping("/reorder")
-        @Operation(summary = "Get items needing reorder", description = "Retrieve items that need to be reordered (low stock)")
-        @ApiResponse(responseCode = "200", description = "Items needing reorder retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getItemsNeedingReorder(@RequestParam String inventoryId) {
-                List<InventoryItem> items = inventoryItemService.getItemsNeedingReorder(inventoryId);
-                return ResponseEntity.ok(items);
-        }
-
-        @GetMapping("/top-selling")
-        @Operation(summary = "Get top selling items", description = "Retrieve the top selling items in the inventory")
-        @ApiResponse(responseCode = "200", description = "Top selling items retrieved successfully")
-        public ResponseEntity<List<InventoryItem>> getTopSellingItems(
-                        @RequestParam String inventoryId,
-                        @RequestParam(defaultValue = "10") int limit) {
-                List<InventoryItem> items = inventoryItemService.getTopSellingItems(inventoryId, limit);
-                return ResponseEntity.ok(items);
-        }
 }

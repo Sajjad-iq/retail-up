@@ -6,16 +6,21 @@ import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 public class InventoryItemService {
@@ -225,48 +230,6 @@ public class InventoryItemService {
     }
 
     /**
-     * Get all items in an inventory
-     */
-    public List<InventoryItem> getItemsByInventory(String inventoryId) {
-        return inventoryItemRepository.findByInventoryId(inventoryId);
-    }
-
-    /**
-     * Get active items in an inventory
-     */
-    public List<InventoryItem> getActiveItemsByInventory(String inventoryId) {
-        return inventoryItemRepository.findByInventoryIdAndIsActiveTrue(inventoryId);
-    }
-
-    /**
-     * Get items by category within an inventory
-     */
-    public List<InventoryItem> getItemsByCategory(String inventoryId, String category) {
-        return inventoryItemRepository.findByInventoryIdAndCategory(inventoryId, category);
-    }
-
-    /**
-     * Get low stock items in an inventory
-     */
-    public List<InventoryItem> getLowStockItems(String inventoryId) {
-        return inventoryItemRepository.findLowStockItems(inventoryId);
-    }
-
-    /**
-     * Get out of stock items in an inventory
-     */
-    public List<InventoryItem> getOutOfStockItems(String inventoryId) {
-        return inventoryItemRepository.findOutOfStockItems(inventoryId);
-    }
-
-    /**
-     * Search items by name, SKU, or barcode within an inventory
-     */
-    public List<InventoryItem> searchItems(String inventoryId, String searchTerm) {
-        return inventoryItemRepository.searchItems(inventoryId, searchTerm);
-    }
-
-    /**
      * Delete inventory item (soft delete by setting isActive to false)
      */
     public void deleteInventoryItem(String id) {
@@ -329,55 +292,6 @@ public class InventoryItemService {
     }
 
     /**
-     * Get items by brand within an inventory
-     */
-    public List<InventoryItem> getItemsByBrand(String inventoryId, String brand) {
-        return inventoryItemRepository.findByInventoryIdAndBrand(inventoryId, brand);
-    }
-
-    /**
-     * Get items by supplier within an inventory
-     */
-    public List<InventoryItem> getItemsBySupplier(String inventoryId, String supplierName) {
-        return inventoryItemRepository.findByInventoryIdAndSupplierName(inventoryId, supplierName);
-    }
-
-    /**
-     * Get perishable items in an inventory
-     */
-    public List<InventoryItem> getPerishableItems(String inventoryId) {
-        return inventoryItemRepository.findByInventoryIdAndIsPerishableTrue(inventoryId);
-    }
-
-    /**
-     * Get items expiring soon (within specified days)
-     */
-    public List<InventoryItem> getItemsExpiringSoon(String inventoryId, int days) {
-        return inventoryItemRepository.findItemsExpiringSoon(inventoryId, days);
-    }
-
-    /**
-     * Get expired items in an inventory
-     */
-    public List<InventoryItem> getExpiredItems(String inventoryId) {
-        return inventoryItemRepository.findExpiredItems(inventoryId);
-    }
-
-    /**
-     * Get items by location within an inventory
-     */
-    public List<InventoryItem> getItemsByLocation(String inventoryId, String location) {
-        return inventoryItemRepository.findByInventoryIdAndLocation(inventoryId, location);
-    }
-
-    /**
-     * Get items with active discounts
-     */
-    public List<InventoryItem> getItemsWithActiveDiscounts(String inventoryId) {
-        return inventoryItemRepository.findItemsWithActiveDiscounts(inventoryId);
-    }
-
-    /**
      * Update sales data for an item (when a sale is made)
      */
     @Transactional
@@ -409,14 +323,8 @@ public class InventoryItemService {
     }
 
     /**
-     * Check if product code exists within an inventory
-     */
-    public boolean itemExistsByProductCode(String productCode, String inventoryId) {
-        return inventoryItemRepository.existsByProductCodeAndInventoryId(productCode, inventoryId);
-    }
-
-    /**
-     * Check if product code exists within an inventory (alias method for controller)
+     * Check if product code exists within an inventory (alias method for
+     * controller)
      */
     public boolean productCodeExists(String productCode, String inventoryId) {
         return inventoryItemRepository.existsByProductCodeAndInventoryId(productCode, inventoryId);
@@ -436,31 +344,108 @@ public class InventoryItemService {
         return inventoryItemRepository.calculateTotalInventoryCost(inventoryId);
     }
 
+    // Paginated methods
+
     /**
-     * Get items that need reordering (low stock items)
+     * Advanced filtering with pagination
      */
-    public List<InventoryItem> getItemsNeedingReorder(String inventoryId) {
-        return getLowStockItems(inventoryId);
+    public PagedResponse<InventoryItem> filterItemsPaginated(String inventoryId, FilterRequest filterRequest, int page,
+            int size, String sortBy, String sortDirection) {
+        Pageable pageable = createPageable(page, size, sortBy, sortDirection);
+
+        Page<InventoryItem> pageResult = inventoryItemRepository.findWithFilters(
+                inventoryId,
+                filterRequest.getCategory(),
+                filterRequest.getBrand(),
+                filterRequest.getSupplierName(),
+                filterRequest.getLocation(),
+                filterRequest.getColor(),
+                filterRequest.getSize(),
+                filterRequest.getIsActive(),
+                filterRequest.getIsPerishable(),
+                filterRequest.getMinStock(),
+                filterRequest.getMaxStock(),
+                filterRequest.getMinCostPrice(),
+                filterRequest.getMaxCostPrice(),
+                filterRequest.getMinSellingPrice(),
+                filterRequest.getMaxSellingPrice(),
+                filterRequest.getSearchTerm(),
+                pageable);
+
+        return createPagedResponse(pageResult);
     }
 
     /**
-     * Get top selling items in an inventory
+     * Get items expiring soon with pagination
      */
-    public List<InventoryItem> getTopSellingItems(String inventoryId, int limit) {
-        return inventoryItemRepository.findTopSellingItems(inventoryId, limit);
+    public PagedResponse<InventoryItem> getItemsExpiringSoonPaginated(String inventoryId, int days, int page, int size,
+            String sortBy, String sortDirection) {
+        Pageable pageable = createPageable(page, size, sortBy, sortDirection);
+        Page<InventoryItem> pageResult = inventoryItemRepository.findItemsExpiringSoon(inventoryId, days, pageable);
+        return createPagedResponse(pageResult);
     }
 
     /**
-     * Get items by color within an inventory
+     * Get expired items with pagination
      */
-    public List<InventoryItem> getItemsByColor(String inventoryId, String color) {
-        return inventoryItemRepository.findByInventoryIdAndColor(inventoryId, color);
+    public PagedResponse<InventoryItem> getExpiredItemsPaginated(String inventoryId, int page, int size, String sortBy,
+            String sortDirection) {
+        Pageable pageable = createPageable(page, size, sortBy, sortDirection);
+        Page<InventoryItem> pageResult = inventoryItemRepository.findExpiredItems(inventoryId, pageable);
+        return createPagedResponse(pageResult);
     }
 
     /**
-     * Get items by size within an inventory
+     * Get items with active discounts with pagination
      */
-    public List<InventoryItem> getItemsBySize(String inventoryId, String size) {
-        return inventoryItemRepository.findByInventoryIdAndSize(inventoryId, size);
+    public PagedResponse<InventoryItem> getItemsWithActiveDiscountsPaginated(String inventoryId, int page, int size,
+            String sortBy, String sortDirection) {
+        Pageable pageable = createPageable(page, size, sortBy, sortDirection);
+        Page<InventoryItem> pageResult = inventoryItemRepository.findItemsWithActiveDiscounts(inventoryId, pageable);
+        return createPagedResponse(pageResult);
     }
+
+    // Helper methods
+
+    /**
+     * Create Pageable object with sorting
+     */
+    private Pageable createPageable(int page, int size, String sortBy, String sortDirection) {
+        // Default values
+        if (page < 0)
+            page = 0;
+        if (size <= 0)
+            size = 20;
+        if (size > 100)
+            size = 100; // Max page size limit
+        if (sortBy == null || sortBy.trim().isEmpty())
+            sortBy = "createdAt";
+        if (sortDirection == null || sortDirection.trim().isEmpty())
+            sortDirection = "desc";
+
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+
+        return PageRequest.of(page, size, sort);
+    }
+
+    /**
+     * Convert Spring Data Page to custom PagedResponse
+     */
+    private <T> PagedResponse<T> createPagedResponse(Page<T> page) {
+        return PagedResponse.<T>builder()
+                .content(page.getContent())
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .first(page.isFirst())
+                .last(page.isLast())
+                .hasNext(page.hasNext())
+                .hasPrevious(page.hasPrevious())
+                .numberOfElements(page.getNumberOfElements())
+                .empty(page.isEmpty())
+                .build();
+    }
+
 }
