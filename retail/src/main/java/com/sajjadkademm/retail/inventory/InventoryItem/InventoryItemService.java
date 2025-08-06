@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -67,15 +68,28 @@ public class InventoryItemService {
             InventoryItem item = InventoryItem.builder()
                     .name(request.getName())
                     .description(request.getDescription())
+                    .sku(request.getSku())
+                    .productCode(request.getProductCode())
                     .barcode(request.getBarcode())
                     .category(request.getCategory())
                     .brand(request.getBrand())
                     .unit(request.getUnit())
+                    .weight(request.getWeight())
+                    .dimensions(request.getDimensions())
+                    .color(request.getColor())
+                    .size(request.getSize())
+                    .location(request.getLocation())
                     .currentStock(request.getCurrentStock())
                     .minimumStock(request.getMinimumStock())
                     .maximumStock(request.getMaximumStock())
                     .costPrice(request.getCostPrice())
                     .sellingPrice(request.getSellingPrice())
+                    .discountPrice(request.getDiscountPrice())
+                    .discountStartDate(request.getDiscountStartDate())
+                    .discountEndDate(request.getDiscountEndDate())
+                    .supplierName(request.getSupplierName())
+                    .isPerishable(request.getIsPerishable() != null ? request.getIsPerishable() : false)
+                    .expiryDate(request.getExpiryDate())
                     .inventoryId(request.getInventoryId())
                     .isActive(true)
                     .createdBy(user)
@@ -116,6 +130,9 @@ public class InventoryItemService {
         if (request.getDescription() != null) {
             item.setDescription(request.getDescription());
         }
+        if (request.getProductCode() != null) {
+            item.setProductCode(request.getProductCode());
+        }
         if (request.getBarcode() != null) {
             item.setBarcode(request.getBarcode());
         }
@@ -127,6 +144,21 @@ public class InventoryItemService {
         }
         if (request.getUnit() != null) {
             item.setUnit(request.getUnit());
+        }
+        if (request.getWeight() != null) {
+            item.setWeight(request.getWeight());
+        }
+        if (request.getDimensions() != null) {
+            item.setDimensions(request.getDimensions());
+        }
+        if (request.getColor() != null) {
+            item.setColor(request.getColor());
+        }
+        if (request.getSize() != null) {
+            item.setSize(request.getSize());
+        }
+        if (request.getLocation() != null) {
+            item.setLocation(request.getLocation());
         }
         if (request.getCurrentStock() != null) {
             item.setCurrentStock(request.getCurrentStock());
@@ -142,6 +174,27 @@ public class InventoryItemService {
         }
         if (request.getSellingPrice() != null) {
             item.setSellingPrice(request.getSellingPrice());
+        }
+        if (request.getDiscountPrice() != null) {
+            item.setDiscountPrice(request.getDiscountPrice());
+        }
+        if (request.getDiscountStartDate() != null) {
+            item.setDiscountStartDate(request.getDiscountStartDate());
+        }
+        if (request.getDiscountEndDate() != null) {
+            item.setDiscountEndDate(request.getDiscountEndDate());
+        }
+        if (request.getSupplierName() != null) {
+            item.setSupplierName(request.getSupplierName());
+        }
+        if (request.getIsPerishable() != null) {
+            item.setIsPerishable(request.getIsPerishable());
+        }
+        if (request.getExpiryDate() != null) {
+            item.setExpiryDate(request.getExpiryDate());
+        }
+        if (request.getIsActive() != null) {
+            item.setIsActive(request.getIsActive());
         }
 
         return inventoryItemRepository.save(item);
@@ -265,5 +318,149 @@ public class InventoryItemService {
      */
     public long getActiveItemCountByInventory(String inventoryId) {
         return inventoryItemRepository.countByInventoryIdAndIsActiveTrue(inventoryId);
+    }
+
+    /**
+     * Get inventory item by product code within an inventory
+     */
+    public InventoryItem getInventoryItemByProductCode(String productCode, String inventoryId) {
+        return inventoryItemRepository.findByProductCodeAndInventoryId(productCode, inventoryId)
+                .orElseThrow(() -> new NotFoundException("Inventory item not found with product code: " + productCode));
+    }
+
+    /**
+     * Get items by brand within an inventory
+     */
+    public List<InventoryItem> getItemsByBrand(String inventoryId, String brand) {
+        return inventoryItemRepository.findByInventoryIdAndBrand(inventoryId, brand);
+    }
+
+    /**
+     * Get items by supplier within an inventory
+     */
+    public List<InventoryItem> getItemsBySupplier(String inventoryId, String supplierName) {
+        return inventoryItemRepository.findByInventoryIdAndSupplierName(inventoryId, supplierName);
+    }
+
+    /**
+     * Get perishable items in an inventory
+     */
+    public List<InventoryItem> getPerishableItems(String inventoryId) {
+        return inventoryItemRepository.findByInventoryIdAndIsPerishableTrue(inventoryId);
+    }
+
+    /**
+     * Get items expiring soon (within specified days)
+     */
+    public List<InventoryItem> getItemsExpiringSoon(String inventoryId, int days) {
+        return inventoryItemRepository.findItemsExpiringSoon(inventoryId, days);
+    }
+
+    /**
+     * Get expired items in an inventory
+     */
+    public List<InventoryItem> getExpiredItems(String inventoryId) {
+        return inventoryItemRepository.findExpiredItems(inventoryId);
+    }
+
+    /**
+     * Get items by location within an inventory
+     */
+    public List<InventoryItem> getItemsByLocation(String inventoryId, String location) {
+        return inventoryItemRepository.findByInventoryIdAndLocation(inventoryId, location);
+    }
+
+    /**
+     * Get items with active discounts
+     */
+    public List<InventoryItem> getItemsWithActiveDiscounts(String inventoryId) {
+        return inventoryItemRepository.findItemsWithActiveDiscounts(inventoryId);
+    }
+
+    /**
+     * Update sales data for an item (when a sale is made)
+     */
+    @Transactional
+    public InventoryItem updateSalesData(String id, Integer quantitySold, BigDecimal saleAmount) {
+        if (quantitySold <= 0) {
+            throw new BadRequestException("Quantity sold must be positive");
+        }
+        if (saleAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BadRequestException("Sale amount cannot be negative");
+        }
+
+        InventoryItem item = inventoryItemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
+
+        // Update stock
+        int newStock = item.getCurrentStock() - quantitySold;
+        if (newStock < 0) {
+            throw new BadRequestException(
+                    "Insufficient stock. Available: " + item.getCurrentStock() + ", Requested: " + quantitySold);
+        }
+
+        // Update sales analytics
+        item.setCurrentStock(newStock);
+        item.setTotalSold(item.getTotalSold() + quantitySold);
+        item.setTotalRevenue(item.getTotalRevenue().add(saleAmount));
+        item.setLastSoldDate(java.time.LocalDateTime.now());
+
+        return inventoryItemRepository.save(item);
+    }
+
+    /**
+     * Check if product code exists within an inventory
+     */
+    public boolean itemExistsByProductCode(String productCode, String inventoryId) {
+        return inventoryItemRepository.existsByProductCodeAndInventoryId(productCode, inventoryId);
+    }
+
+    /**
+     * Check if product code exists within an inventory (alias method for controller)
+     */
+    public boolean productCodeExists(String productCode, String inventoryId) {
+        return inventoryItemRepository.existsByProductCodeAndInventoryId(productCode, inventoryId);
+    }
+
+    /**
+     * Get total inventory value for an inventory
+     */
+    public BigDecimal getTotalInventoryValue(String inventoryId) {
+        return inventoryItemRepository.calculateTotalInventoryValue(inventoryId);
+    }
+
+    /**
+     * Get total inventory cost for an inventory
+     */
+    public BigDecimal getTotalInventoryCost(String inventoryId) {
+        return inventoryItemRepository.calculateTotalInventoryCost(inventoryId);
+    }
+
+    /**
+     * Get items that need reordering (low stock items)
+     */
+    public List<InventoryItem> getItemsNeedingReorder(String inventoryId) {
+        return getLowStockItems(inventoryId);
+    }
+
+    /**
+     * Get top selling items in an inventory
+     */
+    public List<InventoryItem> getTopSellingItems(String inventoryId, int limit) {
+        return inventoryItemRepository.findTopSellingItems(inventoryId, limit);
+    }
+
+    /**
+     * Get items by color within an inventory
+     */
+    public List<InventoryItem> getItemsByColor(String inventoryId, String color) {
+        return inventoryItemRepository.findByInventoryIdAndColor(inventoryId, color);
+    }
+
+    /**
+     * Get items by size within an inventory
+     */
+    public List<InventoryItem> getItemsBySize(String inventoryId, String size) {
+        return inventoryItemRepository.findByInventoryIdAndSize(inventoryId, size);
     }
 }
