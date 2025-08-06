@@ -55,7 +55,7 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, St
     List<InventoryItem> findOutOfStockItems(@Param("inventoryId") String inventoryId);
 
     // Find items expiring soon (within specified days)
-    @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.isPerishable = true AND i.expiryDate IS NOT NULL AND i.expiryDate <= CURRENT_DATE + :days AND i.isActive = true")
+    @Query(value = "SELECT * FROM inventory_item i WHERE i.inventory_id = :inventoryId AND i.is_perishable = true AND i.expiry_date IS NOT NULL AND i.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL :days DAY) AND i.is_active = true", nativeQuery = true)
     List<InventoryItem> findItemsExpiringSoon(@Param("inventoryId") String inventoryId, @Param("days") int days);
 
     // Find expired items

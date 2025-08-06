@@ -23,7 +23,6 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.DecimalMax;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -143,7 +142,6 @@ public class InventoryItem {
     @NotNull
     @Min(value = 0, message = "Current stock cannot be negative")
     private Integer currentStock;
-
 
     // Minimum stock level before reordering alert
     @Column(name = "minimum_stock", nullable = false)
