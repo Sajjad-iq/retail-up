@@ -83,7 +83,6 @@ public class InventoryItemService {
                     .dimensions(request.getDimensions())
                     .color(request.getColor())
                     .size(request.getSize())
-                    .location(request.getLocation())
                     .currentStock(request.getCurrentStock())
                     .minimumStock(request.getMinimumStock())
                     .maximumStock(request.getMaximumStock())
@@ -161,9 +160,6 @@ public class InventoryItemService {
         }
         if (request.getSize() != null) {
             item.setSize(request.getSize());
-        }
-        if (request.getLocation() != null) {
-            item.setLocation(request.getLocation());
         }
         if (request.getCurrentStock() != null) {
             item.setCurrentStock(request.getCurrentStock());
@@ -358,7 +354,6 @@ public class InventoryItemService {
                 filterRequest.getCategory(),
                 filterRequest.getBrand(),
                 filterRequest.getSupplierName(),
-                filterRequest.getLocation(),
                 filterRequest.getColor(),
                 filterRequest.getSize(),
                 filterRequest.getIsActive(),
@@ -372,36 +367,6 @@ public class InventoryItemService {
                 filterRequest.getSearchTerm(),
                 pageable);
 
-        return createPagedResponse(pageResult);
-    }
-
-    /**
-     * Get items expiring soon with pagination
-     */
-    public PagedResponse<InventoryItem> getItemsExpiringSoonPaginated(String inventoryId, int days, int page, int size,
-            String sortBy, String sortDirection) {
-        Pageable pageable = createPageable(page, size, sortBy, sortDirection);
-        Page<InventoryItem> pageResult = inventoryItemRepository.findItemsExpiringSoon(inventoryId, days, pageable);
-        return createPagedResponse(pageResult);
-    }
-
-    /**
-     * Get expired items with pagination
-     */
-    public PagedResponse<InventoryItem> getExpiredItemsPaginated(String inventoryId, int page, int size, String sortBy,
-            String sortDirection) {
-        Pageable pageable = createPageable(page, size, sortBy, sortDirection);
-        Page<InventoryItem> pageResult = inventoryItemRepository.findExpiredItems(inventoryId, pageable);
-        return createPagedResponse(pageResult);
-    }
-
-    /**
-     * Get items with active discounts with pagination
-     */
-    public PagedResponse<InventoryItem> getItemsWithActiveDiscountsPaginated(String inventoryId, int page, int size,
-            String sortBy, String sortDirection) {
-        Pageable pageable = createPageable(page, size, sortBy, sortDirection);
-        Page<InventoryItem> pageResult = inventoryItemRepository.findItemsWithActiveDiscounts(inventoryId, pageable);
         return createPagedResponse(pageResult);
     }
 

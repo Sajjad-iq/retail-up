@@ -163,7 +163,6 @@ public class InventoryItemController {
                         @Parameter(description = "Category filter", example = "Electronics") @RequestParam(required = false) String category,
                         @Parameter(description = "Brand filter", example = "Samsung") @RequestParam(required = false) String brand,
                         @Parameter(description = "Supplier filter", example = "TechSupplier") @RequestParam(required = false) String supplier,
-                        @Parameter(description = "Location filter", example = "Warehouse A") @RequestParam(required = false) String location,
                         @Parameter(description = "Color filter", example = "Black") @RequestParam(required = false) String color,
                         @Parameter(description = "Size filter", example = "Large") @RequestParam(required = false) String itemSize,
 
@@ -199,7 +198,6 @@ public class InventoryItemController {
                 filterRequest.setCategory(category);
                 filterRequest.setBrand(brand);
                 filterRequest.setSupplierName(supplier);
-                filterRequest.setLocation(location);
                 filterRequest.setColor(color);
                 filterRequest.setSize(itemSize);
                 filterRequest.setSearchTerm(search);

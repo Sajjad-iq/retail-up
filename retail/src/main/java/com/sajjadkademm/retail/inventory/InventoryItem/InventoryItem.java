@@ -130,12 +130,6 @@ public class InventoryItem {
     @Size(max = 20)
     private String size;
 
-    // Storage location within warehouse/store (e.g., "A1-B2-C3" for
-    // Aisle-Shelf-Position)
-    @Column(name = "location", length = 50)
-    @Size(max = 50)
-    private String location;
-
     // Stock Management
     // Current available stock quantity
     @Column(name = "current_stock", nullable = false)
