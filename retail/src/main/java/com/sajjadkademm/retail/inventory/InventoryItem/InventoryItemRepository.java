@@ -38,9 +38,6 @@ public interface InventoryItemRepository
        // Find items by supplier within an inventory
        List<InventoryItem> findByInventoryIdAndSupplierName(String inventoryId, String supplierName);
 
-       // Find items by location within an inventory
-       List<InventoryItem> findByInventoryIdAndLocation(String inventoryId, String location);
-
        // Find items by color within an inventory
        List<InventoryItem> findByInventoryIdAndColor(String inventoryId, String color);
 
@@ -118,9 +115,6 @@ public interface InventoryItemRepository
 
        // Find items by supplier within an inventory with pagination
        Page<InventoryItem> findByInventoryIdAndSupplierName(String inventoryId, String supplierName, Pageable pageable);
-
-       // Find items by location within an inventory with pagination
-       Page<InventoryItem> findByInventoryIdAndLocation(String inventoryId, String location, Pageable pageable);
 
        // Find items by color within an inventory with pagination
        Page<InventoryItem> findByInventoryIdAndColor(String inventoryId, String color, Pageable pageable);

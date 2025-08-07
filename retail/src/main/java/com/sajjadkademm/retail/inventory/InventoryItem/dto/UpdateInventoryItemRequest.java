@@ -54,9 +54,6 @@ public class UpdateInventoryItemRequest {
     @Size(max = 20, message = "Size must not exceed 20 characters")
     private String size;
 
-    @Size(max = 50, message = "Location must not exceed 50 characters")
-    private String location;
-
     // Stock Management
     @Min(value = 0, message = "Current stock cannot be negative")
     private Integer currentStock;

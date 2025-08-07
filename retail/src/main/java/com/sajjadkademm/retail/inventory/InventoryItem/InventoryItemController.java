@@ -227,63 +227,6 @@ public class InventoryItemController {
         }
 
         /**
-         * Update stock endpoint
-         */
-        @Operation(summary = "Update Stock", description = "Update the current stock quantity for an inventory item", operationId = "updateStock")
-        @ApiResponse(responseCode = "200", description = "Stock updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class)))
-        @PutMapping("/{id}/stock")
-        public ResponseEntity<InventoryItem> updateStock(
-                        @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id,
-                        @Parameter(description = "New stock quantity", required = true, example = "75") @RequestParam Integer stock) {
-                InventoryItem response = inventoryItemService.updateStock(id, stock);
-                return ResponseEntity.ok(response);
-        }
-
-        /**
-         * Delete inventory item endpoint
-         */
-        @Operation(summary = "Delete Inventory Item", description = "Soft delete an inventory item by setting isActive to false", operationId = "deleteInventoryItem")
-        @ApiResponse(responseCode = "200", description = "Inventory item deleted successfully")
-        @DeleteMapping("/{id}")
-        public ResponseEntity<Void> deleteInventoryItem(
-                        @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id) {
-                inventoryItemService.deleteInventoryItem(id);
-                return ResponseEntity.ok().build();
-        }
-
-        /**
-         * Check if SKU exists endpoint
-         */
-        @Operation(summary = "Check SKU Exists", description = "Check if an item with the specified SKU exists within an inventory", operationId = "itemExistsBySku")
-        @ApiResponse(responseCode = "200", description = "SKU existence check result", content = @Content(mediaType = "application/json", schema = @Schema(type = "boolean"), examples = {
-                        @ExampleObject(name = "SKU Exists", value = "true"),
-                        @ExampleObject(name = "SKU Not Found", value = "false")
-        }))
-        @GetMapping("/exists/sku/{sku}/inventory/{inventoryId}")
-        public ResponseEntity<Boolean> itemExistsBySku(
-                        @Parameter(description = "SKU to check", required = true, example = "LAPTOP001") @PathVariable String sku,
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                boolean exists = inventoryItemService.itemExistsBySku(sku, inventoryId);
-                return ResponseEntity.ok(exists);
-        }
-
-        /**
-         * Check if barcode exists endpoint
-         */
-        @Operation(summary = "Check Barcode Exists", description = "Check if an item with the specified barcode exists within an inventory", operationId = "itemExistsByBarcode")
-        @ApiResponse(responseCode = "200", description = "Barcode existence check result", content = @Content(mediaType = "application/json", schema = @Schema(type = "boolean"), examples = {
-                        @ExampleObject(name = "Barcode Exists", value = "true"),
-                        @ExampleObject(name = "Barcode Not Found", value = "false")
-        }))
-        @GetMapping("/exists/barcode/{barcode}/inventory/{inventoryId}")
-        public ResponseEntity<Boolean> itemExistsByBarcode(
-                        @Parameter(description = "Barcode to check", required = true, example = "1234567890123") @PathVariable String barcode,
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                boolean exists = inventoryItemService.itemExistsByBarcode(barcode, inventoryId);
-                return ResponseEntity.ok(exists);
-        }
-
-        /**
          * Get item count in an inventory endpoint
          */
         @Operation(summary = "Get Item Count", description = "Get the total count of items in an inventory", operationId = "getItemCountByInventory")
@@ -315,57 +258,6 @@ public class InventoryItemController {
         @GetMapping("/units")
         public ResponseEntity<Unit[]> getAvailableUnits() {
                 return ResponseEntity.ok(Unit.values());
-        }
-
-        // New endpoints for additional functionality
-
-        @GetMapping("/product-code/{productCode}")
-        @Operation(summary = "Get inventory item by product code", description = "Retrieve an inventory item by its product code")
-        @ApiResponse(responseCode = "200", description = "Inventory item retrieved successfully")
-        public ResponseEntity<InventoryItem> getInventoryItemByProductCode(
-                        @PathVariable String productCode,
-                        @RequestParam String inventoryId) {
-                InventoryItem item = inventoryItemService.getInventoryItemByProductCode(productCode, inventoryId);
-                return ResponseEntity.ok(item);
-        }
-
-        // Individual filtration endpoints consolidated into /filter endpoint above
-
-        @PutMapping("/{id}/sales")
-        @Operation(summary = "Update sales data", description = "Update sales-related data for an inventory item")
-        @ApiResponse(responseCode = "200", description = "Sales data updated successfully")
-        public ResponseEntity<InventoryItem> updateSalesData(
-                        @PathVariable String id,
-                        @RequestParam int quantitySold,
-                        @RequestParam java.math.BigDecimal revenue) {
-                InventoryItem updatedItem = inventoryItemService.updateSalesData(id, quantitySold, revenue);
-                return ResponseEntity.ok(updatedItem);
-        }
-
-        @GetMapping("/product-code/{productCode}/exists")
-        @Operation(summary = "Check if product code exists", description = "Check if a product code already exists in the inventory")
-        @ApiResponse(responseCode = "200", description = "Product code existence checked successfully")
-        public ResponseEntity<Boolean> productCodeExists(
-                        @PathVariable String productCode,
-                        @RequestParam String inventoryId) {
-                boolean exists = inventoryItemService.productCodeExists(productCode, inventoryId);
-                return ResponseEntity.ok(exists);
-        }
-
-        @GetMapping("/value/total")
-        @Operation(summary = "Get total inventory value", description = "Calculate the total value of all items in the inventory")
-        @ApiResponse(responseCode = "200", description = "Total inventory value calculated successfully")
-        public ResponseEntity<java.math.BigDecimal> getTotalInventoryValue(@RequestParam String inventoryId) {
-                java.math.BigDecimal totalValue = inventoryItemService.getTotalInventoryValue(inventoryId);
-                return ResponseEntity.ok(totalValue);
-        }
-
-        @GetMapping("/cost/total")
-        @Operation(summary = "Get total inventory cost", description = "Calculate the total cost of all items in the inventory")
-        @ApiResponse(responseCode = "200", description = "Total inventory cost calculated successfully")
-        public ResponseEntity<java.math.BigDecimal> getTotalInventoryCost(@RequestParam String inventoryId) {
-                java.math.BigDecimal totalCost = inventoryItemService.getTotalInventoryCost(inventoryId);
-                return ResponseEntity.ok(totalCost);
         }
 
 }

@@ -237,35 +237,6 @@ public class InventoryItemService {
     }
 
     /**
-     * Update stock quantity for an item
-     */
-    public InventoryItem updateStock(String id, Integer newStock) {
-        if (newStock < 0) {
-            throw new BadRequestException("Stock cannot be negative");
-        }
-
-        InventoryItem item = inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
-
-        item.setCurrentStock(newStock);
-        return inventoryItemRepository.save(item);
-    }
-
-    /**
-     * Check if SKU exists within an inventory
-     */
-    public boolean itemExistsBySku(String sku, String inventoryId) {
-        return inventoryItemRepository.existsBySkuAndInventoryId(sku, inventoryId);
-    }
-
-    /**
-     * Check if barcode exists within an inventory
-     */
-    public boolean itemExistsByBarcode(String barcode, String inventoryId) {
-        return inventoryItemRepository.existsByBarcodeAndInventoryId(barcode, inventoryId);
-    }
-
-    /**
      * Get item count in an inventory
      */
     public long getItemCountByInventory(String inventoryId) {
@@ -277,67 +248,6 @@ public class InventoryItemService {
      */
     public long getActiveItemCountByInventory(String inventoryId) {
         return inventoryItemRepository.countByInventoryIdAndIsActiveTrue(inventoryId);
-    }
-
-    /**
-     * Get inventory item by product code within an inventory
-     */
-    public InventoryItem getInventoryItemByProductCode(String productCode, String inventoryId) {
-        return inventoryItemRepository.findByProductCodeAndInventoryId(productCode, inventoryId)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with product code: " + productCode));
-    }
-
-    /**
-     * Update sales data for an item (when a sale is made)
-     */
-    @Transactional
-    public InventoryItem updateSalesData(String id, Integer quantitySold, BigDecimal saleAmount) {
-        if (quantitySold <= 0) {
-            throw new BadRequestException("Quantity sold must be positive");
-        }
-        if (saleAmount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("Sale amount cannot be negative");
-        }
-
-        InventoryItem item = inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
-
-        // Update stock
-        int newStock = item.getCurrentStock() - quantitySold;
-        if (newStock < 0) {
-            throw new BadRequestException(
-                    "Insufficient stock. Available: " + item.getCurrentStock() + ", Requested: " + quantitySold);
-        }
-
-        // Update sales analytics
-        item.setCurrentStock(newStock);
-        item.setTotalSold(item.getTotalSold() + quantitySold);
-        item.setTotalRevenue(item.getTotalRevenue().add(saleAmount));
-        item.setLastSoldDate(java.time.LocalDateTime.now());
-
-        return inventoryItemRepository.save(item);
-    }
-
-    /**
-     * Check if product code exists within an inventory (alias method for
-     * controller)
-     */
-    public boolean productCodeExists(String productCode, String inventoryId) {
-        return inventoryItemRepository.existsByProductCodeAndInventoryId(productCode, inventoryId);
-    }
-
-    /**
-     * Get total inventory value for an inventory
-     */
-    public BigDecimal getTotalInventoryValue(String inventoryId) {
-        return inventoryItemRepository.calculateTotalInventoryValue(inventoryId);
-    }
-
-    /**
-     * Get total inventory cost for an inventory
-     */
-    public BigDecimal getTotalInventoryCost(String inventoryId) {
-        return inventoryItemRepository.calculateTotalInventoryCost(inventoryId);
     }
 
     // Paginated methods
