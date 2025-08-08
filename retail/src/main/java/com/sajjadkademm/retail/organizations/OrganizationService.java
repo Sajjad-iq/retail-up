@@ -3,6 +3,7 @@ package com.sajjadkademm.retail.organizations;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.inventory.service.InventorySettingsService;
@@ -10,6 +11,7 @@ import com.sajjadkademm.retail.settings.pos.service.POSSettingsService;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.users.dto.AccountType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,6 +62,10 @@ public class OrganizationService {
             User user = userService.getUserById(request.getUserId());
             if (user == null) {
                 throw new NotFoundException("User not found with ID: " + request.getUserId());
+            }
+
+            if (user.getAccountType() != AccountType.USER) {
+                throw new UnauthorizedException("Only Users Can Crate Organizations");
             }
 
             Organization organization = Organization.builder()
