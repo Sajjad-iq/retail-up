@@ -250,6 +250,17 @@ public class InventoryItemService {
         return inventoryItemRepository.countByInventoryIdAndIsActiveTrue(inventoryId);
     }
 
+    /**
+     * Update stock for an inventory item (internal use)
+     */
+    public InventoryItem updateStock(String itemId, Integer newStock) {
+        InventoryItem item = inventoryItemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + itemId));
+        
+        item.setCurrentStock(newStock);
+        return inventoryItemRepository.save(item);
+    }
+
     // Paginated methods
 
     /**

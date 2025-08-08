@@ -90,6 +90,7 @@ public class AuthService {
         // Create new user
         User newUser = User.builder()
                 .name(request.getName())
+                .email(request.getEmail())
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .status(UserStatus.ACTIVE)

@@ -104,7 +104,6 @@ public class InventorySetting {
     private LocalDateTime updatedAt;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @NotNull(message = "Organization is required")
     @JoinColumn(name = "organization_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_inventory_settings_organization"))
     private Organization organization;
 }

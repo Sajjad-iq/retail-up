@@ -4,7 +4,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.sajjadkademm.retail.users.UserRepository;
 
 /**
@@ -25,6 +25,6 @@ public class TestConfig {
     /**
      * Mock UserRepository for testing
      */
-    @MockBean
-    public UserRepository userRepository;
+    @MockitoBean
+    private UserRepository userRepository;
 }

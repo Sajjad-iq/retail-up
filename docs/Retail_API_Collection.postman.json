@@ -333,6 +333,694 @@
             ]
         },
         {
+            "name": "Inventory",
+            "item": [
+                {
+                    "name": "Create Inventory",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"user123\",\n  \"organizationId\": \"org123\",\n  \"name\": \"Main Warehouse\",\n  \"description\": \"Primary inventory location\",\n  \"location\": \"Building A, Floor 1\",\n  \"type\": \"WAREHOUSE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Inventory",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Warehouse\",\n  \"description\": \"Updated description\",\n  \"location\": \"Building B, Floor 2\",\n  \"type\": \"WAREHOUSE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/{{inventoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "{{inventoryId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Inventory by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/{{inventoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "{{inventoryId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Inventories by Organization",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/organization/{{organizationId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "organization",
+                                "{{organizationId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Active Inventories by Organization",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/organization/{{organizationId}}/active",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "organization",
+                                "{{organizationId}}",
+                                "active"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Search Inventories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/search?organizationId={{organizationId}}&query=warehouse&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "organizationId",
+                                    "value": "{{organizationId}}"
+                                },
+                                {
+                                    "key": "query",
+                                    "value": "warehouse"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Inventory Items",
+            "item": [
+                {
+                    "name": "Create Inventory Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"user123\",\n  \"inventoryId\": \"inv123\",\n  \"name\": \"Laptop Computer\",\n  \"description\": \"High-performance laptop for business use\",\n  \"sku\": \"LAPTOP001\",\n  \"barcode\": \"1234567890123\",\n  \"category\": \"Electronics\",\n  \"brand\": \"TechCorp\",\n  \"unit\": \"PIECES\",\n  \"currentStock\": 50,\n  \"minimumStock\": 10,\n  \"maximumStock\": 100,\n  \"costPrice\": 800.00,\n  \"sellingPrice\": 1200.00\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Inventory Item",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Laptop Computer\",\n  \"description\": \"Updated description\",\n  \"currentStock\": 45,\n  \"sellingPrice\": 1250.00\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/{{itemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "{{itemId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Inventory Item by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/{{itemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "{{itemId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Inventory Item by SKU",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/sku/{{sku}}/inventory/{{inventoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "sku",
+                                "{{sku}}",
+                                "inventory",
+                                "{{inventoryId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Inventory Item by Barcode",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/barcode/{{barcode}}/inventory/{{inventoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "barcode",
+                                "{{barcode}}",
+                                "inventory",
+                                "{{inventoryId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Inventory Items with Filters",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/inventory/{{inventoryId}}?page=0&size=20&sortBy=createdAt&sortDirection=desc&search=laptop&category=Electronics&activeOnly=true",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "inventory",
+                                "{{inventoryId}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "sortDirection",
+                                    "value": "desc"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "laptop"
+                                },
+                                {
+                                    "key": "category",
+                                    "value": "Electronics"
+                                },
+                                {
+                                    "key": "activeOnly",
+                                    "value": "true"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Item Count by Inventory",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/inventory/{{inventoryId}}/count",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "inventory",
+                                "{{inventoryId}}",
+                                "count"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Active Item Count by Inventory",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/inventory/{{inventoryId}}/count/active",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "inventory",
+                                "{{inventoryId}}",
+                                "count",
+                                "active"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Available Units",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-items/units",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-items",
+                                "units"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Inventory Movements",
+            "item": [
+                {
+                    "name": "Record Movement",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"user123\",\n  \"inventoryItemId\": \"item123\",\n  \"movementType\": \"SALE\",\n  \"quantity\": 5,\n  \"reason\": \"Customer purchase\",\n  \"referenceType\": \"SALE\",\n  \"referenceId\": \"sale123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Movement by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements/{{movementId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements",
+                                "{{movementId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Movements by Item",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements/item/{{inventoryItemId}}?page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements",
+                                "item",
+                                "{{inventoryItemId}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Movements by Inventory",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements/inventory/{{inventoryId}}?page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements",
+                                "inventory",
+                                "{{inventoryId}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Movements by Type",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements/type/{{movementType}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements",
+                                "type",
+                                "{{movementType}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Movements by User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements/user/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements",
+                                "user",
+                                "{{userId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Movements by Date Range",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements/date-range?startDate=2024-01-01T00:00:00&endDate=2024-12-31T23:59:59",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements",
+                                "date-range"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2024-01-01T00:00:00"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2024-12-31T23:59:59"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Movements by Reference",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventory-movements/reference?referenceType=SALE&referenceId=sale123",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventory-movements",
+                                "reference"
+                            ],
+                            "query": [
+                                {
+                                    "key": "referenceType",
+                                    "value": "SALE"
+                                },
+                                {
+                                    "key": "referenceId",
+                                    "value": "sale123"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
             "name": "Inventory Settings",
             "item": [
                 {
