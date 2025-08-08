@@ -524,19 +524,274 @@ class OrganizationServiceIntegrationTest {
     class OrganizationExistenceCheckIntegrationTests {
 
         @Test
-        @DisplayName("Organization exists by domain check should work correctly")
-        void organizationExistsByDomainCheck_ShouldWorkCorrectly() {
+        @DisplayName("Check organization exists by domain should return true when exists")
+        void checkOrganizationExistsByDomain_ShouldReturnTrueWhenExists() {
             // Given
             when(organizationRepository.existsByDomain("test.com")).thenReturn(true);
-            when(organizationRepository.existsByDomain("nonexistent.com")).thenReturn(false);
 
-            // When & Then
-            assertTrue(organizationService.organizationExistsByDomain("test.com"));
-            assertFalse(organizationService.organizationExistsByDomain("nonexistent.com"));
+            // When
+            boolean result = organizationService.organizationExistsByDomain("test.com");
+
+            // Then
+            assertTrue(result);
 
             // Verify interactions
             verify(organizationRepository).existsByDomain("test.com");
+        }
+
+        @Test
+        @DisplayName("Check organization exists by domain should return false when not exists")
+        void checkOrganizationExistsByDomain_ShouldReturnFalseWhenNotExists() {
+            // Given
+            when(organizationRepository.existsByDomain("nonexistent.com")).thenReturn(false);
+
+            // When
+            boolean result = organizationService.organizationExistsByDomain("nonexistent.com");
+
+            // Then
+            assertFalse(result);
+
+            // Verify interactions
             verify(organizationRepository).existsByDomain("nonexistent.com");
+        }
+
+        @Test
+        @DisplayName("Check organization exists by domain with null should return false")
+        void checkOrganizationExistsByDomain_WithNull_ShouldReturnFalse() {
+            // Given
+            when(organizationRepository.existsByDomain(null)).thenReturn(false);
+
+            // When
+            boolean result = organizationService.organizationExistsByDomain(null);
+
+            // Then
+            assertFalse(result);
+
+            // Verify interactions
+            verify(organizationRepository).existsByDomain(null);
+        }
+
+        @Test
+        @DisplayName("Check organization exists by domain with empty string should return false")
+        void checkOrganizationExistsByDomain_WithEmptyString_ShouldReturnFalse() {
+            // Given
+            when(organizationRepository.existsByDomain("")).thenReturn(false);
+
+            // When
+            boolean result = organizationService.organizationExistsByDomain("");
+
+            // Then
+            assertFalse(result);
+
+            // Verify interactions
+            verify(organizationRepository).existsByDomain("");
+        }
+    }
+
+    @Nested
+    @DisplayName("Edge Cases and Validation Tests")
+    class EdgeCasesAndValidationTests {
+
+        @Test
+        @DisplayName("Create organization with minimal valid data should work")
+        void createOrganizationWithMinimalValidData_ShouldWork() {
+            // Given
+            CreateOrganizationRequest minimalRequest = new CreateOrganizationRequest(
+                    "user-123",
+                    "Min Org",
+                    "min.com",
+                    null, // description can be null
+                    "123 Street",
+                    "1234567890",
+                    "contact@min.com"
+            );
+
+            Organization savedOrganization = Organization.builder()
+                    .id("min-org-123")
+                    .name("Min Org")
+                    .domain("min.com")
+                    .description(null)
+                    .address("123 Street")
+                    .phone("1234567890")
+                    .createdBy(testUser)
+                    .build();
+
+            when(organizationRepository.existsByPhone("1234567890")).thenReturn(false);
+            when(organizationRepository.existsByDomain("min.com")).thenReturn(false);
+            when(userService.getUserById("user-123")).thenReturn(testUser);
+            when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
+            when(inventorySettingsService.createAndSaveDefaultInventorySettings("min-org-123", "user-123"))
+                    .thenReturn(InventorySetting.builder().id("inv-min").organizationId("min-org-123").build());
+            when(posSettingsService.createAndSaveDefaultPOSSettings("min-org-123", "user-123"))
+                    .thenReturn(POSSetting.builder().id("pos-min").organizationId("min-org-123").build());
+            when(systemSettingsService.createAndSaveDefaultSystemSettings("min-org-123", "user-123"))
+                    .thenReturn(SystemSetting.builder().id("sys-min").organizationId("min-org-123").build());
+
+            // When
+            Organization result = organizationService.createOrganization(minimalRequest);
+
+            // Then
+            assertNotNull(result);
+            assertEquals("min-org-123", result.getId());
+            assertEquals("Min Org", result.getName());
+            assertEquals("min.com", result.getDomain());
+            assertNull(result.getDescription());
+            assertEquals("123 Street", result.getAddress());
+            assertEquals("1234567890", result.getPhone());
+        }
+
+        @Test
+        @DisplayName("Update organization with null description should work")
+        void updateOrganizationWithNullDescription_ShouldWork() {
+            // Given
+            UpdateOrganizationRequest nullDescRequest = new UpdateOrganizationRequest(
+                    "Updated Name",
+                    null, // null description
+                    "Updated Address"
+            );
+
+            Organization updatedOrganization = Organization.builder()
+                    .id("org-123")
+                    .name("Updated Name")
+                    .domain("test.com")
+                    .description(null)
+                    .address("Updated Address")
+                    .phone("9876543210")
+                    .createdBy(testUser)
+                    .build();
+
+            when(organizationRepository.findById("org-123")).thenReturn(Optional.of(testOrganization));
+            when(organizationRepository.save(any(Organization.class))).thenReturn(updatedOrganization);
+
+            // When
+            Organization result = organizationService.updateOrganization("org-123", nullDescRequest);
+
+            // Then
+            assertNotNull(result);
+            assertEquals("Updated Name", result.getName());
+            assertNull(result.getDescription());
+            assertEquals("Updated Address", result.getAddress());
+        }
+
+        @Test
+        @DisplayName("Search organizations with special characters should work")
+        void searchOrganizationsWithSpecialCharacters_ShouldWork() {
+            // Given
+            String specialSearchTerm = "Test & Co.";
+            List<Organization> searchResults = Arrays.asList(testOrganization);
+            when(organizationRepository.searchOrganizations("Test & Co.")).thenReturn(searchResults);
+
+            // When
+            List<Organization> result = organizationService.searchOrganizations(specialSearchTerm);
+
+            // Then
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            verify(organizationRepository).searchOrganizations("Test & Co.");
+        }
+
+        @Test
+        @DisplayName("Search organizations with single character should work")
+        void searchOrganizationsWithSingleCharacter_ShouldWork() {
+            // Given
+            String singleChar = "T";
+            List<Organization> searchResults = Arrays.asList(testOrganization);
+            when(organizationRepository.searchOrganizations("T")).thenReturn(searchResults);
+
+            // When
+            List<Organization> result = organizationService.searchOrganizations(singleChar);
+
+            // Then
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            verify(organizationRepository).searchOrganizations("T");
+        }
+    }
+
+    @Nested
+    @DisplayName("Transaction Rollback Tests")
+    class TransactionRollbackTests {
+
+        @Test
+        @DisplayName("Create organization with POS settings failure should rollback")
+        void createOrganizationWithPOSSettingsFailure_ShouldRollback() {
+            // Given
+            Organization savedOrganization = Organization.builder()
+                    .id("new-org-456")
+                    .name("New Organization")
+                    .domain("neworg.com")
+                    .description("New organization description")
+                    .address("456 New Street, New City")
+                    .phone("5555555555")
+                    .createdBy(testUser)
+                    .build();
+
+            when(organizationRepository.existsByPhone("5555555555")).thenReturn(false);
+            when(organizationRepository.existsByDomain("neworg.com")).thenReturn(false);
+            when(userService.getUserById("user-123")).thenReturn(testUser);
+            when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
+            when(inventorySettingsService.createAndSaveDefaultInventorySettings("new-org-456", "user-123"))
+                    .thenReturn(InventorySetting.builder().id("inv-123").organizationId("new-org-456").build());
+            doThrow(new RuntimeException("POS settings creation failed"))
+                    .when(posSettingsService).createAndSaveDefaultPOSSettings("new-org-456", "user-123");
+
+            // When & Then
+            BadRequestException exception = assertThrows(BadRequestException.class,
+                    () -> organizationService.createOrganization(createRequest));
+
+            assertTrue(exception.getMessage().contains("Failed to create organization"));
+            assertTrue(exception.getMessage().contains("POS settings creation failed"));
+
+            // Verify flow execution up to failure point
+            verify(organizationRepository).existsByPhone("5555555555");
+            verify(organizationRepository).existsByDomain("neworg.com");
+            verify(userService).getUserById("user-123");
+            verify(organizationRepository).save(any(Organization.class));
+            verify(inventorySettingsService).createAndSaveDefaultInventorySettings("new-org-456", "user-123");
+            verify(posSettingsService).createAndSaveDefaultPOSSettings("new-org-456", "user-123");
+            verify(systemSettingsService, never()).createAndSaveDefaultSystemSettings(anyString(), anyString());
+        }
+
+        @Test
+        @DisplayName("Create organization with system settings failure should rollback")
+        void createOrganizationWithSystemSettingsFailure_ShouldRollback() {
+            // Given
+            Organization savedOrganization = Organization.builder()
+                    .id("new-org-456")
+                    .name("New Organization")
+                    .domain("neworg.com")
+                    .description("New organization description")
+                    .address("456 New Street, New City")
+                    .phone("5555555555")
+                    .createdBy(testUser)
+                    .build();
+
+            when(organizationRepository.existsByPhone("5555555555")).thenReturn(false);
+            when(organizationRepository.existsByDomain("neworg.com")).thenReturn(false);
+            when(userService.getUserById("user-123")).thenReturn(testUser);
+            when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
+            when(inventorySettingsService.createAndSaveDefaultInventorySettings("new-org-456", "user-123"))
+                    .thenReturn(InventorySetting.builder().id("inv-123").organizationId("new-org-456").build());
+            when(posSettingsService.createAndSaveDefaultPOSSettings("new-org-456", "user-123"))
+                    .thenReturn(POSSetting.builder().id("pos-123").organizationId("new-org-456").build());
+            doThrow(new RuntimeException("System settings creation failed"))
+                    .when(systemSettingsService).createAndSaveDefaultSystemSettings("new-org-456", "user-123");
+
+            // When & Then
+            BadRequestException exception = assertThrows(BadRequestException.class,
+                    () -> organizationService.createOrganization(createRequest));
+
+            assertTrue(exception.getMessage().contains("Failed to create organization"));
+            assertTrue(exception.getMessage().contains("System settings creation failed"));
+
+            // Verify complete flow execution up to failure point
+            verify(organizationRepository).existsByPhone("5555555555");
+            verify(organizationRepository).existsByDomain("neworg.com");
+            verify(userService).getUserById("user-123");
+            verify(organizationRepository).save(any(Organization.class));
+            verify(inventorySettingsService).createAndSaveDefaultInventorySettings("new-org-456", "user-123");
+            verify(posSettingsService).createAndSaveDefaultPOSSettings("new-org-456", "user-123");
+            verify(systemSettingsService).createAndSaveDefaultSystemSettings("new-org-456", "user-123");
         }
     }
 }
