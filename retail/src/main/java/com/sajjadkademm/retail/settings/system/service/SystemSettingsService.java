@@ -33,7 +33,6 @@ public class SystemSettingsService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
 
-                setting.setTwoFactorAuthEnabled(request.getTwoFactorAuthEnabled());
                 setting.setAutoBackupEnabled(request.getAutoBackupEnabled());
                 setting.setBackupRetentionDays(request.getBackupRetentionDays());
                 setting.setTimezone(request.getTimezone());
@@ -65,7 +64,6 @@ public class SystemSettingsService {
         public SystemSetting createDefaultSystemSettings(String organizationId) {
                 return SystemSetting.builder()
                                 .organizationId(organizationId)
-                                .twoFactorAuthEnabled(false)
                                 // Backup Settings
                                 .autoBackupEnabled(true)
                                 .backupRetentionDays(30)

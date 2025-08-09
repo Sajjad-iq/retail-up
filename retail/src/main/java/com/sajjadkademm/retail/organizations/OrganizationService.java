@@ -6,8 +6,6 @@ import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
-import com.sajjadkademm.retail.settings.inventory.service.InventorySettingsService;
-import com.sajjadkademm.retail.settings.pos.service.POSSettingsService;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
@@ -22,20 +20,14 @@ import java.util.List;
 @Service
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
-    private final InventorySettingsService inventorySettingsService;
-    private final POSSettingsService posSettingsService;
     private final SystemSettingsService systemSettingsService;
     private final UserService userService;
 
     @Autowired
     public OrganizationService(OrganizationRepository organizationRepository,
-            InventorySettingsService inventorySettingsService,
-            POSSettingsService posSettingsService,
             SystemSettingsService systemSettingsService,
             UserService userService) {
         this.organizationRepository = organizationRepository;
-        this.inventorySettingsService = inventorySettingsService;
-        this.posSettingsService = posSettingsService;
         this.systemSettingsService = systemSettingsService;
         this.userService = userService;
     }
@@ -81,10 +73,7 @@ public class OrganizationService {
             Organization savedOrganization = organizationRepository.save(organization);
 
             // Create and save default settings for the organization
-            // If any of these fail, the entire transaction will be rolled back
-            inventorySettingsService.createAndSaveDefaultInventorySettings(savedOrganization.getId(),
-                    request.getUserId());
-            posSettingsService.createAndSaveDefaultPOSSettings(savedOrganization.getId(), request.getUserId());
+            // If this fails, the entire transaction will be rolled back
             systemSettingsService.createAndSaveDefaultSystemSettings(savedOrganization.getId(), request.getUserId());
 
             return savedOrganization;

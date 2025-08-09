@@ -43,9 +43,6 @@ public class SystemSetting {
     @NotNull(message = "Organization ID is required")
     private String organizationId;
 
-    @Column(name = "two_factor_auth_enabled", nullable = false)
-    @NotNull(message = "Two factor auth enabled is required")
-    private Boolean twoFactorAuthEnabled = false;
     // Backup Settings
     @Column(name = "auto_backup_enabled", nullable = false)
     @NotNull(message = "Auto backup enabled is required")

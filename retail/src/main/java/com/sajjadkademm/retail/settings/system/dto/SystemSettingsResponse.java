@@ -16,8 +16,6 @@ public class SystemSettingsResponse {
     private String id;
     private String organizationId;
 
-    private Boolean twoFactorAuthEnabled;
-
     // Backup Settings
     private Boolean autoBackupEnabled;
     private Integer backupRetentionDays;

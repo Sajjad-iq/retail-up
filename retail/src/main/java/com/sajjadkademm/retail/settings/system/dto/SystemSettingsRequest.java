@@ -14,13 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SystemSettingsRequest {
 
-    @NotNull(message = "Two factor auth enabled is required")
-    private Boolean twoFactorAuthEnabled;
-
-    // Backup Settings
-    @NotNull(message = "Auto backup enabled is required")
-    private Boolean autoBackupEnabled;
-
     @Min(value = 1, message = "Backup retention days must be at least 1")
     @Max(value = 365, message = "Backup retention days cannot exceed 365")
     private Integer backupRetentionDays;
