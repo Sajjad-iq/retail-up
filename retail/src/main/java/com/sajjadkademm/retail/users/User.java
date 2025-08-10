@@ -26,6 +26,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -43,6 +45,7 @@ public class User {
 
     @Column(name = "phone", nullable = true, unique = true)
     @Size(min = 10, max = 20)
+    @JsonIgnore
     private String phone;
 
     @Column(name = "email", nullable = true)
@@ -51,6 +54,7 @@ public class User {
 
     @Column(name = "password", nullable = false)
     @NotBlank(message = "Password is required")
+    @JsonIgnore
     private String password;
 
     @Column(name = "status", nullable = false)
@@ -72,5 +76,6 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Column(name = "last_login_at", nullable = true)
+    @JsonIgnore
     private LocalDateTime lastLoginAt;
 }

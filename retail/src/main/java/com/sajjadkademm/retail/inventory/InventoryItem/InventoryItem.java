@@ -34,6 +34,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 import com.sajjadkademm.retail.users.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -250,6 +251,7 @@ public class InventoryItem {
 
         // Many-to-One relationship with User entity (tracks who created this item)
         @ManyToOne(optional = false, fetch = FetchType.EAGER)
+        @JsonIgnoreProperties({ "password", "phone", "lastLoginAt" })
         @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
         private User createdBy;
 }

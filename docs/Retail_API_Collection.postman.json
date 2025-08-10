@@ -11,6 +11,14 @@
         {
             "key": "token",
             "value": ""
+        },
+        {
+            "key": "userId",
+            "value": "usr_00000000000000000001"
+        },
+        {
+            "key": "organizationId",
+            "value": "org_00000000000000000001"
         }
     ],
     "item": [
@@ -49,7 +57,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"userId\": \"user123\",\n  \"name\": \"Acme Corporation\",\n  \"domain\": \"acme.com\",\n  \"description\": \"A leading retail company specializing in electronics and home appliances\",\n  \"address\": \"123 Business Street, New York, NY 10001\",\n  \"phone\": \"+1-555-123-4567\"\n}"
+                            "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"name\": \"Acme Corporation\",\n  \"domain\": \"acme.com\",\n  \"description\": \"A leading retail company specializing in electronics and home appliances\",\n  \"address\": \"123 Business Street, New York, NY 10001\",\n  \"phone\": \"+1-555-123-4567\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/organizations",
@@ -82,14 +90,14 @@
                             "raw": "{\n  \"name\": \"Acme Corporation Updated\",\n  \"description\": \"Updated description\",\n  \"address\": \"456 Updated Business Ave, New York, NY 10002\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/organizations/:id",
+                            "raw": "{{baseUrl}}/api/organizations/{{id}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
                                 "organizations",
-                                ":id"
+                                "{{id}}"
                             ]
                         }
                     }
@@ -105,14 +113,14 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/organizations/:id",
+                            "raw": "{{baseUrl}}/api/organizations/{{id}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
                                 "organizations",
-                                ":id"
+                                "{{id}}"
                             ]
                         }
                     }
@@ -179,7 +187,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/organizations/exists/domain/:domain",
+                            "raw": "{{baseUrl}}/api/organizations/exists/domain/{{domain}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -188,7 +196,7 @@
                                 "organizations",
                                 "exists",
                                 "domain",
-                                ":domain"
+                                "{{domain}}"
                             ]
                         }
                     }
@@ -292,7 +300,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"userId\": \"123\",\n  \"oldPassword\": \"oldpassword123\",\n  \"newPassword\": \"newpassword123\"\n}"
+                            "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"oldPassword\": \"oldpassword123\",\n  \"newPassword\": \"newpassword123\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/auth/change-password",
@@ -351,7 +359,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"userId\": \"user123\",\n  \"organizationId\": \"org123\",\n  \"name\": \"Main Warehouse\",\n  \"description\": \"Primary inventory location\",\n  \"location\": \"Building A, Floor 1\",\n  \"type\": \"WAREHOUSE\"\n}"
+                            "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"name\": \"Main Warehouse\",\n  \"description\": \"Primary inventory location\",\n  \"location\": \"Building A, Floor 1\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/inventories",
@@ -381,7 +389,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"name\": \"Updated Warehouse\",\n  \"description\": \"Updated description\",\n  \"location\": \"Building B, Floor 2\",\n  \"type\": \"WAREHOUSE\"\n}"
+                            "raw": "{\n  \"name\": \"Updated Warehouse\",\n  \"description\": \"Updated description\",\n  \"location\": \"Building B, Floor 2\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/inventories/{{inventoryId}}",
@@ -479,32 +487,97 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/inventories/search?organizationId={{organizationId}}&query=warehouse&page=0&size=20",
+                            "raw": "{{baseUrl}}/api/inventories/organization/{{organizationId}}/search?q=warehouse",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
                                 "inventories",
+                                "organization",
+                                "{{organizationId}}",
                                 "search"
                             ],
                             "query": [
                                 {
-                                    "key": "organizationId",
-                                    "value": "{{organizationId}}"
-                                },
-                                {
-                                    "key": "query",
+                                    "key": "q",
                                     "value": "warehouse"
-                                },
-                                {
-                                    "key": "page",
-                                    "value": "0"
-                                },
-                                {
-                                    "key": "size",
-                                    "value": "20"
                                 }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Inventory",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/{{inventoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "{{inventoryId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check Inventory Exists by Name",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/exists/name/{{name}}/organization/{{organizationId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "exists",
+                                "name",
+                                "{{name}}",
+                                "organization",
+                                "{{organizationId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Inventory Count by Organization",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/inventories/organization/{{organizationId}}/count",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "inventories",
+                                "organization",
+                                "{{organizationId}}",
+                                "count"
                             ]
                         }
                     }
@@ -530,7 +603,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"userId\": \"user123\",\n  \"inventoryId\": \"inv123\",\n  \"name\": \"Laptop Computer\",\n  \"description\": \"High-performance laptop for business use\",\n  \"sku\": \"LAPTOP001\",\n  \"barcode\": \"1234567890123\",\n  \"category\": \"Electronics\",\n  \"brand\": \"TechCorp\",\n  \"unit\": \"PIECES\",\n  \"currentStock\": 50,\n  \"minimumStock\": 10,\n  \"maximumStock\": 100,\n  \"costPrice\": 800.00,\n  \"sellingPrice\": 1200.00\n}"
+                            "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"inventoryId\": \"{{inventoryId}}\",\n  \"name\": \"Laptop Computer\",\n  \"description\": \"High-performance laptop for business use\",\n  \"sku\": \"LAPTOP001\",\n  \"productCode\": \"PC-001\",\n  \"barcode\": \"1234567890123\",\n  \"category\": \"Electronics\",\n  \"brand\": \"TechCorp\",\n  \"supplierName\": \"TechSupplier\",\n  \"unit\": \"PIECES\",\n  \"weight\": 1.25,\n  \"dimensions\": \"30x20x2\",\n  \"color\": \"Black\",\n  \"size\": \"15-inch\",\n  \"currentStock\": 50,\n  \"minimumStock\": 10,\n  \"maximumStock\": 100,\n  \"costPrice\": 800.00,\n  \"sellingPrice\": 1200.00,\n  \"discountPrice\": 1100.00,\n  \"discountStartDate\": \"2025-01-01T00:00:00\",\n  \"discountEndDate\": \"2025-01-15T23:59:59\",\n  \"isPerishable\": false,\n  \"expiryDate\": null\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/inventory-items",
@@ -661,7 +734,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/inventory-items/inventory/{{inventoryId}}?page=0&size=20&sortBy=createdAt&sortDirection=desc&search=laptop&category=Electronics&activeOnly=true",
+                            "raw": "{{baseUrl}}/api/inventory-items/inventory/{{inventoryId}}?page=0&size=20&sortBy=createdAt&sortDirection=desc&search=laptop&category=Electronics&brand=TechCorp&supplier=TechSupplier&itemSize=15-inch&activeOnly=true&perishable=false&lowStock=false&outOfStock=false&hasDiscount=true&minStock=1&maxStock=100&minCostPrice=100&maxCostPrice=1000&minSellingPrice=150&maxSellingPrice=2000&createdAfter=2024-01-01&createdBefore=2025-12-31&expiryAfter=2025-01-01&expiryBefore=2025-12-31&expiryStatus=expiring&expiryDays=7",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -697,8 +770,84 @@
                                     "value": "Electronics"
                                 },
                                 {
+                                    "key": "brand",
+                                    "value": "TechCorp"
+                                },
+                                {
+                                    "key": "supplier",
+                                    "value": "TechSupplier"
+                                },
+                                {
+                                    "key": "itemSize",
+                                    "value": "15-inch"
+                                },
+                                {
                                     "key": "activeOnly",
                                     "value": "true"
+                                },
+                                {
+                                    "key": "perishable",
+                                    "value": "false"
+                                },
+                                {
+                                    "key": "lowStock",
+                                    "value": "false"
+                                },
+                                {
+                                    "key": "outOfStock",
+                                    "value": "false"
+                                },
+                                {
+                                    "key": "hasDiscount",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "minStock",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "maxStock",
+                                    "value": "100"
+                                },
+                                {
+                                    "key": "minCostPrice",
+                                    "value": "100"
+                                },
+                                {
+                                    "key": "maxCostPrice",
+                                    "value": "1000"
+                                },
+                                {
+                                    "key": "minSellingPrice",
+                                    "value": "150"
+                                },
+                                {
+                                    "key": "maxSellingPrice",
+                                    "value": "2000"
+                                },
+                                {
+                                    "key": "createdAfter",
+                                    "value": "2024-01-01"
+                                },
+                                {
+                                    "key": "createdBefore",
+                                    "value": "2025-12-31"
+                                },
+                                {
+                                    "key": "expiryAfter",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "expiryBefore",
+                                    "value": "2025-12-31"
+                                },
+                                {
+                                    "key": "expiryStatus",
+                                    "value": "expiring"
+                                },
+                                {
+                                    "key": "expiryDays",
+                                    "value": "7"
                                 }
                             ]
                         }
@@ -799,7 +948,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"userId\": \"user123\",\n  \"inventoryItemId\": \"item123\",\n  \"movementType\": \"SALE\",\n  \"quantity\": 5,\n  \"reason\": \"Customer purchase\",\n  \"referenceType\": \"SALE\",\n  \"referenceId\": \"sale123\"\n}"
+                            "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"inventoryItemId\": \"{{itemId}}\",\n  \"movementType\": \"SALE\",\n  \"quantity\": 5,\n  \"reason\": \"Customer purchase\",\n  \"referenceType\": \"SALE\",\n  \"referenceId\": \"sale123\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/inventory-movements",
@@ -1034,7 +1183,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/inventory/:organizationId",
+                            "raw": "{{baseUrl}}/api/settings/inventory/{{organizationId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1042,7 +1191,7 @@
                                 "api",
                                 "settings",
                                 "inventory",
-                                ":organizationId"
+                                "{{organizationId}}"
                             ]
                         }
                     }
@@ -1063,10 +1212,10 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"userId\": \"user123\",\n  \"negativeStockAllowed\": true,\n  \"barcodeRequired\": false,\n  \"skuRequired\": true,\n  \"requireCostPrice\": false,\n  \"lowStockAlertsEnabled\": true,\n  \"lowStockThreshold\": 5,\n  \"outOfStockAlertsEnabled\": false,\n  \"expiryAlertsEnabled\": true,\n  \"expiryAlertDays\": 14,\n  \"batchTrackingEnabled\": false,\n  \"expiryDateTrackingEnabled\": true\n}"
+                            "raw": "{\n  \"negativeStockAllowed\": true,\n  \"barcodeRequired\": false,\n  \"skuRequired\": true,\n  \"requireCostPrice\": false,\n  \"lowStockAlertsEnabled\": true,\n  \"lowStockThreshold\": 5,\n  \"outOfStockAlertsEnabled\": false,\n  \"expiryAlertsEnabled\": true,\n  \"expiryAlertDays\": 14,\n  \"batchTrackingEnabled\": false,\n  \"expiryDateTrackingEnabled\": true\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/inventory/:organizationId",
+                            "raw": "{{baseUrl}}/api/settings/inventory/{{organizationId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1074,7 +1223,7 @@
                                 "api",
                                 "settings",
                                 "inventory",
-                                ":organizationId"
+                                "{{organizationId}}"
                             ]
                         }
                     }
@@ -1090,7 +1239,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/inventory/:organizationId/reset",
+                            "raw": "{{baseUrl}}/api/settings/inventory/{{organizationId}}/reset",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1098,7 +1247,7 @@
                                 "api",
                                 "settings",
                                 "inventory",
-                                ":organizationId",
+                                "{{organizationId}}",
                                 "reset"
                             ]
                         }
@@ -1120,7 +1269,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/system/:organizationId",
+                            "raw": "{{baseUrl}}/api/settings/system/{{organizationId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1128,7 +1277,7 @@
                                 "api",
                                 "settings",
                                 "system",
-                                ":organizationId"
+                                "{{organizationId}}"
                             ]
                         }
                     }
@@ -1149,10 +1298,10 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"userId\": \"user123\",\n  \"twoFactorAuthEnabled\": false,\n  \"autoBackupEnabled\": true,\n  \"backupRetentionDays\": 60,\n  \"timezone\": \"Europe/London\",\n  \"language\": \"en\",\n  \"currency\": \"EUR\",\n  \"emailNotificationsEnabled\": false\n}"
+                            "raw": "{\n  \"backupRetentionDays\": 60,\n  \"timezone\": \"Europe/London\",\n  \"language\": \"en\",\n  \"currency\": \"EUR\",\n  \"emailNotificationsEnabled\": false\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/system/:organizationId",
+                            "raw": "{{baseUrl}}/api/settings/system/{{organizationId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1160,7 +1309,7 @@
                                 "api",
                                 "settings",
                                 "system",
-                                ":organizationId"
+                                "{{organizationId}}"
                             ]
                         }
                     }
@@ -1176,7 +1325,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/system/:organizationId/reset",
+                            "raw": "{{baseUrl}}/api/settings/system/{{organizationId}}/reset",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1184,7 +1333,7 @@
                                 "api",
                                 "settings",
                                 "system",
-                                ":organizationId",
+                                "{{organizationId}}",
                                 "reset"
                             ]
                         }
@@ -1206,7 +1355,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/pos/:organizationId",
+                            "raw": "{{baseUrl}}/api/settings/pos/{{organizationId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1214,7 +1363,7 @@
                                 "api",
                                 "settings",
                                 "pos",
-                                ":organizationId"
+                                "{{organizationId}}"
                             ]
                         }
                     }
@@ -1238,7 +1387,7 @@
                             "raw": "{\n  \"userId\": \"user123\",\n  \"cashPaymentEnabled\": true,\n  \"cardPaymentEnabled\": true,\n  \"changeCalculationMethod\": \"manual\",\n  \"allowPartialPayments\": true,\n  \"requireExactChange\": false,\n  \"autoPrintReceipts\": false,\n  \"receiptTemplateHtml\": \"templates/updated-receipt-main.html\",\n  \"receiptHeaderTemplateHtml\": \"templates/updated-receipt-header.html\",\n  \"receiptFooterTemplateHtml\": \"templates/updated-receipt-footer.html\",\n  \"receiptPaperWidthMm\": 58,\n  \"holdTransactionsEnabled\": false,\n  \"returnsEnabled\": true,\n  \"discountsEnabled\": false,\n  \"customerLookupEnabled\": false,\n  \"requireCustomerInfo\": true,\n  \"showProductImages\": false,\n  \"showStockLevels\": true\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/pos/:organizationId",
+                            "raw": "{{baseUrl}}/api/settings/pos/{{organizationId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1246,7 +1395,7 @@
                                 "api",
                                 "settings",
                                 "pos",
-                                ":organizationId"
+                                "{{organizationId}}"
                             ]
                         }
                     }
@@ -1262,7 +1411,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/settings/pos/:organizationId/reset",
+                            "raw": "{{baseUrl}}/api/settings/pos/{{organizationId}}/reset",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1270,7 +1419,7 @@
                                 "api",
                                 "settings",
                                 "pos",
-                                ":organizationId",
+                                "{{organizationId}}",
                                 "reset"
                             ]
                         }

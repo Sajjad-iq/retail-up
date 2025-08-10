@@ -26,6 +26,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.users.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -81,6 +82,7 @@ public class Inventory {
     private Organization organization;
 
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({ "password", "phone", "lastLoginAt" })
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
 
