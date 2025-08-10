@@ -56,7 +56,7 @@ public interface InventoryItemRepository
        List<InventoryItem> findOutOfStockItems(@Param("inventoryId") String inventoryId);
 
        // Find items expiring soon (within specified days)
-       @Query(value = "SELECT * FROM inventory_item i WHERE i.inventory_id = :inventoryId AND i.is_perishable = true AND i.expiry_date IS NOT NULL AND i.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL :days DAY) AND i.is_active = true", nativeQuery = true)
+       @Query(value = "SELECT * FROM inventory_items i WHERE i.inventory_id = :inventoryId AND i.is_perishable = true AND i.expiry_date IS NOT NULL AND i.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL :days DAY) AND i.is_active = true", nativeQuery = true)
        List<InventoryItem> findItemsExpiringSoon(@Param("inventoryId") String inventoryId, @Param("days") int days);
 
        // Find expired items
@@ -76,12 +76,12 @@ public interface InventoryItemRepository
        @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.isActive = true ORDER BY i.totalSold DESC LIMIT :limit")
        List<InventoryItem> findTopSellingItems(@Param("inventoryId") String inventoryId, @Param("limit") int limit);
 
-       // Calculate total inventory value (selling price * current stock)
-       @Query("SELECT COALESCE(SUM(i.sellingPrice * i.currentStock), 0) FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.isActive = true")
+       // Calculate total inventory value (selling price amount * current stock)
+       @Query("SELECT COALESCE(SUM(i.sellingPrice.amount * i.currentStock), 0) FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.isActive = true")
        BigDecimal calculateTotalInventoryValue(@Param("inventoryId") String inventoryId);
 
-       // Calculate total inventory cost (cost price * current stock)
-       @Query("SELECT COALESCE(SUM(i.costPrice * i.currentStock), 0) FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.costPrice IS NOT NULL AND i.isActive = true")
+       // Calculate total inventory cost (cost price amount * current stock)
+       @Query("SELECT COALESCE(SUM(i.costPrice.amount * i.currentStock), 0) FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.costPrice IS NOT NULL AND i.isActive = true")
        BigDecimal calculateTotalInventoryCost(@Param("inventoryId") String inventoryId);
 
        // Check if SKU exists within an inventory
@@ -134,7 +134,7 @@ public interface InventoryItemRepository
        Page<InventoryItem> findOutOfStockItems(@Param("inventoryId") String inventoryId, Pageable pageable);
 
        // Find items expiring soon with pagination
-       @Query(value = "SELECT * FROM inventory_item i WHERE i.inventory_id = :inventoryId AND i.is_perishable = true AND i.expiry_date IS NOT NULL AND i.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL :days DAY) AND i.is_active = true", countQuery = "SELECT COUNT(*) FROM inventory_item i WHERE i.inventory_id = :inventoryId AND i.is_perishable = true AND i.expiry_date IS NOT NULL AND i.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL :days DAY) AND i.is_active = true", nativeQuery = true)
+       @Query(value = "SELECT * FROM inventory_items i WHERE i.inventory_id = :inventoryId AND i.is_perishable = true AND i.expiry_date IS NOT NULL AND i.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL :days DAY) AND i.is_active = true", countQuery = "SELECT COUNT(*) FROM inventory_items i WHERE i.inventory_id = :inventoryId AND i.is_perishable = true AND i.expiry_date IS NOT NULL AND i.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL :days DAY) AND i.is_active = true", nativeQuery = true)
        Page<InventoryItem> findItemsExpiringSoon(@Param("inventoryId") String inventoryId, @Param("days") int days,
                      Pageable pageable);
 
@@ -162,10 +162,10 @@ public interface InventoryItemRepository
                      "AND (:isPerishable IS NULL OR i.isPerishable = :isPerishable) " +
                      "AND (:minStock IS NULL OR i.currentStock >= :minStock) " +
                      "AND (:maxStock IS NULL OR i.currentStock <= :maxStock) " +
-                     "AND (:minCostPrice IS NULL OR i.costPrice >= :minCostPrice) " +
-                     "AND (:maxCostPrice IS NULL OR i.costPrice <= :maxCostPrice) " +
-                     "AND (:minSellingPrice IS NULL OR i.sellingPrice >= :minSellingPrice) " +
-                     "AND (:maxSellingPrice IS NULL OR i.sellingPrice <= :maxSellingPrice) " +
+                     "AND (:minCostPrice IS NULL OR i.costPrice.amount >= :minCostPrice) " +
+                     "AND (:maxCostPrice IS NULL OR i.costPrice.amount <= :maxCostPrice) " +
+                     "AND (:minSellingPrice IS NULL OR i.sellingPrice.amount >= :minSellingPrice) " +
+                     "AND (:maxSellingPrice IS NULL OR i.sellingPrice.amount <= :maxSellingPrice) " +
                      "AND (:searchTerm IS NULL OR i.name LIKE %:searchTerm% OR i.sku LIKE %:searchTerm% OR i.barcode LIKE %:searchTerm% OR i.productCode LIKE %:searchTerm%)")
        Page<InventoryItem> findWithFilters(
                      @Param("inventoryId") String inventoryId,

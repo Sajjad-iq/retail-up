@@ -33,7 +33,6 @@ public class SystemSettingsService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
 
-                setting.setAutoBackupEnabled(request.getAutoBackupEnabled());
                 setting.setBackupRetentionDays(request.getBackupRetentionDays());
                 setting.setTimezone(request.getTimezone());
                 setting.setLanguage(request.getLanguage());

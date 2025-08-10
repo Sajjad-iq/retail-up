@@ -5,12 +5,16 @@ import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
+import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.utils.dto.Currency;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,15 +30,18 @@ import java.math.BigDecimal;
 public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryService inventoryService;
+    private final SystemSettingsService systemSettingsService;
     private final UserService userService;
 
     @Autowired
     public InventoryItemService(InventoryItemRepository inventoryItemRepository,
             InventoryService inventoryService,
-            UserService userService) {
+            UserService userService,
+            SystemSettingsService systemSettingsService) {
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryService = inventoryService;
         this.userService = userService;
+        this.systemSettingsService = systemSettingsService;
     }
 
     /**
@@ -70,6 +77,8 @@ public class InventoryItemService {
                 }
             }
 
+            Currency currency = resolveCurrency(inventory.getOrganizationId());
+
             InventoryItem item = InventoryItem.builder()
                     .name(request.getName())
                     .description(request.getDescription())
@@ -86,8 +95,8 @@ public class InventoryItemService {
                     .currentStock(request.getCurrentStock())
                     .minimumStock(request.getMinimumStock())
                     .maximumStock(request.getMaximumStock())
-                    .costPrice(request.getCostPrice())
-                    .sellingPrice(request.getSellingPrice())
+                    .costPrice(request.getCostPrice() != null ? new Money(request.getCostPrice(), currency) : null)
+                    .sellingPrice(new Money(request.getSellingPrice(), currency))
                     .discountPrice(request.getDiscountPrice())
                     .discountStartDate(request.getDiscountStartDate())
                     .discountEndDate(request.getDiscountEndDate())
@@ -171,10 +180,22 @@ public class InventoryItemService {
             item.setMaximumStock(request.getMaximumStock());
         }
         if (request.getCostPrice() != null) {
-            item.setCostPrice(request.getCostPrice());
+            Currency currency = resolveCurrency(item.getInventory().getOrganizationId());
+            if (item.getCostPrice() == null) {
+                item.setCostPrice(new Money(request.getCostPrice(), currency));
+            } else {
+                item.getCostPrice().setAmount(request.getCostPrice());
+                item.getCostPrice().setCurrency(currency);
+            }
         }
         if (request.getSellingPrice() != null) {
-            item.setSellingPrice(request.getSellingPrice());
+            Currency currency = resolveCurrency(item.getInventory().getOrganizationId());
+            if (item.getSellingPrice() == null) {
+                item.setSellingPrice(new Money(request.getSellingPrice(), currency));
+            } else {
+                item.getSellingPrice().setAmount(request.getSellingPrice());
+                item.getSellingPrice().setCurrency(currency);
+            }
         }
         if (request.getDiscountPrice() != null) {
             item.setDiscountPrice(request.getDiscountPrice());
@@ -256,7 +277,7 @@ public class InventoryItemService {
     public InventoryItem updateStock(String itemId, Integer newStock) {
         InventoryItem item = inventoryItemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + itemId));
-        
+
         item.setCurrentStock(newStock);
         return inventoryItemRepository.save(item);
     }
@@ -332,6 +353,23 @@ public class InventoryItemService {
                 .numberOfElements(page.getNumberOfElements())
                 .empty(page.isEmpty())
                 .build();
+    }
+
+    private Currency resolveCurrency(String organizationId) {
+        try {
+            SystemSetting systemSetting = systemSettingsService.getSystemSettings(organizationId);
+            String currencyCode = systemSetting.getCurrency();
+            if (currencyCode == null || currencyCode.isBlank()) {
+                return Currency.USD;
+            }
+            try {
+                return Currency.valueOf(currencyCode.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return Currency.USD;
+            }
+        } catch (Exception ex) {
+            return Currency.USD;
+        }
     }
 
 }
