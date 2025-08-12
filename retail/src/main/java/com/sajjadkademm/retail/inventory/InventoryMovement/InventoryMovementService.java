@@ -6,6 +6,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.users.User;
 // Removed UserRepository dependency; user is provided via request
 
@@ -81,6 +82,79 @@ public class InventoryMovementService {
             throw e;
         } catch (Exception e) {
             throw new BadRequestException("Failed to record inventory movement: " + e.getMessage(), e);
+        }
+    }
+
+    // Convenience methods for common movement types
+
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordStockIn(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.STOCK_IN);
+        request.setQuantity(quantity);
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordStockOut(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.STOCK_OUT);
+        request.setQuantity(Math.abs(quantity));
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordAdjustmentIn(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.ADJUSTMENT_IN);
+        request.setQuantity(quantity);
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordAdjustmentOut(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.ADJUSTMENT_OUT);
+        request.setQuantity(Math.abs(quantity));
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordAdjustmentToTarget(User user, InventoryItem item, int targetStock, String reason,
+            ReferenceType referenceType, String referenceId) {
+        int current = item.getCurrentStock();
+        int delta = targetStock - current;
+        if (delta == 0) {
+            return null;
+        }
+        if (delta > 0) {
+            return recordAdjustmentIn(user, item, delta, reason, referenceType, referenceId);
+        } else {
+            return recordAdjustmentOut(user, item, Math.abs(delta), reason, referenceType, referenceId);
         }
     }
 

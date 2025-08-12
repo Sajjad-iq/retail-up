@@ -13,9 +13,6 @@ import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemCreate
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.ValidatedCreateInventoryItemContext;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemUpdateUtils;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
@@ -66,10 +63,13 @@ public class InventoryItemService {
             Inventory inventory = context.getInventory();
             User user = context.getUser();
 
+            // get currency from organization settings
             Currency currency = resolveCurrency(inventory.getOrganizationId());
 
+            // get initial stock from request
             Integer initialStock = request.getCurrentStock();
 
+            // create inventory item
             InventoryItem item = InventoryItem.builder()
                     .name(request.getName())
                     .description(request.getDescription())
@@ -99,23 +99,18 @@ public class InventoryItemService {
                     .createdBy(user)
                     .build();
 
+            // save inventory item
             InventoryItem saved = inventoryItemRepository.save(item);
 
-            // Record initial STOCK_IN movement if initialStock > 0 and movement service
-            // available
-            if (inventoryMovementService != null && initialStock != null) {
-                CreateMovementRequest movementRequest = new CreateMovementRequest();
-                movementRequest.setUser(user);
-                movementRequest.setInventoryItem(saved);
-                movementRequest.setMovementType(MovementType.STOCK_IN);
-                movementRequest.setQuantity(initialStock);
-                movementRequest.setReason("Initial stock on item creation");
-                movementRequest.setReferenceType(ReferenceType.ADJUSTMENT);
-                movementRequest.setReferenceId(saved.getId());
-
-                inventoryMovementService.recordMovement(movementRequest);
-                // Reflect expected stock on the returned instance
-                saved.setCurrentStock(initialStock);
+            // record initial STOCK_IN movement via movement service helpers
+            if (inventoryMovementService != null && initialStock != null && initialStock > 0) {
+                inventoryMovementService.recordStockIn(
+                        user,
+                        saved,
+                        initialStock,
+                        "Initial stock on item creation",
+                        com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType.ADJUSTMENT,
+                        saved.getId());
             }
 
             return saved;
@@ -137,13 +132,30 @@ public class InventoryItemService {
         InventoryItem item = inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
 
-        // Validation via validator
+        // validation
         inventoryItemUpdateValidator.validate(item, request);
 
-        // Apply updates via validator
+        // capture current stock before applying updates
+        Integer requestedStock = request.getCurrentStock();
+
+        // apply field updates
         inventoryItemUpdateValidator.applyUpdates(item, request);
 
-        return inventoryItemRepository.save(item);
+        // record stock movement if stock changed (use saved item to keep update order
+        // logical)
+        InventoryItem updated = inventoryItemRepository.save(item);
+        if (requestedStock != null && inventoryMovementService != null) {
+            // attribute to item's creator by default
+            User actor = updated.getCreatedBy();
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    updated,
+                    requestedStock,
+                    "Stock adjusted via item update",
+                    com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType.ADJUSTMENT,
+                    updated.getId());
+        }
+        return updated;
     }
 
     /**
