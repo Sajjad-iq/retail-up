@@ -35,8 +35,6 @@ public class AuthService {
      * Authenticate user with email/phone and password
      */
     public LoginResponse login(LoginRequest request) {
-        log.info("Attempting login for user: {}", request.getEmailOrPhone());
-
         // Find user by email or phone
         Optional<User> userOpt = findUserByEmailOrPhone(request.getEmailOrPhone());
 

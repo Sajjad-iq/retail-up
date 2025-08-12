@@ -4,12 +4,14 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemCreateValidator;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.ValidatedCreateInventoryItemContext;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemUpdateUtils;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
@@ -17,7 +19,7 @@ import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserService;
+// removed unused UserService import
 import com.sajjadkademm.retail.utils.dto.Currency;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
-    private final InventoryService inventoryService;
     private final SystemSettingsService systemSettingsService;
-    private final UserService userService;
+    private final InventoryItemCreateValidator inventoryItemCreateValidator;
+    private final InventoryItemUpdateUtils inventoryItemUpdateValidator;
 
     // Optional lazy injection to avoid circular dependency with
     // InventoryMovementService
@@ -44,13 +46,13 @@ public class InventoryItemService {
 
     @Autowired
     public InventoryItemService(InventoryItemRepository inventoryItemRepository,
-            InventoryService inventoryService,
-            UserService userService,
-            SystemSettingsService systemSettingsService) {
+            SystemSettingsService systemSettingsService,
+            InventoryItemCreateValidator inventoryItemCreateValidator,
+            InventoryItemUpdateUtils inventoryItemUpdateValidator) {
         this.inventoryItemRepository = inventoryItemRepository;
-        this.inventoryService = inventoryService;
-        this.userService = userService;
         this.systemSettingsService = systemSettingsService;
+        this.inventoryItemCreateValidator = inventoryItemCreateValidator;
+        this.inventoryItemUpdateValidator = inventoryItemUpdateValidator;
     }
 
     /**
@@ -59,32 +61,10 @@ public class InventoryItemService {
     @Transactional(rollbackFor = { Exception.class })
     public InventoryItem createInventoryItem(CreateInventoryItemRequest request) {
         try {
-            // Check if inventory exists
-            Inventory inventory = inventoryService.getInventoryById(request.getInventoryId());
-            if (inventory == null) {
-                throw new NotFoundException("Inventory not found with ID: " + request.getInventoryId());
-            }
-
-            // Check if user exists
-            User user = userService.getUserById(request.getUserId());
-            if (user == null) {
-                throw new NotFoundException("User not found with ID: " + request.getUserId());
-            }
-
-            // Check if SKU already exists in the inventory
-            if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {
-                throw new ConflictException(
-                        "Item with SKU '" + request.getSku() + "' already exists in this inventory");
-            }
-
-            // Check if barcode already exists in the inventory (if provided)
-            if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
-                if (inventoryItemRepository.existsByBarcodeAndInventoryId(request.getBarcode(),
-                        request.getInventoryId())) {
-                    throw new ConflictException(
-                            "Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
-                }
-            }
+            // Validate request and fetch required entities
+            ValidatedCreateInventoryItemContext context = inventoryItemCreateValidator.validate(request);
+            Inventory inventory = context.getInventory();
+            User user = context.getUser();
 
             Currency currency = resolveCurrency(inventory.getOrganizationId());
 
@@ -152,102 +132,16 @@ public class InventoryItemService {
     /**
      * Update an existing inventory item
      */
+    @Transactional(rollbackFor = { Exception.class })
     public InventoryItem updateInventoryItem(String id, UpdateInventoryItemRequest request) {
         InventoryItem item = inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
 
-        // Check if new barcode conflicts with existing item in the same inventory
-        if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
-            if (!request.getBarcode().equals(item.getBarcode()) &&
-                    inventoryItemRepository.existsByBarcodeAndInventoryId(request.getBarcode(),
-                            item.getInventoryId())) {
-                throw new ConflictException(
-                        "Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
-            }
-        }
+        // Validation via validator
+        inventoryItemUpdateValidator.validate(item, request);
 
-        // Update fields if provided
-        if (request.getName() != null) {
-            item.setName(request.getName());
-        }
-        if (request.getDescription() != null) {
-            item.setDescription(request.getDescription());
-        }
-        if (request.getProductCode() != null) {
-            item.setProductCode(request.getProductCode());
-        }
-        if (request.getBarcode() != null) {
-            item.setBarcode(request.getBarcode());
-        }
-        if (request.getCategory() != null) {
-            item.setCategory(request.getCategory());
-        }
-        if (request.getBrand() != null) {
-            item.setBrand(request.getBrand());
-        }
-        if (request.getUnit() != null) {
-            item.setUnit(request.getUnit());
-        }
-        if (request.getWeight() != null) {
-            item.setWeight(request.getWeight());
-        }
-        if (request.getDimensions() != null) {
-            item.setDimensions(request.getDimensions());
-        }
-        if (request.getColor() != null) {
-            item.setColor(request.getColor());
-        }
-        if (request.getSize() != null) {
-            item.setSize(request.getSize());
-        }
-        if (request.getCurrentStock() != null) {
-            item.setCurrentStock(request.getCurrentStock());
-        }
-        if (request.getMinimumStock() != null) {
-            item.setMinimumStock(request.getMinimumStock());
-        }
-        if (request.getMaximumStock() != null) {
-            item.setMaximumStock(request.getMaximumStock());
-        }
-        if (request.getCostPrice() != null) {
-            Currency currency = resolveCurrency(item.getInventory().getOrganizationId());
-            if (item.getCostPrice() == null) {
-                item.setCostPrice(new Money(request.getCostPrice(), currency));
-            } else {
-                item.getCostPrice().setAmount(request.getCostPrice());
-                item.getCostPrice().setCurrency(currency);
-            }
-        }
-        if (request.getSellingPrice() != null) {
-            Currency currency = resolveCurrency(item.getInventory().getOrganizationId());
-            if (item.getSellingPrice() == null) {
-                item.setSellingPrice(new Money(request.getSellingPrice(), currency));
-            } else {
-                item.getSellingPrice().setAmount(request.getSellingPrice());
-                item.getSellingPrice().setCurrency(currency);
-            }
-        }
-        if (request.getDiscountPrice() != null) {
-            item.setDiscountPrice(request.getDiscountPrice());
-        }
-        if (request.getDiscountStartDate() != null) {
-            item.setDiscountStartDate(request.getDiscountStartDate());
-        }
-        if (request.getDiscountEndDate() != null) {
-            item.setDiscountEndDate(request.getDiscountEndDate());
-        }
-        if (request.getSupplierName() != null) {
-            item.setSupplierName(request.getSupplierName());
-        }
-        if (request.getIsPerishable() != null) {
-            item.setIsPerishable(request.getIsPerishable());
-        }
-        if (request.getExpiryDate() != null) {
-            item.setExpiryDate(request.getExpiryDate());
-        }
-        if (request.getIsActive() != null) {
-            item.setIsActive(request.getIsActive());
-        }
+        // Apply updates via validator
+        inventoryItemUpdateValidator.applyUpdates(item, request);
 
         return inventoryItemRepository.save(item);
     }
