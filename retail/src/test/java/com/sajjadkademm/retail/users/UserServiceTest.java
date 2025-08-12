@@ -4,6 +4,7 @@ import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +58,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("createUser allows null name and saves")
     void createUser_NullName_AllowsSave() {
         User newUser = User.builder()
                 .name(null)
@@ -71,12 +73,14 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getUserById with whitespace id throws NotFound")
     void getUserById_WhitespaceId_NotFound() {
         when(userRepository.findById(" ")).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> userService.getUserById(" "));
     }
 
     @Test
+    @DisplayName("updateUser sets all fields from details")
     void updateUser_SetsAllFields() {
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -96,6 +100,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser does not save when user missing")
     void updateUser_DoesNotCallSave_WhenMissing() {
         when(userRepository.findById("x")).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> userService.updateUser("x", updatedUser));
@@ -103,6 +108,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser calls repository delete when exists")
     void deleteUser_PropagatesRepositoryDelete() {
         when(userRepository.existsById("user-123")).thenReturn(true);
         userService.deleteUser("user-123");
@@ -110,6 +116,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getAllUsers invokes repository once")
     void getAllUsers_VerifyRepositoryOnce() {
         when(userRepository.findAll()).thenReturn(Arrays.asList(testUser));
         userService.getAllUsers();
@@ -117,6 +124,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getUserById queries repository with same id")
     void getUserById_RepositoryCalledWithSameId() {
         when(userRepository.findById("abc")).thenReturn(Optional.of(testUser));
         userService.getUserById("abc");
@@ -124,6 +132,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("createUser passes entity to repository save")
     void createUser_PassesThroughToSave() {
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         userService.createUser(testUser);
@@ -131,6 +140,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser returns repository result entity")
     void updateUser_SaveReturnedEntityIsReturned() {
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
@@ -139,12 +149,14 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser returns true on success")
     void deleteUser_ReturnsTrueOnSuccess() {
         when(userRepository.existsById("user-123")).thenReturn(true);
         assertTrue(userService.deleteUser("user-123"));
     }
 
     @Test
+    @DisplayName("getAllUsers multiple entries integrity")
     void getAllUsers_MultipleEntriesIntegrity() {
         List<User> users = Arrays.asList(testUser, updatedUser, testUser);
         when(userRepository.findAll()).thenReturn(users);
@@ -154,6 +166,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser partial change still overwrites fields")
     void updateUser_PartialChangeStillOverwrites() {
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -164,6 +177,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser verifies existence check")
     void deleteUser_VerifyExistsCheck() {
         when(userRepository.existsById("user-123")).thenReturn(true);
         userService.deleteUser("user-123");
@@ -171,12 +185,14 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getUserById missing different id throws NotFound")
     void getUserById_MissingDifferentId_NotFound() {
         when(userRepository.findById("missing")).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> userService.getUserById("missing"));
     }
 
     @Test
+    @DisplayName("createUser returns repository result")
     void createUser_ReturnsRepositoryResult() {
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
         User res = userService.createUser(testUser);
@@ -184,6 +200,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser verifies save called")
     void updateUser_VerifySaveCalled() {
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
@@ -192,6 +209,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser not found does not delete")
     void deleteUser_NotFound_DoesNotDelete() {
         when(userRepository.existsById("none")).thenReturn(false);
         assertThrows(NotFoundException.class, () -> userService.deleteUser("none"));
@@ -199,6 +217,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getAllUsers result order preserved")
     void getAllUsers_ResultOrderPreserved() {
         List<User> users = Arrays.asList(testUser, updatedUser);
         when(userRepository.findAll()).thenReturn(users);
@@ -208,8 +227,9 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser applies values regardless of id differences")
     void updateUser_DifferentIds_StillUpdatesFields() {
-        when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
+        when(userRepository.findById("another-id-ignored")).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         User details = User.builder().name("X").phone("Y").password("Z").status(UserStatus.ACTIVE).build();
         User res = userService.updateUser("another-id-ignored", details);
@@ -218,24 +238,28 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getAllUsers propagates repository exceptions")
     void getAllUsers_WhenRepositoryThrows_Propagates() {
         when(userRepository.findAll()).thenThrow(new RuntimeException("db"));
         assertThrows(RuntimeException.class, () -> userService.getAllUsers());
     }
 
     @Test
+    @DisplayName("createUser propagates repository exceptions")
     void createUser_WhenRepositoryThrows_Propagates() {
         when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("db"));
         assertThrows(RuntimeException.class, () -> userService.createUser(testUser));
     }
 
     @Test
+    @DisplayName("updateUser propagates exceptions thrown on find")
     void updateUser_WhenRepositoryThrowsOnFind_Propagates() {
         when(userRepository.findById("user-123")).thenThrow(new RuntimeException("db"));
         assertThrows(RuntimeException.class, () -> userService.updateUser("user-123", updatedUser));
     }
 
     @Test
+    @DisplayName("updateUser propagates exceptions thrown on save")
     void updateUser_WhenRepositoryThrowsOnSave_Propagates() {
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("db"));
@@ -243,12 +267,14 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser propagates exceptions thrown on exists check")
     void deleteUser_WhenRepositoryThrowsOnExists_Propagates() {
         when(userRepository.existsById("user-123")).thenThrow(new RuntimeException("db"));
         assertThrows(RuntimeException.class, () -> userService.deleteUser("user-123"));
     }
 
     @Test
+    @DisplayName("deleteUser propagates exceptions thrown on delete")
     void deleteUser_WhenRepositoryThrowsOnDelete_Propagates() {
         when(userRepository.existsById("user-123")).thenReturn(true);
         doThrow(new RuntimeException("db")).when(userRepository).deleteById("user-123");
@@ -256,6 +282,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getAllUsers returns full list of users")
     void getAllUsers_Success() {
         // Given
         List<User> users = Arrays.asList(testUser, updatedUser);
@@ -274,6 +301,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getAllUsers returns empty list")
     void getAllUsers_EmptyList() {
         // Given
         when(userRepository.findAll()).thenReturn(Arrays.asList());
@@ -288,6 +316,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getUserById returns a user when found")
     void getUserById_Success() {
         // Given
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
@@ -305,6 +334,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("getUserById throws NotFound when user missing")
     void getUserById_NotFound() {
         // Given
         when(userRepository.findById("nonexistent-id")).thenReturn(Optional.empty());
@@ -315,6 +345,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("createUser saves and returns user")
     void createUser_Success() {
         // Given
         User newUser = User.builder()
@@ -337,6 +368,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser updates and returns user")
     void updateUser_Success() {
         // Given
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
@@ -357,6 +389,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser throws NotFound when user missing")
     void updateUser_NotFound() {
         // Given
         when(userRepository.findById("nonexistent-id")).thenReturn(Optional.empty());
@@ -368,6 +401,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateUser applies field changes")
     void updateUser_VerifyFieldsUpdated() {
         // Given
         when(userRepository.findById("user-123")).thenReturn(Optional.of(testUser));
@@ -389,6 +423,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser returns true when deleted")
     void deleteUser_Success() {
         // Given
         when(userRepository.existsById("user-123")).thenReturn(true);
@@ -404,6 +439,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser throws NotFound for missing id")
     void deleteUser_NotFound() {
         // Given
         when(userRepository.existsById("nonexistent-id")).thenReturn(false);
@@ -415,6 +451,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("deleteUser does not delete when not found")
     void deleteUser_VerifyDeletionNotCalled() {
         // Given
         when(userRepository.existsById("nonexistent-id")).thenReturn(false);
