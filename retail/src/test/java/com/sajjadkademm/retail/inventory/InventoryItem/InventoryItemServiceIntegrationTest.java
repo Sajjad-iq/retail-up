@@ -12,6 +12,8 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRe
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
+import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.AccountType;
@@ -61,6 +63,9 @@ class InventoryItemServiceIntegrationTest {
 
     @MockitoBean
     private SystemSettingsService systemSettingsService;
+
+    @MockitoBean
+    private InventoryMovementService inventoryMovementService;
 
     private User testUser;
     private Inventory testInventory;
@@ -184,6 +189,39 @@ class InventoryItemServiceIntegrationTest {
             verify(systemSettingsService).getSystemSettings("org-123");
             verify(inventoryItemRepository).save(argThat(
                     item -> item.getSellingPrice() != null && item.getSellingPrice().getCurrency() == Currency.EUR));
+            // Verify initial movement recorded
+            verify(inventoryMovementService).recordStockIn(
+                    testUser,
+                    saved,
+                    10,
+                    "Initial stock on item creation",
+                    ReferenceType.ADJUSTMENT,
+                    "item-123");
+        }
+
+        @Test
+        @DisplayName("Creation with zero initial stock should not record movement")
+        void creationWithZeroInitialStock_ShouldNotRecordMovement() {
+            // Given
+            CreateInventoryItemRequest request = buildCreateRequest();
+            request.setCurrentStock(0);
+            InventoryItem saved = buildInventoryItemSaved("item-456");
+
+            when(inventoryService.getInventoryById(testInventory.getId())).thenReturn(testInventory);
+            when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+            when(inventoryItemRepository.existsBySkuAndInventoryId(anyString(), eq(testInventory.getId())))
+                    .thenReturn(false);
+            when(inventoryItemRepository.existsByBarcodeAndInventoryId(anyString(), eq(testInventory.getId())))
+                    .thenReturn(false);
+            when(systemSettingsService.getSystemSettings("org-123"))
+                    .thenReturn(SystemSetting.builder().id("sys-1").organizationId("org-123").currency("USD").build());
+            when(inventoryItemRepository.save(any(InventoryItem.class))).thenReturn(saved);
+
+            // When
+            inventoryItemService.createInventoryItem(request);
+
+            // Then - no movement recorded
+            verify(inventoryMovementService, never()).recordStockIn(any(), any(), anyInt(), any(), any(), any());
         }
 
         @Test
@@ -303,6 +341,9 @@ class InventoryItemServiceIntegrationTest {
             assertEquals(Currency.GBP, result.getSellingPrice().getCurrency());
             assertEquals(new BigDecimal("850.00"), result.getCostPrice().getAmount());
             assertEquals(Currency.GBP, result.getCostPrice().getCurrency());
+            // No stock change requested => no adjustment recorded
+            verify(inventoryMovementService, never()).recordAdjustmentToTarget(any(), any(), anyInt(), any(), any(),
+                    any());
         }
 
         @Test
@@ -322,6 +363,74 @@ class InventoryItemServiceIntegrationTest {
             ConflictException ex = assertThrows(ConflictException.class,
                     () -> inventoryItemService.updateInventoryItem("item-123", update));
             assertTrue(ex.getMessage().contains("already exists"));
+        }
+
+        @Test
+        @DisplayName("Update with stock change should record adjustment movement")
+        void updateWithStockChange_ShouldRecordAdjustmentMovement() {
+            // Given
+            InventoryItem existing = buildInventoryItemSaved("item-123");
+            existing.setCurrentStock(5);
+
+            UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+            update.setCurrentStock(12);
+
+            when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
+            when(inventoryItemRepository.save(any(InventoryItem.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            // When
+            InventoryItem result = inventoryItemService.updateInventoryItem("item-123", update);
+
+            // Then
+            assertEquals(12, result.getCurrentStock());
+            verify(inventoryMovementService).recordAdjustmentToTarget(
+                    eq(existing.getCreatedBy()),
+                    any(InventoryItem.class),
+                    eq(12),
+                    eq("Stock adjusted via item update"),
+                    eq(ReferenceType.ADJUSTMENT),
+                    eq("item-123"));
+        }
+
+        @Test
+        @DisplayName("Update with stock decrease should record adjustment movement out")
+        void updateWithStockDecrease_ShouldRecordAdjustmentMovement() {
+            // Given
+            InventoryItem existing = buildInventoryItemSaved("item-789");
+            existing.setCurrentStock(10);
+
+            UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+            update.setCurrentStock(2);
+
+            when(inventoryItemRepository.findById("item-789")).thenReturn(Optional.of(existing));
+            when(inventoryItemRepository.save(any(InventoryItem.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            // When
+            InventoryItem result = inventoryItemService.updateInventoryItem("item-789", update);
+
+            // Then
+            assertEquals(2, result.getCurrentStock());
+            verify(inventoryMovementService).recordAdjustmentToTarget(
+                    eq(existing.getCreatedBy()),
+                    any(InventoryItem.class),
+                    eq(2),
+                    eq("Stock adjusted via item update"),
+                    eq(ReferenceType.ADJUSTMENT),
+                    eq("item-789"));
+        }
+
+        @Test
+        @DisplayName("Update unexpected repository error should wrap into BadRequestException")
+        void updateUnexpectedRepoError_ShouldWrapInBadRequest() {
+            // Given
+            InventoryItem existing = buildInventoryItemSaved("item-500");
+            when(inventoryItemRepository.findById("item-500")).thenReturn(Optional.of(existing));
+            when(inventoryItemRepository.save(any(InventoryItem.class))).thenThrow(new RuntimeException("DB down"));
+
+            // When & Then
+            BadRequestException ex = assertThrows(BadRequestException.class,
+                    () -> inventoryItemService.updateInventoryItem("item-500", new UpdateInventoryItemRequest()));
+            assertTrue(ex.getMessage().contains("Failed to update inventory item"));
         }
 
         @Test

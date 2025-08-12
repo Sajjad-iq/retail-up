@@ -167,6 +167,9 @@ public class InventoryItemService {
             throw e;
         } catch (BadRequestException e) {
             throw e;
+        } catch (NotFoundException e) {
+            // Preserve NotFound for tests that assert this specific error
+            throw e;
         } catch (Exception e) {
             throw new BadRequestException("Failed to update inventory item: " + e.getMessage(), e);
         }
