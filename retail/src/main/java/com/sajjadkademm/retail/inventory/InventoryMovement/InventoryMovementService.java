@@ -7,7 +7,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserRepository;
+// Removed UserRepository dependency; user is provided via request
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,14 +23,11 @@ import java.util.List;
 public class InventoryMovementService {
     private final InventoryMovementRepository movementRepository;
     private final InventoryItemService inventoryItemService;
-    private final UserRepository userRepository;
 
     public InventoryMovementService(InventoryMovementRepository movementRepository,
-            InventoryItemService inventoryItemService,
-            UserRepository userRepository) {
+            InventoryItemService inventoryItemService) {
         this.movementRepository = movementRepository;
         this.inventoryItemService = inventoryItemService;
-        this.userRepository = userRepository;
     }
 
     /**
@@ -39,12 +36,16 @@ public class InventoryMovementService {
     @Transactional(rollbackFor = { Exception.class })
     public InventoryMovement recordMovement(CreateMovementRequest request) {
         try {
-            // Validate inventory item exists
-            InventoryItem item = inventoryItemService.getInventoryItemById(request.getInventoryItemId());
+            // Take user and item directly from request (assumed validated upstream)
+            InventoryItem item = request.getInventoryItem();
+            if (item == null) {
+                throw new BadRequestException("Inventory item must be provided in the request");
+            }
 
-            // Validate user exists
-            User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new NotFoundException("User not found with ID: " + request.getUserId()));
+            User user = request.getUser();
+            if (user == null) {
+                throw new BadRequestException("User must be provided in the request");
+            }
 
             // Calculate new stock level
             int previousStock = item.getCurrentStock();

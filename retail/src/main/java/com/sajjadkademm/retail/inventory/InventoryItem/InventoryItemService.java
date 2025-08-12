@@ -10,6 +10,10 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRe
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
@@ -17,6 +21,7 @@ import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.utils.dto.Currency;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,14 +29,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-
 @Service
 public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryService inventoryService;
     private final SystemSettingsService systemSettingsService;
     private final UserService userService;
+
+    // Optional lazy injection to avoid circular dependency with
+    // InventoryMovementService
+    @Autowired(required = false)
+    @Lazy
+    private InventoryMovementService inventoryMovementService;
 
     @Autowired
     public InventoryItemService(InventoryItemRepository inventoryItemRepository,
@@ -79,6 +88,8 @@ public class InventoryItemService {
 
             Currency currency = resolveCurrency(inventory.getOrganizationId());
 
+            Integer initialStock = request.getCurrentStock();
+
             InventoryItem item = InventoryItem.builder()
                     .name(request.getName())
                     .description(request.getDescription())
@@ -108,7 +119,26 @@ public class InventoryItemService {
                     .createdBy(user)
                     .build();
 
-            return inventoryItemRepository.save(item);
+            InventoryItem saved = inventoryItemRepository.save(item);
+
+            // Record initial STOCK_IN movement if initialStock > 0 and movement service
+            // available
+            if (inventoryMovementService != null && initialStock != null) {
+                CreateMovementRequest movementRequest = new CreateMovementRequest();
+                movementRequest.setUser(user);
+                movementRequest.setInventoryItem(saved);
+                movementRequest.setMovementType(MovementType.STOCK_IN);
+                movementRequest.setQuantity(initialStock);
+                movementRequest.setReason("Initial stock on item creation");
+                movementRequest.setReferenceType(ReferenceType.ADJUSTMENT);
+                movementRequest.setReferenceId(saved.getId());
+
+                inventoryMovementService.recordMovement(movementRequest);
+                // Reflect expected stock on the returned instance
+                saved.setCurrentStock(initialStock);
+            }
+
+            return saved;
 
         } catch (ConflictException e) {
             throw e;

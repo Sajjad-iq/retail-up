@@ -1,7 +1,9 @@
 package com.sajjadkademm.retail.inventory.InventoryMovement.dto;
 
+import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
+import com.sajjadkademm.retail.users.User;
+
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -14,11 +16,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateMovementRequest {
 
-    @NotBlank(message = "User ID is required")
-    private String userId;
+    @NotNull(message = "User is required")
+    private User user;
 
-    @NotBlank(message = "Inventory item ID is required")
-    private String inventoryItemId;
+    @NotNull(message = "Inventory item is required")
+    private InventoryItem inventoryItem;
 
     @NotNull(message = "Movement type is required")
     private MovementType movementType;

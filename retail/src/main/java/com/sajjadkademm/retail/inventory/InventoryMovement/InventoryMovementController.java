@@ -1,6 +1,5 @@
 package com.sajjadkademm.retail.inventory.InventoryMovement;
 
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 
@@ -10,15 +9,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,46 +36,7 @@ public class InventoryMovementController {
 
     private final InventoryMovementService movementService;
 
-    /**
-     * Record inventory movement endpoint
-     */
-    @Operation(summary = "Record Inventory Movement", description = "Record a new inventory movement (stock in/out)", operationId = "recordMovement")
-    @ApiResponse(responseCode = "200", description = "Movement recorded successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryMovement.class), examples = @ExampleObject(name = "Recorded Movement", value = """
-            {
-                "id": "mov123",
-                "movementType": "SALE",
-                "quantity": 5,
-                "reason": "Customer purchase",
-                "referenceType": "SALE",
-                "referenceId": "sale123",
-                "createdAt": "2024-12-19T10:30:00",
-                "inventoryItem": {
-                    "id": "item123",
-                    "name": "Laptop Computer",
-                    "sku": "LAPTOP001"
-                },
-                "createdBy": {
-                    "id": "user123",
-                    "username": "john.doe"
-                }
-            }
-            """)))
-    @PostMapping
-    public ResponseEntity<InventoryMovement> recordMovement(
-            @Parameter(description = "Movement creation request", required = true, content = @Content(schema = @Schema(implementation = CreateMovementRequest.class), examples = @ExampleObject(name = "Create Movement Request", value = """
-                    {
-                        "userId": "user123",
-                        "inventoryItemId": "item123",
-                        "movementType": "SALE",
-                        "quantity": 5,
-                        "reason": "Customer purchase",
-                        "referenceType": "SALE",
-                        "referenceId": "sale123"
-                    }
-                    """))) @Valid @RequestBody CreateMovementRequest request) {
-        InventoryMovement response = movementService.recordMovement(request);
-        return ResponseEntity.ok(response);
-    }
+    // Movement creation is internal-only; no public POST endpoint
 
     /**
      * Get movement by ID endpoint
