@@ -20,6 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Application service responsible for recording and querying inventory item
+ * movements. This service encapsulates the stock delta calculation, movement
+ * persistence and stock synchronization with the related `InventoryItem`.
+ *
+ * Use the typed helper methods (e.g. `recordStockIn`, `recordSale`,
+ * `recordAdjustmentToTarget`) rather than constructing requests manually to
+ * keep movement recording consistent across the application.
+ */
 @Service
 public class InventoryMovementService {
     private final InventoryMovementRepository movementRepository;
@@ -32,7 +41,11 @@ public class InventoryMovementService {
     }
 
     /**
-     * Record a new inventory movement
+     * Record a new inventory movement.
+     *
+     * Validates the request, computes the resulting stock level, prevents
+     * negative stock, persists the movement and updates the item's current
+     * stock.
      */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryMovement recordMovement(CreateMovementRequest request) {
@@ -87,6 +100,9 @@ public class InventoryMovementService {
 
     // Convenience methods for common movement types
 
+    /**
+     * Record a STOCK_IN movement (initial stock or restocking).
+     */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryMovement recordStockIn(User user, InventoryItem item, int quantity, String reason,
             ReferenceType referenceType, String referenceId) {
@@ -101,6 +117,9 @@ public class InventoryMovementService {
         return recordMovement(request);
     }
 
+    /**
+     * Record a STOCK_OUT movement (general stock removal).
+     */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryMovement recordStockOut(User user, InventoryItem item, int quantity, String reason,
             ReferenceType referenceType, String referenceId) {
@@ -115,6 +134,9 @@ public class InventoryMovementService {
         return recordMovement(request);
     }
 
+    /**
+     * Record an ADJUSTMENT_IN movement (positive correction).
+     */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryMovement recordAdjustmentIn(User user, InventoryItem item, int quantity, String reason,
             ReferenceType referenceType, String referenceId) {
@@ -129,6 +151,9 @@ public class InventoryMovementService {
         return recordMovement(request);
     }
 
+    /**
+     * Record an ADJUSTMENT_OUT movement (negative correction).
+     */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryMovement recordAdjustmentOut(User user, InventoryItem item, int quantity, String reason,
             ReferenceType referenceType, String referenceId) {
@@ -143,6 +168,10 @@ public class InventoryMovementService {
         return recordMovement(request);
     }
 
+    /**
+     * Record an adjustment to reach the provided target stock, computing the
+     * appropriate direction and quantity.
+     */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryMovement recordAdjustmentToTarget(User user, InventoryItem item, int targetStock, String reason,
             ReferenceType referenceType, String referenceId) {
@@ -156,6 +185,162 @@ public class InventoryMovementService {
         } else {
             return recordAdjustmentOut(user, item, Math.abs(delta), reason, referenceType, referenceId);
         }
+    }
+
+    // Inbound flows
+    /**
+     * Record a PURCHASE movement (stock received from supplier).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordPurchase(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.PURCHASE);
+        request.setQuantity(quantity);
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    /**
+     * Record a RETURN movement (customer returned items).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordReturn(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.RETURN);
+        request.setQuantity(quantity);
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    /**
+     * Record a TRANSFER_IN movement (stock received from another location).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordTransferIn(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.TRANSFER_IN);
+        request.setQuantity(quantity);
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    // Outbound flows
+    /**
+     * Record a SALE movement (items sold to a customer).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordSale(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.SALE);
+        request.setQuantity(Math.abs(quantity));
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    /**
+     * Record a DAMAGE movement (items damaged or spoiled).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordDamage(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.DAMAGE);
+        request.setQuantity(Math.abs(quantity));
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    /**
+     * Record a THEFT movement (items stolen or missing).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordTheft(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.THEFT);
+        request.setQuantity(Math.abs(quantity));
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    /**
+     * Record an EXPIRED movement (items past expiry date).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordExpired(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.EXPIRED);
+        request.setQuantity(Math.abs(quantity));
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    /**
+     * Record a TRANSFER_OUT movement (stock sent to another location).
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordTransferOut(User user, InventoryItem item, int quantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.TRANSFER_OUT);
+        request.setQuantity(Math.abs(quantity));
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
+    }
+
+    // Manual
+    /**
+     * Record a MANUAL_ADJUSTMENT movement with a signed quantity.
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryMovement recordManualAdjustment(User user, InventoryItem item, int signedQuantity, String reason,
+            ReferenceType referenceType, String referenceId) {
+        CreateMovementRequest request = new CreateMovementRequest();
+        request.setUser(user);
+        request.setInventoryItem(item);
+        request.setMovementType(MovementType.MANUAL_ADJUSTMENT);
+        request.setQuantity(signedQuantity);
+        request.setReason(reason);
+        request.setReferenceType(referenceType);
+        request.setReferenceId(referenceId);
+        return recordMovement(request);
     }
 
     /**

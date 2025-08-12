@@ -28,6 +28,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Application service that handles CRUD operations for `InventoryItem` and
+ * orchestrates related behaviors such as initial stock movements and stock
+ * adjustments during updates. Validation responsibilities are delegated to
+ * dedicated utility components to keep the service focused on orchestration.
+ */
 @Service
 public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
@@ -129,33 +135,41 @@ public class InventoryItemService {
      */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryItem updateInventoryItem(String id, UpdateInventoryItemRequest request) {
-        InventoryItem item = inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
+        try {
+            InventoryItem item = inventoryItemRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
 
-        // validation
-        inventoryItemUpdateValidator.validate(item, request);
+            // validation
+            inventoryItemUpdateValidator.validate(item, request);
 
-        // capture current stock before applying updates
-        Integer requestedStock = request.getCurrentStock();
+            // capture current stock before applying updates
+            Integer requestedStock = request.getCurrentStock();
 
-        // apply field updates
-        inventoryItemUpdateValidator.applyUpdates(item, request);
+            // apply field updates
+            inventoryItemUpdateValidator.applyUpdates(item, request);
 
-        // record stock movement if stock changed (use saved item to keep update order
-        // logical)
-        InventoryItem updated = inventoryItemRepository.save(item);
-        if (requestedStock != null && inventoryMovementService != null) {
-            // attribute to item's creator by default
-            User actor = updated.getCreatedBy();
-            inventoryMovementService.recordAdjustmentToTarget(
-                    actor,
-                    updated,
-                    requestedStock,
-                    "Stock adjusted via item update",
-                    com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType.ADJUSTMENT,
-                    updated.getId());
+            // record stock movement if stock changed (use saved item to keep update order
+            // logical)
+            InventoryItem updated = inventoryItemRepository.save(item);
+            if (requestedStock != null && inventoryMovementService != null) {
+                // attribute to item's creator by default
+                User actor = updated.getCreatedBy();
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        updated,
+                        requestedStock,
+                        "Stock adjusted via item update",
+                        com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType.ADJUSTMENT,
+                        updated.getId());
+            }
+            return updated;
+        } catch (ConflictException e) {
+            throw e;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to update inventory item: " + e.getMessage(), e);
         }
-        return updated;
     }
 
     /**
