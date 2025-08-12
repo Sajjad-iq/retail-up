@@ -16,15 +16,14 @@ import jakarta.persistence.EnumType;
 
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Min;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.users.User;
 
 import lombok.AllArgsConstructor;
@@ -57,22 +56,10 @@ public class InventoryMovement {
     @NotNull
     private MovementType movementType;
 
-    // Quantity moved (positive for IN, negative for OUT)
+    // Quantity moved
     @Column(name = "quantity", nullable = false)
     @NotNull
     private Integer quantity;
-
-    // Stock level before this movement
-    @Column(name = "previous_stock", nullable = false)
-    @NotNull
-    @Min(value = 0, message = "Previous stock cannot be negative")
-    private Integer previousStock;
-
-    // Stock level after this movement
-    @Column(name = "new_stock", nullable = false)
-    @NotNull
-    @Min(value = 0, message = "New stock cannot be negative")
-    private Integer newStock;
 
     // Optional reason or notes for the movement
     @Column(name = "reason", length = 500)
@@ -80,12 +67,10 @@ public class InventoryMovement {
     private String reason;
 
     // Reference Information
-    // Type of reference (SALE, PURCHASE, ADJUSTMENT, TRANSFER, etc.)
     @Column(name = "reference_type", length = 50)
-    @Size(max = 50)
-    private String referenceType;
+    @Enumerated(EnumType.STRING)
+    private ReferenceType referenceType;
 
-    // ID of the referenced entity (sale ID, purchase ID, etc.)
     @Column(name = "reference_id", length = 100)
     @Size(max = 100)
     private String referenceId;

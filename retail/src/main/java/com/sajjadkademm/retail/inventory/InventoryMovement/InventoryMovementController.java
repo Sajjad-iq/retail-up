@@ -2,6 +2,7 @@ package com.sajjadkademm.retail.inventory.InventoryMovement;
 
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,9 +48,7 @@ public class InventoryMovementController {
             {
                 "id": "mov123",
                 "movementType": "SALE",
-                "quantity": -5,
-                "previousStock": 100,
-                "newStock": 95,
+                "quantity": 5,
                 "reason": "Customer purchase",
                 "referenceType": "SALE",
                 "referenceId": "sale123",
@@ -104,7 +103,7 @@ public class InventoryMovementController {
             @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String inventoryItemId,
             @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(required = false) Integer page,
             @Parameter(description = "Page size", example = "20") @RequestParam(required = false) Integer size) {
-        
+
         if (page != null && size != null) {
             Page<InventoryMovement> response = movementService.getMovementsByItem(inventoryItemId, page, size);
             return ResponseEntity.ok(response);
@@ -124,7 +123,7 @@ public class InventoryMovementController {
             @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId,
             @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(required = false) Integer page,
             @Parameter(description = "Page size", example = "20") @RequestParam(required = false) Integer size) {
-        
+
         if (page != null && size != null) {
             Page<InventoryMovement> response = movementService.getMovementsByInventory(inventoryId, page, size);
             return ResponseEntity.ok(response);
@@ -178,9 +177,9 @@ public class InventoryMovementController {
     @ApiResponse(responseCode = "200", description = "Movements retrieved successfully")
     @GetMapping("/reference")
     public ResponseEntity<List<InventoryMovement>> getMovementsByReference(
-            @Parameter(description = "Reference type", required = true, example = "SALE") @RequestParam String referenceType,
+            @Parameter(description = "Reference type", required = true, example = "SALE") @RequestParam ReferenceType referenceType,
             @Parameter(description = "Reference ID", required = true, example = "sale123") @RequestParam String referenceId) {
-        List<InventoryMovement> response = movementService.getMovementsByReference(referenceType, referenceId);
+        List<InventoryMovement> response = movementService.getMovementsByReference(referenceType.name(), referenceId);
         return ResponseEntity.ok(response);
     }
 }

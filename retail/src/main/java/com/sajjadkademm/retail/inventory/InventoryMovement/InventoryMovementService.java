@@ -57,12 +57,10 @@ public class InventoryMovementService {
                                 + Math.abs(request.getQuantity()));
             }
 
-            // Create movement record
+            // Create movement record (entity no longer stores previous/new stock)
             InventoryMovement movement = InventoryMovement.builder()
                     .movementType(request.getMovementType())
                     .quantity(request.getQuantity())
-                    .previousStock(previousStock)
-                    .newStock(newStock)
                     .reason(request.getReason())
                     .referenceType(request.getReferenceType())
                     .referenceId(request.getReferenceId())
