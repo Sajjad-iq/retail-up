@@ -101,25 +101,26 @@ public class InventoryItemUpdateUtils {
             throw new BadRequestException("Selling price cannot be less than cost price");
         }
 
-        BigDecimal discountPrice = request.getDiscountPrice() != null ? request.getDiscountPrice()
-                : existing.getDiscountPrice();
-        LocalDateTime discountStart = request.getDiscountStartDate() != null ? request.getDiscountStartDate()
-                : existing.getDiscountStartDate();
-        LocalDateTime discountEnd = request.getDiscountEndDate() != null ? request.getDiscountEndDate()
-                : existing.getDiscountEndDate();
-        if (discountPrice != null) {
-            if (sellingPrice == null) {
+        BigDecimal discountPrice = request.getDiscountPrice();
+        LocalDateTime discountStart = request.getDiscountStartDate();
+        LocalDateTime discountEnd = request.getDiscountEndDate();
+        // Only enforce discount-related rules if any discount field is being changed
+        if (discountPrice != null || discountStart != null || discountEnd != null) {
+            BigDecimal effectiveSelling = sellingPrice; // may be from request or existing
+            if (discountPrice != null && effectiveSelling == null) {
                 throw new BadRequestException("Selling price is required when discount price is provided");
             }
-            if (discountPrice.compareTo(sellingPrice) > 0) {
+            if (discountPrice != null && effectiveSelling != null && discountPrice.compareTo(effectiveSelling) > 0) {
                 throw new BadRequestException("Discount price cannot exceed selling price");
             }
-            if (discountStart == null || discountEnd == null) {
-                throw new BadRequestException(
-                        "Discount start and end dates are required when discount price is provided");
-            }
-            if (discountStart.isAfter(discountEnd)) {
-                throw new BadRequestException("Discount start date cannot be after discount end date");
+            if (discountPrice != null) {
+                if (discountStart == null || discountEnd == null) {
+                    throw new BadRequestException(
+                            "Discount start and end dates are required when discount price is provided");
+                }
+                if (discountStart.isAfter(discountEnd)) {
+                    throw new BadRequestException("Discount start date cannot be after discount end date");
+                }
             }
         }
 
