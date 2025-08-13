@@ -5,6 +5,7 @@ import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
@@ -93,6 +94,14 @@ public class OrganizationService {
     public Organization updateOrganization(String id, UpdateOrganizationRequest request) {
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found with ID: " + id));
+
+        // check if the organization disabled
+        if (organization.getStatus() == OrganizationStatus.DISABLED
+                || organization.getStatus() == OrganizationStatus.REJECTED
+                || organization.getStatus() == OrganizationStatus.SUSPENDED
+                || organization.getStatus() == OrganizationStatus.DELETED) {
+            throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
+        }
 
         // Update organization fields
         organization.setName(request.getName());
