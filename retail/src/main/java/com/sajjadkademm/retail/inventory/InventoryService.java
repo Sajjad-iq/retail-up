@@ -39,27 +39,28 @@ public class InventoryService {
     @Transactional(rollbackFor = { Exception.class })
     public Inventory createInventory(CreateInventoryRequest request) {
         try {
-            // Check if organization exists
+            // Resolve organization and ensure it exists
             Organization organization = organizationService.getOrganizationById(request.getOrganizationId());
             if (organization == null) {
                 throw new NotFoundException("Organization not found with ID: " + request.getOrganizationId());
             }
 
-            // assert organization is active
+            // Guard: only active organizations can create inventories
             OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
-            // Check if user exists
+            // Resolve creating user and ensure it exists
             User user = userService.getUserById(request.getUserId());
             if (user == null) {
                 throw new NotFoundException("User not found with ID: " + request.getUserId());
             }
 
-            // Check if inventory with same name already exists in the organization
+            // Uniqueness: name must be unique within organization
             if (inventoryRepository.existsByNameAndOrganizationId(request.getName(), request.getOrganizationId())) {
                 throw new ConflictException(
                         "Inventory with name '" + request.getName() + "' already exists in this organization");
             }
 
+            // Persist
             Inventory inventory = Inventory.builder()
                     .name(request.getName())
                     .description(request.getDescription())
@@ -87,7 +88,7 @@ public class InventoryService {
         Inventory inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory not found with ID: " + id));
 
-        // Check if new name conflicts with existing inventory in the same organization
+        // Uniqueness: name must be unique within organization when changed
         if (request.getName() != null && !request.getName().equals(inventory.getName())) {
             if (inventoryRepository.existsByNameAndOrganizationId(request.getName(), inventory.getOrganizationId())) {
                 throw new ConflictException(
@@ -95,10 +96,10 @@ public class InventoryService {
             }
         }
 
-        // assert organization is active
+        // Guard: disallow updates if parent organization is not active
         OrganizationValidationUtils.assertOrganizationIsActive(inventory.getOrganization());
 
-        // Update fields if provided
+        // Apply changes
         if (request.getName() != null) {
             inventory.setName(request.getName());
         }

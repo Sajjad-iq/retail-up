@@ -15,7 +15,6 @@ import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.utils.dto.Currency;
@@ -34,31 +33,37 @@ public class InventoryItemUpdateUtils {
     private final OrganizationService organizationService;
 
     public void validate(InventoryItem existing, UpdateInventoryItemRequest request) {
-        // Validate inventory exists and is active
+        // Resolve inventory and guard it exists
         Inventory inventory = existing.getInventory() != null
                 ? existing.getInventory()
                 : inventoryService.getInventoryById(existing.getInventoryId());
         if (inventory == null) {
             throw new NotFoundException("Inventory not found with ID: " + existing.getInventoryId());
         }
+        // Guard: inventory must be active
         if (Boolean.FALSE.equals(inventory.getIsActive())) {
             throw new BadRequestException("This Inventory Disabled");
         }
 
-        // Validate organization exists and is active
+        // Guard: item must be active for updates
+        if (Boolean.FALSE.equals(existing.getIsActive())) {
+            throw new BadRequestException("This Item Disabled");
+        }
+
+        // Resolve organization and ensure it is active
         Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
         if (organization == null) {
             throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
         }
         OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
-        // Normalize inputs (trim)
+        // Normalize string inputs
         if (request.getBarcode() != null)
             request.setBarcode(request.getBarcode().trim());
         if (request.getProductCode() != null)
             request.setProductCode(request.getProductCode().trim());
 
-        // Check if new barcode conflicts with existing item in the same inventory
+        // Friendly uniqueness checks within inventory scope (only when changed)
         if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
             boolean isChangingBarcode = !request.getBarcode().equals(existing.getBarcode());
             if (isChangingBarcode && inventoryItemRepository
@@ -67,8 +72,6 @@ public class InventoryItemUpdateUtils {
                         "Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
             }
         }
-
-        // Check if new product code conflicts with existing item in the same inventory
         if (request.getProductCode() != null && !request.getProductCode().trim().isEmpty()) {
             boolean isChangingProductCode = !request.getProductCode().equals(existing.getProductCode());
             if (isChangingProductCode && inventoryItemRepository
@@ -78,7 +81,7 @@ public class InventoryItemUpdateUtils {
             }
         }
 
-        // Cross-field rules
+        // Cross-field rules (use new value if present, otherwise existing)
         Integer minStock = request.getMinimumStock() != null ? request.getMinimumStock() : existing.getMinimumStock();
         Integer maxStock = request.getMaximumStock() != null ? request.getMaximumStock() : existing.getMaximumStock();
         Integer currentStock = request.getCurrentStock() != null ? request.getCurrentStock()
@@ -102,7 +105,6 @@ public class InventoryItemUpdateUtils {
                 : existing.getDiscountPrice();
         LocalDateTime discountStart = request.getDiscountStartDate() != null ? request.getDiscountStartDate()
                 : existing.getDiscountStartDate();
-
         LocalDateTime discountEnd = request.getDiscountEndDate() != null ? request.getDiscountEndDate()
                 : existing.getDiscountEndDate();
         if (discountPrice != null) {
@@ -139,6 +141,7 @@ public class InventoryItemUpdateUtils {
     }
 
     public void applyUpdates(InventoryItem item, UpdateInventoryItemRequest request) {
+        // Apply each change only when provided
         if (request.getName() != null) {
             item.setName(request.getName());
         }

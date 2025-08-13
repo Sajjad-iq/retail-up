@@ -11,6 +11,7 @@ import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.AccountType;
 import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -253,6 +254,34 @@ class OrganizationServiceIntegrationTest {
                                         &&
                                         org.getDescription().equals("Updated organization description") &&
                                         org.getAddress().equals("789 Updated Street, Updated City")));
+                }
+
+                @Test
+                @DisplayName("Updating a disabled organization should fail")
+                void updatingDisabledOrganization_ShouldFail() {
+                        // Given
+                        Organization disabled = Organization.builder()
+                                        .id(testOrganization.getId())
+                                        .name(testOrganization.getName())
+                                        .domain(testOrganization.getDomain())
+                                        .description(testOrganization.getDescription())
+                                        .address(testOrganization.getAddress())
+                                        .phone(testOrganization.getPhone())
+                                        .createdBy(testUser)
+                                        .status(OrganizationStatus.DISABLED)
+                                        .build();
+                        when(organizationRepository.findById("org-123")).thenReturn(Optional.of(disabled));
+
+                        // When & Then
+                        BadRequestException exception = assertThrows(BadRequestException.class,
+                                        () -> organizationService.updateOrganization("org-123", updateRequest));
+                        assertTrue(exception.getMessage().contains("This Organization Disabled") ||
+                                        exception.getMessage()
+                                                        .contains("Disabled or Rejected or Suspended or Deleted"));
+
+                        // Verify
+                        verify(organizationRepository).findById("org-123");
+                        verify(organizationRepository, never()).save(any(Organization.class));
                 }
 
                 @Test

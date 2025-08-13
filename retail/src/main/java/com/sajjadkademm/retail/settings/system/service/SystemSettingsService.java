@@ -6,9 +6,8 @@ import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
 import com.sajjadkademm.retail.organizations.Organization;
-import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.OrganizationRepository;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class SystemSettingsService {
 
         private final SystemSettingRepository systemSettingRepository;
-        private final OrganizationService organizationService;
+        private final OrganizationRepository organizationRepository;
 
         /**
          * Get system settings for an organization
@@ -37,7 +36,10 @@ public class SystemSettingsService {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
-                Organization organization = organizationService.getOrganizationById(organizationId);
+
+                Organization organization = organizationRepository.findById(organizationId)
+                                .orElseThrow(() -> new NotFoundException(
+                                                "Organization not found with ID: " + organizationId));
 
                 // assert organization is active
                 OrganizationValidationUtils.assertOrganizationIsActive(organization);
@@ -59,7 +61,9 @@ public class SystemSettingsService {
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
 
-                Organization organization = organizationService.getOrganizationById(organizationId);
+                Organization organization = organizationRepository.findById(organizationId)
+                                .orElseThrow(() -> new NotFoundException(
+                                                "Organization not found with ID: " + organizationId));
 
                 // assert organization is active
                 OrganizationValidationUtils.assertOrganizationIsActive(organization);

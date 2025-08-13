@@ -29,33 +29,31 @@ public class InventoryItemCreateValidator {
     private final InventoryItemRepository inventoryItemRepository;
 
     public ValidatedCreateInventoryItemContext validate(CreateInventoryItemRequest request) {
-        // Validate inventory exists
+        // Resolve and validate inventory
         Inventory inventory = inventoryService.getInventoryById(request.getInventoryId());
         if (inventory == null) {
             throw new NotFoundException("Inventory not found with ID: " + request.getInventoryId());
         }
 
-        // check if the organization active
+        // Resolve organization, ensure it exists and is active
         Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
         if (organization == null) {
             throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
         }
-
-        // assert organization is active
         OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
-        // check if the inventory active
+        // Guard: inventory must be active
         if (inventory.getIsActive() == false) {
             throw new BadRequestException("This Inventory Disabled");
         }
 
-        // Validate user exists
+        // Resolve creating user
         User user = userService.getUserById(request.getUserId());
         if (user == null) {
             throw new NotFoundException("User not found with ID: " + request.getUserId());
         }
 
-        // Normalize inputs (trim)
+        // Normalize string inputs
         if (request.getSku() != null)
             request.setSku(request.getSku().trim());
         if (request.getBarcode() != null)
@@ -63,20 +61,16 @@ public class InventoryItemCreateValidator {
         if (request.getProductCode() != null)
             request.setProductCode(request.getProductCode().trim());
 
-        // Validate SKU uniqueness within inventory
+        // Friendly uniqueness checks within inventory scope
         if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {
             throw new ConflictException("Item with SKU '" + request.getSku() + "' already exists in this inventory");
         }
-
-        // Validate Barcode uniqueness within inventory (if provided)
         if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
             if (inventoryItemRepository.existsByBarcodeAndInventoryId(request.getBarcode(), request.getInventoryId())) {
                 throw new ConflictException(
                         "Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
             }
         }
-
-        // Validate Product code uniqueness within inventory (if provided)
         if (request.getProductCode() != null && !request.getProductCode().trim().isEmpty()) {
             if (inventoryItemRepository.existsByProductCodeAndInventoryId(request.getProductCode(),
                     request.getInventoryId())) {
@@ -136,6 +130,7 @@ public class InventoryItemCreateValidator {
             }
         }
 
+        // Hand off validated dependencies
         return new ValidatedCreateInventoryItemContext(inventory, user);
     }
 }
