@@ -3,12 +3,16 @@ package com.sajjadkademm.retail.inventory.InventoryItem.utils;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
+import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
+import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 
@@ -18,6 +22,7 @@ public class InventoryItemCreateValidator {
 
     private final InventoryService inventoryService;
     private final UserService userService;
+    private final OrganizationService organizationService;
     private final InventoryItemRepository inventoryItemRepository;
 
     public ValidatedCreateInventoryItemContext validate(CreateInventoryItemRequest request) {
@@ -25,6 +30,25 @@ public class InventoryItemCreateValidator {
         Inventory inventory = inventoryService.getInventoryById(request.getInventoryId());
         if (inventory == null) {
             throw new NotFoundException("Inventory not found with ID: " + request.getInventoryId());
+        }
+
+        // check if the organization active
+        Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
+        if (organization == null) {
+            throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
+        }
+
+        // check if the organization disabled
+        if (organization.getStatus() == OrganizationStatus.DISABLED
+                || organization.getStatus() == OrganizationStatus.REJECTED
+                || organization.getStatus() == OrganizationStatus.SUSPENDED
+                || organization.getStatus() == OrganizationStatus.DELETED) {
+            throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
+        }
+
+        // check if the inventory active
+        if (inventory.getIsActive() == false) {
+            throw new BadRequestException("This Inventory Disabled");
         }
 
         // Validate user exists
@@ -43,6 +67,15 @@ public class InventoryItemCreateValidator {
             if (inventoryItemRepository.existsByBarcodeAndInventoryId(request.getBarcode(), request.getInventoryId())) {
                 throw new ConflictException(
                         "Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
+            }
+        }
+
+        // Validate Product code uniqueness within inventory (if provided)
+        if (request.getProductCode() != null && !request.getProductCode().trim().isEmpty()) {
+            if (inventoryItemRepository.existsByProductCodeAndInventoryId(request.getProductCode(),
+                    request.getInventoryId())) {
+                throw new ConflictException(
+                        "Item with product code '" + request.getProductCode() + "' already exists in this inventory");
             }
         }
 

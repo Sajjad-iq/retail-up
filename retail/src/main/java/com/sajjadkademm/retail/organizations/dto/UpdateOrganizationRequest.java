@@ -24,4 +24,12 @@ public class UpdateOrganizationRequest {
     @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;
 
+    private OrganizationStatus status;
+
+    public UpdateOrganizationRequest(String name, String description, String address) {
+        this.name = name;
+        this.description = description;
+        this.address = address;
+        this.status = null;
+    }
 }

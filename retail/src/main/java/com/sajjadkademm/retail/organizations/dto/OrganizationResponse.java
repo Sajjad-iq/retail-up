@@ -18,6 +18,7 @@ public class OrganizationResponse {
     private String description;
     private String address;
     private String phone;
+    private OrganizationStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

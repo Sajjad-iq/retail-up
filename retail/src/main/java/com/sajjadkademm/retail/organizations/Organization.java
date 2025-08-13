@@ -10,6 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +21,7 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.users.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -63,6 +66,11 @@ public class Organization {
     @Column(name = "phone", nullable = false, length = 20)
     @Size(max = 20)
     private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(name = "status", nullable = false)
+    private OrganizationStatus status = OrganizationStatus.ACTIVE;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

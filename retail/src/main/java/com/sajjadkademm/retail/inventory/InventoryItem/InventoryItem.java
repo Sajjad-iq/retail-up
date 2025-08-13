@@ -17,6 +17,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.UniqueConstraint;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -60,6 +61,12 @@ import lombok.Builder;
                 @Index(name = "idx_inventory_items_is_active", columnList = "is_active"),
                 @Index(name = "idx_inventory_items_expiry_date", columnList = "expiry_date"),
                 @Index(name = "idx_inventory_items_low_stock", columnList = "current_stock,minimum_stock")
+}, uniqueConstraints = {
+                @UniqueConstraint(name = "uk_inventory_items_sku_inventory", columnNames = { "sku", "inventory_id" }),
+                @UniqueConstraint(name = "uk_inventory_items_barcode_inventory", columnNames = { "barcode",
+                                "inventory_id" }),
+                @UniqueConstraint(name = "uk_inventory_items_product_code_inventory", columnNames = { "product_code",
+                                "inventory_id" })
 })
 public class InventoryItem {
         // Primary Key - Unique identifier for each inventory item

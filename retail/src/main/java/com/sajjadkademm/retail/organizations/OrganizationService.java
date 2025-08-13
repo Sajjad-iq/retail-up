@@ -98,6 +98,9 @@ public class OrganizationService {
         organization.setName(request.getName());
         organization.setDescription(request.getDescription());
         organization.setAddress(request.getAddress());
+        if (request.getStatus() != null) {
+            organization.setStatus(request.getStatus());
+        }
 
         return organizationRepository.save(organization);
     }

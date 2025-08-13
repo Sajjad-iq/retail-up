@@ -48,6 +48,7 @@ public class OrganizationController {
                 "description": "A leading retail company specializing in electronics and home appliances",
                 "address": "123 Business Street, New York, NY 10001",
                 "phone": "+1-555-123-4567",
+                "status": "ACTIVE",
                 "createdAt": "2024-12-19T10:30:00",
                 "updatedAt": "2024-12-19T10:30:00",
                 "createdBy": "user123"
@@ -81,6 +82,7 @@ public class OrganizationController {
                 "description": "Updated description for the leading retail company",
                 "address": "456 Updated Business Ave, New York, NY 10002",
                 "phone": "+1-555-123-4567",
+                "status": "DISABLED",
                 "createdAt": "2024-12-19T10:30:00",
                 "updatedAt": "2024-12-19T11:30:00",
                 "createdBy": "user123"
@@ -93,7 +95,8 @@ public class OrganizationController {
                     {
                         "name": "Acme Corporation Updated",
                         "description": "Updated description for the leading retail company",
-                        "address": "456 Updated Business Ave, New York, NY 10002"
+                        "address": "456 Updated Business Ave, New York, NY 10002",
+                        "status": "DISABLED"
                     }
                     """))) @Valid @RequestBody UpdateOrganizationRequest request) {
         Organization response = organizationService.updateOrganization(id, request);
@@ -112,6 +115,7 @@ public class OrganizationController {
                 "description": "A leading retail company specializing in electronics and home appliances",
                 "address": "123 Business Street, New York, NY 10001",
                 "phone": "+1-555-123-4567",
+                "status": "ACTIVE",
                 "createdAt": "2024-12-19T10:30:00",
                 "updatedAt": "2024-12-19T10:30:00",
                 "createdBy": "user123"
@@ -137,6 +141,7 @@ public class OrganizationController {
                     "description": "A leading retail company",
                     "address": "123 Business Street, New York, NY 10001",
                     "phone": "+1-555-123-4567",
+                    "status": "ACTIVE",
                     "createdAt": "2024-12-19T10:30:00",
                     "updatedAt": "2024-12-19T10:30:00",
                     "createdBy": "user123"
@@ -148,6 +153,7 @@ public class OrganizationController {
                     "description": "Technology solutions provider",
                     "address": "789 Tech Blvd, San Francisco, CA 94102",
                     "phone": "+1-555-987-6543",
+                    "status": "DISABLED",
                     "createdAt": "2024-12-19T11:30:00",
                     "updatedAt": "2024-12-19T11:30:00",
                     "createdBy": "user456"
@@ -173,6 +179,7 @@ public class OrganizationController {
                     "description": "A leading retail company",
                     "address": "123 Business Street, New York, NY 10001",
                     "phone": "+1-555-123-4567",
+                    "status": "ACTIVE",
                     "createdAt": "2024-12-19T10:30:00",
                     "updatedAt": "2024-12-19T10:30:00",
                     "createdBy": "user123"

@@ -3,11 +3,18 @@ package com.sajjadkademm.retail.inventory.InventoryItem.utils;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
+import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.Inventory;
+import com.sajjadkademm.retail.inventory.InventoryService;
+import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.utils.dto.Currency;
@@ -18,8 +25,33 @@ public class InventoryItemUpdateUtils {
 
     private final InventoryItemRepository inventoryItemRepository;
     private final SystemSettingsService systemSettingsService;
+    private final InventoryService inventoryService;
+    private final OrganizationService organizationService;
 
     public void validate(InventoryItem existing, UpdateInventoryItemRequest request) {
+        // Validate inventory exists and is active
+        Inventory inventory = existing.getInventory() != null
+                ? existing.getInventory()
+                : inventoryService.getInventoryById(existing.getInventoryId());
+        if (inventory == null) {
+            throw new NotFoundException("Inventory not found with ID: " + existing.getInventoryId());
+        }
+        if (Boolean.FALSE.equals(inventory.getIsActive())) {
+            throw new BadRequestException("This Inventory Disabled");
+        }
+
+        // Validate organization exists and is active
+        Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
+        if (organization == null) {
+            throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
+        }
+        if (organization.getStatus() == OrganizationStatus.DISABLED
+                || organization.getStatus() == OrganizationStatus.REJECTED
+                || organization.getStatus() == OrganizationStatus.SUSPENDED
+                || organization.getStatus() == OrganizationStatus.DELETED) {
+            throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
+        }
+
         // Check if new barcode conflicts with existing item in the same inventory
         if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
             boolean isChangingBarcode = !request.getBarcode().equals(existing.getBarcode());

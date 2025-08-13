@@ -2,8 +2,9 @@ package com.sajjadkademm.retail.organizations.dto;
 
 public enum OrganizationStatus {
     ACTIVE,
-    INACTIVE,
+    DISABLED,
+    PENDING,
+    REJECTED,
     SUSPENDED,
-    PENDING_VERIFICATION,
     DELETED
 }
