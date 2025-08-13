@@ -7,6 +7,7 @@ import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepositor
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
 import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 
 import lombok.RequiredArgsConstructor;
@@ -38,13 +39,8 @@ public class SystemSettingsService {
                                                 "System settings not found for organization: " + organizationId));
                 Organization organization = organizationService.getOrganizationById(organizationId);
 
-                // check if the organization disabled
-                if (organization.getStatus() == OrganizationStatus.DISABLED
-                                || organization.getStatus() == OrganizationStatus.REJECTED
-                                || organization.getStatus() == OrganizationStatus.SUSPENDED
-                                || organization.getStatus() == OrganizationStatus.DELETED) {
-                        throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
-                }
+                // assert organization is active
+                OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
                 setting.setBackupRetentionDays(request.getBackupRetentionDays());
                 setting.setTimezone(request.getTimezone());
@@ -65,13 +61,8 @@ public class SystemSettingsService {
 
                 Organization organization = organizationService.getOrganizationById(organizationId);
 
-                // check if the organization disabled
-                if (organization.getStatus() == OrganizationStatus.DISABLED
-                                || organization.getStatus() == OrganizationStatus.REJECTED
-                                || organization.getStatus() == OrganizationStatus.SUSPENDED
-                                || organization.getStatus() == OrganizationStatus.DELETED) {
-                        throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
-                }
+                // assert organization is active
+                OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
                 SystemSetting defaultSettings = createDefaultSystemSettings(organizationId);
                 defaultSettings.setId(setting.getId());

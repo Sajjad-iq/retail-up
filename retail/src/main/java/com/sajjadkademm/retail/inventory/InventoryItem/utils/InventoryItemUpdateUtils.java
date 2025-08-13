@@ -14,6 +14,7 @@ import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
 import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
@@ -52,12 +53,7 @@ public class InventoryItemUpdateUtils {
         if (organization == null) {
             throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
         }
-        if (organization.getStatus() == OrganizationStatus.DISABLED
-                || organization.getStatus() == OrganizationStatus.REJECTED
-                || organization.getStatus() == OrganizationStatus.SUSPENDED
-                || organization.getStatus() == OrganizationStatus.DELETED) {
-            throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
-        }
+        OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
         // Normalize inputs (trim)
         if (request.getBarcode() != null)

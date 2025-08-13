@@ -12,6 +12,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
 import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
@@ -44,13 +45,8 @@ public class InventoryItemCreateValidator {
             throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
         }
 
-        // check if the organization disabled
-        if (organization.getStatus() == OrganizationStatus.DISABLED
-                || organization.getStatus() == OrganizationStatus.REJECTED
-                || organization.getStatus() == OrganizationStatus.SUSPENDED
-                || organization.getStatus() == OrganizationStatus.DELETED) {
-            throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
-        }
+        // assert organization is active
+        OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
         // check if the inventory active
         if (inventory.getIsActive() == false) {

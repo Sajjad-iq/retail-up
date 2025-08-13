@@ -95,13 +95,8 @@ public class OrganizationService {
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found with ID: " + id));
 
-        // check if the organization disabled
-        if (organization.getStatus() == OrganizationStatus.DISABLED
-                || organization.getStatus() == OrganizationStatus.REJECTED
-                || organization.getStatus() == OrganizationStatus.SUSPENDED
-                || organization.getStatus() == OrganizationStatus.DELETED) {
-            throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
-        }
+        // assert organization is active before updates
+        OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
         // Update organization fields
         organization.setName(request.getName());
