@@ -5,6 +5,9 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
+import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class SystemSettingsService {
 
         private final SystemSettingRepository systemSettingRepository;
+        private final OrganizationService organizationService;
 
         /**
          * Get system settings for an organization
@@ -32,6 +36,15 @@ public class SystemSettingsService {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
+                Organization organization = organizationService.getOrganizationById(organizationId);
+
+                // check if the organization disabled
+                if (organization.getStatus() == OrganizationStatus.DISABLED
+                                || organization.getStatus() == OrganizationStatus.REJECTED
+                                || organization.getStatus() == OrganizationStatus.SUSPENDED
+                                || organization.getStatus() == OrganizationStatus.DELETED) {
+                        throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
+                }
 
                 setting.setBackupRetentionDays(request.getBackupRetentionDays());
                 setting.setTimezone(request.getTimezone());
@@ -49,6 +62,16 @@ public class SystemSettingsService {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
                                                 "System settings not found for organization: " + organizationId));
+
+                Organization organization = organizationService.getOrganizationById(organizationId);
+
+                // check if the organization disabled
+                if (organization.getStatus() == OrganizationStatus.DISABLED
+                                || organization.getStatus() == OrganizationStatus.REJECTED
+                                || organization.getStatus() == OrganizationStatus.SUSPENDED
+                                || organization.getStatus() == OrganizationStatus.DELETED) {
+                        throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
+                }
 
                 SystemSetting defaultSettings = createDefaultSystemSettings(organizationId);
                 defaultSettings.setId(setting.getId());
