@@ -19,9 +19,16 @@ import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.utils.dto.Currency;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class InventoryItemUpdateUtils {
+
+    private static final String CODE_REGEX = "^[A-Za-z0-9_-]+$";
+    private static final String BARCODE_REGEX = "^[A-Za-z0-9_-]+$";
 
     private final InventoryItemRepository inventoryItemRepository;
     private final SystemSettingsService systemSettingsService;
@@ -52,6 +59,20 @@ public class InventoryItemUpdateUtils {
             throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
         }
 
+        // Normalize inputs (trim)
+        if (request.getBarcode() != null)
+            request.setBarcode(request.getBarcode().trim());
+        if (request.getProductCode() != null)
+            request.setProductCode(request.getProductCode().trim());
+
+        // Regex checks (optional hardening)
+        if (request.getProductCode() != null && !request.getProductCode().matches(CODE_REGEX)) {
+            throw new BadRequestException("Product code contains invalid characters");
+        }
+        if (request.getBarcode() != null && !request.getBarcode().matches(BARCODE_REGEX)) {
+            throw new BadRequestException("Barcode contains invalid characters");
+        }
+
         // Check if new barcode conflicts with existing item in the same inventory
         if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
             boolean isChangingBarcode = !request.getBarcode().equals(existing.getBarcode());
@@ -59,6 +80,75 @@ public class InventoryItemUpdateUtils {
                     .existsByBarcodeAndInventoryId(request.getBarcode(), existing.getInventoryId())) {
                 throw new ConflictException(
                         "Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
+            }
+        }
+
+        // Check if new product code conflicts with existing item in the same inventory
+        if (request.getProductCode() != null && !request.getProductCode().trim().isEmpty()) {
+            boolean isChangingProductCode = !request.getProductCode().equals(existing.getProductCode());
+            if (isChangingProductCode && inventoryItemRepository
+                    .existsByProductCodeAndInventoryId(request.getProductCode(), existing.getInventoryId())) {
+                throw new ConflictException(
+                        "Item with product code '" + request.getProductCode() + "' already exists in this inventory");
+            }
+        }
+
+        // Cross-field rules
+        Integer minStock = request.getMinimumStock() != null ? request.getMinimumStock() : existing.getMinimumStock();
+        Integer maxStock = request.getMaximumStock() != null ? request.getMaximumStock() : existing.getMaximumStock();
+        Integer currentStock = request.getCurrentStock() != null ? request.getCurrentStock()
+                : existing.getCurrentStock();
+        if (maxStock != null && minStock != null && maxStock < minStock) {
+            throw new BadRequestException("Maximum stock cannot be less than minimum stock");
+        }
+        if (maxStock != null && currentStock != null && currentStock > maxStock) {
+            throw new BadRequestException("Current stock cannot exceed maximum stock");
+        }
+
+        BigDecimal costPrice = request.getCostPrice() != null ? request.getCostPrice()
+                : (existing.getCostPrice() != null ? existing.getCostPrice().getAmount() : null);
+        BigDecimal sellingPrice = request.getSellingPrice() != null ? request.getSellingPrice()
+                : (existing.getSellingPrice() != null ? existing.getSellingPrice().getAmount() : null);
+        if (costPrice != null && sellingPrice != null && costPrice.compareTo(sellingPrice) > 0) {
+            throw new BadRequestException("Selling price cannot be less than cost price");
+        }
+
+        BigDecimal discountPrice = request.getDiscountPrice() != null ? request.getDiscountPrice()
+                : existing.getDiscountPrice();
+        LocalDateTime discountStart = request.getDiscountStartDate() != null ? request.getDiscountStartDate()
+                : existing.getDiscountStartDate();
+
+        LocalDateTime discountEnd = request.getDiscountEndDate() != null ? request.getDiscountEndDate()
+                : existing.getDiscountEndDate();
+        if (discountPrice != null) {
+            if (sellingPrice == null) {
+                throw new BadRequestException("Selling price is required when discount price is provided");
+            }
+            if (discountPrice.compareTo(sellingPrice) > 0) {
+                throw new BadRequestException("Discount price cannot exceed selling price");
+            }
+            if (discountStart == null || discountEnd == null) {
+                throw new BadRequestException(
+                        "Discount start and end dates are required when discount price is provided");
+            }
+            if (discountStart.isAfter(discountEnd)) {
+                throw new BadRequestException("Discount start date cannot be after discount end date");
+            }
+        }
+
+        Boolean isPerishable = request.getIsPerishable() != null ? request.getIsPerishable()
+                : existing.getIsPerishable();
+        LocalDate expiryDate = request.getExpiryDate() != null ? request.getExpiryDate() : existing.getExpiryDate();
+        if (Boolean.TRUE.equals(isPerishable)) {
+            if (expiryDate == null) {
+                throw new BadRequestException("Expiry date is required for perishable items");
+            }
+            if (!expiryDate.isAfter(LocalDate.now())) {
+                throw new BadRequestException("Expiry date must be in the future for perishable items");
+            }
+        } else if (Boolean.FALSE.equals(isPerishable)) {
+            if (expiryDate != null) {
+                throw new BadRequestException("Expiry date must be null for non-perishable items");
             }
         }
     }
