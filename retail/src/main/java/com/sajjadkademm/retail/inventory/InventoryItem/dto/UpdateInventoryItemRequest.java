@@ -3,6 +3,7 @@ package com.sajjadkademm.retail.inventory.InventoryItem.dto;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Pattern;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,10 +26,12 @@ public class UpdateInventoryItemRequest {
     private String description;
 
     @Size(max = 50, message = "Product code must not exceed 50 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Product code must contain only letters, numbers, hyphens, and underscores")
     private String productCode;
 
     // Product Identification
     @Size(max = 100, message = "Barcode must not exceed 100 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Barcode must contain only letters, numbers, hyphens, and underscores")
     private String barcode;
 
     // Product Classification

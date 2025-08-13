@@ -7,6 +7,7 @@ import com.sajjadkademm.retail.inventory.dto.CreateInventoryRequest;
 import com.sajjadkademm.retail.inventory.dto.UpdateInventoryRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 
@@ -41,6 +42,14 @@ public class InventoryService {
             Organization organization = organizationService.getOrganizationById(request.getOrganizationId());
             if (organization == null) {
                 throw new NotFoundException("Organization not found with ID: " + request.getOrganizationId());
+            }
+
+            // check if the organization disabled
+            if (organization.getStatus() == OrganizationStatus.DISABLED
+                    || organization.getStatus() == OrganizationStatus.REJECTED
+                    || organization.getStatus() == OrganizationStatus.SUSPENDED
+                    || organization.getStatus() == OrganizationStatus.DELETED) {
+                throw new BadRequestException("This Organization Disabled or Rejected or Suspended or Deleted");
             }
 
             // Check if user exists

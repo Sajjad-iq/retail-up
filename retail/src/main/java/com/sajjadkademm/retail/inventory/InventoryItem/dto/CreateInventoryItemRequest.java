@@ -39,14 +39,17 @@ public class CreateInventoryItemRequest {
     private String description;
 
     @NotBlank(message = "SKU is required")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "SKU must contain only letters, numbers, hyphens, and underscores")
     @Size(min = 3, max = 50, message = "SKU must be between 3 and 50 characters")
     private String sku;
 
     @Size(max = 50, message = "Product code must not exceed 50 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Product code must contain only letters, numbers, hyphens, and underscores")
     private String productCode;
 
     // Product Identification
     @Size(max = 100, message = "Barcode must not exceed 100 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Barcode must contain only letters, numbers, hyphens, and underscores")
     private String barcode;
 
     // Product Classification
