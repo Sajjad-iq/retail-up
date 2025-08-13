@@ -13,6 +13,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemCreate
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.ValidatedCreateInventoryItemContext;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemUpdateUtils;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
@@ -115,7 +116,7 @@ public class InventoryItemService {
                         saved,
                         initialStock,
                         "Initial stock on item creation",
-                        com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType.ADJUSTMENT,
+                        ReferenceType.ADJUSTMENT,
                         saved.getId());
             }
 

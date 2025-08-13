@@ -95,6 +95,9 @@ public class InventoryService {
             }
         }
 
+        // assert organization is active
+        OrganizationValidationUtils.assertOrganizationIsActive(inventory.getOrganization());
+
         // Update fields if provided
         if (request.getName() != null) {
             inventory.setName(request.getName());

@@ -13,7 +13,6 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRe
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import java.math.BigDecimal;
@@ -23,9 +22,6 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 public class InventoryItemCreateValidator {
-
-    private static final String CODE_REGEX = "^[A-Za-z0-9_-]+$";
-    private static final String BARCODE_REGEX = "^[A-Za-z0-9_-]+$";
 
     private final InventoryService inventoryService;
     private final UserService userService;
@@ -66,17 +62,6 @@ public class InventoryItemCreateValidator {
             request.setBarcode(request.getBarcode().trim());
         if (request.getProductCode() != null)
             request.setProductCode(request.getProductCode().trim());
-
-        // Regex checks (optional hardening)
-        if (request.getSku() != null && !request.getSku().matches(CODE_REGEX)) {
-            throw new BadRequestException("SKU contains invalid characters");
-        }
-        if (request.getProductCode() != null && !request.getProductCode().matches(CODE_REGEX)) {
-            throw new BadRequestException("Product code contains invalid characters");
-        }
-        if (request.getBarcode() != null && !request.getBarcode().matches(BARCODE_REGEX)) {
-            throw new BadRequestException("Barcode contains invalid characters");
-        }
 
         // Validate SKU uniqueness within inventory
         if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {

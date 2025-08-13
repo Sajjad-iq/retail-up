@@ -28,9 +28,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class InventoryItemUpdateUtils {
 
-    private static final String CODE_REGEX = "^[A-Za-z0-9_-]+$";
-    private static final String BARCODE_REGEX = "^[A-Za-z0-9_-]+$";
-
     private final InventoryItemRepository inventoryItemRepository;
     private final SystemSettingsService systemSettingsService;
     private final InventoryService inventoryService;
@@ -60,14 +57,6 @@ public class InventoryItemUpdateUtils {
             request.setBarcode(request.getBarcode().trim());
         if (request.getProductCode() != null)
             request.setProductCode(request.getProductCode().trim());
-
-        // Regex checks (optional hardening)
-        if (request.getProductCode() != null && !request.getProductCode().matches(CODE_REGEX)) {
-            throw new BadRequestException("Product code contains invalid characters");
-        }
-        if (request.getBarcode() != null && !request.getBarcode().matches(BARCODE_REGEX)) {
-            throw new BadRequestException("Barcode contains invalid characters");
-        }
 
         // Check if new barcode conflicts with existing item in the same inventory
         if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
