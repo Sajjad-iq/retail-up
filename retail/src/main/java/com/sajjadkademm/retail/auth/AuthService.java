@@ -151,7 +151,7 @@ public class AuthService {
     public boolean changePassword(String userId, String oldPassword, String newPassword) {
         User user = userService.getUserById(userId);
         if (user == null) {
-            throw new NotFoundException("User not found with id: " + userId);
+            throw new NotFoundException("User not found");
         }
 
         // Verify old password

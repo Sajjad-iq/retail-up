@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@DirtiesContext
 class AuthServiceIntegrationTest {
 
     @Autowired
@@ -438,7 +440,7 @@ class AuthServiceIntegrationTest {
             NotFoundException exception = assertThrows(NotFoundException.class,
                     () -> authService.changePassword("nonexistent", "oldpassword", "newpassword"));
 
-            assertEquals("User not found with id: nonexistent", exception.getMessage());
+            assertEquals("User not found", exception.getMessage());
             verify(userService).getUserById("nonexistent");
             verify(userService, never()).updateUser(anyString(), any(User.class));
         }

@@ -3,6 +3,7 @@ package com.sajjadkademm.retail.organizations;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -40,6 +42,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@DirtiesContext
 class OrganizationServiceIntegrationTest {
 
         @Autowired
@@ -204,7 +207,7 @@ class OrganizationServiceIntegrationTest {
                                         () -> organizationService.createOrganization(createRequest));
 
                         assertTrue(exception.getMessage().contains("Failed to create organization"));
-                        assertTrue(exception.getMessage().contains("User not found with ID: user-123"));
+                        assertTrue(exception.getMessage().contains("User not found"));
 
                         // Verify partial flow execution
                         verify(organizationRepository).existsByPhone("5555555555");
@@ -294,7 +297,7 @@ class OrganizationServiceIntegrationTest {
                         NotFoundException exception = assertThrows(NotFoundException.class,
                                         () -> organizationService.updateOrganization("nonexistent", updateRequest));
 
-                        assertEquals("Organization not found with ID: nonexistent", exception.getMessage());
+                        assertEquals("Organization not found", exception.getMessage());
 
                         // Verify interactions
                         verify(organizationRepository).findById("nonexistent");
@@ -336,7 +339,7 @@ class OrganizationServiceIntegrationTest {
                         NotFoundException exception = assertThrows(NotFoundException.class,
                                         () -> organizationService.getOrganizationById("nonexistent"));
 
-                        assertEquals("Organization not found with ID: nonexistent", exception.getMessage());
+                        assertEquals("Organization not found", exception.getMessage());
 
                         // Verify interactions
                         verify(organizationRepository).findById("nonexistent");
@@ -1122,29 +1125,15 @@ class OrganizationServiceIntegrationTest {
                         when(organizationRepository.existsByDomain("inactive.com")).thenReturn(false);
                         when(userService.getUserById("inactive-123")).thenReturn(inactiveUser);
 
-                        Organization savedOrganization = Organization.builder()
-                                        .id("inactive-org-123")
-                                        .name("Inactive User Org")
-                                        .domain("inactive.com")
-                                        .description("Organization by inactive user")
-                                        .address("123 Inactive Street")
-                                        .phone("6666666666")
-                                        .createdBy(inactiveUser)
-                                        .build();
+                        // When & Then - Should fail because inactive users cannot create organizations
+                        BadRequestException exception = assertThrows(BadRequestException.class,
+                                        () -> organizationService.createOrganization(inactiveUserRequest));
 
-                        when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
-                        when(systemSettingsService.createAndSaveDefaultSystemSettings("inactive-org-123",
-                                        "inactive-123"))
-                                        .thenReturn(SystemSetting.builder().id("sys-inactive")
-                                                        .organizationId("inactive-org-123").build());
+                        assertEquals("Failed to create organization: Only Active Users Can Crate Organizations",
+                                        exception.getMessage());
 
-                        // When
-                        Organization result = organizationService.createOrganization(inactiveUserRequest);
-
-                        // Then - Should still work (business logic might allow inactive users to create
-                        // orgs)
-                        assertNotNull(result);
-                        assertEquals(UserStatus.INACTIVE, result.getCreatedBy().getStatus());
+                        // Verify that no organization was saved
+                        verify(organizationRepository, never()).save(any(Organization.class));
                 }
         }
 

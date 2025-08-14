@@ -16,6 +16,7 @@ import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementServ
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.dto.AccountType;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.utils.dto.Currency;
@@ -34,6 +35,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -49,6 +51,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@DirtiesContext
 class InventoryItemServiceIntegrationTest {
 
         @Autowired
@@ -62,6 +65,9 @@ class InventoryItemServiceIntegrationTest {
 
         @MockitoBean
         private UserService userService;
+
+        @MockitoBean
+        private UserRepository userRepository;
 
         @MockitoBean
         private SystemSettingsService systemSettingsService;
@@ -109,6 +115,12 @@ class InventoryItemServiceIntegrationTest {
                                 .createdBy(testUser)
                                 .build();
                 when(organizationService.getOrganizationById("org-123")).thenReturn(activeOrg);
+
+                // Mock user service to return the test user
+                when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+
+                // Mock user repository to return the test user (for validation utilities)
+                when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         }
 
         private CreateInventoryItemRequest buildCreateRequest() {
@@ -351,6 +363,7 @@ class InventoryItemServiceIntegrationTest {
                                         new BigDecimal("800.00"), Currency.USD));
 
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+                        update.setUserId(testUser.getId());
                         update.setName("Updated Laptop");
                         update.setBarcode("NEW-BC-999");
                         update.setSellingPrice(new BigDecimal("1300.00"));
@@ -389,6 +402,7 @@ class InventoryItemServiceIntegrationTest {
                         InventoryItem existing = buildInventoryItemSaved("item-123");
                         existing.setBarcode("OLD-BC");
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+                        update.setUserId(testUser.getId());
                         update.setBarcode("DUP-BC");
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
@@ -409,11 +423,13 @@ class InventoryItemServiceIntegrationTest {
                         existing.setCurrentStock(5);
 
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+                        update.setUserId(testUser.getId());
                         update.setCurrentStock(12);
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(inventoryItemRepository.save(any(InventoryItem.class)))
                                         .thenAnswer(inv -> inv.getArgument(0));
+                        when(userService.getUserById(testUser.getId())).thenReturn(testUser);
 
                         // When
                         InventoryItem result = inventoryItemService.updateInventoryItem("item-123", update);
@@ -421,7 +437,7 @@ class InventoryItemServiceIntegrationTest {
                         // Then
                         assertEquals(12, result.getCurrentStock());
                         verify(inventoryMovementService).recordAdjustmentToTarget(
-                                        eq(existing.getCreatedBy()),
+                                        eq(testUser),
                                         any(InventoryItem.class),
                                         eq(12),
                                         eq("Stock adjusted via item update"),
@@ -437,11 +453,13 @@ class InventoryItemServiceIntegrationTest {
                         existing.setCurrentStock(10);
 
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+                        update.setUserId(testUser.getId());
                         update.setCurrentStock(2);
 
                         when(inventoryItemRepository.findById("item-789")).thenReturn(Optional.of(existing));
                         when(inventoryItemRepository.save(any(InventoryItem.class)))
                                         .thenAnswer(inv -> inv.getArgument(0));
+                        when(userService.getUserById(testUser.getId())).thenReturn(testUser);
 
                         // When
                         InventoryItem result = inventoryItemService.updateInventoryItem("item-789", update);
@@ -449,7 +467,7 @@ class InventoryItemServiceIntegrationTest {
                         // Then
                         assertEquals(2, result.getCurrentStock());
                         verify(inventoryMovementService).recordAdjustmentToTarget(
-                                        eq(existing.getCreatedBy()),
+                                        eq(testUser),
                                         any(InventoryItem.class),
                                         eq(2),
                                         eq("Stock adjusted via item update"),
@@ -463,23 +481,27 @@ class InventoryItemServiceIntegrationTest {
                         // Given
                         InventoryItem existing = buildInventoryItemSaved("item-500");
                         when(inventoryItemRepository.findById("item-500")).thenReturn(Optional.of(existing));
+                        UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+                        update.setUserId(testUser.getId());
+
                         when(inventoryItemRepository.save(any(InventoryItem.class)))
                                         .thenThrow(new RuntimeException("DB down"));
 
                         // When & Then
                         BadRequestException ex = assertThrows(BadRequestException.class,
-                                        () -> inventoryItemService.updateInventoryItem("item-500",
-                                                        new UpdateInventoryItemRequest()));
+                                        () -> inventoryItemService.updateInventoryItem("item-500", update));
                         assertTrue(ex.getMessage().contains("Failed to update inventory item"));
                 }
 
                 @Test
                 @DisplayName("Update non-existent inventory item should fail")
                 void updateNonExistent_ShouldFail() {
+                        UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
+                        update.setUserId(testUser.getId());
+
                         when(inventoryItemRepository.findById("missing")).thenReturn(Optional.empty());
                         assertThrows(NotFoundException.class,
-                                        () -> inventoryItemService.updateInventoryItem("missing",
-                                                        new UpdateInventoryItemRequest()));
+                                        () -> inventoryItemService.updateInventoryItem("missing", update));
                 }
         }
 
