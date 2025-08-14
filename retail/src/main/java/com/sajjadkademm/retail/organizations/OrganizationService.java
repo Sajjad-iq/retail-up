@@ -5,12 +5,12 @@ import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.AccountType;
+import com.sajjadkademm.retail.users.dto.UserStatus;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,11 +54,15 @@ public class OrganizationService {
             // Check if user exists
             User user = userService.getUserById(request.getUserId());
             if (user == null) {
-                throw new NotFoundException("User not found with ID: " + request.getUserId());
+                throw new NotFoundException("User not found");
             }
 
             if (user.getAccountType() != AccountType.USER) {
                 throw new UnauthorizedException("Only Users Can Crate Organizations");
+            }
+
+            if (user.getStatus() != UserStatus.ACTIVE) {
+                throw new UnauthorizedException("Only Active Users Can Crate Organizations");
             }
 
             Organization organization = Organization.builder()
@@ -93,15 +97,29 @@ public class OrganizationService {
      */
     public Organization updateOrganization(String id, UpdateOrganizationRequest request) {
         Organization organization = organizationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Organization not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Organization not found"));
 
         // assert organization is active before updates
         OrganizationValidationUtils.assertOrganizationIsActive(organization);
+
+        if (request.getPhone() != null && !request.getPhone().equals(organization.getPhone())) {
+            if (organizationRepository.existsByPhone(request.getPhone())) {
+                throw new ConflictException("Organization with phone " + request.getPhone() + " already exists");
+            }
+        }
+
+        if (request.getDomain() != null && !request.getDomain().equals(organization.getDomain())) {
+            if (organizationRepository.existsByDomain(request.getDomain())) {
+                throw new ConflictException("Organization with domain " + request.getDomain() + " already exists");
+            }
+        }
 
         // Update organization fields
         organization.setName(request.getName());
         organization.setDescription(request.getDescription());
         organization.setAddress(request.getAddress());
+        organization.setPhone(request.getPhone());
+        organization.setDomain(request.getDomain());
         if (request.getStatus() != null) {
             organization.setStatus(request.getStatus());
         }
@@ -114,7 +132,7 @@ public class OrganizationService {
      */
     public Organization getOrganizationById(String id) {
         return organizationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Organization not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Organization not found"));
     }
 
     /**

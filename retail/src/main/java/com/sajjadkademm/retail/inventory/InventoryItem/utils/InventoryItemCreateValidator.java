@@ -15,6 +15,9 @@ import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,13 +35,13 @@ public class InventoryItemCreateValidator {
         // Resolve and validate inventory
         Inventory inventory = inventoryService.getInventoryById(request.getInventoryId());
         if (inventory == null) {
-            throw new NotFoundException("Inventory not found with ID: " + request.getInventoryId());
+            throw new NotFoundException("Inventory not found");
         }
 
         // Resolve organization, ensure it exists and is active
         Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
         if (organization == null) {
-            throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
+            throw new NotFoundException("Organization not found");
         }
         OrganizationValidationUtils.assertOrganizationIsActive(organization);
 
@@ -50,7 +53,11 @@ public class InventoryItemCreateValidator {
         // Resolve creating user
         User user = userService.getUserById(request.getUserId());
         if (user == null) {
-            throw new NotFoundException("User not found with ID: " + request.getUserId());
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new UnauthorizedException("Only Active Users Can Create Inventory Items");
         }
 
         // Normalize string inputs

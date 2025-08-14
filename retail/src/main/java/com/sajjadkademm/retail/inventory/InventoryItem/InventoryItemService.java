@@ -138,7 +138,7 @@ public class InventoryItemService {
     public InventoryItem updateInventoryItem(String id, UpdateInventoryItemRequest request) {
         try {
             InventoryItem item = inventoryItemRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
+                    .orElseThrow(() -> new NotFoundException("Inventory item not found"));
 
             // validation
             inventoryItemUpdateValidator.validate(item, request);
@@ -181,7 +181,7 @@ public class InventoryItemService {
      */
     public InventoryItem getInventoryItemById(String id) {
         return inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
     }
 
     /**
@@ -205,7 +205,7 @@ public class InventoryItemService {
      */
     public void deleteInventoryItem(String id) {
         InventoryItem item = inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
 
         item.setIsActive(false);
         inventoryItemRepository.save(item);
@@ -230,7 +230,7 @@ public class InventoryItemService {
      */
     public InventoryItem updateStock(String itemId, Integer newStock) {
         InventoryItem item = inventoryItemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with ID: " + itemId));
+                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
 
         item.setCurrentStock(newStock);
         return inventoryItemRepository.save(item);

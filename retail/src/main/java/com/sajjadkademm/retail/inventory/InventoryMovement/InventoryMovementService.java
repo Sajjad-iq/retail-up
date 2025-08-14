@@ -348,7 +348,7 @@ public class InventoryMovementService {
      */
     public InventoryMovement getMovementById(String id) {
         return movementRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory movement not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Inventory movement not found"));
     }
 
     /**

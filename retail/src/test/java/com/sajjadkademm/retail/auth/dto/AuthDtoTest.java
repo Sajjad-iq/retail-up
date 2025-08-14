@@ -97,10 +97,14 @@ class AuthDtoTest {
             Set<ConstraintViolation<LoginRequest>> violations = validator.validate(loginRequest);
 
             // Then
-            assertEquals(1, violations.size());
-            ConstraintViolation<LoginRequest> violation = violations.iterator().next();
-            assertEquals("Password is required", violation.getMessage());
-            assertEquals("password", violation.getPropertyPath().toString());
+            assertEquals(2, violations.size()); // Both @NotBlank and @Size(min=8) trigger for empty string
+            // Check that both validation errors are present
+            boolean hasNotBlankError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Password is required"));
+            boolean hasSizeError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Password must be between 8 and 32 characters"));
+            assertTrue(hasNotBlankError, "Should have @NotBlank validation error");
+            assertTrue(hasSizeError, "Should have @Size validation error");
         }
 
         @Test
@@ -204,8 +208,7 @@ class AuthDtoTest {
                     "John Doe",
                     "john@example.com",
                     "1234567890",
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
@@ -222,16 +225,20 @@ class AuthDtoTest {
                     "",
                     "john@example.com",
                     "1234567890",
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
 
             // Then
-            assertEquals(1, violations.size());
-            ConstraintViolation<RegisterRequest> violation = violations.iterator().next();
-            assertEquals("Name is required", violation.getMessage());
+            assertEquals(2, violations.size()); // Both @NotBlank and @Size(min=3) trigger for empty string
+            // Check that both validation errors are present
+            boolean hasNotBlankError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Name is required"));
+            boolean hasSizeError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Name must be between 3 and 255 characters"));
+            assertTrue(hasNotBlankError, "Should have @NotBlank validation error");
+            assertTrue(hasSizeError, "Should have @Size validation error");
         }
 
         @Test
@@ -242,8 +249,7 @@ class AuthDtoTest {
                     "Jo", // 2 characters
                     "john@example.com",
                     "1234567890",
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
@@ -263,8 +269,7 @@ class AuthDtoTest {
                     longName,
                     "john@example.com",
                     "1234567890",
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
@@ -283,8 +288,7 @@ class AuthDtoTest {
                     "John Doe",
                     "invalid-email",
                     "1234567890",
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
@@ -303,16 +307,20 @@ class AuthDtoTest {
                     "John Doe",
                     "john@example.com",
                     "",
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
 
             // Then
-            assertEquals(1, violations.size());
-            ConstraintViolation<RegisterRequest> violation = violations.iterator().next();
-            assertEquals("Phone is required", violation.getMessage());
+            assertEquals(2, violations.size()); // Both @NotBlank and @Size(min=10) trigger for empty string
+            // Check that both validation errors are present
+            boolean hasNotBlankError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Phone is required"));
+            boolean hasSizeError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Phone must be between 10 and 20 digits"));
+            assertTrue(hasNotBlankError, "Should have @NotBlank validation error");
+            assertTrue(hasSizeError, "Should have @Size validation error");
         }
 
         @Test
@@ -323,8 +331,7 @@ class AuthDtoTest {
                     "John Doe",
                     "john@example.com",
                     "123456789", // 9 characters
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
@@ -343,8 +350,7 @@ class AuthDtoTest {
                     "John Doe",
                     "john@example.com",
                     "123456789012345678901", // 21 characters
-                    "password123"
-            );
+                    "password123");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
@@ -363,16 +369,20 @@ class AuthDtoTest {
                     "John Doe",
                     "john@example.com",
                     "1234567890",
-                    ""
-            );
+                    "");
 
             // When
             Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(registerRequest);
 
             // Then
-            assertEquals(1, violations.size());
-            ConstraintViolation<RegisterRequest> violation = violations.iterator().next();
-            assertEquals("Password is required", violation.getMessage());
+            assertEquals(2, violations.size()); // Both @NotBlank and @Size(min=8) trigger for empty string
+            // Check that both validation errors are present
+            boolean hasNotBlankError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Password is required"));
+            boolean hasSizeError = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Password must be between 8 and 32 characters"));
+            assertTrue(hasNotBlankError, "Should have @NotBlank validation error");
+            assertTrue(hasSizeError, "Should have @Size validation error");
         }
 
         @Test
@@ -480,8 +490,7 @@ class AuthDtoTest {
                     "John Doe",
                     "john@example.com",
                     "1234567890",
-                    "Login successful"
-            );
+                    "Login successful");
 
             // Then
             assertEquals("jwt.token.here", response.getToken());

@@ -47,10 +47,10 @@ public class Organization {
 
     @Column(name = "name", nullable = false)
     @NotBlank
-    @Size(min = 2, max = 100)
+    @Size(min = 2, max = 255)
     private String name;
 
-    @Column(name = "domain", nullable = false, unique = true, updatable = false)
+    @Column(name = "domain", nullable = false, unique = true)
     @NotBlank
     @Size(min = 3, max = 255)
     private String domain;
@@ -63,7 +63,7 @@ public class Organization {
     @Size(max = 255)
     private String address;
 
-    @Column(name = "phone", nullable = false, length = 20)
+    @Column(name = "phone", nullable = true, length = 20)
     @Size(max = 20)
     private String phone;
 

@@ -18,6 +18,10 @@ import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.utils.dto.Currency;
+import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.users.UserRepository;
+import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,6 +35,7 @@ public class InventoryItemUpdateUtils {
     private final SystemSettingsService systemSettingsService;
     private final InventoryService inventoryService;
     private final OrganizationService organizationService;
+    private final UserRepository userRepository;
 
     public void validate(InventoryItem existing, UpdateInventoryItemRequest request) {
         // Resolve inventory and guard it exists
@@ -38,7 +43,7 @@ public class InventoryItemUpdateUtils {
                 ? existing.getInventory()
                 : inventoryService.getInventoryById(existing.getInventoryId());
         if (inventory == null) {
-            throw new NotFoundException("Inventory not found with ID: " + existing.getInventoryId());
+            throw new NotFoundException("Inventory not found");
         }
         // Guard: inventory must be active
         if (Boolean.FALSE.equals(inventory.getIsActive())) {
@@ -53,9 +58,17 @@ public class InventoryItemUpdateUtils {
         // Resolve organization and ensure it is active
         Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
         if (organization == null) {
-            throw new NotFoundException("Organization not found with ID: " + inventory.getOrganizationId());
+            throw new NotFoundException("Organization not found");
         }
         OrganizationValidationUtils.assertOrganizationIsActive(organization);
+
+        // Resolve user and ensure it is active
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new UnauthorizedException("Only Active Users Can Update Inventory Items");
+        }
 
         // Normalize string inputs
         if (request.getBarcode() != null)

@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMin;
@@ -17,6 +18,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateInventoryItemRequest {
+
+    @NotBlank(message = "User ID is required")
+    private String userId;
 
     // Basic Product Information
     @Size(min = 2, max = 200, message = "Item name must be between 2 and 200 characters")

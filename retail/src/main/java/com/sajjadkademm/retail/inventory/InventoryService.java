@@ -8,9 +8,10 @@ import com.sajjadkademm.retail.inventory.dto.UpdateInventoryRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class InventoryService {
             // Resolve organization and ensure it exists
             Organization organization = organizationService.getOrganizationById(request.getOrganizationId());
             if (organization == null) {
-                throw new NotFoundException("Organization not found with ID: " + request.getOrganizationId());
+                throw new NotFoundException("Organization not found with ");
             }
 
             // Guard: only active organizations can create inventories
@@ -51,7 +52,11 @@ public class InventoryService {
             // Resolve creating user and ensure it exists
             User user = userService.getUserById(request.getUserId());
             if (user == null) {
-                throw new NotFoundException("User not found with ID: " + request.getUserId());
+                throw new NotFoundException("User not found");
+            }
+
+            if (user.getStatus() != UserStatus.ACTIVE) {
+                throw new UnauthorizedException("Only Active Users Can Crate Inventories");
             }
 
             // Uniqueness: name must be unique within organization
@@ -147,7 +152,7 @@ public class InventoryService {
      */
     public void deleteInventory(String id) {
         Inventory inventory = inventoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Inventory not found"));
 
         inventory.setIsActive(false);
         inventoryRepository.save(inventory);

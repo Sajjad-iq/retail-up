@@ -23,7 +23,7 @@ public class UserService {
     public User getUserById(String id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
-            throw new NotFoundException("User not found with id: " + id);
+            throw new NotFoundException("User not found");
         }
         return user.get();
     }
@@ -35,7 +35,7 @@ public class UserService {
     public User updateUser(String id, User userDetails) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
-            throw new NotFoundException("User not found with id: " + id);
+            throw new NotFoundException("User not found");
         }
 
         User user = optionalUser.get();
@@ -48,7 +48,7 @@ public class UserService {
 
     public boolean deleteUser(String id) {
         if (!userRepository.existsById(id)) {
-            throw new NotFoundException("User not found with id: " + id);
+            throw new NotFoundException("User not found");
         }
         userRepository.deleteById(id);
         return true;

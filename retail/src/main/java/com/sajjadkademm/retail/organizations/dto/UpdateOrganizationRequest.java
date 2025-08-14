@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class UpdateOrganizationRequest {
 
     @NotBlank(message = "Organization name is required")
-    @Size(min = 2, max = 100, message = "Organization name must be between 2 and 100 characters")
+    @Size(min = 2, max = 255, message = "Organization name must be between 2 and 255 characters")
     private String name;
 
     @NotBlank(message = "Description is required")
@@ -23,6 +23,12 @@ public class UpdateOrganizationRequest {
     @NotBlank(message = "Address is required")
     @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;
+
+    @Size(max = 20, message = "Phone must not exceed 20 characters")
+    private String phone;
+
+    @Size(min = 3, max = 255, message = "Domain must be between 3 and 255 characters")
+    private String domain;
 
     private OrganizationStatus status;
 
