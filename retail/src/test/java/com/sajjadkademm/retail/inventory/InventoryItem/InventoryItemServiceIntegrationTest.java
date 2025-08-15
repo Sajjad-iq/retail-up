@@ -652,25 +652,5 @@ class InventoryItemServiceIntegrationTest {
                         assertTrue(resp.isFirst());
                 }
 
-                @Test
-                @DisplayName("updateStock should update current stock")
-                void updateStock_ShouldWork() {
-                        InventoryItem existing = buildInventoryItemSaved("item-123");
-                        existing.setCurrentStock(5);
-
-                        when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
-                        when(inventoryItemRepository.save(any(InventoryItem.class)))
-                                        .thenAnswer(inv -> inv.getArgument(0));
-
-                        InventoryItem updated = inventoryItemService.updateStock("item-123", 20);
-                        assertEquals(20, updated.getCurrentStock());
-                }
-
-                @Test
-                @DisplayName("updateStock on missing item should fail")
-                void updateStock_Missing_ShouldFail() {
-                        when(inventoryItemRepository.findById("missing")).thenReturn(Optional.empty());
-                        assertThrows(NotFoundException.class, () -> inventoryItemService.updateStock("missing", 10));
-                }
         }
 }

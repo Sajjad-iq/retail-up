@@ -16,7 +16,6 @@ import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -202,17 +201,6 @@ public class InventoryItemService {
      */
     public long getActiveItemCountByInventory(String inventoryId) {
         return inventoryItemRepository.countByInventoryIdAndIsActiveTrue(inventoryId);
-    }
-
-    /**
-     * Update stock for an inventory item (internal use)
-     */
-    public InventoryItem updateStock(String itemId, Integer newStock) {
-        InventoryItem item = inventoryItemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
-
-        item.setCurrentStock(newStock);
-        return inventoryItemRepository.save(item);
     }
 
     // Paginated methods
