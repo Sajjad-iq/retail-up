@@ -11,9 +11,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+
 import java.time.LocalDateTime;
 
 import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.utils.dto.Currency;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -64,7 +68,8 @@ public class SystemSetting {
 
     @Column(name = "currency", nullable = false)
     @NotNull(message = "Currency is required")
-    private String currency = "USD";
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
 
     // Notification Settings
     @Column(name = "email_notifications_enabled", nullable = false)

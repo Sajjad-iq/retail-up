@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import com.sajjadkademm.retail.utils.dto.Currency;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -25,7 +27,7 @@ public class SystemSettingsResponse {
     // General Settings
     private String timezone;
     private String language;
-    private String currency;
+    private Currency currency;
 
     // Notification Settings
     private Boolean emailNotificationsEnabled;

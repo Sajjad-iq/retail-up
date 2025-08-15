@@ -67,11 +67,7 @@ public class InventoryItemService {
         try {
             // Validate request and fetch required entities
             ValidatedCreateInventoryItemContext context = inventoryItemCreateValidator.validate(request);
-            Inventory inventory = context.getInventory();
             User user = context.getUser();
-
-            // get currency from organization settings
-            Currency currency = resolveCurrency(inventory.getOrganizationId());
 
             // get initial stock from request
             Integer initialStock = request.getCurrentStock();
@@ -93,8 +89,8 @@ public class InventoryItemService {
                     .currentStock(request.getCurrentStock())
                     .minimumStock(request.getMinimumStock())
                     .maximumStock(request.getMaximumStock())
-                    .costPrice(request.getCostPrice() != null ? new Money(request.getCostPrice(), currency) : null)
-                    .sellingPrice(new Money(request.getSellingPrice(), currency))
+                    .costPrice(request.getCostPrice())
+                    .sellingPrice(request.getSellingPrice())
                     .discountPrice(request.getDiscountPrice())
                     .discountStartDate(request.getDiscountStartDate())
                     .discountEndDate(request.getDiscountEndDate())
@@ -307,23 +303,6 @@ public class InventoryItemService {
                 .numberOfElements(page.getNumberOfElements())
                 .empty(page.isEmpty())
                 .build();
-    }
-
-    private Currency resolveCurrency(String organizationId) {
-        try {
-            SystemSetting systemSetting = systemSettingsService.getSystemSettings(organizationId);
-            String currencyCode = systemSetting.getCurrency();
-            if (currencyCode == null || currencyCode.isBlank()) {
-                return Currency.USD;
-            }
-            try {
-                return Currency.valueOf(currencyCode.toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                return Currency.USD;
-            }
-        } catch (Exception ex) {
-            return Currency.USD;
-        }
     }
 
 }

@@ -106,11 +106,21 @@ public class InventoryItemUpdateUtils {
             throw new BadRequestException("Current stock cannot exceed maximum stock");
         }
 
-        BigDecimal costPrice = request.getCostPrice() != null ? request.getCostPrice()
-                : (existing.getCostPrice() != null ? existing.getCostPrice().getAmount() : null);
-        BigDecimal sellingPrice = request.getSellingPrice() != null ? request.getSellingPrice()
-                : (existing.getSellingPrice() != null ? existing.getSellingPrice().getAmount() : null);
-        if (costPrice != null && sellingPrice != null && costPrice.compareTo(sellingPrice) > 0) {
+        Money costPrice = request.getCostPrice() != null ? request.getCostPrice()
+                : existing.getCostPrice();
+        Money sellingPrice = request.getSellingPrice() != null ? request.getSellingPrice()
+                : existing.getSellingPrice();
+
+        // Validate currency is provided when updating pricing
+        if (request.getCostPrice() != null && request.getCostPrice().getCurrency() == null) {
+            throw new BadRequestException("Currency is required for cost price");
+        }
+        if (request.getSellingPrice() != null && request.getSellingPrice().getCurrency() == null) {
+            throw new BadRequestException("Currency is required for selling price");
+        }
+
+        if (costPrice != null && sellingPrice != null
+                && costPrice.getAmount().compareTo(sellingPrice.getAmount()) > 0) {
             throw new BadRequestException("Selling price cannot be less than cost price");
         }
 
@@ -119,7 +129,8 @@ public class InventoryItemUpdateUtils {
         LocalDateTime discountEnd = request.getDiscountEndDate();
         // Only enforce discount-related rules if any discount field is being changed
         if (discountPrice != null || discountStart != null || discountEnd != null) {
-            BigDecimal effectiveSelling = sellingPrice; // may be from request or existing
+            BigDecimal effectiveSelling = sellingPrice != null ? sellingPrice.getAmount() : null; // may be from request
+                                                                                                  // or existing
             if (discountPrice != null && effectiveSelling == null) {
                 throw new BadRequestException("Selling price is required when discount price is provided");
             }
@@ -199,22 +210,10 @@ public class InventoryItemUpdateUtils {
             item.setMaximumStock(request.getMaximumStock());
         }
         if (request.getCostPrice() != null) {
-            Currency currency = resolveCurrency(item.getInventory().getOrganizationId());
-            if (item.getCostPrice() == null) {
-                item.setCostPrice(new Money(request.getCostPrice(), currency));
-            } else {
-                item.getCostPrice().setAmount(request.getCostPrice());
-                item.getCostPrice().setCurrency(currency);
-            }
+            item.setCostPrice(request.getCostPrice());
         }
         if (request.getSellingPrice() != null) {
-            Currency currency = resolveCurrency(item.getInventory().getOrganizationId());
-            if (item.getSellingPrice() == null) {
-                item.setSellingPrice(new Money(request.getSellingPrice(), currency));
-            } else {
-                item.getSellingPrice().setAmount(request.getSellingPrice());
-                item.getSellingPrice().setCurrency(currency);
-            }
+            item.setSellingPrice(request.getSellingPrice());
         }
         if (request.getDiscountPrice() != null) {
             item.setDiscountPrice(request.getDiscountPrice());
@@ -239,20 +238,4 @@ public class InventoryItemUpdateUtils {
         }
     }
 
-    private Currency resolveCurrency(String organizationId) {
-        try {
-            SystemSetting systemSetting = systemSettingsService.getSystemSettings(organizationId);
-            String currencyCode = systemSetting.getCurrency();
-            if (currencyCode == null || currencyCode.isBlank()) {
-                return Currency.USD;
-            }
-            try {
-                return Currency.valueOf(currencyCode.toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                return Currency.USD;
-            }
-        } catch (Exception ex) {
-            return Currency.USD;
-        }
-    }
 }

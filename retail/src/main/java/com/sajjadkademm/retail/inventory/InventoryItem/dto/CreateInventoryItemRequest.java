@@ -89,12 +89,10 @@ public class CreateInventoryItemRequest {
     private Integer maximumStock;
 
     // Pricing Information
-    @DecimalMin(value = "0.0", message = "Cost price cannot be negative")
-    private BigDecimal costPrice;
+    private Money costPrice;
 
     @NotNull(message = "Selling price is required")
-    @DecimalMin(value = "0.0", message = "Selling price cannot be negative")
-    private BigDecimal sellingPrice;
+    private Money sellingPrice;
 
     @DecimalMin(value = "0.0", message = "Discount price cannot be negative")
     private BigDecimal discountPrice;

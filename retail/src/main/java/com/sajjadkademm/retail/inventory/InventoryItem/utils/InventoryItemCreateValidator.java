@@ -10,6 +10,7 @@ import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
@@ -97,9 +98,19 @@ public class InventoryItemCreateValidator {
             throw new BadRequestException("Current stock cannot exceed maximum stock");
         }
 
-        BigDecimal costPrice = request.getCostPrice();
-        BigDecimal sellingPrice = request.getSellingPrice();
-        if (costPrice != null && sellingPrice != null && costPrice.compareTo(sellingPrice) > 0) {
+        Money costPrice = request.getCostPrice();
+        Money sellingPrice = request.getSellingPrice();
+
+        // Validate currency is provided
+        if (sellingPrice != null && sellingPrice.getCurrency() == null) {
+            throw new BadRequestException("Currency is required for selling price");
+        }
+        if (costPrice != null && costPrice.getCurrency() == null) {
+            throw new BadRequestException("Currency is required for cost price");
+        }
+
+        if (costPrice != null && sellingPrice != null
+                && costPrice.getAmount().compareTo(sellingPrice.getAmount()) > 0) {
             throw new BadRequestException("Selling price cannot be less than cost price");
         }
 
@@ -110,7 +121,7 @@ public class InventoryItemCreateValidator {
             if (sellingPrice == null) {
                 throw new BadRequestException("Selling price is required when discount price is provided");
             }
-            if (discountPrice.compareTo(sellingPrice) > 0) {
+            if (discountPrice.compareTo(sellingPrice.getAmount()) > 0) {
                 throw new BadRequestException("Discount price cannot exceed selling price");
             }
             if (discountStart == null || discountEnd == null) {

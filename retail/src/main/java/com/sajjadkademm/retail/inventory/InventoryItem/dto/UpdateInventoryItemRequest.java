@@ -1,6 +1,7 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMin;
@@ -72,11 +73,10 @@ public class UpdateInventoryItemRequest {
     private Integer maximumStock;
 
     // Pricing Information
-    @DecimalMin(value = "0.0", message = "Cost price cannot be negative")
-    private BigDecimal costPrice;
+    private Money costPrice;
 
-    @DecimalMin(value = "0.0", message = "Selling price cannot be negative")
-    private BigDecimal sellingPrice;
+    @NotNull(message = "Selling price is required")
+    private Money sellingPrice;
 
     @DecimalMin(value = "0.0", message = "Discount price cannot be negative")
     private BigDecimal discountPrice;

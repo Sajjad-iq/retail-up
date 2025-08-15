@@ -142,8 +142,10 @@ class InventoryItemServiceIntegrationTest {
                 req.setCurrentStock(10);
                 req.setMinimumStock(2);
                 req.setMaximumStock(50);
-                req.setCostPrice(new BigDecimal("800.00"));
-                req.setSellingPrice(new BigDecimal("1200.00"));
+                req.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(new BigDecimal("800.00"),
+                                Currency.USD));
+                req.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                                new BigDecimal("1200.00"), Currency.USD));
                 req.setDiscountPrice(new BigDecimal("1000.00"));
                 req.setDiscountStartDate(LocalDateTime.now().minusDays(1));
                 req.setDiscountEndDate(LocalDateTime.now().plusDays(7));
@@ -205,7 +207,7 @@ class InventoryItemServiceIntegrationTest {
                                         .thenReturn(false);
                         when(systemSettingsService.getSystemSettings("org-123"))
                                         .thenReturn(SystemSetting.builder().id("sys-1").organizationId("org-123")
-                                                        .currency("EUR").build());
+                                                        .currency(Currency.EUR).build());
                         when(inventoryItemRepository.save(any(InventoryItem.class))).thenReturn(saved);
 
                         // When
@@ -249,7 +251,7 @@ class InventoryItemServiceIntegrationTest {
                                         .thenReturn(false);
                         when(systemSettingsService.getSystemSettings("org-123"))
                                         .thenReturn(SystemSetting.builder().id("sys-1").organizationId("org-123")
-                                                        .currency("USD").build());
+                                                        .currency(Currency.USD).build());
                         when(inventoryItemRepository.save(any(InventoryItem.class))).thenReturn(saved);
 
                         // When
@@ -335,7 +337,7 @@ class InventoryItemServiceIntegrationTest {
                         when(systemSettingsService.getSystemSettings("org-123"))
                                         .thenReturn(
                                                         SystemSetting.builder().id("sys-1").organizationId("org-123")
-                                                                        .currency("INVALID").build());
+                                                                        .currency(Currency.USD).build());
                         when(inventoryItemRepository.save(any(InventoryItem.class))).thenReturn(saved);
 
                         // When
@@ -366,13 +368,15 @@ class InventoryItemServiceIntegrationTest {
                         update.setUserId(testUser.getId());
                         update.setName("Updated Laptop");
                         update.setBarcode("NEW-BC-999");
-                        update.setSellingPrice(new BigDecimal("1300.00"));
-                        update.setCostPrice(new BigDecimal("850.00"));
+                        update.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                                        new BigDecimal("1300.00"), Currency.USD));
+                        update.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                                        new BigDecimal("850.00"), Currency.USD));
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(systemSettingsService.getSystemSettings("org-123"))
                                         .thenReturn(SystemSetting.builder().id("sys-1").organizationId("org-123")
-                                                        .currency("GBP").build());
+                                                        .currency(Currency.GBP).build());
                         when(inventoryItemRepository.existsByBarcodeAndInventoryId("NEW-BC-999",
                                         existing.getInventoryId()))
                                         .thenReturn(false);

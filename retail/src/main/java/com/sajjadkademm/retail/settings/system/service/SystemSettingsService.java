@@ -4,6 +4,7 @@ import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
+import com.sajjadkademm.retail.utils.dto.Currency;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationRepository;
@@ -26,7 +27,7 @@ public class SystemSettingsService {
         public SystemSetting getSystemSettings(String organizationId) {
                 return systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
-                                                "System settings not found for organization: " + organizationId));
+                                                "System settings not found"));
         }
 
         /**
@@ -35,11 +36,11 @@ public class SystemSettingsService {
         public SystemSetting updateSystemSettings(String organizationId, SystemSettingsRequest request) {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
-                                                "System settings not found for organization: " + organizationId));
+                                                "System settings not found"));
 
                 Organization organization = organizationRepository.findById(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
-                                                "Organization not found with ID: " + organizationId));
+                                                "Organization not found"));
 
                 // assert organization is active
                 OrganizationValidationUtils.assertOrganizationIsActive(organization);
@@ -59,11 +60,11 @@ public class SystemSettingsService {
         public SystemSetting resetToDefaults(String organizationId) {
                 SystemSetting setting = systemSettingRepository.findByOrganizationId(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
-                                                "System settings not found for organization: " + organizationId));
+                                                "System settings not found"));
 
                 Organization organization = organizationRepository.findById(organizationId)
                                 .orElseThrow(() -> new NotFoundException(
-                                                "Organization not found with ID: " + organizationId));
+                                                "Organization not found"));
 
                 // assert organization is active
                 OrganizationValidationUtils.assertOrganizationIsActive(organization);
@@ -87,7 +88,7 @@ public class SystemSettingsService {
                                 // General Settings
                                 .timezone("UTC")
                                 .language("en")
-                                .currency("USD")
+                                .currency(Currency.USD)
                                 // Notification Settings
                                 .emailNotificationsEnabled(true)
                                 .build();

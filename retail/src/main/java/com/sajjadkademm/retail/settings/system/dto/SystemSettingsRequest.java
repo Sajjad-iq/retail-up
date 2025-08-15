@@ -1,6 +1,9 @@
 package com.sajjadkademm.retail.settings.system.dto;
 
 import jakarta.validation.constraints.Min;
+
+import com.sajjadkademm.retail.utils.dto.Currency;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotNull;
@@ -29,7 +32,7 @@ public class SystemSettingsRequest {
 
     @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a 3-letter code")
     @NotNull(message = "Currency is required")
-    private String currency;
+    private Currency currency;
 
     // Notification Settings
     @NotNull(message = "Email notifications enabled is required")
