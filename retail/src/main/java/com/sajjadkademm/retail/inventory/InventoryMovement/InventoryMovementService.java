@@ -32,12 +32,10 @@ import java.util.List;
 @Service
 public class InventoryMovementService {
     private final InventoryMovementRepository movementRepository;
-    private final InventoryItemService inventoryItemService;
 
     public InventoryMovementService(InventoryMovementRepository movementRepository,
             InventoryItemService inventoryItemService) {
         this.movementRepository = movementRepository;
-        this.inventoryItemService = inventoryItemService;
     }
 
     /**
@@ -85,9 +83,6 @@ public class InventoryMovementService {
 
             // Save movement record
             InventoryMovement savedMovement = movementRepository.save(movement);
-
-            // Update inventory item stock
-            updateInventoryItemStock(item, newStock);
 
             return savedMovement;
 
@@ -437,11 +432,4 @@ public class InventoryMovementService {
         }
     }
 
-    /**
-     * Update inventory item stock
-     */
-    private void updateInventoryItemStock(InventoryItem item, int newStock) {
-        // Use the inventory item service to update stock
-        inventoryItemService.updateStock(item.getId(), newStock);
-    }
 }
