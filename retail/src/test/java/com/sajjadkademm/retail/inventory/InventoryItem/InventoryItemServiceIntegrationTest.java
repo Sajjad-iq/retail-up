@@ -205,9 +205,7 @@ class InventoryItemServiceIntegrationTest {
                         when(inventoryItemRepository.existsByBarcodeAndInventoryId("1234567890123",
                                         testInventory.getId()))
                                         .thenReturn(false);
-                        when(systemSettingsService.getSystemSettings("org-123"))
-                                        .thenReturn(SystemSetting.builder().id("sys-1").organizationId("org-123")
-                                                        .currency(Currency.EUR).build());
+
                         when(inventoryItemRepository.save(any(InventoryItem.class))).thenReturn(saved);
 
                         // When
@@ -220,10 +218,9 @@ class InventoryItemServiceIntegrationTest {
                         verify(inventoryItemRepository).existsBySkuAndInventoryId("SKU-001", testInventory.getId());
                         verify(inventoryItemRepository).existsByBarcodeAndInventoryId("1234567890123",
                                         testInventory.getId());
-                        verify(systemSettingsService).getSystemSettings("org-123");
                         verify(inventoryItemRepository).save(argThat(
                                         item -> item.getSellingPrice() != null
-                                                        && item.getSellingPrice().getCurrency() == Currency.EUR));
+                                                        && item.getSellingPrice().getCurrency() == Currency.USD));
                         // Verify initial movement recorded
                         verify(inventoryMovementService).recordStockIn(
                                         testUser,
@@ -249,9 +246,7 @@ class InventoryItemServiceIntegrationTest {
                         when(inventoryItemRepository.existsByBarcodeAndInventoryId(anyString(),
                                         eq(testInventory.getId())))
                                         .thenReturn(false);
-                        when(systemSettingsService.getSystemSettings("org-123"))
-                                        .thenReturn(SystemSetting.builder().id("sys-1").organizationId("org-123")
-                                                        .currency(Currency.USD).build());
+
                         when(inventoryItemRepository.save(any(InventoryItem.class))).thenReturn(saved);
 
                         // When
@@ -355,8 +350,8 @@ class InventoryItemServiceIntegrationTest {
         class UpdateInventoryItemIntegrationTests {
 
                 @Test
-                @DisplayName("Update should work and set currencies based on system settings")
-                void update_ShouldWork_AndResolveCurrency() {
+                @DisplayName("Update should work and preserve currencies from request")
+                void update_ShouldWork_AndPreserveCurrency() {
                         // Given
                         InventoryItem existing = buildInventoryItemSaved("item-123");
                         existing.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
@@ -374,9 +369,7 @@ class InventoryItemServiceIntegrationTest {
                                         new BigDecimal("850.00"), Currency.USD));
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
-                        when(systemSettingsService.getSystemSettings("org-123"))
-                                        .thenReturn(SystemSetting.builder().id("sys-1").organizationId("org-123")
-                                                        .currency(Currency.GBP).build());
+
                         when(inventoryItemRepository.existsByBarcodeAndInventoryId("NEW-BC-999",
                                         existing.getInventoryId()))
                                         .thenReturn(false);
@@ -390,9 +383,9 @@ class InventoryItemServiceIntegrationTest {
                         assertEquals("Updated Laptop", result.getName());
                         assertEquals("NEW-BC-999", result.getBarcode());
                         assertEquals(new BigDecimal("1300.00"), result.getSellingPrice().getAmount());
-                        assertEquals(Currency.GBP, result.getSellingPrice().getCurrency());
+                        assertEquals(Currency.USD, result.getSellingPrice().getCurrency());
                         assertEquals(new BigDecimal("850.00"), result.getCostPrice().getAmount());
-                        assertEquals(Currency.GBP, result.getCostPrice().getCurrency());
+                        assertEquals(Currency.USD, result.getCostPrice().getCurrency());
                         // No stock change requested => no adjustment recorded
                         verify(inventoryMovementService, never()).recordAdjustmentToTarget(any(), any(), anyInt(),
                                         any(), any(),
