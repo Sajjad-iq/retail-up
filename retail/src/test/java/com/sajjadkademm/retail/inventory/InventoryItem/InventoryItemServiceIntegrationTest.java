@@ -227,13 +227,13 @@ class InventoryItemServiceIntegrationTest {
                                         saved,
                                         10,
                                         "Initial stock on item creation",
-                                        ReferenceType.ADJUSTMENT,
+                                        ReferenceType.CREATION,
                                         "item-123");
                 }
 
                 @Test
-                @DisplayName("Creation with zero initial stock should not record movement")
-                void creationWithZeroInitialStock_ShouldNotRecordMovement() {
+                @DisplayName("Creation with zero initial stock should record movement")
+                void creationWithZeroInitialStock_ShouldRecordMovement() {
                         // Given
                         CreateInventoryItemRequest request = buildCreateRequest();
                         request.setCurrentStock(0);
@@ -252,9 +252,14 @@ class InventoryItemServiceIntegrationTest {
                         // When
                         inventoryItemService.createInventoryItem(request);
 
-                        // Then - no movement recorded
-                        verify(inventoryMovementService, never()).recordStockIn(any(), any(), anyInt(), any(), any(),
-                                        any());
+                        // Then - movement should be recorded for zero stock
+                        verify(inventoryMovementService).recordStockIn(
+                                        eq(testUser),
+                                        eq(saved),
+                                        eq(0),
+                                        eq("Initial stock on item creation"),
+                                        eq(ReferenceType.CREATION),
+                                        eq(saved.getId()));
                 }
 
                 @Test
@@ -437,7 +442,7 @@ class InventoryItemServiceIntegrationTest {
                                         eq(testUser),
                                         any(InventoryItem.class),
                                         eq(12),
-                                        eq("Stock adjusted via item update"),
+                                        eq("Stock increased via item update"),
                                         eq(ReferenceType.ADJUSTMENT),
                                         eq("item-123"));
                 }
@@ -467,7 +472,7 @@ class InventoryItemServiceIntegrationTest {
                                         eq(testUser),
                                         any(InventoryItem.class),
                                         eq(2),
-                                        eq("Stock adjusted via item update"),
+                                        eq("Stock decreased via item update"),
                                         eq(ReferenceType.ADJUSTMENT),
                                         eq("item-789"));
                 }

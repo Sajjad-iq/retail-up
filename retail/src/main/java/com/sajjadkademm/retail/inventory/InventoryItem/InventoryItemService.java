@@ -36,20 +36,18 @@ public class InventoryItemService {
     private final InventoryItemCreateValidator inventoryItemCreateValidator;
     private final InventoryItemUpdateUtils inventoryItemUpdateValidator;
 
-    // Optional lazy injection to avoid circular dependency with
-    // InventoryMovementService
-    @Autowired(required = false)
-    @Lazy
-    private InventoryMovementService inventoryMovementService;
+    private final InventoryMovementService inventoryMovementService;
 
     @Autowired
     public InventoryItemService(InventoryItemRepository inventoryItemRepository,
             SystemSettingsService systemSettingsService,
             InventoryItemCreateValidator inventoryItemCreateValidator,
-            InventoryItemUpdateUtils inventoryItemUpdateValidator) {
+            InventoryItemUpdateUtils inventoryItemUpdateValidator,
+            InventoryMovementService inventoryMovementService) {
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryItemCreateValidator = inventoryItemCreateValidator;
         this.inventoryItemUpdateValidator = inventoryItemUpdateValidator;
+        this.inventoryMovementService = inventoryMovementService;
     }
 
     /**
@@ -99,7 +97,7 @@ public class InventoryItemService {
             InventoryItem saved = inventoryItemRepository.save(item);
 
             // record initial STOCK_IN movement via movement service helpers
-            if (inventoryMovementService != null && initialStock != null && initialStock >= 0) {
+            if (initialStock != null && initialStock >= 0) {
                 inventoryMovementService.recordStockIn(
                         user,
                         saved,
@@ -133,13 +131,16 @@ public class InventoryItemService {
             // validation
             inventoryItemUpdateValidator.validate(item, request);
 
+            // capture original stock before applying updates
+            Integer originalStock = item.getCurrentStock();
+
             // apply field updates
             inventoryItemUpdateValidator.applyUpdates(item, request);
 
             // track stock movements
             InventoryItem updated = inventoryItemRepository.save(item);
 
-            inventoryItemUpdateValidator.trackStockMovements(updated, request, inventoryMovementService);
+            inventoryItemUpdateValidator.trackStockMovements(updated, request, inventoryMovementService, originalStock);
 
             return updated;
         } catch (ConflictException e) {

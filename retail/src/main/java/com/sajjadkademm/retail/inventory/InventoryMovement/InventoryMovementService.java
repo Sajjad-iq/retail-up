@@ -3,11 +3,11 @@ package com.sajjadkademm.retail.inventory.InventoryMovement;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.users.dto.UserStatus;
 // Removed UserRepository dependency; user is provided via request
 
 import org.springframework.data.domain.Page;
@@ -33,8 +33,7 @@ import java.util.List;
 public class InventoryMovementService {
     private final InventoryMovementRepository movementRepository;
 
-    public InventoryMovementService(InventoryMovementRepository movementRepository,
-            InventoryItemService inventoryItemService) {
+    public InventoryMovementService(InventoryMovementRepository movementRepository) {
         this.movementRepository = movementRepository;
     }
 
@@ -59,15 +58,8 @@ public class InventoryMovementService {
                 throw new BadRequestException("User must be provided in the request");
             }
 
-            // Calculate new stock level
-            int previousStock = item.getCurrentStock();
-            int newStock = calculateNewStock(previousStock, request.getQuantity(), request.getMovementType());
-
-            // Validate stock doesn't go negative
-            if (newStock < 0) {
-                throw new BadRequestException(
-                        "Insufficient stock. Current stock: " + previousStock + ", requested: "
-                                + Math.abs(request.getQuantity()));
+            if (user.getStatus() != UserStatus.ACTIVE) {
+                throw new BadRequestException("User must be active to record inventory movements");
             }
 
             // Create movement record (entity no longer stores previous/new stock)
@@ -402,34 +394,6 @@ public class InventoryMovementService {
      */
     public List<InventoryMovement> getMovementsByReference(String referenceType, String referenceId) {
         return movementRepository.findByReferenceTypeAndReferenceIdOrderByCreatedAtDesc(referenceType, referenceId);
-    }
-
-    /**
-     * Calculate new stock based on movement type and quantity
-     */
-    private int calculateNewStock(int currentStock, int quantity, MovementType movementType) {
-        switch (movementType) {
-            case STOCK_IN:
-            case PURCHASE:
-            case RETURN:
-            case ADJUSTMENT_IN:
-            case TRANSFER_IN:
-                return currentStock + Math.abs(quantity);
-            case STOCK_OUT:
-            case SALE:
-            case DAMAGE:
-            case THEFT:
-            case EXPIRED:
-            case ADJUSTMENT_OUT:
-            case TRANSFER_OUT:
-                return currentStock - Math.abs(quantity);
-
-            case MANUAL_ADJUSTMENT:
-                return currentStock + quantity; // Can be positive or negative
-
-            default:
-                throw new BadRequestException("Unknown movement type: " + movementType);
-        }
     }
 
 }

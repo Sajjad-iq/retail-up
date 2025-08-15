@@ -240,107 +240,93 @@ public class InventoryItemUpdateUtils {
      * Track inventory movements and changes for all relevant field updates
      */
     public void trackStockMovements(InventoryItem item, UpdateInventoryItemRequest request,
-            InventoryMovementService inventoryMovementService) {
+            InventoryMovementService inventoryMovementService, Integer originalStock) {
 
         // Resolve user and ensure it is active
         User actor = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         // Track stock changes
-        if (request.getCurrentStock() != null && !request.getCurrentStock().equals(item.getCurrentStock())) {
-            int stockDifference = request.getCurrentStock() - item.getCurrentStock();
+        if (request.getCurrentStock() != null && !request.getCurrentStock().equals(originalStock)) {
+            int stockDifference = request.getCurrentStock() - originalStock;
             String movementDescription = stockDifference > 0 ? "Stock increased via item update"
                     : "Stock decreased via item update";
 
-            if (inventoryMovementService != null) {
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        item,
-                        request.getCurrentStock(),
-                        movementDescription,
-                        ReferenceType.INFO_UPDATE,
-                        item.getId());
-            }
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    request.getCurrentStock(),
+                    movementDescription,
+                    ReferenceType.ADJUSTMENT,
+                    item.getId());
         }
 
         // Track pricing changes
         if (request.getCostPrice() != null
                 && !request.getCostPrice().getAmount().equals(item.getCostPrice().getAmount())) {
-            if (inventoryMovementService != null) {
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        item,
-                        item.getCurrentStock(),
-                        "Cost price updated via item update",
-                        ReferenceType.INFO_UPDATE,
-                        item.getId());
-            }
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    item.getCurrentStock(),
+                    "Cost price updated via item update",
+                    ReferenceType.INFO_UPDATE,
+                    item.getId());
         }
 
         if (request.getSellingPrice() != null
                 && !request.getSellingPrice().getAmount().equals(item.getSellingPrice().getAmount())) {
-            if (inventoryMovementService != null) {
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        item,
-                        item.getCurrentStock(),
-                        "Selling price updated via item update",
-                        ReferenceType.INFO_UPDATE,
-                        item.getId());
-            }
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    item.getCurrentStock(),
+                    "Selling price updated via item update",
+                    ReferenceType.INFO_UPDATE,
+                    item.getId());
         }
 
         // Track discount changes
         if (request.getDiscountPrice() != null && !request.getDiscountPrice().equals(item.getDiscountPrice())) {
-            if (inventoryMovementService != null) {
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        item,
-                        item.getCurrentStock(),
-                        "Discount price updated via item update",
-                        ReferenceType.INFO_UPDATE,
-                        item.getId());
-            }
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    item.getCurrentStock(),
+                    "Discount price updated via item update",
+                    ReferenceType.INFO_UPDATE,
+                    item.getId());
         }
 
         // Track critical business field changes
         if (request.getIsActive() != null && !request.getIsActive().equals(item.getIsActive())) {
-            if (inventoryMovementService != null) {
-                String statusChange = request.getIsActive() ? "Item activated" : "Item deactivated";
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        item,
-                        item.getCurrentStock(),
-                        statusChange + " via item update",
-                        ReferenceType.INFO_UPDATE,
-                        item.getId());
-            }
+            String statusChange = request.getIsActive() ? "Item activated" : "Item deactivated";
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    item.getCurrentStock(),
+                    statusChange + " via item update",
+                    ReferenceType.INFO_UPDATE,
+                    item.getId());
         }
 
         // Track supplier changes
         if (request.getSupplierName() != null && !request.getSupplierName().equals(item.getSupplierName())) {
-            if (inventoryMovementService != null) {
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        item,
-                        item.getCurrentStock(),
-                        "Supplier changed via item update",
-                        ReferenceType.INFO_UPDATE,
-                        item.getId());
-            }
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    item.getCurrentStock(),
+                    "Supplier changed via item update",
+                    ReferenceType.INFO_UPDATE,
+                    item.getId());
         }
 
         // Track expiry date changes for perishable items
         if (request.getExpiryDate() != null && !request.getExpiryDate().equals(item.getExpiryDate())) {
-            if (inventoryMovementService != null) {
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        item,
-                        item.getCurrentStock(),
-                        "Expiry date updated via item update",
-                        ReferenceType.INFO_UPDATE,
-                        item.getId());
-            }
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    item.getCurrentStock(),
+                    "Expiry date updated via item update",
+                    ReferenceType.INFO_UPDATE,
+                    item.getId());
         }
     }
 

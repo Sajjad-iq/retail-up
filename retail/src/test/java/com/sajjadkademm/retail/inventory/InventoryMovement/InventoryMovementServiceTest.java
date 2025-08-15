@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.inventory.InventoryMovement;
 
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;
+
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
@@ -44,9 +44,6 @@ class InventoryMovementServiceTest {
     @MockitoBean
     private InventoryMovementRepository movementRepository;
 
-    @MockitoBean
-    private InventoryItemService inventoryItemService;
-
     private User testUser;
     private InventoryItem testItem;
 
@@ -77,49 +74,45 @@ class InventoryMovementServiceTest {
     }
 
     @Test
-    @DisplayName("recordStockIn should create movement and increase stock")
-    void recordStockIn_ShouldIncreaseStock() {
+    @DisplayName("recordStockIn should create movement")
+    void recordStockIn_ShouldCreateMovement() {
         inventoryMovementService.recordStockIn(testUser, testItem, 3, "Restock", ReferenceType.PURCHASE, "ref-1");
         verify(movementRepository)
                 .save(argThat(m -> m.getMovementType() == MovementType.STOCK_IN && m.getQuantity() == 3));
-        verify(inventoryItemService).updateStock("item-1", 8);
     }
 
     @Test
-    @DisplayName("recordStockOut should create movement and decrease stock")
-    void recordStockOut_ShouldDecreaseStock() {
+    @DisplayName("recordStockOut should create movement")
+    void recordStockOut_ShouldCreateMovement() {
         inventoryMovementService.recordStockOut(testUser, testItem, 2, "Usage", ReferenceType.OTHER, "ref-2");
         verify(movementRepository)
                 .save(argThat(m -> m.getMovementType() == MovementType.STOCK_OUT && m.getQuantity() == 2));
-        verify(inventoryItemService).updateStock("item-1", 3);
     }
 
     @Test
-    @DisplayName("recordStockOut with insufficient stock should fail")
-    void recordStockOut_InsufficientStock_ShouldFail() {
-        assertThrows(BadRequestException.class, () -> inventoryMovementService.recordStockOut(testUser, testItem, 10,
-                "Excess", ReferenceType.OTHER, "ref-3"));
-        verify(inventoryItemService, never()).updateStock(anyString(), anyInt());
+    @DisplayName("recordStockOut should always create movement regardless of stock level")
+    void recordStockOut_ShouldAlwaysCreateMovement() {
+        inventoryMovementService.recordStockOut(testUser, testItem, 10, "Excess", ReferenceType.OTHER, "ref-3");
+        verify(movementRepository)
+                .save(argThat(m -> m.getMovementType() == MovementType.STOCK_OUT && m.getQuantity() == 10));
     }
 
     @Test
-    @DisplayName("recordStockOut with negative qty should still decrease by abs(qty)")
+    @DisplayName("recordStockOut with negative qty should use absolute value")
     void recordStockOut_NegativeQty_UsesAbs() {
         inventoryMovementService.recordStockOut(testUser, testItem, -2, "Correction", ReferenceType.OTHER, "ref-2n");
         verify(movementRepository)
                 .save(argThat(m -> m.getMovementType() == MovementType.STOCK_OUT && m.getQuantity() == 2));
-        verify(inventoryItemService).updateStock("item-1", 3);
     }
 
     @Test
-    @DisplayName("recordAdjustmentToTarget should compute delta and update to target")
-    void recordAdjustmentToTarget_ShouldReachTarget() {
+    @DisplayName("recordAdjustmentToTarget should compute delta and create movement")
+    void recordAdjustmentToTarget_ShouldCreateMovement() {
         inventoryMovementService.recordAdjustmentToTarget(testUser, testItem, 12, "Sync", ReferenceType.ADJUSTMENT,
                 "ref-4");
         // delta +7 -> ADJUSTMENT_IN with 7
         verify(movementRepository)
                 .save(argThat(m -> m.getMovementType() == MovementType.ADJUSTMENT_IN && m.getQuantity() == 7));
-        verify(inventoryItemService).updateStock("item-1", 12);
     }
 
     @Test
@@ -136,7 +129,6 @@ class InventoryMovementServiceTest {
                 ReferenceType.ADJUSTMENT, "ref-5");
         assertNull(res);
         verify(movementRepository, never()).save(any());
-        verify(inventoryItemService, never()).updateStock(anyString(), anyInt());
     }
 
     @Nested
@@ -167,22 +159,21 @@ class InventoryMovementServiceTest {
     @DisplayName("Quantity normalization & edge cases")
     class Normalization {
         @Test
-        @DisplayName("recordStockIn with negative qty should still increase by abs(qty)")
-        void recordStockIn_NegativeQty_UsesAbsForStock() {
+        @DisplayName("recordStockIn with negative qty should save negative quantity")
+        void recordStockIn_NegativeQty_SavesNegativeQuantity() {
             inventoryMovementService.recordStockIn(testUser, testItem, -4, "Restock", ReferenceType.PURCHASE, "ref-n");
             // Movement saved with raw quantity (-4)
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.STOCK_IN && m.getQuantity() == -4));
-            // Stock increased by abs(4)
-            verify(inventoryItemService).updateStock("item-1", 9);
         }
 
         @Test
-        @DisplayName("recordAdjustmentOut insufficient should fail")
-        void recordAdjustmentOut_Insufficient_Fails() {
-            assertThrows(BadRequestException.class, () -> inventoryMovementService.recordAdjustmentOut(testUser,
-                    testItem, 99, "Adj out", ReferenceType.ADJUSTMENT, "a-out"));
-            verify(inventoryItemService, never()).updateStock(anyString(), anyInt());
+        @DisplayName("recordAdjustmentOut should always create movement")
+        void recordAdjustmentOut_AlwaysCreatesMovement() {
+            inventoryMovementService.recordAdjustmentOut(testUser, testItem, 99, "Adj out", ReferenceType.ADJUSTMENT,
+                    "a-out");
+            verify(movementRepository)
+                    .save(argThat(m -> m.getMovementType() == MovementType.ADJUSTMENT_OUT && m.getQuantity() == 99));
         }
     }
 
@@ -296,32 +287,29 @@ class InventoryMovementServiceTest {
     @DisplayName("Inbound helpers")
     class InboundHelpers {
         @Test
-        @DisplayName("recordPurchase increases stock")
-        void recordPurchase_IncreasesStock() {
+        @DisplayName("recordPurchase creates movement")
+        void recordPurchase_CreatesMovement() {
             inventoryMovementService.recordPurchase(testUser, testItem, 4, "PO", ReferenceType.PURCHASE, "po-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.PURCHASE && m.getQuantity() == 4));
-            verify(inventoryItemService).updateStock("item-1", 9);
         }
 
         @Test
-        @DisplayName("recordReturn increases stock")
-        void recordReturn_IncreasesStock() {
+        @DisplayName("recordReturn creates movement")
+        void recordReturn_CreatesMovement() {
             inventoryMovementService.recordReturn(testUser, testItem, 2, "Customer return", ReferenceType.RETURN,
                     "r-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.RETURN && m.getQuantity() == 2));
-            verify(inventoryItemService).updateStock("item-1", 7);
         }
 
         @Test
-        @DisplayName("recordTransferIn increases stock")
-        void recordTransferIn_IncreasesStock() {
+        @DisplayName("recordTransferIn creates movement")
+        void recordTransferIn_CreatesMovement() {
             inventoryMovementService.recordTransferIn(testUser, testItem, 6, "From WH2", ReferenceType.TRANSFER,
                     "t-in-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.TRANSFER_IN && m.getQuantity() == 6));
-            verify(inventoryItemService).updateStock("item-1", 11);
         }
     }
 
@@ -329,57 +317,52 @@ class InventoryMovementServiceTest {
     @DisplayName("Outbound helpers")
     class OutboundHelpers {
         @Test
-        @DisplayName("recordSale decreases stock")
-        void recordSale_DecreasesStock() {
+        @DisplayName("recordSale creates movement")
+        void recordSale_CreatesMovement() {
             inventoryMovementService.recordSale(testUser, testItem, 3, "POS sale", ReferenceType.SALE, "s-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.SALE && m.getQuantity() == 3));
-            verify(inventoryItemService).updateStock("item-1", 2);
         }
 
         @Test
-        @DisplayName("recordSale insufficient stock should fail")
-        void recordSale_InsufficientStock_Fails() {
-            assertThrows(BadRequestException.class, () -> inventoryMovementService.recordSale(testUser, testItem, 9,
-                    "POS sale", ReferenceType.SALE, "s-2"));
-            verify(inventoryItemService, never()).updateStock(anyString(), anyInt());
+        @DisplayName("recordSale should always create movement")
+        void recordSale_AlwaysCreatesMovement() {
+            inventoryMovementService.recordSale(testUser, testItem, 9, "POS sale", ReferenceType.SALE, "s-2");
+            verify(movementRepository)
+                    .save(argThat(m -> m.getMovementType() == MovementType.SALE && m.getQuantity() == 9));
         }
 
         @Test
-        @DisplayName("recordDamage decreases stock")
-        void recordDamage_DecreasesStock() {
+        @DisplayName("recordDamage creates movement")
+        void recordDamage_CreatesMovement() {
             inventoryMovementService.recordDamage(testUser, testItem, 2, "Broken", ReferenceType.DAMAGE, "d-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.DAMAGE && m.getQuantity() == 2));
-            verify(inventoryItemService).updateStock("item-1", 3);
         }
 
         @Test
-        @DisplayName("recordTheft decreases stock")
-        void recordTheft_DecreasesStock() {
+        @DisplayName("recordTheft creates movement")
+        void recordTheft_CreatesMovement() {
             inventoryMovementService.recordTheft(testUser, testItem, 1, "Missing", ReferenceType.THEFT, "th-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.THEFT && m.getQuantity() == 1));
-            verify(inventoryItemService).updateStock("item-1", 4);
         }
 
         @Test
-        @DisplayName("recordExpired decreases stock")
-        void recordExpired_DecreasesStock() {
+        @DisplayName("recordExpired creates movement")
+        void recordExpired_CreatesMovement() {
             inventoryMovementService.recordExpired(testUser, testItem, 1, "Expired", ReferenceType.OTHER, "ex-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.EXPIRED && m.getQuantity() == 1));
-            verify(inventoryItemService).updateStock("item-1", 4);
         }
 
         @Test
-        @DisplayName("recordTransferOut decreases stock")
-        void recordTransferOut_DecreasesStock() {
+        @DisplayName("recordTransferOut creates movement")
+        void recordTransferOut_CreatesMovement() {
             inventoryMovementService.recordTransferOut(testUser, testItem, 2, "To WH2", ReferenceType.TRANSFER,
                     "t-out-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.TRANSFER_OUT && m.getQuantity() == 2));
-            verify(inventoryItemService).updateStock("item-1", 3);
         }
     }
 
@@ -387,23 +370,21 @@ class InventoryMovementServiceTest {
     @DisplayName("Manual adjustment")
     class ManualAdjustment {
         @Test
-        @DisplayName("Positive manual adjustment increases stock")
-        void manualPositive_IncreasesStock() {
+        @DisplayName("Positive manual adjustment creates movement")
+        void manualPositive_CreatesMovement() {
             inventoryMovementService.recordManualAdjustment(testUser, testItem, 4, "Count fix",
                     ReferenceType.ADJUSTMENT, "m-1");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.MANUAL_ADJUSTMENT && m.getQuantity() == 4));
-            verify(inventoryItemService).updateStock("item-1", 9);
         }
 
         @Test
-        @DisplayName("Negative manual adjustment decreases stock")
-        void manualNegative_DecreasesStock() {
+        @DisplayName("Negative manual adjustment creates movement")
+        void manualNegative_CreatesMovement() {
             inventoryMovementService.recordManualAdjustment(testUser, testItem, -3, "Count fix",
                     ReferenceType.ADJUSTMENT, "m-2");
             verify(movementRepository)
                     .save(argThat(m -> m.getMovementType() == MovementType.MANUAL_ADJUSTMENT && m.getQuantity() == -3));
-            verify(inventoryItemService).updateStock("item-1", 2);
         }
     }
 }
