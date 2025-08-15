@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @SpringBootApplication
 @RestController
 @Tag(name = "Health Check", description = "Application health and status endpoints")
-public class RetailApplication {
+public class  RetailApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RetailApplication.class, args);

@@ -139,7 +139,7 @@ public class InventoryItemService {
             // track stock movements
             InventoryItem updated = inventoryItemRepository.save(item);
 
-            inventoryItemUpdateValidator.trackStockMovements(updated, request);
+            inventoryItemUpdateValidator.trackStockMovements(updated, request, inventoryMovementService);
 
             return updated;
         } catch (ConflictException e) {

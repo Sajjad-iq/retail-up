@@ -34,7 +34,6 @@ public class InventoryItemUpdateUtils {
     private final InventoryService inventoryService;
     private final OrganizationService organizationService;
     private final UserRepository userRepository;
-    private final InventoryMovementService inventoryMovementService;
 
     public void validate(InventoryItem existing, UpdateInventoryItemRequest request) {
         // Resolve inventory and guard it exists
@@ -240,7 +239,8 @@ public class InventoryItemUpdateUtils {
     /**
      * Track inventory movements and changes for all relevant field updates
      */
-    public void trackStockMovements(InventoryItem item, UpdateInventoryItemRequest request) {
+    public void trackStockMovements(InventoryItem item, UpdateInventoryItemRequest request,
+            InventoryMovementService inventoryMovementService) {
 
         // Resolve user and ensure it is active
         User actor = userRepository.findById(request.getUserId())
