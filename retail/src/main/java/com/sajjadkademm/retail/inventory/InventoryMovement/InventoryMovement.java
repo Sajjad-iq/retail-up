@@ -21,6 +21,7 @@ import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
@@ -89,6 +90,7 @@ public class InventoryMovement {
 
     // Many-to-One relationship with User entity (tracks who made the movement)
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({ "password", "phone", "lastLoginAt" })
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
 }

@@ -12,5 +12,8 @@ public enum ReferenceType {
     DAMAGE,
     THEFT,
     STOCK_TAKE,
-    OTHER
+    OTHER,
+    CREATION,
+    EXPIRATION,
+    INFO_UPDATE
 }

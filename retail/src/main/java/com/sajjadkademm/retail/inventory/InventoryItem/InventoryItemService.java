@@ -3,8 +3,6 @@ package com.sajjadkademm.retail.inventory.InventoryItem;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
-import com.sajjadkademm.retail.inventory.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
@@ -14,11 +12,8 @@ import com.sajjadkademm.retail.inventory.InventoryItem.utils.ValidatedCreateInve
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemUpdateUtils;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
-import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
-// removed unused UserService import
-import com.sajjadkademm.retail.utils.dto.Currency;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -38,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
-    private final SystemSettingsService systemSettingsService;
     private final InventoryItemCreateValidator inventoryItemCreateValidator;
     private final InventoryItemUpdateUtils inventoryItemUpdateValidator;
 
@@ -54,7 +48,6 @@ public class InventoryItemService {
             InventoryItemCreateValidator inventoryItemCreateValidator,
             InventoryItemUpdateUtils inventoryItemUpdateValidator) {
         this.inventoryItemRepository = inventoryItemRepository;
-        this.systemSettingsService = systemSettingsService;
         this.inventoryItemCreateValidator = inventoryItemCreateValidator;
         this.inventoryItemUpdateValidator = inventoryItemUpdateValidator;
     }
@@ -106,13 +99,13 @@ public class InventoryItemService {
             InventoryItem saved = inventoryItemRepository.save(item);
 
             // record initial STOCK_IN movement via movement service helpers
-            if (inventoryMovementService != null && initialStock != null && initialStock > 0) {
+            if (inventoryMovementService != null && initialStock != null && initialStock >= 0) {
                 inventoryMovementService.recordStockIn(
                         user,
                         saved,
                         initialStock,
                         "Initial stock on item creation",
-                        ReferenceType.ADJUSTMENT,
+                        ReferenceType.CREATION,
                         saved.getId());
             }
 
@@ -139,26 +132,11 @@ public class InventoryItemService {
             // validation
             inventoryItemUpdateValidator.validate(item, request);
 
-            // capture current stock before applying updates
-            Integer requestedStock = request.getCurrentStock();
-
             // apply field updates
             inventoryItemUpdateValidator.applyUpdates(item, request);
 
-            // record stock movement if stock changed (use saved item to keep update order
-            // logical)
             InventoryItem updated = inventoryItemRepository.save(item);
-            if (requestedStock != null && inventoryMovementService != null) {
-                // attribute to item's creator by default
-                User actor = updated.getCreatedBy();
-                inventoryMovementService.recordAdjustmentToTarget(
-                        actor,
-                        updated,
-                        requestedStock,
-                        "Stock adjusted via item update",
-                        com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType.ADJUSTMENT,
-                        updated.getId());
-            }
+
             return updated;
         } catch (ConflictException e) {
             throw e;
