@@ -15,9 +15,6 @@ import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
-import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
-import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
-import com.sajjadkademm.retail.utils.dto.Currency;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.dto.UserStatus;
@@ -32,7 +29,6 @@ import java.time.LocalDateTime;
 public class InventoryItemUpdateUtils {
 
     private final InventoryItemRepository inventoryItemRepository;
-    private final SystemSettingsService systemSettingsService;
     private final InventoryService inventoryService;
     private final OrganizationService organizationService;
     private final UserRepository userRepository;
