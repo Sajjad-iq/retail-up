@@ -129,13 +129,17 @@ public class InventoryItemService {
             InventoryItem item = inventoryItemRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Inventory item not found"));
 
+            // get user
             // validation
             inventoryItemUpdateValidator.validate(item, request);
 
             // apply field updates
             inventoryItemUpdateValidator.applyUpdates(item, request);
 
+            // track stock movements
             InventoryItem updated = inventoryItemRepository.save(item);
+
+            inventoryItemUpdateValidator.trackStockMovements(updated, request);
 
             return updated;
         } catch (ConflictException e) {

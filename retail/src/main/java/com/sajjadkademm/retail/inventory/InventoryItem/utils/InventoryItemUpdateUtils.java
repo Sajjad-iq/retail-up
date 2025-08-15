@@ -10,6 +10,8 @@ import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
+import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.organizations.Organization;
@@ -32,6 +34,7 @@ public class InventoryItemUpdateUtils {
     private final InventoryService inventoryService;
     private final OrganizationService organizationService;
     private final UserRepository userRepository;
+    private final InventoryMovementService inventoryMovementService;
 
     public void validate(InventoryItem existing, UpdateInventoryItemRequest request) {
         // Resolve inventory and guard it exists
@@ -231,6 +234,113 @@ public class InventoryItemUpdateUtils {
         }
         if (request.getIsActive() != null) {
             item.setIsActive(request.getIsActive());
+        }
+    }
+
+    /**
+     * Track inventory movements and changes for all relevant field updates
+     */
+    public void trackStockMovements(InventoryItem item, UpdateInventoryItemRequest request) {
+
+        // Resolve user and ensure it is active
+        User actor = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        // Track stock changes
+        if (request.getCurrentStock() != null && !request.getCurrentStock().equals(item.getCurrentStock())) {
+            int stockDifference = request.getCurrentStock() - item.getCurrentStock();
+            String movementDescription = stockDifference > 0 ? "Stock increased via item update"
+                    : "Stock decreased via item update";
+
+            if (inventoryMovementService != null) {
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        item,
+                        request.getCurrentStock(),
+                        movementDescription,
+                        ReferenceType.INFO_UPDATE,
+                        item.getId());
+            }
+        }
+
+        // Track pricing changes
+        if (request.getCostPrice() != null
+                && !request.getCostPrice().getAmount().equals(item.getCostPrice().getAmount())) {
+            if (inventoryMovementService != null) {
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        item,
+                        item.getCurrentStock(),
+                        "Cost price updated via item update",
+                        ReferenceType.INFO_UPDATE,
+                        item.getId());
+            }
+        }
+
+        if (request.getSellingPrice() != null
+                && !request.getSellingPrice().getAmount().equals(item.getSellingPrice().getAmount())) {
+            if (inventoryMovementService != null) {
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        item,
+                        item.getCurrentStock(),
+                        "Selling price updated via item update",
+                        ReferenceType.INFO_UPDATE,
+                        item.getId());
+            }
+        }
+
+        // Track discount changes
+        if (request.getDiscountPrice() != null && !request.getDiscountPrice().equals(item.getDiscountPrice())) {
+            if (inventoryMovementService != null) {
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        item,
+                        item.getCurrentStock(),
+                        "Discount price updated via item update",
+                        ReferenceType.INFO_UPDATE,
+                        item.getId());
+            }
+        }
+
+        // Track critical business field changes
+        if (request.getIsActive() != null && !request.getIsActive().equals(item.getIsActive())) {
+            if (inventoryMovementService != null) {
+                String statusChange = request.getIsActive() ? "Item activated" : "Item deactivated";
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        item,
+                        item.getCurrentStock(),
+                        statusChange + " via item update",
+                        ReferenceType.INFO_UPDATE,
+                        item.getId());
+            }
+        }
+
+        // Track supplier changes
+        if (request.getSupplierName() != null && !request.getSupplierName().equals(item.getSupplierName())) {
+            if (inventoryMovementService != null) {
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        item,
+                        item.getCurrentStock(),
+                        "Supplier changed via item update",
+                        ReferenceType.INFO_UPDATE,
+                        item.getId());
+            }
+        }
+
+        // Track expiry date changes for perishable items
+        if (request.getExpiryDate() != null && !request.getExpiryDate().equals(item.getExpiryDate())) {
+            if (inventoryMovementService != null) {
+                inventoryMovementService.recordAdjustmentToTarget(
+                        actor,
+                        item,
+                        item.getCurrentStock(),
+                        "Expiry date updated via item update",
+                        ReferenceType.INFO_UPDATE,
+                        item.getId());
+            }
         }
     }
 
