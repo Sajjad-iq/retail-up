@@ -73,6 +73,18 @@ public class InventoryItemUpdateUtils {
             request.setBarcode(request.getBarcode().trim());
         if (request.getProductCode() != null)
             request.setProductCode(request.getProductCode().trim());
+        if (request.getSku() != null) {
+            request.setSku(request.getSku().trim());
+        }
+
+        if (request.getSku() != null && !request.getSku().trim().isEmpty()) {
+            boolean isChangingSku = !request.getSku().equals(existing.getSku());
+            if (isChangingSku && inventoryItemRepository
+                    .existsBySkuAndInventoryId(request.getSku(), existing.getInventoryId())) {
+                throw new ConflictException(
+                        "Item with SKU '" + request.getSku() + "' already exists in this inventory");
+            }
+        }
 
         // Friendly uniqueness checks within inventory scope (only when changed)
         if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
@@ -177,6 +189,9 @@ public class InventoryItemUpdateUtils {
         if (request.getBarcode() != null) {
             item.setBarcode(request.getBarcode());
         }
+        if (request.getSku() != null) {
+            item.setSku(request.getSku());
+        }
         if (request.getCategory() != null) {
             item.setCategory(request.getCategory());
         }
@@ -245,6 +260,16 @@ public class InventoryItemUpdateUtils {
         // Resolve user and ensure it is active
         User actor = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (request.getSku() != null && !request.getSku().equals(item.getSku())) {
+            inventoryMovementService.recordAdjustmentToTarget(
+                    actor,
+                    item,
+                    item.getCurrentStock(),
+                    "SKU updated via item update",
+                    ReferenceType.INFO_UPDATE,
+                    item.getId());
+        }
 
         // Track stock changes
         if (request.getCurrentStock() != null && !request.getCurrentStock().equals(originalStock)) {

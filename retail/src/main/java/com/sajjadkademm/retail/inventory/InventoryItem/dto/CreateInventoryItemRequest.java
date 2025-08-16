@@ -38,9 +38,7 @@ public class CreateInventoryItemRequest {
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
-    @NotBlank(message = "SKU is required")
     @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "SKU must contain only letters, numbers, hyphens, and underscores")
-    @Size(min = 3, max = 50, message = "SKU must be between 3 and 50 characters")
     private String sku;
 
     @Size(max = 50, message = "Product code must not exceed 50 characters")
