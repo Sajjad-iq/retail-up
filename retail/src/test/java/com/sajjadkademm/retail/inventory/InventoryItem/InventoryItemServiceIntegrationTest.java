@@ -81,6 +81,7 @@ class InventoryItemServiceIntegrationTest {
 
         private User testUser;
         private Inventory testInventory;
+        private Organization testOrganization;
 
         @BeforeEach
         void setUp() {
@@ -107,7 +108,7 @@ class InventoryItemServiceIntegrationTest {
                                 .build();
 
                 // Provide an active organization for validator checks
-                Organization activeOrg = Organization.builder()
+                testOrganization = Organization.builder()
                                 .id("org-123")
                                 .name("Test Org")
                                 .domain("org.test")
@@ -115,7 +116,7 @@ class InventoryItemServiceIntegrationTest {
                                 .phone("000")
                                 .createdBy(testUser)
                                 .build();
-                when(organizationService.getOrganizationById("org-123")).thenReturn(activeOrg);
+                when(organizationService.getOrganizationById("org-123")).thenReturn(testOrganization);
 
                 // Mock user service to return the test user
                 when(userService.getUserById(testUser.getId())).thenReturn(testUser);
@@ -1140,7 +1141,12 @@ class InventoryItemServiceIntegrationTest {
                         update.setCurrentStock(-5);
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
+                        when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
+                        // This should fail because current stock cannot be negative
                         assertThrows(BadRequestException.class,
                                         () -> inventoryItemService.updateInventoryItem("item-123", update));
                 }
@@ -1154,7 +1160,12 @@ class InventoryItemServiceIntegrationTest {
                         update.setCurrentStock(1000000);
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
+                        when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
+                        // This should fail because currentStock(1000000) > maxStock(50)
                         assertThrows(BadRequestException.class,
                                         () -> inventoryItemService.updateInventoryItem("item-123", update));
                 }
@@ -1168,7 +1179,12 @@ class InventoryItemServiceIntegrationTest {
                         update.setDiscountPrice(new BigDecimal("-50.00"));
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
+                        when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
+                        // This should fail because discount price is negative
                         assertThrows(BadRequestException.class,
                                         () -> inventoryItemService.updateInventoryItem("item-123", update));
                 }
@@ -1185,6 +1201,9 @@ class InventoryItemServiceIntegrationTest {
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
                         // This should fail because discountStartDate is after discountEndDate
                         // The validation only happens when discountPrice is not null
@@ -1193,8 +1212,8 @@ class InventoryItemServiceIntegrationTest {
                 }
 
                 @Test
-                @DisplayName("Update with discount dates but no discount price should fail validation")
-                void updateWithDiscountDatesButNoPrice_ShouldFail() {
+                @DisplayName("Update with discount dates but no discount price should work")
+                void updateWithDiscountDatesButNoPrice_ShouldWork() {
                         InventoryItem existing = buildInventoryItemSaved("item-123");
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
@@ -1204,6 +1223,11 @@ class InventoryItemServiceIntegrationTest {
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
+                        when(inventoryItemRepository.save(any(InventoryItem.class)))
+                                        .thenAnswer(inv -> inv.getArgument(0));
 
                         // This should work because the validation only checks dates when discountPrice
                         // is set
@@ -1224,7 +1248,12 @@ class InventoryItemServiceIntegrationTest {
                         update.setExpiryDate(LocalDate.now().minusDays(1));
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
+                        when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
+                        // This should fail because expiry date is in the past for a perishable item
                         assertThrows(BadRequestException.class,
                                         () -> inventoryItemService.updateInventoryItem("item-123", update));
                 }
