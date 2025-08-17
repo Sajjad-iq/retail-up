@@ -668,8 +668,8 @@ class InventoryItemServiceIntegrationTest {
         class EdgeCasesAndErrorHandlingTests {
 
                 @Test
-                @DisplayName("Create with null name should work (validation not enabled in tests)")
-                void createWithNullName_ShouldWork() {
+                @DisplayName("Create with null name should fail validation")
+                void createWithNullName_ShouldFail() {
                         CreateInventoryItemRequest request = buildCreateRequest();
                         request.setName(null);
                         when(inventoryService.getInventoryById(testInventory.getId())).thenReturn(testInventory);
@@ -678,12 +678,10 @@ class InventoryItemServiceIntegrationTest {
                                         .thenReturn(false);
                         when(inventoryItemRepository.existsByBarcodeAndInventoryId(anyString(), anyString()))
                                         .thenReturn(false);
-                        when(inventoryItemRepository.save(any(InventoryItem.class)))
-                                        .thenReturn(buildInventoryItemSaved("item-123"));
 
-                        // Since validation is not enabled in tests, this should work
-                        InventoryItem result = inventoryItemService.createInventoryItem(request);
-                        assertNotNull(result);
+                        // This should fail because name is required
+                        assertThrows(BadRequestException.class,
+                                        () -> inventoryItemService.createInventoryItem(request));
                 }
 
                 @Test
@@ -772,7 +770,17 @@ class InventoryItemServiceIntegrationTest {
                         InventoryItem existing = buildInventoryItemSaved("item-123");
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(null);
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
+                        when(userService.getUserById(null)).thenReturn(null); // Mock user service to return null for
+                                                                              // null userId
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
+
+                        // This should fail because user ID is null
                         assertThrows(NotFoundException.class,
                                         () -> inventoryItemService.updateInventoryItem("item-123", update));
                 }
@@ -1073,11 +1081,10 @@ class InventoryItemServiceIntegrationTest {
                 }
 
                 @Test
-                @DisplayName("Create with null stock should not record movement")
-                void createWithNullStock_ShouldNotRecordMovement() {
+                @DisplayName("Create with null stock should fail validation")
+                void createWithNullStock_ShouldFail() {
                         CreateInventoryItemRequest request = buildCreateRequest();
                         request.setCurrentStock(null);
-                        InventoryItem saved = buildInventoryItemSaved("item-123");
 
                         when(inventoryService.getInventoryById(testInventory.getId())).thenReturn(testInventory);
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
@@ -1085,31 +1092,31 @@ class InventoryItemServiceIntegrationTest {
                                         .thenReturn(false);
                         when(inventoryItemRepository.existsByBarcodeAndInventoryId(anyString(), anyString()))
                                         .thenReturn(false);
-                        when(inventoryItemRepository.save(any(InventoryItem.class))).thenReturn(saved);
 
-                        inventoryItemService.createInventoryItem(request);
-
-                        verify(inventoryMovementService, never()).recordStockIn(
-                                        any(), any(), anyInt(), anyString(), any(), anyString());
+                        // This should fail because current stock is required
+                        assertThrows(BadRequestException.class,
+                                        () -> inventoryItemService.createInventoryItem(request));
                 }
 
                 @Test
-                @DisplayName("Update with null stock should not record movement")
-                void updateWithNullStock_ShouldNotRecordMovement() {
+                @DisplayName("Update with null stock should fail validation")
+                void updateWithNullStock_ShouldFail() {
                         InventoryItem existing = buildInventoryItemSaved("item-123");
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setCurrentStock(null);
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
-                        when(inventoryItemRepository.save(any(InventoryItem.class)))
-                                        .thenAnswer(inv -> inv.getArgument(0));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
-                        inventoryItemService.updateInventoryItem("item-123", update);
-
-                        verify(inventoryMovementService, never()).recordAdjustmentToTarget(
-                                        any(), any(), anyInt(), anyString(), any(), anyString());
+                        // This should fail because current stock is required
+                        assertThrows(BadRequestException.class,
+                                        () -> inventoryItemService.updateInventoryItem("item-123", update));
                 }
 
                 @Test
@@ -1120,11 +1127,16 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setCurrentStock(10);
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(inventoryItemRepository.save(any(InventoryItem.class)))
                                         .thenAnswer(inv -> inv.getArgument(0));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
                         inventoryItemService.updateInventoryItem("item-123", update);
 
@@ -1139,6 +1151,8 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setCurrentStock(-5);
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
@@ -1158,6 +1172,8 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setCurrentStock(1000000);
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
@@ -1177,6 +1193,9 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setDiscountPrice(new BigDecimal("-50.00"));
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
@@ -1198,6 +1217,9 @@ class InventoryItemServiceIntegrationTest {
                         update.setDiscountPrice(new BigDecimal("50.00")); // Set discount price to trigger validation
                         update.setDiscountStartDate(LocalDateTime.now().plusDays(7));
                         update.setDiscountEndDate(LocalDateTime.now().plusDays(1));
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
@@ -1217,17 +1239,20 @@ class InventoryItemServiceIntegrationTest {
                         InventoryItem existing = buildInventoryItemSaved("item-123");
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
                         // Don't set discount price, but set dates
                         update.setDiscountStartDate(LocalDateTime.now().plusDays(1));
                         update.setDiscountEndDate(LocalDateTime.now().plusDays(7));
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
+                        when(inventoryItemRepository.save(any(InventoryItem.class)))
+                                        .thenAnswer(inv -> inv.getArgument(0));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
                         when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
                         when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
                                         .thenReturn(testOrganization);
-                        when(inventoryItemRepository.save(any(InventoryItem.class)))
-                                        .thenAnswer(inv -> inv.getArgument(0));
 
                         // This should work because the validation only checks dates when discountPrice
                         // is set
@@ -1246,6 +1271,9 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setExpiryDate(LocalDate.now().minusDays(1));
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
