@@ -25,6 +25,8 @@ public class CreateInventoryItemRequest {
     @Size(min = 20, max = 255, message = "User ID must be between 20 and 255 characters")
     private String userId;
 
+    private String id;
+
     @NotBlank(message = "Inventory ID is required")
     @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Inventory ID must contain only alphanumeric characters, hyphens, and underscores")
     @Size(min = 20, max = 255, message = "Inventory ID must be between 20 and 255 characters")

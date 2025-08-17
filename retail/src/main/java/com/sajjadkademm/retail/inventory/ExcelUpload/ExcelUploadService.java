@@ -2,10 +2,12 @@ package com.sajjadkademm.retail.inventory.ExcelUpload;
 
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
+import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.utils.dto.Currency;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for handling Excel file uploads to create inventory items in bulk.
@@ -33,10 +36,13 @@ import java.util.List;
 @Service
 public class ExcelUploadService {
     private final InventoryItemService inventoryItemService;
+    private final InventoryItemRepository inventoryItemRepository;
 
     @Autowired
-    public ExcelUploadService(InventoryItemService inventoryItemService) {
+    public ExcelUploadService(InventoryItemService inventoryItemService,
+            InventoryItemRepository inventoryItemRepository) {
         this.inventoryItemService = inventoryItemService;
+        this.inventoryItemRepository = inventoryItemRepository;
     }
 
     /**
@@ -52,8 +58,42 @@ public class ExcelUploadService {
             for (int i = 0; i < items.size(); i++) {
                 try {
                     CreateInventoryItemRequest itemRequest = items.get(i);
-                    InventoryItem created = inventoryItemService.createInventoryItem(itemRequest);
-                    createdItems.add(created);
+                    Optional<InventoryItem> existingItem = inventoryItemRepository.findById(itemRequest.getId());
+                    if (existingItem.isPresent()) {
+                        UpdateInventoryItemRequest updateRequest = new UpdateInventoryItemRequest();
+                        updateRequest.setUserId(user.getId());
+                        updateRequest.setName(itemRequest.getName());
+                        updateRequest.setDescription(itemRequest.getDescription());
+                        updateRequest.setSku(itemRequest.getSku());
+                        updateRequest.setProductCode(itemRequest.getProductCode());
+                        updateRequest.setBarcode(itemRequest.getBarcode());
+                        updateRequest.setCategory(itemRequest.getCategory());
+                        updateRequest.setBrand(itemRequest.getBrand());
+                        updateRequest.setUnit(itemRequest.getUnit());
+                        updateRequest.setWeight(itemRequest.getWeight());
+                        updateRequest.setDimensions(itemRequest.getDimensions());
+                        updateRequest.setColor(itemRequest.getColor());
+                        updateRequest.setSize(itemRequest.getSize());
+                        updateRequest.setCurrentStock(itemRequest.getCurrentStock());
+                        updateRequest.setMinimumStock(itemRequest.getMinimumStock());
+                        updateRequest.setMaximumStock(itemRequest.getMaximumStock());
+                        updateRequest.setCostPrice(itemRequest.getCostPrice());
+                        updateRequest.setSellingPrice(itemRequest.getSellingPrice());
+                        updateRequest.setDiscountPrice(itemRequest.getDiscountPrice());
+                        updateRequest.setDiscountStartDate(itemRequest.getDiscountStartDate());
+                        updateRequest.setDiscountEndDate(itemRequest.getDiscountEndDate());
+                        updateRequest.setSupplierName(itemRequest.getSupplierName());
+                        updateRequest.setIsPerishable(itemRequest.getIsPerishable());
+                        updateRequest.setExpiryDate(itemRequest.getExpiryDate());
+                        updateRequest.setIsActive(true);
+
+                        InventoryItem updated = inventoryItemService.updateInventoryItem(itemRequest.getId(),
+                                updateRequest);
+                        createdItems.add(updated);
+                    } else {
+                        InventoryItem created = inventoryItemService.createInventoryItem(itemRequest);
+                        createdItems.add(created);
+                    }
                 } catch (Exception e) {
                     errors.add("Row " + (i + 2) + ": " + e.getMessage());
                 }

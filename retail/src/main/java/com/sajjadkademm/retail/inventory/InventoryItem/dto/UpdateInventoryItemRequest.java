@@ -97,5 +97,5 @@ public class UpdateInventoryItemRequest {
     private LocalDate expiryDate;
 
     // Status
-    private Boolean isActive;
+    private Boolean isActive = true;
 }
