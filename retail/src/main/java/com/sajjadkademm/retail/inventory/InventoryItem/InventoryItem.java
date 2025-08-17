@@ -149,8 +149,7 @@ public class InventoryItem {
         private Integer currentStock;
 
         // Minimum stock level before reordering alert
-        @Column(name = "minimum_stock", nullable = false)
-        @NotNull
+        @Column(name = "minimum_stock")
         @Min(value = 0, message = "Minimum stock cannot be negative")
         private Integer minimumStock;
 
@@ -197,8 +196,7 @@ public class InventoryItem {
 
         // Expiry and Perishability
         // Whether the product has an expiration date (food, medicine, etc.)
-        @Column(name = "is_perishable", nullable = false)
-        @NotNull
+        @Column(name = "is_perishable")
         @Builder.Default
         private Boolean isPerishable = false;
 
@@ -214,15 +212,13 @@ public class InventoryItem {
 
         // Sales Analytics
         // Total quantity sold since product creation (lifetime sales)
-        @Column(name = "total_sold", nullable = false)
-        @NotNull
+        @Column(name = "total_sold")
         @Min(value = 0, message = "Total sold cannot be negative")
         @Builder.Default
         private Integer totalSold = 0;
 
         // Total revenue generated from this product (lifetime revenue)
-        @Column(name = "total_revenue", precision = 15, scale = 2, nullable = false)
-        @NotNull
+        @Column(name = "total_revenue", precision = 15, scale = 2)
         @DecimalMin(value = "0.0", message = "Total revenue cannot be negative")
         @Builder.Default
         private BigDecimal totalRevenue = BigDecimal.ZERO;

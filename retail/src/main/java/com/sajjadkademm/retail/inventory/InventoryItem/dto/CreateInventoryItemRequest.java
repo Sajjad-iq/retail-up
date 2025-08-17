@@ -81,9 +81,8 @@ public class CreateInventoryItemRequest {
     @Min(value = 0, message = "Current stock cannot be negative")
     private Integer currentStock = 0;
 
-    @NotNull(message = "Minimum stock is required")
     @Min(value = 0, message = "Minimum stock cannot be negative")
-    private Integer minimumStock = 0;
+    private Integer minimumStock;
 
     @Min(value = 0, message = "Maximum stock cannot be negative")
     private Integer maximumStock;
