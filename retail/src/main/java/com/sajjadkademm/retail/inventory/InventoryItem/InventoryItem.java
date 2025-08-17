@@ -87,7 +87,7 @@ public class InventoryItem {
         private String description;
 
         // Stock Keeping Unit - Unique identifier for inventory tracking and management
-        @Column(name = "sku", nullable = true)
+        @Column(name = "sku")
         @Size(min = 3, max = 50)
         private String sku;
 

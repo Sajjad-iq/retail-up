@@ -11,6 +11,7 @@ import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
@@ -39,7 +40,26 @@ public class InventoryItemCreateValidator {
             throw new NotFoundException("Inventory not found");
         }
 
-        // Resolve organization, ensure it exists and is active
+        // name is required
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new BadRequestException("Name is required");
+        }
+
+        // unit is required
+        if (request.getUnit() == null) {
+            throw new BadRequestException("Unit is required");
+        }
+
+        // current stock must be greater than or equal to 0
+        // current stock is required
+        if (request.getCurrentStock() == null || request.getCurrentStock() < 0) {
+            throw new BadRequestException("Current stock cannot be negative");
+        }
+        // minimum stock must be greater than or equal to 0
+        if (request.getMinimumStock() != null && request.getMinimumStock() < 0) {
+            throw new BadRequestException("Minimum stock cannot be negative");
+        }
+
         Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
         if (organization == null) {
             throw new NotFoundException("Organization not found");

@@ -177,7 +177,7 @@ public class ExcelUploadService {
             item.setIsPerishable(parseBoolean(getStringValue(values, 23)));
             item.setExpiryDate(parseDate(getStringValue(values, 24)));
             item.setInventoryId(inventoryId);
-            item.setUserId("temp-user-id"); // This should be set properly in a real implementation
+            item.setUserId("temp-user-id"); // This id will be overridden by the user id in the controller
 
             return item;
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.inventory.ExcelUpload;
 
+import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.ExcelUpload.utils.ExcelUploadUtils;
 import com.sajjadkademm.retail.users.User;
@@ -49,12 +50,12 @@ public class ExcelUploadController {
         try {
             // Validate file
             if (file.isEmpty()) {
-                return ResponseEntity.badRequest().build();
+                throw new BadRequestException("File is empty");
             }
 
             // Validate file type
             if (!ExcelUploadUtils.isValidCsvFile(file)) {
-                return ResponseEntity.badRequest().build();
+                throw new BadRequestException("Invalid file type");
             }
 
             // Get user
@@ -66,7 +67,7 @@ public class ExcelUploadController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new BadRequestException(e.getMessage());
         }
     }
 

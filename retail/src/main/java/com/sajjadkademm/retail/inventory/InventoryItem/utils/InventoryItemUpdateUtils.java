@@ -53,6 +53,26 @@ public class InventoryItemUpdateUtils {
             throw new BadRequestException("This Item Disabled");
         }
 
+        // name is required
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new BadRequestException("Name is required");
+        }
+
+        // unit is required
+        if (request.getUnit() == null) {
+            throw new BadRequestException("Unit is required");
+        }
+
+        // current stock must be greater than or equal to 0
+        // current stock is required
+        if (request.getCurrentStock() == null || request.getCurrentStock() < 0) {
+            throw new BadRequestException("Current stock cannot be negative");
+        }
+        // minimum stock must be greater than or equal to 0
+        if (request.getMinimumStock() != null && request.getMinimumStock() < 0) {
+            throw new BadRequestException("Minimum stock cannot be negative");
+        }
+
         // Resolve organization and ensure it is active
         Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
         if (organization == null) {
