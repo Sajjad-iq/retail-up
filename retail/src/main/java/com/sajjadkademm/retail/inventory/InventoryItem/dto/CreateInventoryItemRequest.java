@@ -25,6 +25,8 @@ public class CreateInventoryItemRequest {
     @Size(min = 20, max = 255, message = "User ID must be between 20 and 255 characters")
     private String userId;
 
+    // temporary id required for excelUpload module to update existing items
+    // not actually needed for creation
     private String id;
 
     @NotBlank(message = "Inventory ID is required")

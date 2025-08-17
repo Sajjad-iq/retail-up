@@ -51,14 +51,18 @@ public class ExcelUploadService {
     @Transactional(rollbackFor = { Exception.class })
     public ExcelUploadResponse processExcelFile(MultipartFile file, String inventoryId, User user) {
         try {
-            List<CreateInventoryItemRequest> items = parseExcelFile(file, inventoryId);
-            List<InventoryItem> createdItems = new ArrayList<>();
-            List<String> errors = new ArrayList<>();
+            List<CreateInventoryItemRequest> items = parseExcelFile(file, inventoryId); // List of items to be created
+            List<InventoryItem> createdItems = new ArrayList<>(); // List of created items
+            List<String> errors = new ArrayList<>(); // List of errors
 
             for (int i = 0; i < items.size(); i++) {
                 try {
                     CreateInventoryItemRequest itemRequest = items.get(i);
+
+                    // Check if the item already exists
                     Optional<InventoryItem> existingItem = inventoryItemRepository.findById(itemRequest.getId());
+
+                    // If the item already exists, update it
                     if (existingItem.isPresent()) {
                         UpdateInventoryItemRequest updateRequest = new UpdateInventoryItemRequest();
                         updateRequest.setUserId(user.getId());
@@ -91,6 +95,7 @@ public class ExcelUploadService {
                                 updateRequest);
                         createdItems.add(updated);
                     } else {
+                        // If the item does not exist, create it
                         InventoryItem created = inventoryItemService.createInventoryItem(itemRequest);
                         createdItems.add(created);
                     }
