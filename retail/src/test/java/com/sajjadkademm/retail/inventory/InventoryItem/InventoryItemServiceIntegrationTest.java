@@ -377,6 +377,8 @@ class InventoryItemServiceIntegrationTest {
                         update.setUserId(testUser.getId());
                         update.setName("Updated Laptop");
                         update.setBarcode("NEW-BC-999");
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
                         update.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
                                         new BigDecimal("1300.00"), Currency.USD));
                         update.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
@@ -415,6 +417,9 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setBarcode("DUP-BC");
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(inventoryItemRepository.existsByBarcodeAndInventoryId("DUP-BC", existing.getInventoryId()))
@@ -436,11 +441,16 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setCurrentStock(12);
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
                         when(inventoryItemRepository.save(any(InventoryItem.class)))
                                         .thenAnswer(inv -> inv.getArgument(0));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
                         // When
                         InventoryItem result = inventoryItemService.updateInventoryItem("item-123", update);
@@ -466,11 +476,16 @@ class InventoryItemServiceIntegrationTest {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
                         update.setCurrentStock(2);
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
 
                         when(inventoryItemRepository.findById("item-789")).thenReturn(Optional.of(existing));
                         when(inventoryItemRepository.save(any(InventoryItem.class)))
                                         .thenAnswer(inv -> inv.getArgument(0));
                         when(userService.getUserById(testUser.getId())).thenReturn(testUser);
+                        when(inventoryService.getInventoryById(existing.getInventoryId())).thenReturn(testInventory);
+                        when(organizationService.getOrganizationById(testInventory.getOrganizationId()))
+                                        .thenReturn(testOrganization);
 
                         // When
                         InventoryItem result = inventoryItemService.updateInventoryItem("item-789", update);
@@ -494,6 +509,9 @@ class InventoryItemServiceIntegrationTest {
                         when(inventoryItemRepository.findById("item-500")).thenReturn(Optional.of(existing));
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
 
                         when(inventoryItemRepository.save(any(InventoryItem.class)))
                                         .thenThrow(new RuntimeException("DB down"));
@@ -509,6 +527,9 @@ class InventoryItemServiceIntegrationTest {
                 void updateNonExistent_ShouldFail() {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
 
                         when(inventoryItemRepository.findById("missing")).thenReturn(Optional.empty());
                         assertThrows(NotFoundException.class,
@@ -759,6 +780,9 @@ class InventoryItemServiceIntegrationTest {
                 void updateWithNonExistentItem_ShouldFail() {
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
                         update.setUserId(testUser.getId());
+                        update.setName("Updated Name"); // Provide required name
+                        update.setUnit(Unit.PIECES); // Provide required unit
+                        update.setCurrentStock(10); // Provide required current stock
                         when(inventoryItemRepository.findById("missing")).thenReturn(Optional.empty());
                         assertThrows(NotFoundException.class,
                                         () -> inventoryItemService.updateInventoryItem("missing", update));
