@@ -1,64 +1,154 @@
-# vue
+# Retail Up - Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+A modern retail management solution built with Vue 3, TypeScript, and shadcn/ui.
 
-## Recommended IDE Setup
+## Features
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Authentication System**: User registration and login
+- **Organization Management**: Create and manage retail organizations
+- **Modern UI**: Built with shadcn/ui components and Tailwind CSS
+- **TypeScript**: Full type safety throughout the application
+- **State Management**: Pinia store for authentication and app state
+- **Service Architecture**: Separated services for different domains
 
-## Type Support for `.vue` Imports in TS
+## Tech Stack
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Vue 3 with Composition API
+- TypeScript
+- Tailwind CSS
+- shadcn/ui components
+- Pinia for state management
+- Axios for HTTP requests
+- Vite for build tooling
 
-## Customize configuration
+## Project Structure
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-pnpm install
+```
+src/
+├── components/
+│   ├── auth/           # Authentication components
+│   ├── organization/   # Organization management
+│   ├── dashboard/      # Main dashboard
+│   ├── layout/         # Layout components
+│   └── ui/            # shadcn/ui components
+├── config/             # Environment configuration
+├── stores/             # Pinia stores
+├── services/           # API services
+│   ├── http.ts         # Base HTTP service (Axios)
+│   ├── authService.ts  # Authentication service
+│   └── organizationService.ts # Organization service
+└── assets/             # Styles and assets
 ```
 
-### Compile and Hot-Reload for Development
+## Service Architecture
 
-```sh
-pnpm dev
+The application uses a clean service architecture:
+
+### HTTP Service (`http.ts`)
+- **Purpose**: Base Axios configuration and interceptors
+- **Features**: 
+  - Singleton pattern
+  - Automatic token injection
+  - Error handling (401 responses)
+  - Request/response interceptors
+
+### Authentication Service (`authService.ts`)
+- **Purpose**: Handle all authentication-related API calls
+- **Features**:
+  - User login/register
+  - Token management
+  - Current user retrieval
+  - Logout functionality
+
+### Organization Service (`organizationService.ts`)
+- **Purpose**: Handle all organization-related API calls
+- **Features**:
+  - Create/read/update/delete organizations
+  - Organization listing
+  - Business logic separation
+
+## Environment Configuration
+
+Create a `.env` file in the root directory:
+
+```bash
+# API Configuration
+VITE_API_BASE_URL=http://localhost:8082/api
+
+# App Configuration
+VITE_APP_NAME=Retail Up
+VITE_APP_VERSION=1.0.0
 ```
 
-### Type-Check, Compile and Minify for Production
+## API Endpoints
 
-```sh
+The frontend expects the following backend API endpoints:
+
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user (protected)
+- `POST /api/auth/logout` - User logout (protected)
+
+### Organizations
+- `POST /api/organizations` - Create organization (protected)
+- `GET /api/organizations` - List organizations (protected)
+- `GET /api/organizations/{id}` - Get organization (protected)
+- `PUT /api/organizations/{id}` - Update organization (protected)
+- `DELETE /api/organizations/{id}` - Delete organization (protected)
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
+
+2. Create environment file:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your backend URL
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   pnpm dev
+   ```
+
+4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Backend Integration
+
+Make sure your Java backend server is running and provides the required API endpoints. The API base URL can be configured in the `.env` file.
+
+### CORS Configuration
+
+Your backend should allow CORS from the frontend origin (typically `http://localhost:5173` for development).
+
+## Build for Production
+
+```bash
+npm run build
+# or
 pnpm build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+## Development
 
-```sh
-pnpm test:unit
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
+## Service Benefits
 
-```sh
-# Install browsers for the first run
-npx playwright install
-
-# When testing on CI, must build the project first
-pnpm build
-
-# Runs the end-to-end tests
-pnpm test:e2e
-# Runs the tests only on Chromium
-pnpm test:e2e --project=chromium
-# Runs the tests of a specific file
-pnpm test:e2e tests/example.spec.ts
-# Runs the tests in debug mode
-pnpm test:e2e --debug
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-pnpm lint
-```
+- **Separation of Concerns**: Each service handles its own domain
+- **Reusability**: Services can be used across different components
+- **Testability**: Easy to mock and test individual services
+- **Maintainability**: Clear structure and easy to extend
+- **Type Safety**: Full TypeScript support for all service methods

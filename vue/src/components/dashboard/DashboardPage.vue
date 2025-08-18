@@ -1,0 +1,143 @@
+<template>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+      <p class="text-gray-600">Welcome to your retail management dashboard</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Organization Info Card -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Organization</CardTitle>
+          <CardDescription>Your organization details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-2">
+            <div>
+              <span class="font-medium">Name:</span>
+              <span class="ml-2">{{ organization?.name }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Domain:</span>
+              <span class="ml-2">{{ organization?.domain }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Description:</span>
+              <span class="ml-2">{{ organization?.description || 'No description' }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Address:</span>
+              <span class="ml-2">{{ organization?.address || 'No address' }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Phone:</span>
+              <span class="ml-2">{{ organization?.phone }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Status:</span>
+              <span class="ml-2">
+                <span :class="getStatusClass(organization?.status)">
+                  {{ organization?.status }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- User Info Card -->
+      <Card>
+        <CardHeader>
+          <CardTitle>User</CardTitle>
+          <CardDescription>Your account information</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-2">
+            <div>
+              <span class="font-medium">Name:</span>
+              <span class="ml-2">{{ user?.name }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Email:</span>
+              <span class="ml-2">{{ user?.email }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Phone:</span>
+              <span class="ml-2">{{ user?.phone }}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- Quick Actions Card -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Common tasks</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-3">
+            <Button class="w-full" variant="outline">
+              Manage Products
+            </Button>
+            <Button class="w-full" variant="outline">
+              View Sales
+            </Button>
+            <Button class="w-full" variant="outline">
+              Manage Inventory
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import type { OrganizationStatus } from '@/services/organizationService'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  phone: string
+}
+
+interface Organization {
+  id: string
+  name: string
+  domain: string
+  description?: string
+  address?: string
+  phone: string
+  status: OrganizationStatus
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+}
+
+defineProps<{
+  user: User | null
+  organization: Organization | null
+}>()
+
+const getStatusClass = (status: OrganizationStatus | undefined) => {
+  switch (status) {
+    case 'ACTIVE':
+      return 'px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full'
+    case 'PENDING':
+      return 'px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full'
+    case 'DISABLED':
+      return 'px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full'
+    case 'REJECTED':
+      return 'px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full'
+    case 'SUSPENDED':
+      return 'px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full'
+    default:
+      return 'px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full'
+  }
+}
+</script>
