@@ -1,7 +1,7 @@
 import { httpService } from '../config/http'
 import { ErrorHandler } from '@/utils/errorHandler'
-import type { ApiResponse } from './index'
-import type { Money, Unit, Currency } from '@/types/global'
+import type { Inventory, InventoryItem, Money, Unit } from '@/types/global'
+import type { ApiResponse } from '.'
 
 // Backend CreateInventoryRequest structure
 export interface CreateInventoryRequest {
@@ -10,58 +10,6 @@ export interface CreateInventoryRequest {
   name: string
   description?: string
   location?: string
-}
-
-// Backend Inventory entity structure (complete match)
-export interface Inventory {
-  id: string
-  name: string
-  description?: string
-  location?: string
-  isActive: boolean
-  organizationId: string
-  createdAt: string // LocalDateTime from backend
-  updatedAt: string // LocalDateTime from backend
-  organization?: any // Organization entity
-  createdBy: any // User entity - was missing!
-  inventoryItems?: InventoryItem[]
-}
-
-// Backend InventoryItem structure (complete match)
-export interface InventoryItem {
-  id: string
-  name: string
-  description?: string
-  sku?: string
-  productCode?: string
-  barcode?: string
-  category?: string
-  brand?: string
-  unit: Unit
-  weight?: number
-  dimensions?: string
-  color?: string
-  size?: string
-  currentStock: number
-  minimumStock?: number
-  maximumStock?: number
-  costPrice?: Money
-  sellingPrice: Money
-  discountPrice?: number
-  discountStartDate?: string // LocalDateTime
-  discountEndDate?: string // LocalDateTime
-  supplierName?: string
-  isPerishable: boolean
-  expiryDate?: string // LocalDate
-  isActive: boolean
-  totalSold: number
-  totalRevenue: number
-  lastSoldDate?: string // LocalDateTime
-  inventoryId: string
-  createdAt: string // LocalDateTime
-  updatedAt: string // LocalDateTime
-  inventory?: Inventory
-  createdBy?: any // User entity
 }
 
 // Backend CreateInventoryItemRequest structure (complete match)

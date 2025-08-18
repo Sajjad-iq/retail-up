@@ -22,8 +22,8 @@ export const useAuthStore = defineStore('auth', () => {
                     name: result.data.name,
                     email: result.data.email,
                     phone: result.data.phone,
-                    status: 'ACTIVE' as UserStatus, // Default status
-                    accountType: 'USER' as AccountType, // Default account type
+                    status: '' as UserStatus, // Default status
+                    accountType: '' as AccountType, // Default account type
                     // createdAt and updatedAt are nullable in backend, so we'll set them when we fetch full user profile
                 }
                 token.value = result.data.token
@@ -37,7 +37,6 @@ export const useAuthStore = defineStore('auth', () => {
                 return { success: false, error: result.error || 'Login failed' }
             }
         } catch (error) {
-            console.error('Login failed:', error)
             return { success: false, error: 'Login failed' }
         }
     }
@@ -53,8 +52,8 @@ export const useAuthStore = defineStore('auth', () => {
                     name: result.data.name,
                     email: result.data.email,
                     phone: result.data.phone,
-                    status: 'ACTIVE' as UserStatus, // Default status
-                    accountType: 'USER' as AccountType, // Default account type
+                    status: '' as UserStatus, // Default status
+                    accountType: '' as AccountType, // Default account type
                     // createdAt and updatedAt are nullable in backend, so we'll set them when we fetch full user profile
                 }
                 token.value = result.data.token
@@ -68,7 +67,6 @@ export const useAuthStore = defineStore('auth', () => {
                 return { success: false, error: result.error || 'Registration failed' }
             }
         } catch (error) {
-            console.error('Registration failed:', error)
             return { success: false, error: 'Registration failed' }
         }
     }

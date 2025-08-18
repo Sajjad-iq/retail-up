@@ -29,8 +29,6 @@ export type {
 export { inventoryService } from './inventoryService'
 export type {
     CreateInventoryRequest,
-    Inventory,
-    InventoryItem,
     UpdateInventoryRequest,
     CreateInventoryItemRequest,
     UpdateInventoryItemRequest
