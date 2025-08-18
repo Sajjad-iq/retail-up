@@ -7,41 +7,39 @@
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <form @submit.prevent="handleLogin" class="space-y-4">
-        <div class="space-y-2">
-          <label for="emailOrPhone" class="text-sm font-medium leading-none">
-            Email or Phone
-          </label>
-          <Input
-            id="emailOrPhone"
-            v-model="form.emailOrPhone"
-            type="text"
-            placeholder="Enter your email or phone"
-            required
-            class="w-full"
-          />
-        </div>
+      <form @submit="onSubmit" class="space-y-4">
+        <FormField v-slot="{ componentField }" name="emailOrPhone">
+          <FormItem>
+            <FormLabel>Email or Phone</FormLabel>
+            <FormControl>
+              <Input 
+                type="text" 
+                placeholder="Enter your email or phone" 
+                v-bind="componentField" 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
         
-        <div class="space-y-2">
-          <label for="password" class="text-sm font-medium leading-none">
-            Password
-          </label>
-          <Input
-            id="password"
-            v-model="form.password"
-            type="password"
-            placeholder="Enter your password"
-            required
-            minlength="8"
-            maxlength="32"
-            class="w-full"
-          />
-          <p class="text-xs text-muted-foreground">
-            Password must be between 8 and 32 characters
-          </p>
-        </div>
+        <FormField v-slot="{ componentField }" name="password">
+          <FormItem>
+            <FormLabel>Password</FormLabel>
+            <FormControl>
+              <Input 
+                type="password" 
+                placeholder="Enter your password" 
+                v-bind="componentField" 
+              />
+            </FormControl>
+            <FormDescription>
+              Password must be between 8 and 32 characters
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        </FormField>
         
-        <Button type="submit" class="w-full" :disabled="loading || !isFormValid">
+        <Button type="submit" class="w-full" :disabled="loading">
           {{ loading ? 'Signing in...' : 'Sign in' }}
         </Button>
       </form>
@@ -58,41 +56,58 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref } from 'vue'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import * as z from 'zod'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import ToastContainer from '@/components/ui/toast/ToastContainer.vue'
+import { useAuthStore } from '@/stores/auth'
 
 interface LoginForm {
   emailOrPhone: string
   password: string
 }
 
-const emit = defineEmits<{
-  switchToRegister: []
-  login: [form: LoginForm]
-}>()
-
+const toastContainer = ref<InstanceType<typeof ToastContainer>>()
+const authStore = useAuthStore()
 const loading = ref(false)
-const form = reactive<LoginForm>({
-  emailOrPhone: '',
-  password: ''
+
+
+const handleLogin = async (form: LoginForm): Promise<void> => {
+  const result = await authStore.login(form.emailOrPhone, form.password)
+  if (result.success) {
+    console.log('Login successful')
+    toastContainer.value?.addToast({ type: 'success', title: 'Success', message: 'Login successful!' })
+  }
+}
+
+
+const formSchema = toTypedSchema(z.object({
+  emailOrPhone: z.string().min(1, 'Email or phone is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters').max(32, 'Password must be less than 32 characters')
+}))
+
+const form = useForm({
+  validationSchema: formSchema,
 })
 
-const isFormValid = computed(() => {
-  return form.emailOrPhone.trim() !== '' && 
-         form.password.length >= 8 && 
-         form.password.length <= 32
-})
-
-const handleLogin = async () => {
-  if (!isFormValid.value) return
-  
+const onSubmit = form.handleSubmit(async (values) => {
   loading.value = true
   try {
-    emit('login', { ...form })
+    handleLogin(values)
   } finally {
     loading.value = false
   }
-}
+})
 </script>

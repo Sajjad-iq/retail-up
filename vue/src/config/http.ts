@@ -1,5 +1,4 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
-import { config } from './env'
 
 class HttpService {
     private static instance: HttpService
@@ -7,7 +6,7 @@ class HttpService {
 
     private constructor() {
         this.axiosInstance = axios.create({
-            baseURL: config.api.baseURL,
+            baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082/api',
             timeout: 10000,
             headers: {
                 'Content-Type': 'application/json',
