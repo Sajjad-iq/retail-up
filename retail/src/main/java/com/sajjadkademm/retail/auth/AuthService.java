@@ -177,4 +177,41 @@ public class AuthService {
             return false;
         }
     }
+
+    /**
+     * Validate JWT token and return user information if valid
+     */
+    public LoginResponse validateTokenAndGetUserInfo(String token) {
+        try {
+            if (!jwtUtil.validateToken(token)) {
+                return null;
+            }
+
+            // Extract user information from token
+            String userId = jwtUtil.extractUserId(token);
+            String phone = jwtUtil.extractPhone(token);
+            String name = jwtUtil.extractName(token);
+
+            // Verify user still exists and is active
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty() || userOpt.get().getStatus() != UserStatus.ACTIVE) {
+                return null;
+            }
+
+            User user = userOpt.get();
+
+            return LoginResponse.builder()
+                    .token(token)
+                    .userId(userId)
+                    .name(name)
+                    .email(user.getEmail()) // Get email from user repository
+                    .phone(phone)
+                    .message("Token is valid")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Error validating token and getting user info: {}", e.getMessage());
+            return null;
+        }
+    }
 }

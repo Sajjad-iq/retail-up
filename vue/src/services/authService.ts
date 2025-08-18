@@ -102,9 +102,9 @@ class AuthService {
         }
     }
 
-    async validateToken(): Promise<ApiResponse<AuthResponse>> {
+    async validateToken(): Promise<ApiResponse<LoginResponse>> {
         try {
-            const response = await this.axios.get<AuthResponse>('/auth/validate-token')
+            const response = await this.axios.get<LoginResponse>('/auth/validate-token')
             return { success: true, data: response.data }
         } catch (error: any) {
             const apiError = ErrorHandler.handleApiError(error)

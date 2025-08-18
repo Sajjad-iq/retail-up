@@ -172,12 +172,17 @@ public class AuthController {
     /**
      * Validate JWT token endpoint
      */
-    @Operation(summary = "Validate JWT Token", description = "Validate if a JWT token is valid and not expired", operationId = "validateToken")
+    @Operation(summary = "Validate JWT Token", description = "Validate if a JWT token is valid and not expired, returning user information if valid", operationId = "validateToken")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Token is valid", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class), examples = @ExampleObject(name = "Valid Token", value = """
+            @ApiResponse(responseCode = "200", description = "Token is valid", content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class), examples = @ExampleObject(name = "Valid Token", value = """
                     {
                         "success": true,
-                        "message": "Token is valid"
+                        "message": "Token is valid",
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "userId": "123",
+                        "name": "John Doe",
+                        "email": "user@example.com",
+                        "phone": "+1234567890"
                     }
                     """))),
             @ApiResponse(responseCode = "400", description = "Bad request - invalid authorization header or token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class), examples = @ExampleObject(name = "Invalid Token", value = """
@@ -191,20 +196,17 @@ public class AuthController {
                     """)))
     })
     @GetMapping("/validate-token")
-    public ResponseEntity<AuthResponse> validateToken(
+    public ResponseEntity<LoginResponse> validateToken(
             @Parameter(description = "Authorization header with Bearer token", required = true, example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") @RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new BadRequestException("Invalid authorization header");
         }
 
         String token = authHeader.substring(7);
-        boolean isValid = authService.validateToken(token);
+        LoginResponse userInfo = authService.validateTokenAndGetUserInfo(token);
 
-        if (isValid) {
-            return ResponseEntity.ok(AuthResponse.builder()
-                    .success(true)
-                    .message("Token is valid")
-                    .build());
+        if (userInfo != null) {
+            return ResponseEntity.ok(userInfo);
         } else {
             throw new BadRequestException("Token is invalid or expired");
         }

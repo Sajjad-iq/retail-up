@@ -7,7 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
     const organization = ref<Organization | null>(null)
     const token = ref<string | null>(null)
-    const isAuthenticated = computed(() => !!token.value)
+    const isAuthenticated = computed(() => !!token.value && !!user.value)
 
     const login = async (emailOrPhone: string, password: string) => {
         try {
@@ -81,23 +81,81 @@ export const useAuthStore = defineStore('auth', () => {
             user.value = null
             organization.value = null
             token.value = null
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            localStorage.removeItem('organization')
         }
     }
 
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
         const storedToken = localStorage.getItem('token')
         const storedUser = localStorage.getItem('user')
         const storedOrg = localStorage.getItem('organization')
 
         if (storedToken && storedUser) {
-            token.value = storedToken
-            user.value = JSON.parse(storedUser)
-            // Update HTTP service with stored token
-            authService.setToken(storedToken)
+            try {
+                // Validate the stored token with the backend
+                const result = await authService.validateToken()
+                if (result.success && result.data) {
+                    // Token is valid, restore the session with fresh user data
+                    token.value = result.data.token
+                    user.value = {
+                        id: result.data.userId,
+                        name: result.data.name,
+                        email: result.data.email,
+                        phone: result.data.phone,
+                        status: 'ACTIVE' as UserStatus, // Default status
+                        accountType: 'USER' as AccountType, // Default account type
+                    }
+                    // Update HTTP service with stored token
+                    authService.setToken(result.data.token)
+
+                    // Update localStorage with fresh user data
+                    localStorage.setItem('token', result.data.token)
+                    localStorage.setItem('user', JSON.stringify(user.value))
+                } else {
+                    // Token is invalid, clear stored data
+                    console.warn('Stored token is invalid, clearing session')
+                    localStorage.removeItem('token')
+                    localStorage.removeItem('user')
+                    localStorage.removeItem('organization')
+                    token.value = null
+                    user.value = null
+                    organization.value = null
+                }
+            } catch (error) {
+                // Token validation failed, clear stored data
+                console.warn('Token validation failed, clearing session:', error)
+                localStorage.removeItem('token')
+                localStorage.removeItem('user')
+                localStorage.removeItem('organization')
+                token.value = null
+                user.value = null
+                organization.value = null
+            }
         }
 
         if (storedOrg) {
             organization.value = JSON.parse(storedOrg)
+        }
+    }
+
+    // Method to check current authentication status
+    const checkAuthStatus = async (): Promise<boolean> => {
+        if (!token.value) return false
+
+        try {
+            const result = await authService.validateToken()
+            if (!result.success) {
+                // Token is invalid, logout
+                await logout()
+                return false
+            }
+            return true
+        } catch (error) {
+            // Token validation failed, logout
+            await logout()
+            return false
         }
     }
 
@@ -109,6 +167,7 @@ export const useAuthStore = defineStore('auth', () => {
         login,
         register,
         logout,
-        initializeAuth
+        initializeAuth,
+        checkAuthStatus
     }
 })
