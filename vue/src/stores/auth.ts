@@ -1,34 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services/authService'
-import { organizationService } from '@/services/organizationService'
-import type { OrganizationResponse, OrganizationStatus } from '@/services/organizationService'
 import type { UserStatus, AccountType } from '@/services'
-
-export interface User {
-    id: string
-    name: string
-    phone: string
-    email: string
-    status: UserStatus
-    accountType: AccountType
-    createdAt?: string // nullable in backend
-    updatedAt?: string // nullable in backend
-    lastLoginAt?: string
-}
-
-export interface Organization {
-    id: string
-    name: string
-    domain: string
-    description?: string
-    address?: string
-    phone: string
-    status: OrganizationStatus
-    createdAt: string
-    updatedAt: string
-    createdBy: string // User ID as string (from DTO), not User object
-}
+import type { User, Organization } from '@/types/global'
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
@@ -100,58 +74,6 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    const changePassword = async (oldPassword: string, newPassword: string) => {
-        try {
-            if (!user.value) {
-                return { success: false, error: 'No authenticated user' }
-            }
-
-            const result = await authService.changePassword({
-                userId: user.value.id,
-                oldPassword,
-                newPassword
-            })
-
-            return result
-        } catch (error) {
-            console.error('Password change failed:', error)
-            return { success: false, error: 'Password change failed' }
-        }
-    }
-
-    const createOrganization = async (orgData: {
-        name: string
-        domain: string
-        description?: string
-        address?: string
-        phone: string
-        email?: string
-    }) => {
-        try {
-            if (!token.value || !user.value) {
-                return { success: false, error: 'No authentication token or user' }
-            }
-
-            const createRequest = {
-                userId: user.value.id,
-                ...orgData
-            }
-
-            const result = await organizationService.createOrganization(createRequest)
-
-            if (result.success && result.data) {
-                organization.value = result.data
-                localStorage.setItem('organization', JSON.stringify(result.data))
-
-                return { success: true, organization: result.data }
-            } else {
-                return { success: false, error: result.error || 'Organization creation failed' }
-            }
-        } catch (error) {
-            console.error('Organization creation failed:', error)
-            return { success: false, error: 'Organization creation failed' }
-        }
-    }
 
     const logout = async () => {
         try {
@@ -189,8 +111,6 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
         login,
         register,
-        changePassword,
-        createOrganization,
         logout,
         initializeAuth
     }
