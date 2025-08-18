@@ -115,7 +115,6 @@ export const useAuthStore = defineStore('auth', () => {
                     localStorage.setItem('user', JSON.stringify(user.value))
                 } else {
                     // Token is invalid, clear stored data
-                    console.warn('Stored token is invalid, clearing session')
                     localStorage.removeItem('token')
                     localStorage.removeItem('user')
                     localStorage.removeItem('organization')
@@ -125,7 +124,6 @@ export const useAuthStore = defineStore('auth', () => {
                 }
             } catch (error) {
                 // Token validation failed, clear stored data
-                console.warn('Token validation failed, clearing session:', error)
                 localStorage.removeItem('token')
                 localStorage.removeItem('user')
                 localStorage.removeItem('organization')
