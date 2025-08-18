@@ -1,6 +1,7 @@
 import { httpService } from '../config/http'
 import { ErrorHandler } from '@/utils/errorHandler'
 import type { ApiResponse } from './index'
+import type { OrganizationStatus } from '@/types/global'
 
 // Backend CreateOrganizationRequest structure
 export interface CreateOrganizationRequest {
@@ -27,15 +28,6 @@ export interface OrganizationResponse {
     createdBy: string // User ID as string (from DTO), not User object
 }
 
-// Backend OrganizationStatus enum
-export enum OrganizationStatus {
-    ACTIVE = 'ACTIVE',
-    DISABLED = 'DISABLED',
-    PENDING = 'PENDING',
-    REJECTED = 'REJECTED',
-    SUSPENDED = 'SUSPENDED',
-    DELETED = 'DELETED'
-}
 
 // Backend UpdateOrganizationRequest structure
 export interface UpdateOrganizationRequest {

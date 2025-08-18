@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 import MainLayout from '@/components/layout/MainLayout.vue'
 import AuthPage from '@/pages/auth/page.vue'
 import OrganizationPage from '@/components/organization/OrganizationPage.vue'
-import DashboardPage from '@/components/dashboard/DashboardPage.vue'
+import DashboardPage from '@/pages/dashboard/page.vue'
 import ToastContainer from '@/components/ui/toast/ToastContainer.vue'
 import { onMounted } from 'vue'
 

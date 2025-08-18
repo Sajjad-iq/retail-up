@@ -1,7 +1,7 @@
 import { httpService } from '../config/http'
 import { ErrorHandler } from '@/utils/errorHandler'
 import type { ApiResponse } from './index'
-import type { Money, Unit, Currency } from './index'
+import type { Money, Unit, Currency } from '@/types/global'
 
 // Backend CreateInventoryRequest structure
 export interface CreateInventoryRequest {

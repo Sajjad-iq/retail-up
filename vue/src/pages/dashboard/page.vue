@@ -125,32 +125,8 @@
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { OrganizationStatus, UserStatus, AccountType } from '@/services'
+import type { AccountType, Organization, OrganizationStatus, User, UserStatus } from '@/types/global';
 
-interface User {
-  id: string
-  name: string
-  phone: string
-  email: string
-  status: UserStatus
-  accountType: AccountType
-  createdAt?: string // nullable in backend
-  updatedAt?: string // nullable in backend
-  lastLoginAt?: string
-}
-
-interface Organization {
-  id: string
-  name: string
-  domain: string
-  description?: string
-  address?: string
-  phone: string
-  status: OrganizationStatus
-  createdAt: string
-  updatedAt: string
-  createdBy: string // User ID as string (from DTO), not User object
-}
 
 defineProps<{
   user: User | null
