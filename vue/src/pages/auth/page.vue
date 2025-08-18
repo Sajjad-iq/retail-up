@@ -20,8 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import LoginForm from './LoginForm.vue'
-import RegisterForm from './RegisterForm.vue'
+import LoginForm from '../../pages/auth/components/LoginForm.vue'
+import RegisterForm from '../../pages/auth/components/RegisterForm.vue'
 import { ref } from 'vue'
 
 const showRegister = ref(false)
