@@ -60,6 +60,7 @@ import { ref } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
+import { toast } from 'vue-sonner'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -71,7 +72,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import ToastContainer from '@/components/ui/toast/ToastContainer.vue'
 import { useAuthStore } from '@/stores/auth'
 
 interface LoginForm {
@@ -79,19 +79,20 @@ interface LoginForm {
   password: string
 }
 
-const toastContainer = ref<InstanceType<typeof ToastContainer>>()
+
 const authStore = useAuthStore()
 const loading = ref(false)
-
 
 const handleLogin = async (form: LoginForm): Promise<void> => {
   const result = await authStore.login(form.emailOrPhone, form.password)
   if (result.success) {
     console.log('Login successful')
-    toastContainer.value?.addToast({ type: 'success', title: 'Success', message: 'Login successful!' })
+    toast.success('Login successful!')
+  } else {
+    // Show error toast
+    toast.error(result.error || 'Login failed')
   }
 }
-
 
 const formSchema = toTypedSchema(z.object({
   emailOrPhone: z.string().min(1, 'Email or phone is required'),
@@ -105,7 +106,7 @@ const form = useForm({
 const onSubmit = form.handleSubmit(async (values) => {
   loading.value = true
   try {
-    handleLogin(values)
+    await handleLogin(values)
   } finally {
     loading.value = false
   }

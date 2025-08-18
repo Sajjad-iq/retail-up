@@ -108,6 +108,7 @@ import { ref } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
+import { toast } from 'vue-sonner'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -120,7 +121,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useAuthStore } from '@/stores/auth'
-import ToastContainer from '@/components/ui/toast/ToastContainer.vue'
 
 interface RegisterForm {
   name: string
@@ -129,13 +129,18 @@ interface RegisterForm {
   password: string
   confirmPassword: string
 }
+
+const emit = defineEmits<{
+  switchToLogin: []
+  register: [form: Omit<RegisterForm, 'confirmPassword'>]
+}>()
+
 const loading = ref(false)
-const toastContainer = ref<InstanceType<typeof ToastContainer>>()
 const authStore = useAuthStore()
 
 const formSchema = toTypedSchema(z.object({
   name: z.string().min(3, 'Name must be at least 3 characters').max(255, 'Name must be less than 255 characters'),
-  email: z.email('Please enter a valid email address'),
+  email: z.string().email('Please enter a valid email address'),
   phone: z.string().regex(/^[0-9]+$/, 'Phone must contain only digits').min(10, 'Phone must be at least 10 digits').max(20, 'Phone must be less than 20 digits'),
   password: z.string().min(8, 'Password must be at least 8 characters').max(32, 'Password must be less than 32 characters'),
   confirmPassword: z.string()
@@ -143,7 +148,6 @@ const formSchema = toTypedSchema(z.object({
   message: "Passwords don't match",
   path: ["confirmPassword"],
 }))
-
 
 const form = useForm({
   validationSchema: formSchema,
@@ -153,15 +157,21 @@ const handleRegister = async (form: { name: string; email: string; phone: string
   const result = await authStore.register(form.name, form.email, form.phone, form.password)
   if (result.success) {
     console.log('Registration successful')
-    toastContainer.value?.addToast({ type: 'success', title: 'Success', message: 'Account created successfully!' })
+    toast.success('Account created successfully!')
+    // Switch back to login form after successful registration
+    emit('switchToLogin')
+  } else {
+    // Show error toast
+    toast.error(result.error || 'Registration failed')
   }
 }
+
 const onSubmit = form.handleSubmit(async (values) => {
   loading.value = true
   try {
     // Remove confirmPassword before sending to backend
     const { confirmPassword, ...registerData } = values
-    handleRegister(registerData)
+    await handleRegister(registerData)
   } finally {
     loading.value = false
   }

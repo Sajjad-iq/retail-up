@@ -4,7 +4,7 @@ import MainLayout from '@/components/layout/MainLayout.vue'
 import AuthPage from '@/pages/auth/page.vue'
 import OrganizationPage from '@/pages/organization/page.vue'
 import DashboardPage from '@/pages/dashboard/page.vue'
-import ToastContainer from '@/components/ui/toast/ToastContainer.vue'
+import { Toaster } from '@/components/ui/sonner'
 
 const authStore = useAuthStore()
 const { user, organization, isAuthenticated } = authStore
@@ -33,7 +33,7 @@ const { user, organization, isAuthenticated } = authStore
   </MainLayout>
   
   <!-- Toast notifications -->
-  <ToastContainer ref="toastContainer" />
+  <Toaster />
 </template>
 
 <style>
