@@ -72,7 +72,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { useAuthStore } from '@/stores/auth'
+import { useAuth } from '@/composables/useAuth'
 
 interface LoginForm {
   emailOrPhone: string
@@ -80,11 +80,11 @@ interface LoginForm {
 }
 
 
-const authStore = useAuthStore()
+const { login } = useAuth()
 const loading = ref(false)
 
 const handleLogin = async (form: LoginForm): Promise<void> => {
-  const result = await authStore.login(form.emailOrPhone, form.password)
+  const result = await login(form.emailOrPhone, form.password)
   if (result.success) {
     console.log('Login successful')
     toast.success('Login successful!')

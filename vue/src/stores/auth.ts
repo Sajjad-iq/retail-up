@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services/authService'
-import type { User, Organization, UserStatus, AccountType } from '@/types/global'
+import { organizationService } from '@/services/organizationService'
+import type { OrganizationResponse } from '@/services/organizationService'
+import { UserStatus, AccountType, OrganizationStatus } from '@/types/global'
+import type { User, Organization } from '@/types/global'
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
@@ -22,8 +25,8 @@ export const useAuthStore = defineStore('auth', () => {
                     name: result.data.name,
                     email: result.data.email,
                     phone: result.data.phone,
-                    status: '' as UserStatus, // Default status
-                    accountType: '' as AccountType, // Default account type
+                    status: UserStatus.ACTIVE,
+                    accountType: AccountType.USER,
                     // createdAt and updatedAt are nullable in backend, so we'll set them when we fetch full user profile
                 }
                 token.value = result.data.token
@@ -52,8 +55,8 @@ export const useAuthStore = defineStore('auth', () => {
                     name: result.data.name,
                     email: result.data.email,
                     phone: result.data.phone,
-                    status: '' as UserStatus, // Default status
-                    accountType: '' as AccountType, // Default account type
+                    status: UserStatus.ACTIVE,
+                    accountType: AccountType.USER,
                     // createdAt and updatedAt are nullable in backend, so we'll set them when we fetch full user profile
                 }
                 token.value = result.data.token
@@ -104,8 +107,8 @@ export const useAuthStore = defineStore('auth', () => {
                         name: result.data.name,
                         email: result.data.email,
                         phone: result.data.phone,
-                        status: 'ACTIVE' as UserStatus, // Default status
-                        accountType: 'USER' as AccountType, // Default account type
+                        status: UserStatus.ACTIVE,
+                        accountType: AccountType.USER,
                     }
                     // Update HTTP service with stored token
                     authService.setToken(result.data.token)
@@ -157,6 +160,25 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // Setter methods for middleware
+    const setUser = (newUser: User | null) => {
+        user.value = newUser
+    }
+
+    const setToken = (newToken: string | null) => {
+        token.value = newToken
+    }
+
+    const setOrganization = (newOrg: Organization | null) => {
+        organization.value = newOrg
+    }
+
+    const clearSession = () => {
+        user.value = null
+        organization.value = null
+        token.value = null
+    }
+
     return {
         user,
         organization,
@@ -166,6 +188,10 @@ export const useAuthStore = defineStore('auth', () => {
         register,
         logout,
         initializeAuth,
-        checkAuthStatus
+        checkAuthStatus,
+        setUser,
+        setToken,
+        setOrganization,
+        clearSession
     }
 })

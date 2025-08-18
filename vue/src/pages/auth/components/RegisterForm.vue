@@ -120,7 +120,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { useAuthStore } from '@/stores/auth'
+import { useAuth } from '@/composables/useAuth'
 
 interface RegisterForm {
   name: string
@@ -132,11 +132,10 @@ interface RegisterForm {
 
 const emit = defineEmits<{
   switchToLogin: []
-  register: [form: Omit<RegisterForm, 'confirmPassword'>]
 }>()
 
+const { register } = useAuth()
 const loading = ref(false)
-const authStore = useAuthStore()
 
 const formSchema = toTypedSchema(z.object({
   name: z.string().min(3, 'Name must be at least 3 characters').max(255, 'Name must be less than 255 characters'),
@@ -154,7 +153,7 @@ const form = useForm({
 })
 
 const handleRegister = async (form: { name: string; email: string; phone: string; password: string }) => {
-  const result = await authStore.register(form.name, form.email, form.phone, form.password)
+  const result = await register(form.name, form.email, form.phone, form.password)
   if (result.success) {
     console.log('Registration successful')
     toast.success('Account created successfully!')
