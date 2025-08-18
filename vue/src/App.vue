@@ -1,4 +1,5 @@
 <script setup lang="ts"></script>
+import './assets/main.css';
 
 <template>
   <h1>You did it!</h1>
