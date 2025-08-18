@@ -13,7 +13,7 @@ export interface CreateOrganizationRequest {
     email?: string
 }
 
-// Backend OrganizationResponse structure
+// Backend OrganizationResponse structure (complete match with DTO)
 export interface OrganizationResponse {
     id: string
     name: string
@@ -24,7 +24,7 @@ export interface OrganizationResponse {
     status: OrganizationStatus
     createdAt: string // LocalDateTime from backend
     updatedAt: string // LocalDateTime from backend
-    createdBy: string
+    createdBy: string // User ID as string (from DTO), not User object
 }
 
 // Backend OrganizationStatus enum

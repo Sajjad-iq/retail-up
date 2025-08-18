@@ -3,12 +3,18 @@ import { ref, computed } from 'vue'
 import { authService } from '@/services/authService'
 import { organizationService } from '@/services/organizationService'
 import type { OrganizationResponse, OrganizationStatus } from '@/services/organizationService'
+import type { UserStatus, AccountType } from '@/services'
 
 export interface User {
     id: string
     name: string
-    email: string
     phone: string
+    email: string
+    status: UserStatus
+    accountType: AccountType
+    createdAt?: string // nullable in backend
+    updatedAt?: string // nullable in backend
+    lastLoginAt?: string
 }
 
 export interface Organization {
@@ -21,7 +27,7 @@ export interface Organization {
     status: OrganizationStatus
     createdAt: string
     updatedAt: string
-    createdBy: string
+    createdBy: string // User ID as string (from DTO), not User object
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -36,11 +42,16 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (result.success && result.data) {
                 // Create user object from login response
+                // Note: Backend LoginResponse doesn't include all user fields
+                // We'll need to fetch the full user profile separately
                 user.value = {
                     id: result.data.userId,
                     name: result.data.name,
                     email: result.data.email,
-                    phone: result.data.phone
+                    phone: result.data.phone,
+                    status: 'ACTIVE' as UserStatus, // Default status
+                    accountType: 'USER' as AccountType, // Default account type
+                    // createdAt and updatedAt are nullable in backend, so we'll set them when we fetch full user profile
                 }
                 token.value = result.data.token
 
@@ -68,7 +79,10 @@ export const useAuthStore = defineStore('auth', () => {
                     id: result.data.userId,
                     name: result.data.name,
                     email: result.data.email,
-                    phone: result.data.phone
+                    phone: result.data.phone,
+                    status: 'ACTIVE' as UserStatus, // Default status
+                    accountType: 'USER' as AccountType, // Default account type
+                    // createdAt and updatedAt are nullable in backend, so we'll set them when we fetch full user profile
                 }
                 token.value = result.data.token
 
@@ -83,6 +97,25 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (error) {
             console.error('Registration failed:', error)
             return { success: false, error: 'Registration failed' }
+        }
+    }
+
+    const changePassword = async (oldPassword: string, newPassword: string) => {
+        try {
+            if (!user.value) {
+                return { success: false, error: 'No authenticated user' }
+            }
+
+            const result = await authService.changePassword({
+                userId: user.value.id,
+                oldPassword,
+                newPassword
+            })
+
+            return result
+        } catch (error) {
+            console.error('Password change failed:', error)
+            return { success: false, error: 'Password change failed' }
         }
     }
 
@@ -156,6 +189,7 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
         login,
         register,
+        changePassword,
         createOrganization,
         logout,
         initializeAuth

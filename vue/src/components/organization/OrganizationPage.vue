@@ -21,7 +21,14 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 
-const handleOrganizationSubmit = async (form: { name: string; description: string; address: string; phone: string }) => {
+const handleOrganizationSubmit = async (form: { 
+  name: string; 
+  domain: string; 
+  description: string; 
+  address: string; 
+  phone: string; 
+  email: string 
+}) => {
   const result = await authStore.createOrganization(form)
   if (result.success) {
     emit('organization-created')

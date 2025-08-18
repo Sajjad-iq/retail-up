@@ -42,7 +42,7 @@ const handleLogin = async (form: { emailOrPhone: string; password: string }) => 
   }
 }
 
-const handleRegister = async (form: { name: string; email: string; phone: string; password: string; confirmPassword: string }) => {
+const handleRegister = async (form: { name: string; email: string; phone: string; password: string }) => {
   const result = await authStore.register(form.name, form.email, form.phone, form.password)
   if (result.success) {
     emit('register-success')

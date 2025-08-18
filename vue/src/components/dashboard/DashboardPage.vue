@@ -42,6 +42,10 @@
                 </span>
               </span>
             </div>
+            <div v-if="organization?.createdBy">
+              <span class="font-medium">Created By:</span>
+              <span class="ml-2">{{ organization.createdBy }}</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -65,6 +69,30 @@
             <div>
               <span class="font-medium">Phone:</span>
               <span class="ml-2">{{ user?.phone }}</span>
+            </div>
+            <div>
+              <span class="font-medium">Status:</span>
+              <span class="ml-2">
+                <span :class="getUserStatusClass(user?.status)">
+                  {{ user?.status }}
+                </span>
+              </span>
+            </div>
+            <div>
+              <span class="font-medium">Account Type:</span>
+              <span class="ml-2">
+                <span :class="getAccountTypeClass(user?.accountType)">
+                  {{ user?.accountType }}
+                </span>
+              </span>
+            </div>
+            <div v-if="user?.createdAt">
+              <span class="font-medium">Created:</span>
+              <span class="ml-2">{{ formatDate(user.createdAt) }}</span>
+            </div>
+            <div v-if="user?.updatedAt">
+              <span class="font-medium">Last Updated:</span>
+              <span class="ml-2">{{ formatDate(user.updatedAt) }}</span>
             </div>
           </div>
         </CardContent>
@@ -97,13 +125,18 @@
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { OrganizationStatus } from '@/services/organizationService'
+import type { OrganizationStatus, UserStatus, AccountType } from '@/services'
 
 interface User {
   id: string
   name: string
-  email: string
   phone: string
+  email: string
+  status: UserStatus
+  accountType: AccountType
+  createdAt?: string // nullable in backend
+  updatedAt?: string // nullable in backend
+  lastLoginAt?: string
 }
 
 interface Organization {
@@ -116,7 +149,7 @@ interface Organization {
   status: OrganizationStatus
   createdAt: string
   updatedAt: string
-  createdBy: string
+  createdBy: string // User ID as string (from DTO), not User object
 }
 
 defineProps<{
@@ -138,6 +171,40 @@ const getStatusClass = (status: OrganizationStatus | undefined) => {
       return 'px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full'
     default:
       return 'px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full'
+  }
+}
+
+const getUserStatusClass = (status: UserStatus | undefined) => {
+  switch (status) {
+    case 'ACTIVE':
+      return 'px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full'
+    case 'PENDING':
+      return 'px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full'
+    case 'INACTIVE':
+      return 'px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full'
+    case 'LOCKED':
+      return 'px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full'
+    default:
+      return 'px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full'
+  }
+}
+
+const getAccountTypeClass = (accountType: AccountType | undefined) => {
+  switch (accountType) {
+    case 'USER':
+      return 'px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full'
+    case 'EMPLOYEE':
+      return 'px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full'
+    default:
+      return 'px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full'
+  }
+}
+
+const formatDate = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleDateString()
+  } catch {
+    return dateString
   }
 }
 </script>

@@ -26,6 +26,25 @@ export interface RegisterRequest {
     password: string
 }
 
+// Backend ChangePasswordRequest structure
+export interface ChangePasswordRequest {
+    userId: string
+    oldPassword: string
+    newPassword: string
+}
+
+// Backend ChangePasswordResponse structure
+export interface ChangePasswordResponse {
+    success: boolean
+    message: string
+}
+
+// Backend AuthResponse structure
+export interface AuthResponse {
+    success: boolean
+    message: string
+}
+
 class AuthService {
     private axios = httpService.getAxiosInstance()
 
@@ -54,6 +73,38 @@ class AuthService {
                 httpService.setAuthToken(response.data.token)
             }
 
+            return { success: true, data: response.data }
+        } catch (error: any) {
+            const apiError = ErrorHandler.handleApiError(error)
+            return { success: false, error: ErrorHandler.getErrorMessage(apiError) }
+        }
+    }
+
+    async changePassword(passwordData: ChangePasswordRequest): Promise<ApiResponse<ChangePasswordResponse>> {
+        try {
+            const response = await this.axios.post<ChangePasswordResponse>('/auth/change-password', passwordData)
+            return { success: true, data: response.data }
+        } catch (error: any) {
+            const apiError = ErrorHandler.handleApiError(error)
+            return { success: false, error: ErrorHandler.getErrorMessage(apiError) }
+        }
+    }
+
+    async userExists(emailOrPhone: string): Promise<ApiResponse<boolean>> {
+        try {
+            const response = await this.axios.get<boolean>('/auth/exists', {
+                params: { emailOrPhone }
+            })
+            return { success: true, data: response.data }
+        } catch (error: any) {
+            const apiError = ErrorHandler.handleApiError(error)
+            return { success: false, error: ErrorHandler.getErrorMessage(apiError) }
+        }
+    }
+
+    async validateToken(): Promise<ApiResponse<AuthResponse>> {
+        try {
+            const response = await this.axios.get<AuthResponse>('/auth/validate-token')
             return { success: true, data: response.data }
         } catch (error: any) {
             const apiError = ErrorHandler.handleApiError(error)

@@ -32,11 +32,16 @@
             type="password"
             placeholder="Enter your password"
             required
+            minlength="8"
+            maxlength="32"
             class="w-full"
           />
+          <p class="text-xs text-muted-foreground">
+            Password must be between 8 and 32 characters
+          </p>
         </div>
         
-        <Button type="submit" class="w-full" :disabled="loading">
+        <Button type="submit" class="w-full" :disabled="loading || !isFormValid">
           {{ loading ? 'Signing in...' : 'Sign in' }}
         </Button>
       </form>
@@ -53,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -74,7 +79,15 @@ const form = reactive<LoginForm>({
   password: ''
 })
 
+const isFormValid = computed(() => {
+  return form.emailOrPhone.trim() !== '' && 
+         form.password.length >= 8 && 
+         form.password.length <= 32
+})
+
 const handleLogin = async () => {
+  if (!isFormValid.value) return
+  
   loading.value = true
   try {
     emit('login', { ...form })
