@@ -13,7 +13,8 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import OrganizationForm from './OrganizationForm.vue'
+import OrganizationForm from './components/OrganizationForm.vue'
+import { organizationService } from '@/services/organizationService'
 
 const emit = defineEmits<{
   'organization-created': []
@@ -29,7 +30,10 @@ const handleOrganizationSubmit = async (form: {
   phone: string; 
   email: string 
 }) => {
-  const result = await authStore.createOrganization(form)
+  const result = await organizationService.createOrganization({
+    userId: authStore.user?.id || ''  ,
+    ...form
+  })
   if (result.success) {
     emit('organization-created')
   }
