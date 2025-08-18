@@ -5,9 +5,14 @@ import AuthPage from '@/pages/auth/page.vue'
 import OrganizationPage from '@/components/organization/OrganizationPage.vue'
 import DashboardPage from '@/components/dashboard/DashboardPage.vue'
 import ToastContainer from '@/components/ui/toast/ToastContainer.vue'
+import { onMounted } from 'vue'
 
 const authStore = useAuthStore()
 const { user, organization, isAuthenticated } = authStore
+
+onMounted(() => {
+  authStore.initializeAuth()
+})
 
 
 </script>
