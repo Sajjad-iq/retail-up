@@ -24,6 +24,9 @@ export function useAuth() {
       const storedUser = localStorage.getItem('user')
 
       if (storedToken && storedUser) {
+        // Update HTTP service with stored token before validation
+        authService.setToken(storedToken)
+
         // Validate token in background
         const result = await authService.validateToken()
         if (result.success && result.data) {
@@ -38,6 +41,9 @@ export function useAuth() {
           })
           authStore.setToken(result.data.token)
           authStore.setOrganization(null)
+
+          // Update HTTP service with fresh token
+          authService.setToken(result.data.token)
 
           // Update localStorage
           localStorage.setItem('token', result.data.token)
@@ -72,17 +78,36 @@ export function useAuth() {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     localStorage.removeItem('organization')
+    // Clear HTTP service token
+    authService.setToken('')
   }
 
   // Login
   const login = async (emailOrPhone: string, password: string) => {
     isLoading.value = true
     try {
-      const result = await authStore.login(emailOrPhone, password)
-      if (result.success) {
-        // Reset initialization state after successful login
-        isInitialized.value = false
-        await initialize()
+      const result = await authService.login({ emailOrPhone, password })
+      if (result.success && result.data) {
+        // Create user object from login response
+        const userData = {
+          id: result.data.userId,
+          name: result.data.name,
+          email: result.data.email,
+          phone: result.data.phone,
+          status: UserStatus.ACTIVE,
+          accountType: AccountType.USER
+        }
+
+        // Update store and localStorage
+        authStore.setUser(userData)
+        authStore.setToken(result.data.token)
+        localStorage.setItem('token', result.data.token)
+        localStorage.setItem('user', JSON.stringify(userData))
+
+        // Update HTTP service token
+        authService.setToken(result.data.token)
+
+        isInitialized.value = true
       }
       return result
     } finally {
@@ -94,11 +119,28 @@ export function useAuth() {
   const register = async (name: string, email: string, phone: string, password: string) => {
     isLoading.value = true
     try {
-      const result = await authStore.register(name, email, phone, password)
-      if (result.success) {
-        // Reset initialization state after successful registration
-        isInitialized.value = false
-        await initialize()
+      const result = await authService.register({ name, email, phone, password })
+      if (result.success && result.data) {
+        // Create user object from register response
+        const userData = {
+          id: result.data.userId,
+          name: result.data.name,
+          email: result.data.email,
+          phone: result.data.phone,
+          status: UserStatus.ACTIVE,
+          accountType: AccountType.USER
+        }
+
+        // Update store and localStorage
+        authStore.setUser(userData)
+        authStore.setToken(result.data.token)
+        localStorage.setItem('token', result.data.token)
+        localStorage.setItem('user', JSON.stringify(userData))
+
+        // Update HTTP service token
+        authService.setToken(result.data.token)
+
+        isInitialized.value = true
       }
       return result
     } finally {
@@ -110,10 +152,31 @@ export function useAuth() {
   const logout = async () => {
     isLoading.value = true
     try {
-      await authStore.logout()
-      isInitialized.value = false
+      await authService.logout()
+    } catch (error) {
+      console.error('Logout error:', error)
     } finally {
-      isLoading.value = false
+      clearSession()
+      isInitialized.value = false
+    }
+  }
+
+  // Check current authentication status
+  const checkAuthStatus = async (): Promise<boolean> => {
+    if (!token.value) return false
+
+    try {
+      const result = await authService.validateToken()
+      if (!result.success) {
+        // Token is invalid, logout
+        await logout()
+        return false
+      }
+      return true
+    } catch (error) {
+      // Token validation failed, logout
+      await logout()
+      return false
     }
   }
 
@@ -137,6 +200,7 @@ export function useAuth() {
     initialize,
     login,
     register,
-    logout
+    logout,
+    checkAuthStatus
   }
 }

@@ -25,17 +25,16 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/composables/useAuth'
 
-const authStore = useAuthStore()
-const { user, isAuthenticated, logout, initializeAuth } = authStore
 
+const { user, isAuthenticated, logout, initialize } = useAuth()
 const handleLogout = () => {
   logout()
 }
 
 onMounted(() => {
-  initializeAuth()
+  initialize()
 })
 </script>
