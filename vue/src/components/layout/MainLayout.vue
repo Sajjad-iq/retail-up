@@ -24,9 +24,7 @@
           <!-- Left side with toggle button -->
           <div class="flex items-center space-x-4">
             <SidebarTrigger class="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring" />
-            <span class="text-sm text-muted-foreground">Toggle Sidebar</span>
           </div>
-          
           <!-- Right side with Navbar content -->
           <div class="flex-1">
             <Navbar />
