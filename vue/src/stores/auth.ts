@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
     const organization = ref<Organization | null>(null)
     const token = ref<string | null>(null)
     const isAuthenticated = computed(() => !!token.value && !!user.value)
+    const hasSelectedOrganization = computed(() => !!organization.value)
 
     // Setter methods
     const setUser = (newUser: User | null) => {
@@ -48,6 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
         organization,
         token,
         isAuthenticated,
+        hasSelectedOrganization,
 
         // Setters
         setUser,

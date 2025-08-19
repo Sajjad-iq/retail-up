@@ -41,8 +41,17 @@ export function useAuth() {
             accountType: result.data.accountType
           })
           authStore.setToken(result.data.token)
-          authStore.setOrganization(null)
 
+          // Check if organization is already selected from localStorage
+          const storedOrg = localStorage.getItem('selected_organization')
+          if (storedOrg) {
+            try {
+              const org = JSON.parse(storedOrg)
+              authStore.setOrganization(org)
+            } catch (err) {
+              console.error('Error parsing stored organization:', err)
+            }
+          }
 
           // Update HTTP service with fresh token
           authService.setToken(result.data.token)

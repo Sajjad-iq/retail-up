@@ -1,0 +1,184 @@
+import { computed, ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { organizationService } from '@/services/organizationService'
+import { toast } from 'vue-sonner'
+import type { Organization } from '@/types/global'
+
+const ORGANIZATION_STORAGE_KEY = 'selected_organization'
+
+export function useOrganization() {
+    const authStore = useAuthStore()
+    const isLoading = ref(false)
+    const organizations = ref<Organization[]>([])
+    const selectedOrganization = ref<Organization | null>(null)
+    const error = ref<string | null>(null)
+
+    // Computed properties
+    const hasOrganizations = computed(() => organizations.value.length > 0)
+    const isOrganizationSelected = computed(() => !!selectedOrganization.value)
+
+    // Get organizations for the current user
+    const fetchUserOrganizations = async () => {
+        if (!authStore.user?.id) {
+            const errorMsg = 'User not authenticated'
+            error.value = errorMsg
+            toast.error(errorMsg)
+            return false
+        }
+
+        isLoading.value = true
+        error.value = null
+
+        try {
+            // For now, we'll get all organizations since the backend doesn't have a specific endpoint
+            // In the future, this should be: `/organizations/user/${authStore.user.id}`
+            const result = await organizationService.getOrganizations()
+
+            if (result.success && result.data) {
+                organizations.value = result.data
+                toast.success(`Successfully loaded ${result.data.length} organization(s)`)
+                return true
+            } else {
+                const errorMsg = result.error || 'Failed to fetch organizations'
+                error.value = errorMsg
+                toast.error(errorMsg)
+                return false
+            }
+        } catch (err) {
+            const errorMsg = 'An error occurred while fetching organizations'
+            error.value = errorMsg
+            toast.error(errorMsg)
+            return false
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    // Select an organization
+    const selectOrganization = (organization: Organization) => {
+        selectedOrganization.value = organization
+        authStore.setOrganization(organization)
+
+        // Save to localStorage
+        localStorage.setItem(ORGANIZATION_STORAGE_KEY, JSON.stringify(organization))
+
+        toast.success(`Selected organization: ${organization.name}`)
+    }
+
+    // Get the selected organization from localStorage
+    const getStoredOrganization = (): Organization | null => {
+        try {
+            const stored = localStorage.getItem(ORGANIZATION_STORAGE_KEY)
+            if (stored) {
+                const org = JSON.parse(stored) as Organization
+                // Validate that the stored organization exists in the user's organizations
+                if (organizations.value.some(o => o.id === org.id)) {
+                    return org
+                }
+            }
+        } catch (err) {
+            console.error('Error parsing stored organization:', err)
+        }
+        return null
+    }
+
+    // Initialize organization state
+    const initialize = async () => {
+        // First fetch organizations
+        const success = await fetchUserOrganizations()
+
+        if (success) {
+            // Try to restore from localStorage
+            const storedOrg = getStoredOrganization()
+            if (storedOrg) {
+                selectOrganization(storedOrg)
+                toast.info(`Restored organization: ${storedOrg.name}`)
+            }
+        }
+    }
+
+    // Clear selected organization
+    const clearSelection = () => {
+        selectedOrganization.value = null
+        authStore.setOrganization(null)
+        localStorage.removeItem(ORGANIZATION_STORAGE_KEY)
+
+        toast.info('Organization selection cleared')
+    }
+
+    // Create a new organization
+    const createOrganization = async (orgData: {
+        name: string
+        domain: string
+        description?: string
+        address?: string
+        phone: string
+        email?: string
+    }) => {
+        if (!authStore.user?.id) {
+            const errorMsg = 'User not authenticated'
+            error.value = errorMsg
+            toast.error(errorMsg)
+            return false
+        }
+
+        isLoading.value = true
+        error.value = null
+
+        try {
+            const result = await organizationService.createOrganization({
+                userId: authStore.user.id,
+                ...orgData
+            })
+
+            if (result.success && result.data) {
+                // Add the new organization to the list
+                organizations.value.push(result.data)
+
+                // Optionally select the new organization
+                selectOrganization(result.data)
+
+                toast.success(`Organization "${result.data.name}" created successfully`)
+                return true
+            } else {
+                const errorMsg = result.error || 'Failed to create organization'
+                error.value = errorMsg
+                toast.error(errorMsg)
+                return false
+            }
+        } catch (err) {
+            const errorMsg = 'An error occurred while creating organization'
+            error.value = errorMsg
+            toast.error(errorMsg)
+            return false
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    // Auto-initialize when composable is used
+    onMounted(() => {
+        if (authStore.isAuthenticated) {
+            initialize()
+        }
+    })
+
+    return {
+        // State
+        organizations,
+        selectedOrganization,
+        isLoading,
+        error,
+
+        // Computed
+        hasOrganizations,
+        isOrganizationSelected,
+
+        // Methods
+        fetchUserOrganizations,
+        selectOrganization,
+        createOrganization,
+        clearSelection,
+        initialize
+    }
+}
