@@ -6,8 +6,7 @@ import {
   Package, 
   BarChart3, 
   Users, 
-  Settings,
-  Home
+  Settings
 } from 'lucide-vue-next'
 import {
   Sidebar,
@@ -20,7 +19,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuAction,
   SidebarSeparator
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/composables/useAuth'
@@ -76,7 +74,7 @@ const userInitials = computed(() => {
 </script>
 
 <template>
-  <Sidebar>
+  <Sidebar class="border-r border-border">
     <SidebarHeader class="border-b border-border p-4">
       <div class="flex items-center space-x-2">
         <div class="w-8 h-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center">
