@@ -17,23 +17,33 @@ export async function authGuard(
         return
     }
 
-    // If user is authenticated and has type USER, redirect to dashboard
-    if (authStore.isAuthenticated && authStore.user?.accountType === AccountType.USER) {
-        if (to.name !== 'Dashboard') {
+    // If user is not authenticated, allow navigation to auth page
+    if (!authStore.isAuthenticated) {
+        next()
+        return
+    }
+
+    // User is authenticated from this point forward
+
+    // Check if user needs to set up organization first
+    if (!authStore.organization && to.name !== 'Organization') {
+        console.log('User authenticated but no organization, redirecting to organization setup')
+        next({ name: 'Organization' })
+        return
+    }
+
+    // User has organization, now check account type restrictions
+    if (authStore.user?.accountType === AccountType.USER) {
+        // For USER type, only allow dashboard and organization pages
+        const allowedRoutes = ['Dashboard', 'Organization']
+        if (!allowedRoutes.includes(to.name as string)) {
             console.log('User type USER, redirecting to dashboard')
             next({ name: 'Dashboard' })
             return
         }
     }
 
-    // Check if user needs to set up organization
-    if (authStore.isAuthenticated && !authStore.organization && to.name !== 'Organization') {
-        console.log('User authenticated but no organization, redirecting to organization setup')
-        next({ name: 'Organization' })
-        return
-    }
-
-    // Allow navigation
+    // Allow navigation for all other cases
     next()
 }
 

@@ -32,7 +32,7 @@ export const routes: AppRouteRecordRaw[] = [
         name: 'Organization',
         component: () => import('@/pages/organization/page.vue'),
         meta: {
-            requiresAuth: true,
+            requiresAuth: false,
             title: 'Organization Setup'
         }
     },
