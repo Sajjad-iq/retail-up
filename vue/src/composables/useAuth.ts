@@ -43,6 +43,7 @@ export function useAuth() {
           authStore.setToken(result.data.token)
           authStore.setOrganization(null)
 
+
           // Update HTTP service with fresh token
           authService.setToken(result.data.token)
 
