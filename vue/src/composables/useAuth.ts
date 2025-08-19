@@ -28,12 +28,9 @@ export function useAuth() {
         // Update HTTP service with stored token before validation
         authService.setToken(storedToken)
 
-        // Add a small delay to ensure the token is properly set
-        await new Promise(resolve => setTimeout(resolve, 100))
-
         // Validate token in background
         const result = await authService.validateToken()
-        if (result.success && result.data) {
+        if (result.data) {
           // Token is valid, restore session
           authStore.setUser({
             id: result.data.userId,
