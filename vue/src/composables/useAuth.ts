@@ -84,8 +84,8 @@ export function useAuth() {
           name: result.data.name,
           email: result.data.email,
           phone: result.data.phone,
-          status: UserStatus.ACTIVE,
-          accountType: AccountType.USER
+          status: result.data.status,
+          accountType: result.data.accountType
         }
         // Update store (token will be stored in localStorage via store)
         authStore.setUser(userData)
@@ -114,8 +114,8 @@ export function useAuth() {
           name: result.data.name,
           email: result.data.email,
           phone: result.data.phone,
-          status: UserStatus.ACTIVE,
-          accountType: AccountType.USER
+          status: result.data.status,
+          accountType: result.data.accountType
         }
 
         // Update store (token will be stored in localStorage via store)
