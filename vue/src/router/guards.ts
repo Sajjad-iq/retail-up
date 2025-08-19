@@ -12,7 +12,6 @@ export async function authGuard(
 
     // Check if authentication is required
     if (requiresAuth && !authStore.isAuthenticated) {
-        console.log('Route requires authentication, redirecting to auth')
         next({ name: 'Auth' })
         return
     }
@@ -23,11 +22,8 @@ export async function authGuard(
         return
     }
 
-    // User is authenticated from this point forward
-
     // Check if user needs to set up organization first
     if (!authStore.organization && to.name !== 'Organization') {
-        console.log('User authenticated but no organization, redirecting to organization setup')
         next({ name: 'Organization' })
         return
     }
