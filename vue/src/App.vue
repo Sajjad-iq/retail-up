@@ -1,34 +1,16 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import MainLayout from '@/components/layout/MainLayout.vue'
-import AuthPage from '@/pages/auth/page.vue'
-import OrganizationPage from '@/pages/organization/page.vue'
-import DashboardPage from '@/pages/dashboard/page.vue'
 import { Toaster } from '@/components/ui/sonner'
 
-const { user, organization, isAuthenticated} = useAuthStore()
+const { isAuthenticated } = useAuthStore()
 </script>
 
 <template>
   <MainLayout>
- <!-- Show auth page if not authenticated -->
-    <AuthPage
-      v-if="!isAuthenticated"
-    />
-    
-    <!-- Show organization creation if authenticated but no organization -->
-    <OrganizationPage
-      v-else-if="!organization"
-    />
-    
-    <!-- Show main dashboard if authenticated and has organization -->
-    <DashboardPage
-      v-else
-      :user="user"
-      :organization="organization"
-    />
+    <!-- Router view will handle all routing -->
+    <router-view />
   </MainLayout>
-  
   <!-- Toast notifications -->
   <Toaster />
 </template>
