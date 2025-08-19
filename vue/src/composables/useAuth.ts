@@ -18,20 +18,13 @@ export function useAuth() {
   const initialize = async () => {
     if (isInitialized.value) return true
 
-    console.log('useAuth - initialize called')
     isLoading.value = true
     try {
       // Initialize token from localStorage via store
-      console.log('useAuth - calling authStore.initializeToken()')
       authStore.initializeToken()
       const storedToken = authStore.token
-      console.log('useAuth - stored token from store:', storedToken)
 
       if (storedToken) {
-        console.log('useAuth - token found, updating HTTP service')
-        console.log('useAuth - token being sent for validation:', storedToken)
-        console.log('useAuth - token length:', storedToken.length)
-
         // Update HTTP service with stored token before validation
         authService.setToken(storedToken)
 
@@ -85,13 +78,9 @@ export function useAuth() {
   const login = async (emailOrPhone: string, password: string) => {
     isLoading.value = true
     try {
-      console.log('useAuth - login called with:', emailOrPhone)
       const result = await authService.login({ emailOrPhone, password })
-      console.log('useAuth - login result:', result)
 
       if (result.success && result.data) {
-        console.log('useAuth - login successful, token received:', result.data.token)
-
         // Create user object from login response
         const userData = {
           id: result.data.userId,
@@ -101,10 +90,6 @@ export function useAuth() {
           status: UserStatus.ACTIVE,
           accountType: AccountType.USER
         }
-
-        console.log('useAuth - setting user data:', userData)
-        console.log('useAuth - setting token:', result.data.token)
-
         // Update store (token will be stored in localStorage via store)
         authStore.setUser(userData)
         authStore.setToken(result.data.token)
@@ -113,7 +98,6 @@ export function useAuth() {
         authService.setToken(result.data.token)
 
         isInitialized.value = true
-        console.log('useAuth - login completed, isInitialized:', isInitialized.value)
       }
       return result
     } finally {
@@ -188,10 +172,7 @@ export function useAuth() {
   onMounted(() => {
     // Only auto-initialize if not already authenticated and not already initialized
     if (!isInitialized.value && !authStore.isAuthenticated) {
-      console.log('useAuth - onMounted: auto-initializing')
       initialize()
-    } else {
-      console.log('useAuth - onMounted: skipping auto-initialization (already authenticated or initialized)')
     }
   })
 

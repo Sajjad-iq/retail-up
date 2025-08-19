@@ -14,15 +14,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     const setToken = (newToken: string | null) => {
-        console.log('Auth store - setToken called with:', newToken)
         token.value = newToken
         // Only store token in localStorage
         if (newToken) {
             localStorage.setItem('token', newToken)
-            console.log('Auth store - token saved to localStorage')
         }
-        console.log('Auth store - current token value:', token.value)
-        console.log('Auth store - localStorage token:', localStorage.getItem('token'))
     }
 
     const setOrganization = (newOrg: Organization | null) => {
@@ -39,12 +35,10 @@ export const useAuthStore = defineStore('auth', () => {
     // Initialize token from localStorage
     const initializeToken = () => {
         const storedToken = localStorage.getItem('token')
-        console.log('Auth store - initializeToken - stored token from localStorage:', storedToken)
         if (storedToken) {
             token.value = storedToken
-            console.log('Auth store - initializeToken - token restored to store:', token.value)
         } else {
-            console.log('Auth store - initializeToken - no token found in localStorage')
+            console.error('Auth store - initializeToken - no token found in localStorage')
         }
     }
 
