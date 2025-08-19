@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { OrganizationSelector } from '@/components/organization'
+import OrganizationSelector from '@/components/navigation/OrganizationSelector.vue'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
