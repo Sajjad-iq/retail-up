@@ -18,14 +18,25 @@ export function useAuth() {
   const initialize = async () => {
     if (isInitialized.value) return true
 
+    console.log('useAuth - initialize called')
     isLoading.value = true
     try {
-      const storedToken = localStorage.getItem('token')
-      const storedUser = localStorage.getItem('user')
+      // Initialize token from localStorage via store
+      console.log('useAuth - calling authStore.initializeToken()')
+      authStore.initializeToken()
+      const storedToken = authStore.token
+      console.log('useAuth - stored token from store:', storedToken)
 
-      if (storedToken && storedUser) {
+      if (storedToken) {
+        console.log('useAuth - token found, updating HTTP service')
+        console.log('useAuth - token being sent for validation:', storedToken)
+        console.log('useAuth - token length:', storedToken.length)
+
         // Update HTTP service with stored token before validation
         authService.setToken(storedToken)
+
+        // Add a small delay to ensure the token is properly set
+        await new Promise(resolve => setTimeout(resolve, 100))
 
         // Validate token in background
         const result = await authService.validateToken()
@@ -45,15 +56,9 @@ export function useAuth() {
           // Update HTTP service with fresh token
           authService.setToken(result.data.token)
 
-          // Update localStorage
-          localStorage.setItem('token', result.data.token)
-          localStorage.setItem('user', JSON.stringify(authStore.user))
-
           isInitialized.value = true
           return true
         } else {
-          // Token invalid, clear session
-          clearSession()
           isInitialized.value = true
           return false
         }
@@ -63,8 +68,6 @@ export function useAuth() {
         return false
       }
     } catch (error) {
-      console.error('Auth initialization failed:', error)
-      clearSession()
       isInitialized.value = true
       return false
     } finally {
@@ -75,19 +78,20 @@ export function useAuth() {
   // Clear authentication session
   const clearSession = () => {
     authStore.clearSession()
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    localStorage.removeItem('organization')
-    // Clear HTTP service token
-    authService.setToken('')
+    // Token is already cleared in the store's clearSession method
   }
 
   // Login
   const login = async (emailOrPhone: string, password: string) => {
     isLoading.value = true
     try {
+      console.log('useAuth - login called with:', emailOrPhone)
       const result = await authService.login({ emailOrPhone, password })
+      console.log('useAuth - login result:', result)
+
       if (result.success && result.data) {
+        console.log('useAuth - login successful, token received:', result.data.token)
+
         // Create user object from login response
         const userData = {
           id: result.data.userId,
@@ -98,16 +102,18 @@ export function useAuth() {
           accountType: AccountType.USER
         }
 
-        // Update store and localStorage
+        console.log('useAuth - setting user data:', userData)
+        console.log('useAuth - setting token:', result.data.token)
+
+        // Update store (token will be stored in localStorage via store)
         authStore.setUser(userData)
         authStore.setToken(result.data.token)
-        localStorage.setItem('token', result.data.token)
-        localStorage.setItem('user', JSON.stringify(userData))
 
         // Update HTTP service token
         authService.setToken(result.data.token)
 
         isInitialized.value = true
+        console.log('useAuth - login completed, isInitialized:', isInitialized.value)
       }
       return result
     } finally {
@@ -131,11 +137,9 @@ export function useAuth() {
           accountType: AccountType.USER
         }
 
-        // Update store and localStorage
+        // Update store (token will be stored in localStorage via store)
         authStore.setUser(userData)
         authStore.setToken(result.data.token)
-        localStorage.setItem('token', result.data.token)
-        localStorage.setItem('user', JSON.stringify(userData))
 
         // Update HTTP service token
         authService.setToken(result.data.token)
@@ -182,8 +186,12 @@ export function useAuth() {
 
   // Auto-initialize when composable is used
   onMounted(() => {
-    if (!isInitialized.value) {
+    // Only auto-initialize if not already authenticated and not already initialized
+    if (!isInitialized.value && !authStore.isAuthenticated) {
+      console.log('useAuth - onMounted: auto-initializing')
       initialize()
+    } else {
+      console.log('useAuth - onMounted: skipping auto-initialization (already authenticated or initialized)')
     }
   })
 
