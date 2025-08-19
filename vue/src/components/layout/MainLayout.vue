@@ -1,24 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Navigation Header -->
-    <AppNavigation v-if="isAuthenticated" />
-
-    <!-- Main Content -->
-    <main>
+  <div class="min-h-screen bg-background">
+    <Sidebar v-if="isAuthenticated" />
+    <div v-else class="min-h-screen">
       <slot />
-    </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
 import { useAuth } from '@/composables/useAuth'
-import AppNavigation from '@/components/navigation/AppNavigation.vue'
+import Sidebar from './Sidebar.vue'
 
-const { isAuthenticated, initialize } = useAuth()
-
-onMounted(() => {
-  initialize()
-})
-
+const { isAuthenticated } = useAuth()
 </script>

@@ -15,17 +15,14 @@
         v-else
         @switch-to-login="showRegister = false"
       />
-      <Toaster />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import LoginForm from './components/LoginForm.vue'
-import RegisterForm from './components/RegisterForm.vue'
-import { Toaster } from '@/components/ui/sonner'
 import { ref } from 'vue'
-import 'vue-sonner/style.css' // vue-sonner v2 requires this import
+import LoginForm from './components/LoginForm.vue'
+import RegisterForm from './components/RegisterForm.vue'
 
 const showRegister = ref(false)
 </script>
