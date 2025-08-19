@@ -37,8 +37,8 @@ export function useAuth() {
             name: result.data.name,
             email: result.data.email,
             phone: result.data.phone,
-            status: UserStatus.ACTIVE,
-            accountType: AccountType.USER
+            status: result.data.status,
+            accountType: result.data.accountType
           })
           authStore.setToken(result.data.token)
           authStore.setOrganization(null)

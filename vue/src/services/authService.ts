@@ -1,6 +1,7 @@
 import { httpService } from '../config/http'
 import { ErrorHandler } from '@/utils/errorHandler'
 import type { ApiResponse } from './index'
+import type { AccountType, UserStatus } from '@/types/global'
 
 // Backend LoginRequest uses emailOrPhone instead of email
 export interface LoginRequest {
@@ -16,6 +17,8 @@ export interface LoginResponse {
     email: string
     phone: string
     message: string
+    status: UserStatus
+    accountType: AccountType
 }
 
 // Backend RegisterRequest structure

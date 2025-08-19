@@ -1,5 +1,7 @@
 package com.sajjadkademm.retail.auth.dto;
 
+import com.sajjadkademm.retail.users.dto.AccountType;
+import com.sajjadkademm.retail.users.dto.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +18,6 @@ public class LoginResponse {
     private String email;
     private String phone;
     private String message;
+    private UserStatus status;
+    private AccountType accountType;
 }

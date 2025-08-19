@@ -66,6 +66,8 @@ public class AuthService {
                 .userId(user.getId())
                 .name(user.getName())
                 .phone(user.getPhone())
+                .status(user.getStatus())
+                .accountType(user.getAccountType())
                 .message("Login successful")
                 .build();
     }
@@ -106,6 +108,8 @@ public class AuthService {
                 .userId(savedUser.getId())
                 .name(savedUser.getName())
                 .phone(savedUser.getPhone())
+                .status(savedUser.getStatus())
+                .accountType(savedUser.getAccountType())
                 .message("Registration successful")
                 .build();
     }
@@ -206,6 +210,8 @@ public class AuthService {
                     .name(name)
                     .email(user.getEmail()) // Get email from user repository
                     .phone(phone)
+                    .status(user.getStatus())
+                    .accountType(user.getAccountType())
                     .message("Token is valid")
                     .build();
 
