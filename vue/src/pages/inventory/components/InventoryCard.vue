@@ -1,6 +1,6 @@
 <template>
   <Card
-    class="inventory-card hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-white to-gray-50/50"
+    class="inventory-card ratio-square hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-white to-gray-50/50"
     @click="$emit('select', inventory)"
   >
     <CardHeader class="pb-4">
@@ -165,6 +165,7 @@ defineEmits<{
 
 <style scoped>
 .inventory-card {
+  width: 300px;
   --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --card-shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --card-border: 1px solid rgb(229 231 235);
@@ -172,6 +173,7 @@ defineEmits<{
   
   box-shadow: var(--card-shadow);
   border: var(--card-border);
+    aspect-ratio: 1/1;
 }
 
 .inventory-card:hover {
