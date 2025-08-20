@@ -36,7 +36,6 @@ export function useOrganization() {
 
             if (result.success && result.data) {
                 organizations.value = result.data
-                toast.success(`Successfully loaded ${result.data.length} organization(s)`)
                 return true
             } else {
                 const errorMsg = result.error || 'Failed to fetch organizations'
@@ -61,8 +60,6 @@ export function useOrganization() {
 
         // Save to localStorage
         localStorage.setItem(ORGANIZATION_STORAGE_KEY, JSON.stringify(organization))
-
-        toast.success(`Selected organization: ${organization.name}`)
     }
 
     // Get the selected organization from localStorage
@@ -92,7 +89,6 @@ export function useOrganization() {
             const storedOrg = getStoredOrganization()
             if (storedOrg) {
                 selectOrganization(storedOrg)
-                toast.info(`Restored organization: ${storedOrg.name}`)
             }
         }
     }
