@@ -114,7 +114,9 @@ public class InventoryService {
         if (request.getLocation() != null) {
             inventory.setLocation(request.getLocation());
         }
-
+        if (request.getIsActive() != null) {
+            inventory.setIsActive(request.getIsActive());
+        }
         return inventoryRepository.save(inventory);
     }
 

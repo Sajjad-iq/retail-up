@@ -19,4 +19,6 @@ public class UpdateInventoryRequest {
 
     @Size(max = 255, message = "Location must not exceed 255 characters")
     private String location;
+
+    private Boolean isActive;
 }

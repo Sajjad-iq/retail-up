@@ -70,10 +70,12 @@
             </div>
             <FormControl>
               <Switch
-                :disabled="isSubmitting"
-                v-bind="componentField"
+                v-model="componentField.modelValue"
+                :checked="componentField.modelValue"
+                @update:model-value="(value: boolean) => componentField.onChange(value)"
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         </FormField>
 
