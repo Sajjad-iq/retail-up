@@ -1,7 +1,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { authService } from '@/services/authService'
-import { UserStatus, AccountType } from '@/types/global'
+import type { OrganizationResponse } from '@/services/organizationService'
 
 export function useAuth() {
   const authStore = useAuthStore()
@@ -46,7 +46,7 @@ export function useAuth() {
           const storedOrg = localStorage.getItem('selected_organization')
           if (storedOrg) {
             try {
-              const org = JSON.parse(storedOrg)
+              const org = JSON.parse(storedOrg) as OrganizationResponse
               authStore.setOrganization(org)
             } catch (err) {
               console.error('Error parsing stored organization:', err)

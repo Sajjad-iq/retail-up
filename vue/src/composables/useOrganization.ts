@@ -2,15 +2,15 @@ import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { organizationService } from '@/services/organizationService'
 import { toast } from 'vue-sonner'
-import type { Organization } from '@/types/global'
+import type { OrganizationResponse, CreateOrganizationRequest } from '@/services/organizationService'
 
 const ORGANIZATION_STORAGE_KEY = 'selected_organization'
 
 export function useOrganization() {
     const authStore = useAuthStore()
     const isLoading = ref(false)
-    const organizations = ref<Organization[]>([])
-    const selectedOrganization = ref<Organization | null>(null)
+    const organizations = ref<OrganizationResponse[]>([])
+    const selectedOrganization = ref<OrganizationResponse | null>(null)
     const error = ref<string | null>(null)
 
     // Computed properties
@@ -55,7 +55,7 @@ export function useOrganization() {
     }
 
     // Select an organization
-    const selectOrganization = (organization: Organization) => {
+    const selectOrganization = (organization: OrganizationResponse) => {
         selectedOrganization.value = organization
         authStore.setOrganization(organization)
 
@@ -66,11 +66,11 @@ export function useOrganization() {
     }
 
     // Get the selected organization from localStorage
-    const getStoredOrganization = (): Organization | null => {
+    const getStoredOrganization = (): OrganizationResponse | null => {
         try {
             const stored = localStorage.getItem(ORGANIZATION_STORAGE_KEY)
             if (stored) {
-                const org = JSON.parse(stored) as Organization
+                const org = JSON.parse(stored) as OrganizationResponse
                 // Validate that the stored organization exists in the user's organizations
                 if (organizations.value.some(o => o.id === org.id)) {
                     return org
@@ -107,14 +107,7 @@ export function useOrganization() {
     }
 
     // Create a new organization
-    const createOrganization = async (orgData: {
-        name: string
-        domain: string
-        description?: string
-        address?: string
-        phone: string
-        email?: string
-    }) => {
+    const createOrganization = async (orgData: Omit<CreateOrganizationRequest, 'userId'>) => {
         if (!authStore.user?.id) {
             const errorMsg = 'User not authenticated'
             error.value = errorMsg

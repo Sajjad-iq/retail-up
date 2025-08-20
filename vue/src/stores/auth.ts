@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User, Organization } from '@/types/global'
+import type { User } from '@/types/global'
+import type { OrganizationResponse } from '@/services/organizationService'
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
-    const organization = ref<Organization | null>(null)
+    const organization = ref<OrganizationResponse | null>(null)
     const token = ref<string | null>(null)
     const isAuthenticated = computed(() => !!token.value && !!user.value)
     const hasSelectedOrganization = computed(() => !!organization.value)
@@ -22,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    const setOrganization = (newOrg: Organization | null) => {
+    const setOrganization = (newOrg: OrganizationResponse | null) => {
         organization.value = newOrg
     }
 
