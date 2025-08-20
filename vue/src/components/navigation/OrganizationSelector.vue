@@ -89,7 +89,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import CreateOrganizationDialog from '@/pages/organization-selection/components/CreateOrganizationDialog.vue'
+import CreateOrganizationDialog from '@/pages/organization/components/CreateOrganizationDialog.vue'
 import {
   ChevronDownIcon,
   ArrowPathIcon,
