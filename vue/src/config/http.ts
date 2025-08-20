@@ -36,7 +36,6 @@ class HttpService {
                 if (error.response?.status === 401) {
                     // Token expired or invalid
                     localStorage.removeItem('token')
-                    localStorage.removeItem('user')
                     localStorage.removeItem('organization')
                     window.location.reload()
                 }

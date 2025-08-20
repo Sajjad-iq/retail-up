@@ -23,7 +23,7 @@ export async function authGuard(
     }
 
     // Check if user needs to select an organization first
-    if (!authStore.hasSelectedOrganization && to.name !== 'OrganizationSelection') {
+    if (!authStore.hasSelectedOrganization && to.name !== 'OrganizationSelection' && AccountType.USER) {
         next({ name: 'OrganizationSelection' })
         return
     }
