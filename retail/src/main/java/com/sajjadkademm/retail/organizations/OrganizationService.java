@@ -114,6 +114,24 @@ public class OrganizationService {
             }
         }
 
+        // Check if user exists
+        User user = userService.getUserById(request.getUserId());
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getAccountType() != AccountType.USER) {
+            throw new UnauthorizedException("Only Users Can Update Organizations");
+        }
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new UnauthorizedException("Only Active Users Can Update Organizations");
+        }
+
+        if (user.getId() != organization.getCreatedBy().getId()) {
+            throw new UnauthorizedException("Only the creator of the organization can update it");
+        }
+
         // Update organization fields
         organization.setName(request.getName());
         organization.setDescription(request.getDescription());

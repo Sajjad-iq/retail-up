@@ -31,12 +31,13 @@ export interface OrganizationResponse {
 
 // Backend UpdateOrganizationRequest structure
 export interface UpdateOrganizationRequest {
-    name?: string
-    domain?: string
-    description?: string
-    address?: string
+    userId: string
+    name: string
+    description: string
+    address: string
     phone?: string
-    email?: string
+    domain?: string
+    status?: OrganizationStatus
 }
 
 class OrganizationService {
@@ -62,9 +63,12 @@ class OrganizationService {
         }
     }
 
-    async updateOrganization(id: string, orgData: UpdateOrganizationRequest): Promise<ApiResponse<OrganizationResponse>> {
+    async updateOrganization(id: string, userId: string, orgData: Omit<UpdateOrganizationRequest, 'userId'>): Promise<ApiResponse<OrganizationResponse>> {
         try {
-            const response = await this.axios.put<OrganizationResponse>(`/organizations/${id}`, orgData)
+            const response = await this.axios.put<OrganizationResponse>(`/organizations/${id}`, {
+                userId,
+                ...orgData
+            })
             return { success: true, data: response.data }
         } catch (error: any) {
             const apiError = ErrorHandler.handleApiError(error)
