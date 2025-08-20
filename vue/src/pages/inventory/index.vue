@@ -89,7 +89,6 @@ const {
   error,
   fetchOrganizationInventories,
   updateInventory,
-  createInventory,
   selectInventory: selectInventoryComposable,
   searchInventories
 } = useInventory()
@@ -206,7 +205,13 @@ const toggleInventoryStatus = async (inventory: Inventory) => {
  */
 const handleDialogSuccess = (inventory: Inventory) => {
   // The composable handles state updates and success toasts
+  // Just close the dialog
   showDialog.value = false
+  
+  // Refresh the inventories to ensure we have the latest data
+  if (selectedOrganization.value?.id) {
+    fetchOrganizationInventories()
+  }
 }
 
 // ===== WATCHERS =====

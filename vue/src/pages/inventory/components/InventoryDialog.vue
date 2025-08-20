@@ -110,8 +110,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { useOrganization } from '@/composables/useOrganization'
-import { inventoryService } from '@/services/inventoryService'
-import { toast } from 'vue-sonner'
+import { useInventory } from '@/composables/useInventory'
 import type { Inventory } from '@/types/global'
 
 // UI Components
@@ -153,6 +152,7 @@ const emit = defineEmits<Emits>()
 
 // Composables
 const { selectedOrganization } = useOrganization()
+const { createInventory, updateInventory } = useInventory()
 
 // ===== REACTIVE STATE =====
 const isSubmitting = ref(false)
@@ -189,20 +189,17 @@ const form = useForm({
  */
 const onSubmit = form.handleSubmit(async (values) => {
   if (!selectedOrganization.value?.id) {
-    toast.error('No organization selected')
     return
   }
 
   isSubmitting.value = true
 
   try {
-    let result
+    let success = false
 
     if (props.mode === 'create') {
       // Create new inventory
-      result = await inventoryService.createInventory({
-        userId: selectedOrganization.value.id, // Using org ID as userId for now
-        organizationId: selectedOrganization.value.id,
+      success = await createInventory({
         name: values.name,
         description: values.description,
         location: values.location
@@ -210,11 +207,10 @@ const onSubmit = form.handleSubmit(async (values) => {
     } else {
       // Update existing inventory
       if (!props.inventory?.id) {
-        toast.error('No inventory selected for update')
         return
       }
 
-      result = await inventoryService.updateInventory(props.inventory.id, {
+      success = await updateInventory(props.inventory.id, {
         name: values.name,
         description: values.description,
         location: values.location,
@@ -222,14 +218,14 @@ const onSubmit = form.handleSubmit(async (values) => {
       })
     }
 
-    if (result.success && result.data) {
-      emit('success', result.data)
-      toast.success(`Inventory ${props.mode === 'create' ? 'created' : 'updated'} successfully`)
-    } else {
-      toast.error(result.error || `Failed to ${props.mode} inventory`)
+    if (success) {
+      // The composable handles success toasts and state updates
+      // For create mode, we need to emit a success event to close the dialog
+      // For edit mode, the inventory is already updated in the composable
+      emit('success', props.inventory || {} as Inventory)
     }
   } catch (err) {
-    toast.error(`An error occurred while ${props.mode === 'create' ? 'creating' : 'updating'} inventory`)
+    // Error handling is done by the composable
   } finally {
     isSubmitting.value = false
   }
