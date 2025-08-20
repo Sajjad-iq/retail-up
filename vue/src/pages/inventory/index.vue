@@ -180,11 +180,7 @@ const viewInventoryDetails = (inventory: Inventory) => {
  * Select inventory for navigation
  */
 const selectInventory = (inventory: Inventory) => {
-  // Use the composable to select the inventory
   selectInventoryComposable(inventory)
-  // Navigate to inventory details page or items list
-  // This could be expanded based on requirements
-  viewInventoryDetails(inventory)
 }
 
 /**
