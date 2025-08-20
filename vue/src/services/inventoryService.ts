@@ -1,6 +1,6 @@
 import { httpService } from '../config/http'
 import { ErrorHandler } from '@/utils/errorHandler'
-import type { Inventory, InventoryItem, Money, Unit } from '@/types/global'
+import type { Inventory } from '@/types/global'
 import type { ApiResponse } from '.'
 
 // Backend CreateInventoryRequest structure
@@ -10,64 +10,6 @@ export interface CreateInventoryRequest {
   name: string
   description?: string
   location?: string
-}
-
-// Backend CreateInventoryItemRequest structure (complete match)
-export interface CreateInventoryItemRequest {
-  userId: string
-  id?: string // temporary id for excel upload
-  inventoryId: string
-  name: string
-  description?: string
-  sku?: string
-  productCode?: string
-  barcode?: string
-  category?: string
-  brand?: string
-  unit: Unit
-  weight?: number
-  dimensions?: string
-  color?: string
-  size?: string
-  currentStock: number
-  minimumStock?: number
-  maximumStock?: number
-  costPrice?: Money
-  sellingPrice: Money
-  discountPrice?: number
-  discountStartDate?: string // LocalDateTime
-  discountEndDate?: string // LocalDateTime
-  supplierName?: string
-  isPerishable?: boolean
-  expiryDate?: string // LocalDate
-}
-
-// Backend UpdateInventoryItemRequest structure
-export interface UpdateInventoryItemRequest {
-  name?: string
-  description?: string
-  sku?: string
-  productCode?: string
-  barcode?: string
-  category?: string
-  brand?: string
-  unit?: Unit
-  weight?: number
-  dimensions?: string
-  color?: string
-  size?: string
-  currentStock?: number
-  minimumStock?: number
-  maximumStock?: number
-  costPrice?: Money
-  sellingPrice?: Money
-  discountPrice?: number
-  discountStartDate?: string
-  discountEndDate?: string
-  supplierName?: string
-  isPerishable?: boolean
-  expiryDate?: string
-  isActive?: boolean
 }
 
 // Backend UpdateInventoryRequest structure
@@ -81,6 +23,7 @@ export interface UpdateInventoryRequest {
 class InventoryService {
   private axios = httpService.getAxiosInstance()
 
+  // Create a new inventory
   async createInventory(inventoryData: CreateInventoryRequest): Promise<ApiResponse<Inventory>> {
     try {
       const response = await this.axios.post<Inventory>('/inventories', inventoryData)
@@ -91,6 +34,7 @@ class InventoryService {
     }
   }
 
+  // Get a specific inventory by ID
   async getInventory(id: string): Promise<ApiResponse<Inventory>> {
     try {
       const response = await this.axios.get<Inventory>(`/inventories/${id}`)
@@ -101,6 +45,7 @@ class InventoryService {
     }
   }
 
+  // Update an existing inventory
   async updateInventory(id: string, inventoryData: UpdateInventoryRequest): Promise<ApiResponse<Inventory>> {
     try {
       const response = await this.axios.put<Inventory>(`/inventories/${id}`, inventoryData)
@@ -111,6 +56,7 @@ class InventoryService {
     }
   }
 
+  // Delete an inventory (soft delete by setting isActive to false)
   async deleteInventory(id: string): Promise<ApiResponse<void>> {
     try {
       await this.axios.delete(`/inventories/${id}`)
@@ -121,6 +67,7 @@ class InventoryService {
     }
   }
 
+  // Get all inventories (optionally filtered by organization)
   async getInventories(organizationId?: string): Promise<ApiResponse<Inventory[]>> {
     try {
       const params = organizationId ? { organizationId } : {}
@@ -132,9 +79,10 @@ class InventoryService {
     }
   }
 
-  async getInventoryItems(inventoryId: string): Promise<ApiResponse<InventoryItem[]>> {
+  // Get all inventories for a specific organization
+  async getInventoriesByOrganization(organizationId: string): Promise<ApiResponse<Inventory[]>> {
     try {
-      const response = await this.axios.get<InventoryItem[]>(`/inventories/${inventoryId}/items`)
+      const response = await this.axios.get<Inventory[]>(`/inventories/organization/${organizationId}`)
       return { success: true, data: response.data }
     } catch (error: any) {
       const apiError = ErrorHandler.handleApiError(error)
@@ -142,10 +90,10 @@ class InventoryService {
     }
   }
 
-  // Inventory Item specific methods
-  async createInventoryItem(itemData: CreateInventoryItemRequest): Promise<ApiResponse<InventoryItem>> {
+  // Get active inventories for an organization
+  async getActiveInventories(organizationId: string): Promise<ApiResponse<Inventory[]>> {
     try {
-      const response = await this.axios.post<InventoryItem>('/inventory-items', itemData)
+      const response = await this.axios.get<Inventory[]>(`/inventories/organization/${organizationId}/active`)
       return { success: true, data: response.data }
     } catch (error: any) {
       const apiError = ErrorHandler.handleApiError(error)
@@ -153,9 +101,12 @@ class InventoryService {
     }
   }
 
-  async getInventoryItem(id: string): Promise<ApiResponse<InventoryItem>> {
+  // Search inventories by name within an organization
+  async searchInventories(organizationId: string, query: string): Promise<ApiResponse<Inventory[]>> {
     try {
-      const response = await this.axios.get<InventoryItem>(`/inventory-items/${id}`)
+      const response = await this.axios.get<Inventory[]>(`/inventories/organization/${organizationId}/search`, {
+        params: { q: query }
+      })
       return { success: true, data: response.data }
     } catch (error: any) {
       const apiError = ErrorHandler.handleApiError(error)
@@ -163,9 +114,10 @@ class InventoryService {
     }
   }
 
-  async updateInventoryItem(id: string, itemData: UpdateInventoryItemRequest): Promise<ApiResponse<InventoryItem>> {
+  // Check if inventory exists by name within an organization
+  async inventoryExistsByName(name: string, organizationId: string): Promise<ApiResponse<boolean>> {
     try {
-      const response = await this.axios.put<InventoryItem>(`/inventory-items/${id}`, itemData)
+      const response = await this.axios.get<boolean>(`/inventories/exists/name/${name}/organization/${organizationId}`)
       return { success: true, data: response.data }
     } catch (error: any) {
       const apiError = ErrorHandler.handleApiError(error)
@@ -173,10 +125,11 @@ class InventoryService {
     }
   }
 
-  async deleteInventoryItem(id: string): Promise<ApiResponse<void>> {
+  // Get inventory count for an organization
+  async getInventoryCount(organizationId: string): Promise<ApiResponse<number>> {
     try {
-      await this.axios.delete(`/inventory-items/${id}`)
-      return { success: true }
+      const response = await this.axios.get<number>(`/inventories/organization/${organizationId}/count`)
+      return { success: true, data: response.data }
     } catch (error: any) {
       const apiError = ErrorHandler.handleApiError(error)
       return { success: false, error: ErrorHandler.getErrorMessage(apiError) }
