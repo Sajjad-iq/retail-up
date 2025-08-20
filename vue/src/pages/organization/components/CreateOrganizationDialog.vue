@@ -62,7 +62,7 @@
         </FormField>
 
         <!-- Address -->
-        <FormField v-slot="{ componentField, errorMessage }" name="address">
+        <FormField v-slot="{ componentField }" name="address">
           <FormItem>
             <FormLabel>Address</FormLabel>
             <FormControl>
@@ -77,7 +77,7 @@
         </FormField>
 
         <!-- Phone -->
-        <FormField v-slot="{ componentField, errorMessage }" name="phone">
+        <FormField v-slot="{ componentField }" name="phone">
           <FormLabel>Phone</FormLabel>
           <FormControl>
             <Input 

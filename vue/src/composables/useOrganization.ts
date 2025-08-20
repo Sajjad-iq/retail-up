@@ -1,21 +1,21 @@
 import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useOrganizationStore } from '@/stores/organization'
 import { organizationService } from '@/services/organizationService'
 import { toast } from 'vue-sonner'
 import type { OrganizationResponse, CreateOrganizationRequest } from '@/services/organizationService'
 
-const ORGANIZATION_STORAGE_KEY = 'selected_organization'
-
 export function useOrganization() {
     const authStore = useAuthStore()
+    const organizationStore = useOrganizationStore()
     const isLoading = ref(false)
     const organizations = ref<OrganizationResponse[]>([])
-    const selectedOrganization = ref<OrganizationResponse | null>(null)
     const error = ref<string | null>(null)
 
     // Computed properties
     const hasOrganizations = computed(() => organizations.value.length > 0)
-    const isOrganizationSelected = computed(() => !!selectedOrganization.value)
+    const isOrganizationSelected = computed(() => organizationStore.isOrganizationSelected)
+    const selectedOrganization = computed(() => organizationStore.selectedOrganization)
 
     // Get organizations for the current user
     const fetchUserOrganizations = async () => {
@@ -55,17 +55,14 @@ export function useOrganization() {
 
     // Select an organization
     const selectOrganization = (organization: OrganizationResponse) => {
-        selectedOrganization.value = organization
+        organizationStore.setSelectedOrganization(organization)
         authStore.setOrganization(organization)
-
-        // Save to localStorage
-        localStorage.setItem(ORGANIZATION_STORAGE_KEY, JSON.stringify(organization))
     }
 
     // Get the selected organization from localStorage
     const getStoredOrganization = (): OrganizationResponse | null => {
         try {
-            const stored = localStorage.getItem(ORGANIZATION_STORAGE_KEY)
+            const stored = localStorage.getItem('selected_organization')
             if (stored) {
                 const org = JSON.parse(stored) as OrganizationResponse
                 // Validate that the stored organization exists in the user's organizations
@@ -95,9 +92,8 @@ export function useOrganization() {
 
     // Clear selected organization
     const clearSelection = () => {
-        selectedOrganization.value = null
+        organizationStore.setSelectedOrganization(null)
         authStore.setOrganization(null)
-        localStorage.removeItem(ORGANIZATION_STORAGE_KEY)
 
         toast.info('Organization selection cleared')
     }

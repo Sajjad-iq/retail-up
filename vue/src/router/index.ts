@@ -14,7 +14,10 @@ export type AppRouteRecordRaw = RouteRecordRaw & {
 
 // Route definitions with simple authentication check
 export const routes: AppRouteRecordRaw[] = [
-
+    {
+        path: '/',
+        redirect: '/dashboard'
+    },
     {
         path: '/auth',
         name: 'Auth',

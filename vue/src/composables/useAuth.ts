@@ -1,11 +1,13 @@
 import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useOrganizationStore } from '@/stores/organization'
 import { authService } from '@/services/authService'
 import type { OrganizationResponse } from '@/services/organizationService'
 import { toast } from 'vue-sonner'
 
 export function useAuth() {
   const authStore = useAuthStore()
+  const organizationStore = useOrganizationStore()
   const isLoading = ref(false)
   const isInitialized = ref(false)
 
@@ -49,6 +51,7 @@ export function useAuth() {
             try {
               const org = JSON.parse(storedOrg) as OrganizationResponse
               authStore.setOrganization(org)
+              organizationStore.setSelectedOrganization(org)
             } catch (err) {
               toast.error('Error parsing stored organization')
             }

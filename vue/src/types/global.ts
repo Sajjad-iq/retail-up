@@ -140,9 +140,5 @@ export interface Money {
 // Backend OrganizationStatus enum
 export enum OrganizationStatus {
     ACTIVE = 'ACTIVE',
-    DISABLED = 'DISABLED',
-    PENDING = 'PENDING',
-    REJECTED = 'REJECTED',
-    SUSPENDED = 'SUSPENDED',
-    DELETED = 'DELETED'
+    DISABLED = 'DISABLED'
 }

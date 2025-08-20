@@ -3,32 +3,11 @@
   <div class="min-h-screen bg-gray-50 p-8">
     <div class="max-w-4xl mx-auto">
 
-      <!-- Authentication Initialization Loading State: Shows spinner while checking user authentication -->
-      <!-- Green spinner indicates authentication process - either initializing or authenticating user -->
-      <Spinner 
-        v-if="!isAuthInitialized || isAuthLoading"
-        color="green"
-        :message="isAuthLoading ? 'Authenticating user...' : 'Initializing authentication...'"
-      />
+      <!-- Loading State: Shows spinner while loading -->
 
-      <!-- Organization Loading State: Shows spinner while loading organization list -->
-      <!-- Purple spinner indicates organization list loading - fetching available organizations for user -->
-      <Spinner 
-        v-else-if="isOrgLoading"
-        color="purple"
-        message="Loading organizations..."
-      />
-
-      <!-- Organization Details Loading State: Shows spinner while fetching organization data -->
-      <!-- Blue spinner indicates specific organization details loading - fetching selected organization data -->
-      <Spinner 
-        v-else-if="isLoading"
-        color="blue"
-        message="Loading organization details..."
-      />
 
       <!-- Error State: Displays error message with retry button -->
-      <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6">
         <div class="flex items-center gap-3">
           <ExclamationTriangleIcon class="h-6 w-6 text-red-600" />
           <div>
@@ -46,13 +25,27 @@
         <!-- Organization Info Card: Form for editing organization details -->
         <Card class="p-6">
           <CardHeader>
-            <CardTitle class="flex items-center gap-3">
-              <BuildingOfficeIcon class="h-6 w-6 text-blue-600" />
-              Organization Information
-            </CardTitle>
-            <CardDescription>
-              Update your organization's basic information and contact details
-            </CardDescription>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <BuildingOfficeIcon class="h-6 w-6 text-blue-600" />
+                <div>
+                  <CardTitle>Organization Information</CardTitle>
+                  <CardDescription>
+                    Update your organization's basic information and contact details
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                @click="refreshOrganization"
+                :disabled="isLoading"
+                class="flex items-center gap-2"
+              >
+                <ArrowPathIcon class="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <!-- Form with validation using vee-validate -->
@@ -151,10 +144,6 @@
                         <SelectContent>
                           <SelectItem value="ACTIVE">Active</SelectItem>
                           <SelectItem value="DISABLED">Disabled</SelectItem>
-                          <SelectItem value="PENDING">Pending</SelectItem>
-                          <SelectItem value="REJECTED">Rejected</SelectItem>
-                          <SelectItem value="SUSPENDED">Suspended</SelectItem>
-                          <SelectItem value="DELETED">Deleted</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -285,13 +274,14 @@ import {
   BuildingOfficeIcon,
   ExclamationTriangleIcon,
   ChartBarIcon,
+  ArrowPathIcon,
 } from '@heroicons/vue/24/outline'
 
 // Router instance for navigation
 const router = useRouter()
 
 // Organization composable for managing organization state
-const { selectedOrganization, getOrganizationById, isLoading: isOrgLoading } = useOrganization()
+const { selectedOrganization, getOrganizationById } = useOrganization()
 
 // Authentication composable for user information
 const { user, isLoading: isAuthLoading, isInitialized: isAuthInitialized } = useAuth()
@@ -309,9 +299,8 @@ const error = ref<string | null>(null)
 // ===== LOADING STATE HIERARCHY =====
 // 1. isAuthInitialized: Authentication system is ready
 // 2. isAuthLoading: User authentication in progress
-// 3. isOrgLoading: Organization list loading in progress
-// 4. isLoading: Organization details loading in progress
-// 5. isSubmitting: Form submission in progress
+// 3. isLoading: Organization details loading in progress
+// 4. isSubmitting: Form submission in progress
 
 // ===== FORM VALIDATION SCHEMA =====
 // Zod schema for form validation with required and optional fields
@@ -345,6 +334,16 @@ const form = useForm({
  * Fetches organization details using the selected organization ID
  */
 const loadOrganization = async () => {
+  // Check if we already have the same organization data loaded FIRST
+  if (organization.value?.id === selectedOrganization.value?.id) {
+    return
+  }
+  
+  // Prevent multiple simultaneous calls
+  if (isLoading.value) {
+    return
+  }
+  
   // Check if an organization is selected
   if (!selectedOrganization.value?.id) {
     error.value = 'No organization selected'
@@ -432,6 +431,8 @@ const handleSubmit = async (values: any) => {
       updateData
     )
 
+    localStorage.setItem('selected_organization', JSON.stringify(result.data))
+
     if (result.success && result.data) {
       // Update local state with new data
       organization.value = result.data
@@ -458,6 +459,16 @@ const onSubmit = form.handleSubmit(async (values) => {
 })
 
 /**
+ * Refreshes the organization data
+ * Useful for getting the latest data from the server
+ */
+const refreshOrganization = async () => {
+  if (selectedOrganization.value?.id) {
+    await loadOrganization()
+  }
+}
+
+/**
  * Navigates to organization selection page
  * Used when no organization is currently selected
  */
@@ -465,18 +476,6 @@ const goToOrganizationSelection = () => {
   router.push('/organization-selection')
 }
 
-
-
-// ===== WATCHERS =====
-// Watch for changes in selected organization and reload data accordingly
-watch(selectedOrganization, (newOrg) => {
-  if (newOrg) {
-    loadOrganization()
-  } else {
-    toast.info('No organization selected')
-    organization.value = null
-  }
-}, { immediate: true })
 
 // ===== LIFECYCLE HOOKS =====
 // Load organization data when component mounts
