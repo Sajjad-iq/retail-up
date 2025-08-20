@@ -235,7 +235,6 @@ import * as z from 'zod'
 
 // Custom composables and services
 import { useOrganization } from '@/composables/useOrganization'
-import { organizationService } from '@/services/organizationService'
 import { useAuth } from '@/composables/useAuth'
 import { formatDate } from '@/lib/utils'
 
@@ -281,7 +280,7 @@ import {
 const router = useRouter()
 
 // Organization composable for managing organization state
-const { selectedOrganization, getOrganizationById } = useOrganization()
+const { selectedOrganization, getOrganizationById, updateOrganization } = useOrganization()
 
 // Authentication composable for user information
 const { user, isLoading: isAuthLoading, isInitialized: isAuthInitialized } = useAuth()
@@ -414,8 +413,8 @@ const handleSubmit = async (values: any) => {
   isSubmitting.value = true
 
   try {
-    // Prepare update data, excluding userId from the request
-    const updateData: Omit<UpdateOrganizationRequest, 'userId'> = {
+    // Prepare update data
+    const updateData = {
       name: values.name,
       description: values.description,
       address: values.address,
@@ -424,24 +423,16 @@ const handleSubmit = async (values: any) => {
       status: values.status
     }
 
-    // Call the organization service to update
-    const result = await organizationService.updateOrganization(
+    // Use the composable method which handles store and localStorage updates
+    const success = await updateOrganization(
       organization.value.id,
-      user.value.id, // Using selected org ID as userId for now
+      user.value.id,
       updateData
     )
 
-    localStorage.setItem('selected_organization', JSON.stringify(result.data))
-
-    if (result.success && result.data) {
-      // Update local state with new data
-      organization.value = result.data
-      toast.success('Organization updated successfully')
-      
-      // Note: This would typically be handled by the composable
-      // to update the selected organization in the store
-    } else {
-      toast.error(result.error || 'Failed to update organization')
+    if (success) {
+      // Refresh the organization data to get the latest from the store
+      await loadOrganization()
     }
   } catch (err) {
     toast.error('An error occurred while updating organization')

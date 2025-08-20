@@ -157,6 +157,45 @@ export function useOrganization() {
         }
     }
 
+    // Update organization
+    const updateOrganization = async (id: string, userId: string, updateData: any): Promise<boolean> => {
+        isLoading.value = true
+        error.value = null
+
+        try {
+            const result = await organizationService.updateOrganization(id, userId, updateData)
+
+            if (result.success && result.data) {
+                // Update the organization in the list
+                const index = organizations.value.findIndex(org => org.id === id)
+                if (index !== -1) {
+                    organizations.value[index] = result.data
+                }
+
+                // Update selected organization if it's the one being updated
+                if (selectedOrganization.value?.id === id) {
+                    organizationStore.setSelectedOrganization(result.data)
+                    authStore.setOrganization(result.data)
+                }
+
+                toast.success(`Organization "${result.data.name}" updated successfully`)
+                return true
+            } else {
+                const errorMsg = result.error || 'Failed to update organization'
+                error.value = errorMsg
+                toast.error(errorMsg)
+                return false
+            }
+        } catch (err) {
+            const errorMsg = 'An error occurred while updating organization'
+            error.value = errorMsg
+            toast.error(errorMsg)
+            return false
+        } finally {
+            isLoading.value = false
+        }
+    }
+
     // Auto-initialize when composable is used
     onMounted(() => {
         if (authStore.isAuthenticated) {
@@ -181,6 +220,7 @@ export function useOrganization() {
         createOrganization,
         clearSelection,
         initialize,
-        getOrganizationById
+        getOrganizationById,
+        updateOrganization
     }
 }

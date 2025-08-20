@@ -5,6 +5,7 @@ import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
+import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
@@ -100,8 +101,11 @@ public class OrganizationService {
                 .orElseThrow(() -> new NotFoundException("Organization not found"));
 
         // assert organization is active before updates
-        OrganizationValidationUtils.assertOrganizationIsActive(organization);
-
+        if (organization.getStatus() == OrganizationStatus.REJECTED
+                || organization.getStatus() == OrganizationStatus.SUSPENDED
+                || organization.getStatus() == OrganizationStatus.DELETED) {
+            throw new BadRequestException("This Organization Rejected or Suspended or Deleted");
+        }
         if (request.getPhone() != null && !request.getPhone().equals(organization.getPhone())) {
             if (organizationRepository.existsByPhone(request.getPhone())) {
                 throw new ConflictException("Organization with phone " + request.getPhone() + " already exists");
