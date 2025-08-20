@@ -2,6 +2,7 @@ import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { authService } from '@/services/authService'
 import type { OrganizationResponse } from '@/services/organizationService'
+import { toast } from 'vue-sonner'
 
 export function useAuth() {
   const authStore = useAuthStore()
@@ -49,7 +50,7 @@ export function useAuth() {
               const org = JSON.parse(storedOrg) as OrganizationResponse
               authStore.setOrganization(org)
             } catch (err) {
-              console.error('Error parsing stored organization:', err)
+              toast.error('Error parsing stored organization')
             }
           }
 
@@ -149,7 +150,7 @@ export function useAuth() {
     try {
       await authService.logout()
     } catch (error) {
-      console.error('Logout error:', error)
+      toast.error('Logout error')
     } finally {
       clearSession()
       isInitialized.value = false

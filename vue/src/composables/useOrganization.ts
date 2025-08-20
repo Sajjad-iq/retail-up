@@ -77,7 +77,7 @@ export function useOrganization() {
                 }
             }
         } catch (err) {
-            console.error('Error parsing stored organization:', err)
+            toast.error('Error parsing stored organization')
         }
         return null
     }
