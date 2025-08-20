@@ -175,8 +175,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useOrganization } from '@/composables/useOrganization'
-import { inventoryService } from '@/services/inventoryService'
-import { toast } from 'vue-sonner'
+import { useInventory } from '@/composables/useInventory'
 import { formatDate } from '@/lib/utils'
 import type { Inventory } from '@/types/global'
 
@@ -211,11 +210,18 @@ import { InventoryDialog, InventoryDetailsDialog } from './components'
 
 // Composables
 const { selectedOrganization } = useOrganization()
+const {
+  inventories,
+  isLoading,
+  error,
+  fetchOrganizationInventories,
+  updateInventory,
+  createInventory,
+  selectInventory: selectInventoryComposable,
+  searchInventories
+} = useInventory()
 
 // ===== REACTIVE STATE =====
-const inventories = ref<Inventory[]>([])
-const isLoading = ref(false)
-const error = ref<string | null>(null)
 const searchQuery = ref('')
 const showActiveOnly = ref(false)
 const showDialog = ref(false)
@@ -227,16 +233,7 @@ const dialogMode = ref<'create' | 'edit'>('create')
 const filteredInventories = computed(() => {
   let filtered = inventories.value
 
-  // Filter by search query
-  if (searchQuery.value.trim()) {
-    filtered = filtered.filter(inventory =>
-      inventory.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      inventory.description?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      inventory.location?.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  }
-
-  // Filter by active status
+  // Filter by active status only (search is now handled by the composable)
   if (showActiveOnly.value) {
     filtered = filtered.filter(inventory => inventory.isActive)
   }
@@ -251,26 +248,9 @@ const filteredInventories = computed(() => {
  */
 const loadInventories = async () => {
   if (!selectedOrganization.value?.id) {
-    error.value = 'No organization selected'
     return
   }
-
-  isLoading.value = true
-  error.value = null
-
-  try {
-    const result = await inventoryService.getInventoriesByOrganization(selectedOrganization.value.id)
-    
-    if (result.success && result.data) {
-      inventories.value = result.data
-    } else {
-      error.value = result.error || 'Failed to load inventories'
-    }
-  } catch (err) {
-    error.value = 'An error occurred while loading inventories'
-  } finally {
-    isLoading.value = false
-  }
+  await fetchOrganizationInventories()
 }
 
 /**
@@ -283,9 +263,12 @@ const refreshInventories = () => {
 /**
  * Handle search input
  */
-const handleSearch = () => {
-  // Search is handled by computed property
-  // Could add debouncing here if needed
+const handleSearch = async () => {
+  if (searchQuery.value.trim()) {
+    await searchInventories(searchQuery.value)
+  } else {
+    await fetchOrganizationInventories()
+  }
 }
 
 /**
@@ -325,6 +308,8 @@ const viewInventoryDetails = (inventory: Inventory) => {
  * Select inventory for navigation
  */
 const selectInventory = (inventory: Inventory) => {
+  // Use the composable to select the inventory
+  selectInventoryComposable(inventory)
   // Navigate to inventory details page or items list
   // This could be expanded based on requirements
   viewInventoryDetails(inventory)
@@ -334,24 +319,12 @@ const selectInventory = (inventory: Inventory) => {
  * Toggle inventory active status
  */
 const toggleInventoryStatus = async (inventory: Inventory) => {
-  try {
-    const result = await inventoryService.updateInventory(inventory.id, {
-      isActive: !inventory.isActive
-    })
-
-    if (result.success && result.data) {
-      // Update local state
-      const index = inventories.value.findIndex(i => i.id === inventory.id)
-      if (index !== -1) {
-        inventories.value[index] = result.data
-      }
-      
-      toast.success(`Inventory ${inventory.isActive ? 'deactivated' : 'activated'} successfully`)
-    } else {
-      toast.error(result.error || 'Failed to update inventory status')
-    }
-  } catch (err) {
-    toast.error('An error occurred while updating inventory status')
+  const success = await updateInventory(inventory.id, {
+    isActive: !inventory.isActive
+  })
+  
+  if (success) {
+    // The composable handles the success toast and state update
   }
 }
 
@@ -359,19 +332,7 @@ const toggleInventoryStatus = async (inventory: Inventory) => {
  * Handle dialog success
  */
 const handleDialogSuccess = (inventory: Inventory) => {
-  if (dialogMode.value === 'create') {
-    // Add new inventory to the list
-    inventories.value.unshift(inventory)
-    toast.success('Inventory created successfully')
-  } else {
-    // Update existing inventory in the list
-    const index = inventories.value.findIndex(i => i.id === inventory.id)
-    if (index !== -1) {
-      inventories.value[index] = inventory
-    }
-    toast.success('Inventory updated successfully')
-  }
-  
+  // The composable handles state updates and success toasts
   showDialog.value = false
 }
 
@@ -379,9 +340,6 @@ const handleDialogSuccess = (inventory: Inventory) => {
 watch(selectedOrganization, (newOrg) => {
   if (newOrg) {
     loadInventories()
-  } else {
-    inventories.value = []
-    error.value = 'No organization selected'
   }
 }, { immediate: true })
 
