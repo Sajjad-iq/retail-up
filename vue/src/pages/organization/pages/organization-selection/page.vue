@@ -54,7 +54,7 @@ import {
   EmptyState,
   CreateOrganizationCard,
   OrganizationCard
-} from '../organization/components'
+} from '../../components'
 
 const router = useRouter()
 const { user } = useAuth()

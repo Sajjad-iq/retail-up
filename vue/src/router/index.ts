@@ -30,7 +30,7 @@ export const routes: AppRouteRecordRaw[] = [
     {
         path: '/organization-selection',
         name: 'OrganizationSelection',
-        component: () => import('@/pages/organization-selection/page.vue'),
+        component: () => import('@/pages/organization/pages/organization-selection/page.vue'),
         meta: {
             requiresAuth: true,
             title: 'Select Organization'
