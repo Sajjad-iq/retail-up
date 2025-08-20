@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { 
   LayoutDashboard, 
   CreditCard, 
@@ -7,8 +6,6 @@ import {
   BarChart3, 
   Users, 
   Settings,
-  User,
-  LogOut
 } from 'lucide-vue-next'
 import {
   Sidebar,
@@ -23,19 +20,8 @@ import {
   SidebarMenuItem,
   SidebarSeparator
 } from '@/components/ui/sidebar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { useAuth } from '@/composables/useAuth'
-import { useRouter } from 'vue-router'
+import OrganizationSelector from '@/components/navigation/OrganizationSelector.vue'
 
-const { user } = useAuth()
-const router = useRouter()
 
 // Menu items
 const mainItems = [
@@ -74,20 +60,6 @@ const managementItems = [
   },
 ]
 
-const userInitials = computed(() => {
-  if (!user.value?.name) return 'U'
-  return user.value.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-})
-
-const handleLogout = async () => {
-  // Handle logout logic here
-  console.log('Logout clicked')
-}
 </script>
 
 <template>
@@ -101,47 +73,12 @@ const handleLogout = async () => {
       </div>
     </SidebarHeader>
 
+    <!-- Organization Selector -->
+    <div class="border-b border-border p-4">
+      <OrganizationSelector />
+    </div>
+
     <SidebarContent class="overflow-hidden">
-      <!-- User Profile Section with Dropdown -->
-      <SidebarGroup class="p-4 border-b border-border">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button class="flex items-center space-x-3 w-full p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
-              <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span class="text-primary-foreground font-semibold text-sm">
-                  {{ userInitials }}
-                </span>
-              </div>
-              <div class="flex-1 min-w-0 text-left">
-                <p class="text-sm font-medium text-foreground truncate">{{ user?.name || 'User' }}</p>
-                <p class="text-xs text-muted-foreground truncate">{{ user?.email || 'user@example.com' }}</p>
-              </div>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent class="w-56" align="start" side="right">
-            <DropdownMenuLabel>
-              <div class="flex flex-col space-y-1">
-                <p class="text-sm font-medium leading-none">{{ user?.name || 'User' }}</p>
-                <p class="text-xs leading-none text-muted-foreground">{{ user?.email || 'user@example.com' }}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem @click="router.push('/profile')">
-              <User class="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem @click="router.push('/settings')">
-              <Settings class="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem @click="handleLogout" class="text-destructive">
-              <LogOut class="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarGroup>
 
       <!-- Main Navigation -->
       <SidebarGroup>

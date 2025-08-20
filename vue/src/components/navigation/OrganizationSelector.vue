@@ -1,65 +1,67 @@
 <template>
-  <div class="flex items-center space-x-2">
+  <div class="space-y-3">
     <!-- Current Organization Display -->
-    <div v-if="selectedOrganization" class="flex items-center space-x-2">
-      <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-        {{ selectedOrganization.name.charAt(0).toUpperCase() }}
+    <div v-if="selectedOrganization" class="space-y-2">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-muted-foreground font-medium text-sm">
+          {{ selectedOrganization.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-foreground truncate">{{ selectedOrganization.name }}</p>
+          <p class="text-xs text-muted-foreground truncate">{{ selectedOrganization.domain }}</p>
+        </div>
+        
+        <!-- Organization Menu -->
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button variant="ghost" size="sm" class="h-6 w-6 p-0 text-muted-foreground hover:text-foreground">
+              <ChevronDownIcon class="h-3 w-3" />
+              <span class="sr-only">Open organization menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="w-56">
+            <DropdownMenuLabel>Current Organization</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            
+            <!-- Current Organization Info -->
+            <div class="px-2 py-1.5">
+              <p class="text-sm font-medium">{{ selectedOrganization.name }}</p>
+              <p class="text-xs text-muted-foreground">{{ selectedOrganization.domain }}</p>
+            </div>
+            
+            <DropdownMenuSeparator />
+            
+            <!-- Switch Organization -->
+            <DropdownMenuItem @click="goToOrganizationSelection">
+              <ArrowPathIcon class="mr-2 h-4 w-4" />
+              Switch Organization
+            </DropdownMenuItem>
+            
+            <!-- Create New Organization -->
+            <DropdownMenuItem @click="showCreateDialog = true">
+              <PlusIcon class="mr-2 h-4 w-4" />
+              Create New Organization
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            <!-- Organization Settings -->
+            <DropdownMenuItem @click="goToOrganizationSettings">
+              <Cog6ToothIcon class="mr-2 h-4 w-4" />
+              Organization Settings
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <div class="hidden md:block">
-        <p class="text-sm font-medium text-gray-900">{{ selectedOrganization.name }}</p>
-        <p class="text-xs text-gray-500">{{ selectedOrganization.domain }}</p>
-      </div>
-      
-      <!-- Organization Menu -->
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button variant="ghost" size="sm" class="h-8 w-8 p-0">
-            <ChevronDownIcon class="h-4 w-4" />
-            <span class="sr-only">Open organization menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" class="w-56">
-          <DropdownMenuLabel>Current Organization</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          
-          <!-- Current Organization Info -->
-          <div class="px-2 py-1.5">
-            <p class="text-sm font-medium">{{ selectedOrganization.name }}</p>
-            <p class="text-xs text-gray-500">{{ selectedOrganization.domain }}</p>
-          </div>
-          
-          <DropdownMenuSeparator />
-          
-          <!-- Switch Organization -->
-          <DropdownMenuItem @click="goToOrganizationSelection">
-            <ArrowPathIcon class="mr-2 h-4 w-4" />
-            Switch Organization
-          </DropdownMenuItem>
-          
-          <!-- Create New Organization -->
-          <DropdownMenuItem @click="showCreateDialog = true">
-            <PlusIcon class="mr-2 h-4 w-4" />
-            Create New Organization
-          </DropdownMenuItem>
-          
-          <DropdownMenuSeparator />
-          
-          <!-- Organization Settings -->
-          <DropdownMenuItem @click="goToOrganizationSettings">
-            <Cog6ToothIcon class="mr-2 h-4 w-4" />
-            Organization Settings
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
 
     <!-- No Organization Selected -->
-    <div v-else class="flex items-center space-x-2">
+    <div v-else class="space-y-2">
       <Button 
         variant="outline" 
         size="sm"
         @click="goToOrganizationSelection"
-        class="text-orange-600 border-orange-200 hover:bg-orange-50"
+        class="w-full justify-start text-muted-foreground border-muted hover:bg-muted/50"
       >
         <BuildingOfficeIcon class="mr-2 h-4 w-4" />
         Select Organization

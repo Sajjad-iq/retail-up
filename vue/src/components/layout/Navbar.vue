@@ -2,7 +2,6 @@
   <nav class="flex items-center justify-between px-4 py-2">
     <!-- Left side - Organization Selector -->
     <div class="flex items-center">
-      <OrganizationSelector />
     </div>
 
     <!-- Right side actions -->
