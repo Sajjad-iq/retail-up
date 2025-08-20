@@ -99,11 +99,12 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
-const { selectedOrganization, createOrganization } = useOrganization()
+const { selectedOrganization,clearSelection } = useOrganization()
 
 const showCreateDialog = ref(false)
 
 const goToOrganizationSelection = () => {
+  clearSelection()
   router.push('/organization-selection')
 }
 
