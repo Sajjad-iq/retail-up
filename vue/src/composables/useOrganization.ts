@@ -149,6 +149,22 @@ export function useOrganization() {
         }
     }
 
+    // Get organization by ID
+    const getOrganizationById = async (id: string): Promise<OrganizationResponse | null> => {
+        try {
+            const result = await organizationService.getOrganization(id)
+            if (result.success && result.data) {
+                return result.data
+            } else {
+                toast.error(result.error || 'Failed to fetch organization')
+                return null
+            }
+        } catch (err) {
+            toast.error('An error occurred while fetching organization')
+            return null
+        }
+    }
+
     // Auto-initialize when composable is used
     onMounted(() => {
         if (authStore.isAuthenticated) {
@@ -172,6 +188,7 @@ export function useOrganization() {
         selectOrganization,
         createOrganization,
         clearSelection,
-        initialize
+        initialize,
+        getOrganizationById
     }
 }

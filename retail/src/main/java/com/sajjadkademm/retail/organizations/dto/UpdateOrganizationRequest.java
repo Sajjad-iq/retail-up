@@ -35,10 +35,11 @@ public class UpdateOrganizationRequest {
 
     private OrganizationStatus status;
 
-    public UpdateOrganizationRequest(String name, String description, String address) {
+    public UpdateOrganizationRequest( String userId, String domain, String name, String description, String address) {
+        this.userId = userId;
         this.name = name;
         this.description = description;
         this.address = address;
-        this.status = null;
+        this.domain = domain;
     }
 }

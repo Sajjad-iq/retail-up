@@ -29,9 +29,9 @@ export async function authGuard(
     }
 
     // User has organization, now check account type restrictions
-    if (authStore.user?.accountType === AccountType.USER) {
+    if (authStore.user?.accountType !== AccountType.USER) {
         // For USER type, only allow dashboard, organization, and organization selection pages
-        const allowedRoutes = ['Dashboard', 'OrganizationSelection']
+        const allowedRoutes = ['Dashboard', 'OrganizationSelection', "OrganizationSettings"]
         if (!allowedRoutes.includes(to.name as string)) {
             console.log('User type USER, redirecting to dashboard')
             next({ name: 'Dashboard' })

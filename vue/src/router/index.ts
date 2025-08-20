@@ -37,6 +37,15 @@ export const routes: AppRouteRecordRaw[] = [
         }
     },
     {
+        path: '/organization/settings',
+        name: 'OrganizationSettings',
+        component: () => import('@/pages/organization/pages/organization-settings/index.vue'),
+        meta: {
+            requiresAuth: true,
+            title: 'Organization Settings'
+        }
+    },
+    {
         path: '/dashboard',
         name: 'Dashboard',
         component: () => import('@/pages/dashboard/page.vue'),

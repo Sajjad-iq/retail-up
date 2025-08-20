@@ -109,7 +109,7 @@ const goToOrganizationSelection = () => {
 }
 
 const goToOrganizationSettings = () => {
-  router.push('/organization')
+  router.push('/organization/settings')
 }
 
 const onOrganizationCreated = (org: any) => {
