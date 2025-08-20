@@ -5,7 +5,7 @@
     <p class="text-gray-600 mb-6">
       {{ searchQuery ? 'No inventories match your search.' : 'Get started by creating your first inventory.' }}
     </p>
-    <Button @click="$emit('create')" variant="outline">
+    <Button @click="handleCreate" variant="outline">
       Create Inventory
     </Button>
   </div>
@@ -26,7 +26,12 @@ interface Props {
 defineProps<Props>()
 
 // Emits
-defineEmits<{
+const emit = defineEmits<{
   create: []
 }>()
+
+// Methods
+const handleCreate = () => {
+  emit('create')
+}
 </script>

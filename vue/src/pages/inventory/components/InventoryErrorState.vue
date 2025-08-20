@@ -7,17 +7,14 @@
         <p class="text-red-700 mt-1">{{ error }}</p>
       </div>
     </div>
-    <Button @click="$emit('retry')" variant="outline" class="mt-4">
+    <Button @click="handleRetry" variant="outline" class="mt-4">
       Try Again
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-// UI Components
 import { Button } from '@/components/ui/button'
-
-// Icons
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 
 // Props
@@ -28,7 +25,12 @@ interface Props {
 defineProps<Props>()
 
 // Emits
-defineEmits<{
+const emit = defineEmits<{
   retry: []
 }>()
+
+// Methods
+const handleRetry = () => {
+  emit('retry')
+}
 </script>

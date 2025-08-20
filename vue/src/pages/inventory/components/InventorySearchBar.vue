@@ -14,7 +14,7 @@
         <Button
           variant="outline"
           :class="{ 'bg-blue-50 border-blue-200': showActiveOnly }"
-          @click="$emit('toggleActiveFilter')"
+          @click="toggleActiveFilter"
         >
           <CheckCircleIcon class="h-4 w-4 mr-2" />
           Active Only
@@ -29,6 +29,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+
 // UI Components
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,13 +47,32 @@ interface Props {
   showActiveOnly: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 // Emits
-defineEmits<{
+const emit = defineEmits<{
   'update:searchQuery': [value: string]
+  'update:showActiveOnly': [value: boolean]
   search: []
-  toggleActiveFilter: []
   refresh: []
 }>()
+
+// Internal state
+const internalShowActiveOnly = ref(props.showActiveOnly)
+
+// Methods
+const toggleActiveFilter = () => {
+  internalShowActiveOnly.value = !internalShowActiveOnly.value
+  emit('update:showActiveOnly', internalShowActiveOnly.value)
+}
+
+// Watch for prop changes
+watch(() => props.showActiveOnly, (newValue) => {
+  internalShowActiveOnly.value = newValue
+})
+
+// Watch internal state changes
+watch(internalShowActiveOnly, (newValue) => {
+  emit('update:showActiveOnly', newValue)
+})
 </script>

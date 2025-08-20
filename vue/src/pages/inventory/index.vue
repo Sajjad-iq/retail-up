@@ -9,9 +9,8 @@
       <div class="mb-6">
         <InventorySearchBar
           v-model:search-query="searchQuery"
-          :show-active-only="showActiveOnly"
+          v-model:show-active-only="showActiveOnly"
           @search="handleSearch"
-          @toggle-active-filter="toggleActiveFilter"
           @refresh="refreshInventories"
         />
       </div>
@@ -28,8 +27,9 @@
 
       <!-- Inventories Grid -->
       <InventoryGrid
-        v-else-if="filteredInventories.length > 0"
-        :inventories="filteredInventories"
+        v-else-if="inventories.length > 0"
+        :inventories="inventories"
+        :show-active-only="showActiveOnly"
         @select="selectInventory"
         @edit="editInventory"
         @view="viewInventoryDetails"
@@ -62,12 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useOrganization } from '@/composables/useOrganization'
 import { useInventory } from '@/composables/useInventory'
 import type { Inventory } from '@/types/global'
-
-// No UI components needed - all handled by reusable components
 
 // Custom Components
 import { 
@@ -101,40 +99,15 @@ const showDetailsDialog = ref(false)
 const selectedInventory = ref<Inventory | null>(null)
 const dialogMode = ref<'create' | 'edit'>('create')
 
-// ===== COMPUTED =====
-const filteredInventories = computed(() => {
-  let filtered = inventories.value
-
-  // Filter by active status only (search is now handled by the composable)
-  if (showActiveOnly.value) {
-    filtered = filtered.filter(inventory => inventory.isActive)
-  }
-
-  return filtered
-})
-
 // ===== METHODS =====
-
-/**
- * Load inventories for the selected organization
- */
 const loadInventories = async () => {
-  if (!selectedOrganization.value?.id) {
-    return
+  if (selectedOrganization.value?.id) {
+    await fetchOrganizationInventories()
   }
-  await fetchOrganizationInventories()
 }
 
-/**
- * Refresh inventories data
- */
-const refreshInventories = () => {
-  loadInventories()
-}
+const refreshInventories = () => loadInventories()
 
-/**
- * Handle search input
- */
 const handleSearch = async () => {
   if (searchQuery.value.trim()) {
     await searchInventories(searchQuery.value)
@@ -143,68 +116,33 @@ const handleSearch = async () => {
   }
 }
 
-/**
- * Toggle active filter
- */
-const toggleActiveFilter = () => {
-  showActiveOnly.value = !showActiveOnly.value
-}
-
-/**
- * Open create inventory dialog
- */
 const openCreateDialog = () => {
   selectedInventory.value = null
   dialogMode.value = 'create'
   showDialog.value = true
 }
 
-/**
- * Edit selected inventory
- */
 const editInventory = (inventory: Inventory) => {
   selectedInventory.value = inventory
   dialogMode.value = 'edit'
   showDialog.value = true
 }
 
-/**
- * View inventory details
- */
 const viewInventoryDetails = (inventory: Inventory) => {
   selectedInventory.value = inventory
   showDetailsDialog.value = true
 }
 
-/**
- * Select inventory for navigation
- */
 const selectInventory = (inventory: Inventory) => {
   selectInventoryComposable(inventory)
 }
 
-/**
- * Toggle inventory active status
- */
 const toggleInventoryStatus = async (inventory: Inventory) => {
-  const success = await updateInventory(inventory.id, {
-    isActive: !inventory.isActive
-  })
-  
-  if (success) {
-    // The composable handles the success toast and state update
-  }
+  await updateInventory(inventory.id, { isActive: !inventory.isActive })
 }
 
-/**
- * Handle dialog success
- */
-const handleDialogSuccess = (inventory: Inventory) => {
-  // The composable handles state updates and success toasts
-  // Just close the dialog
+const handleDialogSuccess = () => {
   showDialog.value = false
-  
-  // Refresh the inventories to ensure we have the latest data
   if (selectedOrganization.value?.id) {
     fetchOrganizationInventories()
   }
@@ -212,15 +150,11 @@ const handleDialogSuccess = (inventory: Inventory) => {
 
 // ===== WATCHERS =====
 watch(selectedOrganization, (newOrg) => {
-  if (newOrg) {
-    loadInventories()
-  }
+  if (newOrg) loadInventories()
 }, { immediate: true })
 
 // ===== LIFECYCLE HOOKS =====
 onMounted(() => {
-  if (selectedOrganization.value) {
-    loadInventories()
-  }
+  if (selectedOrganization.value) loadInventories()
 })
 </script>
