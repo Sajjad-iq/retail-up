@@ -3,13 +3,29 @@
   <div class="min-h-screen bg-gray-50 p-8">
     <div class="max-w-4xl mx-auto">
 
-      <!-- Loading State: Shows spinner while fetching organization data -->
-      <div v-if="isLoading" class="flex items-center justify-center py-12">
-        <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p class="mt-4 text-gray-600">Loading organization details...</p>
-        </div>
-      </div>
+      <!-- Authentication Initialization Loading State: Shows spinner while checking user authentication -->
+      <!-- Green spinner indicates authentication process - either initializing or authenticating user -->
+      <Spinner 
+        v-if="!isAuthInitialized || isAuthLoading"
+        color="green"
+        :message="isAuthLoading ? 'Authenticating user...' : 'Initializing authentication...'"
+      />
+
+      <!-- Organization Loading State: Shows spinner while loading organization list -->
+      <!-- Purple spinner indicates organization list loading - fetching available organizations for user -->
+      <Spinner 
+        v-else-if="isOrgLoading"
+        color="purple"
+        message="Loading organizations..."
+      />
+
+      <!-- Organization Details Loading State: Shows spinner while fetching organization data -->
+      <!-- Blue spinner indicates specific organization details loading - fetching selected organization data -->
+      <Spinner 
+        v-else-if="isLoading"
+        color="blue"
+        message="Loading organization details..."
+      />
 
       <!-- Error State: Displays error message with retry button -->
       <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -206,7 +222,7 @@
       </div>
 
       <!-- No Organization Selected: Fallback state when no organization is available -->
-      <div v-else class="text-center py-12">
+      <div v-else-if="isAuthInitialized && !isAuthLoading" class="text-center py-12">
         <BuildingOfficeIcon class="h-16 w-16 text-gray-400 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-gray-900 mb-2">No Organization Selected</h3>
         <p class="text-gray-600 mb-6">Please select an organization to view and edit its settings.</p>
@@ -245,6 +261,8 @@ import { OrganizationStatus } from '@/types/global'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+// Reusable spinner component for loading states with customizable colors and messages
+import { Spinner } from '@/components/ui/spinner'
 import {
   FormControl,
   FormField,
@@ -273,20 +291,27 @@ import {
 const router = useRouter()
 
 // Organization composable for managing organization state
-const { selectedOrganization, getOrganizationById } = useOrganization()
+const { selectedOrganization, getOrganizationById, isLoading: isOrgLoading } = useOrganization()
 
 // Authentication composable for user information
-const { user } = useAuth()
+const { user, isLoading: isAuthLoading, isInitialized: isAuthInitialized } = useAuth()
 
 // ===== REACTIVE STATE =====
 // Current organization data
 const organization = ref<OrganizationResponse | null>(null)
-// Loading state for initial data fetch
+// Loading state for initial data fetch (organization details)
 const isLoading = ref(false)
 // Loading state for form submission
 const isSubmitting = ref(false)
 // Error message for failed operations
 const error = ref<string | null>(null)
+
+// ===== LOADING STATE HIERARCHY =====
+// 1. isAuthInitialized: Authentication system is ready
+// 2. isAuthLoading: User authentication in progress
+// 3. isOrgLoading: Organization list loading in progress
+// 4. isLoading: Organization details loading in progress
+// 5. isSubmitting: Form submission in progress
 
 // ===== FORM VALIDATION SCHEMA =====
 // Zod schema for form validation with required and optional fields
