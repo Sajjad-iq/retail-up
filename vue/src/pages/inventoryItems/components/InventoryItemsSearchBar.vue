@@ -15,21 +15,13 @@
       <!-- Category Filter -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-        <Input
-          v-model="category"
-          placeholder="Filter by category"
-          class="w-full"
-        />
+        <Input v-model="category" placeholder="Filter by category" class="w-full" />
       </div>
 
       <!-- Brand Filter -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-        <Input
-          v-model="brand"
-          placeholder="Filter by brand"
-          class="w-full"
-        />
+        <Input v-model="brand" placeholder="Filter by brand" class="w-full" />
       </div>
 
       <!-- Active Status Filter -->
@@ -40,9 +32,9 @@
             <SelectValue placeholder="All items" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem :value="undefined">All items</SelectItem>
-            <SelectItem :value="true">Active only</SelectItem>
-            <SelectItem :value="false">Inactive only</SelectItem>
+            <SelectItem value="all">All items</SelectItem>
+            <SelectItem value="true">Active only</SelectItem>
+            <SelectItem value="false">Inactive only</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -70,53 +62,55 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  MagnifyingGlassIcon, 
-  XMarkIcon, 
-  ArrowPathIcon 
-} from '@heroicons/vue/24/outline'
+import { computed } from "vue";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MagnifyingGlassIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/vue/24/outline";
 
 interface Props {
-  searchQuery: string
-  category: string
-  brand: string
-  activeOnly: boolean | undefined
+  searchQuery: string;
+  category: string;
+  brand: string;
+  activeOnly: string;
 }
 
 interface Emits {
-  (e: 'update:searchQuery', value: string): void
-  (e: 'update:category', value: string): void
-  (e: 'update:brand', value: string): void
-  (e: 'update:activeOnly', value: boolean | undefined): void
-  (e: 'search'): void
-  (e: 'clearFilters'): void
-  (e: 'refresh'): void
+  (e: "update:searchQuery", value: string): void;
+  (e: "update:category", value: string): void;
+  (e: "update:brand", value: string): void;
+  (e: "update:activeOnly", value: string): void;
+  (e: "search"): void;
+  (e: "clear-filters"): void;
+  (e: "refresh"): void;
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
 const searchQuery = computed({
   get: () => props.searchQuery,
-  set: (value) => emit('update:searchQuery', value)
-})
+  set: (value) => emit("update:searchQuery", value),
+});
 
 const category = computed({
   get: () => props.category,
-  set: (value) => emit('update:category', value)
-})
+  set: (value) => emit("update:category", value),
+});
 
 const brand = computed({
   get: () => props.brand,
-  set: (value) => emit('update:brand', value)
-})
+  set: (value) => emit("update:brand", value),
+});
 
 const activeOnly = computed({
   get: () => props.activeOnly,
-  set: (value) => emit('update:activeOnly', value)
-})
+  set: (value) => emit("update:activeOnly", value),
+});
 </script>

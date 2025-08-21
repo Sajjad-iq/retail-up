@@ -2,270 +2,303 @@
   <Dialog :open="open" @update:open="$emit('update:open', $event)">
     <DialogContent class="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle>{{ mode === 'create' ? 'Create New Item' : 'Edit Item' }}</DialogTitle>
+        <DialogTitle>{{ mode === "create" ? "Create New Item" : "Edit Item" }}</DialogTitle>
         <DialogDescription>
-          {{ mode === 'create' 
-            ? 'Add a new item to your inventory with all the necessary details.' 
-            : 'Update the item information and settings.'
+          {{
+            mode === "create"
+              ? "Add a new item to your inventory with all the necessary details."
+              : "Update the item information and settings."
           }}
         </DialogDescription>
       </DialogHeader>
-      
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+
+      <form @submit="onSubmit" class="space-y-6">
         <!-- Basic Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label for="name">Item Name *</Label>
-            <Input
-              id="name"
-              v-model="form.name"
-              placeholder="Enter item name"
-              required
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="sku">SKU</Label>
-            <Input
-              id="sku"
-              v-model="form.sku"
-              placeholder="Stock Keeping Unit"
-            />
-          </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="name">
+            <FormItem>
+              <FormLabel>Item Name *</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter item name" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="sku">
+            <FormItem>
+              <FormLabel>SKU</FormLabel>
+              <FormControl>
+                <Input placeholder="Stock Keeping Unit" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
 
-        <div class="space-y-2">
-          <Label for="description">Description</Label>
-          <Textarea
-            id="description"
-            v-model="form.description"
-            placeholder="Enter item description"
-            rows="3"
-          />
-        </div>
+        <FormField v-slot="{ componentField, errorMessage }" name="description">
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea placeholder="Enter item description" rows="3" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
         <!-- Product Details -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="space-y-2">
-            <Label for="category">Category</Label>
-            <Input
-              id="category"
-              v-model="form.category"
-              placeholder="e.g., Electronics"
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="brand">Brand</Label>
-            <Input
-              id="brand"
-              v-model="form.brand"
-              placeholder="e.g., Apple"
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="barcode">Barcode</Label>
-            <Input
-              id="barcode"
-              v-model="form.barcode"
-              placeholder="Product barcode"
-            />
-          </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="category">
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Electronics" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="brand">
+            <FormItem>
+              <FormLabel>Brand</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Apple" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="barcode">
+            <FormItem>
+              <FormLabel>Barcode</FormLabel>
+              <FormControl>
+                <Input placeholder="Product barcode" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
 
         <!-- Stock Information -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="space-y-2">
-            <Label for="currentStock">Current Stock *</Label>
-            <Input
-              id="currentStock"
-              v-model.number="form.currentStock"
-              type="number"
-              min="0"
-              placeholder="0"
-              required
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="minimumStock">Minimum Stock</Label>
-            <Input
-              id="minimumStock"
-              v-model.number="form.minimumStock"
-              type="number"
-              min="0"
-              placeholder="0"
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="unit">Unit *</Label>
-            <Select v-model="form.unit">
-              <SelectTrigger>
-                <SelectValue placeholder="Select unit" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem v-for="unit in availableUnits" :key="unit" :value="unit">
-                  {{ unit }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="currentStock">
+            <FormItem>
+              <FormLabel>Current Stock *</FormLabel>
+              <FormControl>
+                <Input type="number" min="0" placeholder="0" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="minimumStock">
+            <FormItem>
+              <FormLabel>Minimum Stock</FormLabel>
+              <FormControl>
+                <Input type="number" min="0" placeholder="0" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <!-- Unit Selection -->
+          <FormField v-slot="{ componentField, errorMessage }" name="unit">
+            <FormItem>
+              <FormLabel>Unit *</FormLabel>
+              <Select v-bind="componentField">
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select unit" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem v-for="unit in availableUnits" :key="unit" :value="unit">
+                    {{ unit }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
 
         <!-- Pricing -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label for="sellingPrice">Selling Price *</Label>
-            <div class="flex">
-              <Input
-                id="sellingPrice"
-                v-model.number="form.sellingPrice.amount"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                required
-                class="rounded-r-none"
-              />
-              <Select v-model="form.sellingPrice.currency" class="w-24">
-                <SelectTrigger class="rounded-l-none border-l-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                  <SelectItem value="GBP">GBP</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="costPrice">Cost Price</Label>
-            <div class="flex">
-              <Input
-                id="costPrice"
-                v-model.number="form.costPrice.amount"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                class="rounded-r-none"
-              />
-              <Select v-model="form.costPrice.currency" class="w-24">
-                <SelectTrigger class="rounded-l-none border-l-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                  <SelectItem value="GBP">GBP</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="sellingPrice">
+            <FormItem>
+              <FormLabel>Selling Price *</FormLabel>
+              <FormControl>
+                <div class="flex">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    class="rounded-r-none"
+                    v-bind="componentField"
+                  />
+                  <Select v-model="sellingPriceCurrency">
+                    <SelectTrigger class="rounded-l-none border-l-0 w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="costPrice">
+            <FormItem>
+              <FormLabel>Cost Price</FormLabel>
+              <FormControl>
+                <div class="flex">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    class="rounded-r-none"
+                    v-bind="componentField"
+                  />
+                  <Select v-model="costPriceCurrency">
+                    <SelectTrigger class="rounded-l-none border-l-0 w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
 
         <!-- Additional Details -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label for="supplierName">Supplier</Label>
-            <Input
-              id="supplierName"
-              v-model="form.supplierName"
-              placeholder="Supplier name"
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="productCode">Product Code</Label>
-            <Input
-              id="productCode"
-              v-model="form.productCode"
-              placeholder="Internal product code"
-            />
-          </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="supplierName">
+            <FormItem>
+              <FormLabel>Supplier</FormLabel>
+              <FormControl>
+                <Input placeholder="Supplier name" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="productCode">
+            <FormItem>
+              <FormLabel>Product Code</FormLabel>
+              <FormControl>
+                <Input placeholder="Internal product code" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
 
         <!-- Physical Attributes -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="space-y-2">
-            <Label for="weight">Weight (g)</Label>
-            <Input
-              id="weight"
-              v-model.number="form.weight"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="dimensions">Dimensions</Label>
-            <Input
-              id="dimensions"
-              v-model="form.dimensions"
-              placeholder="L x W x H (cm)"
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="color">Color</Label>
-            <Input
-              id="color"
-              v-model="form.color"
-              placeholder="Item color"
-            />
-          </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="weight">
+            <FormItem>
+              <FormLabel>Weight (g)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="dimensions">
+            <FormItem>
+              <FormLabel>Dimensions</FormLabel>
+              <FormControl>
+                <Input placeholder="L x W x H (cm)" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="color">
+            <FormItem>
+              <FormLabel>Color</FormLabel>
+              <FormControl>
+                <Input placeholder="Item color" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
 
         <!-- Variants -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label for="size">Size</Label>
-            <Input
-              id="size"
-              v-model="form.size"
-              placeholder="Item size"
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <Label for="isPerishable">Perishable Item</Label>
-            <div class="flex items-center space-x-2">
-              <Switch
-                id="isPerishable"
-                v-model="form.isPerishable"
-              />
-              <Label for="isPerishable">Mark as perishable</Label>
-            </div>
-          </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="size">
+            <FormItem>
+              <FormLabel>Size</FormLabel>
+              <FormControl>
+                <Input placeholder="Item size" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="isPerishable">
+            <FormItem>
+              <FormLabel>Perishable Item</FormLabel>
+              <FormControl>
+                <div class="flex items-center space-x-2">
+                  <Switch v-bind="componentField" />
+                  <Label>Mark as perishable</Label>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
 
         <!-- Expiry Date (if perishable) -->
-        <div v-if="form.isPerishable" class="space-y-2">
-          <Label for="expiryDate">Expiry Date</Label>
-          <Input
-            id="expiryDate"
-            v-model="form.expiryDate"
-            type="date"
-          />
-        </div>
+        <FormField
+          v-slot="{ componentField, errorMessage }"
+          name="expiryDate"
+          v-if="formValues.isPerishable"
+        >
+          <FormItem>
+            <FormLabel>Expiry Date</FormLabel>
+            <FormControl>
+              <Input type="date" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
         <!-- Status (for edit mode) -->
-        <div v-if="mode === 'edit'" class="space-y-2">
-          <Label for="isActive">Active Status</Label>
-          <div class="flex items-center space-x-2">
-            <Switch
-              id="isActive"
-              v-model="form.isActive"
-            />
-            <Label for="isActive">Item is active</Label>
-          </div>
-        </div>
+        <FormField v-slot="{ componentField, errorMessage }" name="isActive" v-if="mode === 'edit'">
+          <FormItem>
+            <FormLabel>Active Status</FormLabel>
+            <FormControl>
+              <div class="flex items-center space-x-2">
+                <Switch v-bind="componentField" />
+                <Label>Item is active</Label>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
         <!-- Form Actions -->
         <div class="flex justify-end space-x-2 pt-4">
@@ -275,9 +308,9 @@
           <Button type="submit" :disabled="isSubmitting">
             <span v-if="isSubmitting" class="flex items-center gap-2">
               <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              {{ mode === 'create' ? 'Creating...' : 'Updating...' }}
+              {{ mode === "create" ? "Creating..." : "Updating..." }}
             </span>
-            <span v-else>{{ mode === 'create' ? 'Create Item' : 'Update Item' }}</span>
+            <span v-else>{{ mode === "create" ? "Create Item" : "Update Item" }}</span>
           </Button>
         </div>
       </form>
@@ -286,171 +319,244 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from "vue";
+import { useForm } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { useInventoryItems } from '@/composables/useInventoryItems'
-import type { CreateInventoryItemRequest, UpdateInventoryItemRequest } from '@/services/inventoryItemService'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useInventoryItems } from "@/composables/useInventoryItems";
+import type {
+  CreateInventoryItemRequest,
+  UpdateInventoryItemRequest,
+} from "@/services/inventoryItemService";
+import type { Currency } from "@/types/global";
 
 interface Props {
-  open: boolean
-  item?: any
-  mode: 'create' | 'edit'
-  inventoryId: string
+  open: boolean;
+  item?: any;
+  mode: "create" | "edit";
+  inventoryId: string;
 }
 
 interface Emits {
-  (e: 'update:open', value: boolean): void
-  (e: 'success'): void
+  (e: "update:open", value: boolean): void;
+  (e: "success"): void;
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
-const { useCreateInventoryItem, useUpdateInventoryItem, useAvailableUnits } = useInventoryItems()
+const { useCreateInventoryItem, useUpdateInventoryItem, useAvailableUnits } = useInventoryItems();
 
 // Queries
-const unitsQuery = useAvailableUnits()
+const unitsQuery = useAvailableUnits();
 
 // Mutations
-const createMutation = useCreateInventoryItem()
-const updateMutation = useUpdateInventoryItem()
+const createMutation = useCreateInventoryItem();
+const updateMutation = useUpdateInventoryItem();
 
-// Form state
-const form = ref<CreateInventoryItemRequest>({
-  userId: '',
-  inventoryId: props.inventoryId,
-  name: '',
-  description: '',
-  sku: '',
-  productCode: '',
-  barcode: '',
-  category: '',
-  brand: '',
-  unit: 'PIECES',
-  weight: undefined,
-  dimensions: '',
-  color: '',
-  size: '',
-  currentStock: 0,
-  minimumStock: undefined,
-  maximumStock: undefined,
-  costPrice: { amount: 0, currency: 'USD' },
-  sellingPrice: { amount: 0, currency: 'USD' },
-  discountPrice: undefined,
-  discountStartDate: undefined,
-  discountEndDate: undefined,
-  supplierName: '',
-  isPerishable: false,
-  expiryDate: undefined
-})
+// Form validation schema
+const formSchema = toTypedSchema(
+  z.object({
+    name: z
+      .string()
+      .min(1, "Item name is required")
+      .max(255, "Name must be less than 255 characters"),
+    description: z.string().optional(),
+    sku: z.string().optional(),
+    productCode: z.string().optional(),
+    barcode: z.string().optional(),
+    category: z.string().optional(),
+    brand: z.string().optional(),
+    unit: z.string().min(1, "Unit is required"),
+    weight: z.number().min(0, "Weight must be positive").optional(),
+    dimensions: z.string().optional(),
+    color: z.string().optional(),
+    size: z.string().optional(),
+    currentStock: z.number().min(0, "Current stock must be positive"),
+    minimumStock: z.number().min(0, "Minimum stock must be positive").optional(),
+    maximumStock: z.number().min(0, "Maximum stock must be positive").optional(),
+    sellingPrice: z.number().min(0, "Selling price must be positive"),
+    costPrice: z.number().min(0, "Cost price must be positive").optional(),
+    supplierName: z.string().optional(),
+    isPerishable: z.boolean(),
+    expiryDate: z.string().optional(),
+    isActive: z.boolean().optional(),
+  })
+);
 
-// Computed
-const isSubmitting = computed(() => createMutation.isPending.value || updateMutation.isPending.value)
-const availableUnits = computed(() => unitsQuery.data.value?.data || ['PIECES', 'GRAMS', 'KILOGRAMS', 'LITERS'])
-
-// Methods
-const resetForm = () => {
-  form.value = {
-    userId: '',
-    inventoryId: props.inventoryId,
-    name: '',
-    description: '',
-    sku: '',
-    productCode: '',
-    barcode: '',
-    category: '',
-    brand: '',
-    unit: 'PIECES',
+// Form instance
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {
+    name: "",
+    description: "",
+    sku: "",
+    productCode: "",
+    barcode: "",
+    category: "",
+    brand: "",
+    unit: "PIECES",
     weight: undefined,
-    dimensions: '',
-    color: '',
-    size: '',
+    dimensions: "",
+    color: "",
+    size: "",
     currentStock: 0,
     minimumStock: undefined,
     maximumStock: undefined,
-    costPrice: { amount: 0, currency: 'USD' },
-    sellingPrice: { amount: 0, currency: 'USD' },
-    discountPrice: undefined,
-    discountStartDate: undefined,
-    discountEndDate: undefined,
-    supplierName: '',
+    sellingPrice: 0,
+    costPrice: undefined,
+    supplierName: "",
     isPerishable: false,
-    expiryDate: undefined
-  }
-}
+    expiryDate: undefined,
+    isActive: true,
+  },
+});
 
-const handleSubmit = async () => {
+// Computed
+const isSubmitting = computed(
+  () => createMutation.isPending.value || updateMutation.isPending.value
+);
+const availableUnits = computed(
+  () => unitsQuery.data.value?.data || ["PIECES", "GRAMS", "KILOGRAMS", "LITERS"]
+);
+const formValues = computed(() => form.values);
+
+// Currency state
+const sellingPriceCurrency = ref("USD");
+const costPriceCurrency = ref("USD");
+
+// Methods
+const resetForm = () => {
+  form.resetForm();
+  sellingPriceCurrency.value = "USD";
+  costPriceCurrency.value = "USD";
+};
+
+const handleSubmit = async (values: any) => {
   try {
-    if (props.mode === 'create') {
-      await createMutation.mutateAsync(form.value)
+    const formData: CreateInventoryItemRequest = {
+      userId: "", // Will be set by the service
+      inventoryId: props.inventoryId,
+      name: values.name,
+      description: values.description,
+      sku: values.sku,
+      productCode: values.productCode,
+      barcode: values.barcode,
+      category: values.category,
+      brand: values.brand,
+      unit: values.unit,
+      weight: values.weight,
+      dimensions: values.dimensions,
+      color: values.color,
+      size: values.size,
+      currentStock: values.currentStock,
+      minimumStock: values.minimumStock,
+      maximumStock: values.maximumStock,
+      costPrice: values.costPrice
+        ? { amount: values.costPrice, currency: costPriceCurrency.value as Currency }
+        : undefined,
+      sellingPrice: {
+        amount: values.sellingPrice,
+        currency: sellingPriceCurrency.value as Currency,
+      },
+      discountPrice: undefined,
+      discountStartDate: undefined,
+      discountEndDate: undefined,
+      supplierName: values.supplierName,
+      isPerishable: values.isPerishable,
+      expiryDate: values.expiryDate,
+    };
+
+    if (props.mode === "create") {
+      await createMutation.mutateAsync(formData);
     } else {
       await updateMutation.mutateAsync({
         id: props.item.id,
-        itemData: form.value,
-        inventoryId: props.inventoryId
-      })
+        itemData: formData,
+        inventoryId: props.inventoryId,
+      });
     }
-    
-    emit('success')
-    resetForm()
+
+    emit("success");
+    resetForm();
   } catch (error) {
-    console.error('Form submission error:', error)
+    console.error("Form submission error:", error);
   }
-}
+};
+
+const onSubmit = form.handleSubmit(handleSubmit);
 
 // Watchers
-watch(() => props.item, (newItem) => {
-  if (newItem && props.mode === 'edit') {
-    form.value = {
-      ...form.value,
-      name: newItem.name || '',
-      description: newItem.description || '',
-      sku: newItem.sku || '',
-      productCode: newItem.productCode || '',
-      barcode: newItem.barcode || '',
-      category: newItem.category || '',
-      brand: newItem.brand || '',
-      unit: newItem.unit || 'PIECES',
-      weight: newItem.weight,
-      dimensions: newItem.dimensions || '',
-      color: newItem.color || '',
-      size: newItem.size || '',
-      currentStock: newItem.currentStock || 0,
-      minimumStock: newItem.minimumStock,
-      maximumStock: newItem.maximumStock,
-      costPrice: newItem.costPrice || { amount: 0, currency: 'USD' },
-      sellingPrice: newItem.sellingPrice || { amount: 0, currency: 'USD' },
-      discountPrice: newItem.discountPrice,
-      discountStartDate: newItem.discountStartDate,
-      discountEndDate: newItem.discountEndDate,
-      supplierName: newItem.supplierName || '',
-      isPerishable: newItem.isPerishable || false,
-      expiryDate: newItem.expiryDate,
-      isActive: newItem.isActive
-    }
-  } else {
-    resetForm()
-  }
-}, { immediate: true })
+watch(
+  () => props.item,
+  (newItem) => {
+    if (newItem && props.mode === "edit") {
+      form.setValues({
+        name: newItem.name || "",
+        description: newItem.description || "",
+        sku: newItem.sku || "",
+        productCode: newItem.productCode || "",
+        barcode: newItem.barcode || "",
+        category: newItem.category || "",
+        brand: newItem.brand || "",
+        unit: newItem.unit || "PIECES",
+        weight: newItem.weight,
+        dimensions: newItem.dimensions || "",
+        color: newItem.color || "",
+        size: newItem.size || "",
+        currentStock: newItem.currentStock || 0,
+        minimumStock: newItem.minimumStock,
+        maximumStock: newItem.maximumStock,
+        sellingPrice: newItem.sellingPrice?.amount || 0,
+        costPrice: newItem.costPrice?.amount,
+        supplierName: newItem.supplierName || "",
+        isPerishable: newItem.isPerishable || false,
+        expiryDate: newItem.expiryDate,
+        isActive: newItem.isActive,
+      });
 
-watch(() => props.inventoryId, (newId) => {
-  form.value.inventoryId = newId
-})
+      if (newItem.sellingPrice?.currency) {
+        sellingPriceCurrency.value = newItem.sellingPrice.currency;
+      }
+      if (newItem.costPrice?.currency) {
+        costPriceCurrency.value = newItem.costPrice.currency;
+      }
+    } else {
+      resetForm();
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.inventoryId,
+  (newId) => {
+    // Update form when inventory changes
+  }
+);
 
 // Lifecycle
 onMounted(() => {
-  resetForm()
-})
+  resetForm();
+});
 </script>

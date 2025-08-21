@@ -118,17 +118,25 @@ const currentPage = ref(0);
 const pageSize = ref(20);
 
 // Filters
-const filters = ref<FilterRequest>({
+const filters = ref({
   searchTerm: "",
   category: "",
   brand: "",
-  isActive: undefined,
+  isActive: "",
 });
+
+// Computed filter for API calls
+const apiFilters = computed(() => ({
+  searchTerm: filters.value.searchTerm,
+  category: filters.value.category,
+  brand: filters.value.brand,
+  isActive: filters.value.isActive === "all" ? undefined : filters.value.isActive === "true",
+}));
 
 // Queries
 const inventoryItemsQuery = useInventoryItemsList(
   selectedInventoryId.value || "",
-  filters.value,
+  apiFilters.value,
   currentPage.value,
   pageSize.value,
   "createdAt",
@@ -187,7 +195,7 @@ const clearFilters = () => {
     searchTerm: "",
     category: "",
     brand: "",
-    isActive: undefined,
+    isActive: "all",
   };
   currentPage.value = 0;
 };
