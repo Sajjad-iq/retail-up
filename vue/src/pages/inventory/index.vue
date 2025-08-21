@@ -138,7 +138,6 @@ const selectInventory = (inventory: Inventory) => {
 }
 
 const toggleInventoryStatus = async (inventory: Inventory) => {
-  console.log('toggleInventoryStatus', inventory.isActive)
   await updateInventory(inventory.id, { isActive: !inventory.isActive })
 }
 

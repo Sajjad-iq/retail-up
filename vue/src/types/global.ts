@@ -116,6 +116,23 @@ export enum Unit {
     BAGS = 'BAGS'
 }
 
+// Unit display names mapping (from backend)
+export const UnitDisplayNames: Record<Unit, string> = {
+    [Unit.PIECES]: 'pieces',
+    [Unit.PAIRS]: 'pairs',
+    [Unit.SETS]: 'sets',
+    [Unit.BOXES]: 'boxes',
+    [Unit.PACKS]: 'packs',
+    [Unit.GRAMS]: 'grams',
+    [Unit.KILOGRAMS]: 'kg',
+    [Unit.POUNDS]: 'lbs',
+    [Unit.MILLILITERS]: 'ml',
+    [Unit.LITERS]: 'liters',
+    [Unit.BOTTLES]: 'bottles',
+    [Unit.CANS]: 'cans',
+    [Unit.BAGS]: 'bags'
+}
+
 // User Status Enum (from backend)
 export enum UserStatus {
     ACTIVE = 'ACTIVE',

@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="open" @update:open="$emit('update:open', $event)">
-    <DialogContent class="sm:max-w-[600px]">
+    <DialogContent class="sm:max-w-[600px] h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
           <ArchiveBoxIcon class="h-5 w-5 text-primary" />
