@@ -30,8 +30,8 @@
 
       <!-- Items Table -->
       <InventoryItemsTable
-        v-else-if="inventoryItemsQuery.data?.data?.content?.length"
-        :items="inventoryItemsQuery.data.data.content"
+        v-else-if="inventoryItemsQuery.data.value"
+        :items="inventoryItemsQuery.data.value.data?.content || []"
         :pagination="pagination"
         @edit="editItem"
         @delete="deleteItem"
@@ -78,8 +78,6 @@ import { useRoute } from "vue-router";
 import { useOrganization } from "@/composables/useOrganization";
 import { useInventory } from "@/composables/useInventory";
 import { useInventoryItems } from "@/composables/useInventoryItems";
-import type { Inventory } from "@/types/global";
-import type { FilterRequest } from "@/services/inventoryItemService";
 
 // Custom Components
 import {
@@ -98,7 +96,7 @@ import {
 // Composables
 const route = useRoute();
 const { selectedOrganization } = useOrganization();
-const { inventories, fetchOrganizationInventories } = useInventory();
+const { fetchOrganizationInventories } = useInventory();
 const {
   useInventoryItemsList,
   useItemCounts,
@@ -166,9 +164,6 @@ const pagination = computed(() => {
   };
 });
 
-// Mutations
-const createMutation = useCreateInventoryItem();
-const updateMutation = useUpdateInventoryItem();
 const deleteMutation = useDeleteInventoryItem();
 
 // ===== METHODS =====
