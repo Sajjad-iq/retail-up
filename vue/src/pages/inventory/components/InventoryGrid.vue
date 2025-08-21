@@ -4,6 +4,7 @@
       v-for="inventory in filteredInventories"
       :key="inventory.id"
       :inventory="inventory"
+      @click="handleCardClick(inventory)"
       @select="$emit('select', $event)"
       @edit="$emit('edit', $event)"
       @view="$emit('view', $event)"
@@ -13,35 +14,42 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Inventory } from '@/types/global'
-import InventoryCard from './InventoryCard.vue'
+import { computed } from "vue";
+import { useRouter } from "vue-router";
+import type { Inventory } from "@/types/global";
+import InventoryCard from "./InventoryCard.vue";
 
 // Props
 interface Props {
-  inventories: Inventory[]
-  showActiveOnly?: boolean
+  inventories: Inventory[];
+  showActiveOnly?: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+const router = useRouter();
 
 // Emits
 defineEmits<{
-  select: [inventory: Inventory]
-  edit: [inventory: Inventory]
-  view: [inventory: Inventory]
-  toggleStatus: [inventory: Inventory]
-}>()
+  select: [inventory: Inventory];
+  edit: [inventory: Inventory];
+  view: [inventory: Inventory];
+  toggleStatus: [inventory: Inventory];
+}>();
+
+// Methods
+const handleCardClick = (inventory: Inventory) => {
+  router.push(`/inventory/${inventory.id}/items`);
+};
 
 // Computed
 const filteredInventories = computed(() => {
-  let filtered = props.inventories
+  let filtered = props.inventories;
 
   // Filter by active status if showActiveOnly is true
   if (props.showActiveOnly) {
-    filtered = filtered.filter(inventory => inventory.isActive)
+    filtered = filtered.filter((inventory) => inventory.isActive);
   }
 
-  return filtered
-})
+  return filtered;
+});
 </script>

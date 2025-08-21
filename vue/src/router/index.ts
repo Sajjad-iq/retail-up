@@ -64,6 +64,16 @@ export const routes: AppRouteRecordRaw[] = [
             title: 'Inventory Management',
             icon: 'inventory'
         }
+    },
+    {
+        path: '/inventory/:inventoryId/items',
+        name: 'InventoryItems',
+        component: () => import('@/pages/inventoryItems/index.vue'),
+        meta: {
+            requiresAuth: true,
+            title: 'Inventory Items',
+            icon: 'inventory'
+        }
     }
 ]
 
