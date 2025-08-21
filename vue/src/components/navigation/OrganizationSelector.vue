@@ -114,6 +114,5 @@ const goToOrganizationSettings = () => {
 
 const onOrganizationCreated = (org: any) => {
   showCreateDialog.value = false
-  // The organization is automatically selected in the composable
 }
 </script>

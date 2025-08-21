@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white rounded-lg border p-8">
-    <div class="text-center">
+    <div class="text-center flex flex-col items-center">
       <div class="mx-auto h-12 w-12 text-gray-400">
         <CubeIcon class="h-12 w-12" />
       </div>

@@ -119,7 +119,7 @@
               </Select>
               <FormMessage />
             </FormItem>
-          </FormField>
+            </FormField>
         </div>
 
         <!-- Pricing -->
@@ -417,9 +417,9 @@ const formSchema = toTypedSchema(
     sellingPrice: z.number().min(0, "Selling price must be positive"),
     costPrice: z.number().min(0, "Cost price must be positive").optional(),
     supplierName: z.string().max(200, "Supplier name must not exceed 200 characters").optional(),
-    isPerishable: z.boolean().default(false),
+    isPerishable: z.boolean(),
     expiryDate: z.string().optional(),
-    isActive: z.boolean().default(true).optional(),
+    isActive: z.boolean(),
   })
 );
 
