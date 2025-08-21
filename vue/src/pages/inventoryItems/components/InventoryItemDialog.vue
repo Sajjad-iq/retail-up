@@ -142,9 +142,9 @@
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem :value="CurrencyEnum.USD">{{ CurrencyEnum.USD }}</SelectItem>
+                      <SelectItem :value="CurrencyEnum.EUR">{{ CurrencyEnum.EUR }}</SelectItem>
+                      <SelectItem :value="CurrencyEnum.GBP">{{ CurrencyEnum.GBP }}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -171,9 +171,9 @@
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem :value="CurrencyEnum.USD">{{ CurrencyEnum.USD }}</SelectItem>
+                      <SelectItem :value="CurrencyEnum.EUR">{{ CurrencyEnum.EUR }}</SelectItem>
+                      <SelectItem :value="CurrencyEnum.GBP">{{ CurrencyEnum.GBP }}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -349,6 +349,7 @@ import type {
   UpdateInventoryItemRequest,
 } from "@/services/inventoryItemService";
 import type { Currency } from "@/types/global";
+import { Unit, Currency as CurrencyEnum } from "@/types/global";
 
 interface Props {
   open: boolean;
@@ -379,28 +380,46 @@ const formSchema = toTypedSchema(
   z.object({
     name: z
       .string()
-      .min(1, "Item name is required")
-      .max(255, "Name must be less than 255 characters"),
-    description: z.string().optional(),
-    sku: z.string().optional(),
-    productCode: z.string().optional(),
-    barcode: z.string().optional(),
-    category: z.string().optional(),
-    brand: z.string().optional(),
-    unit: z.string().min(1, "Unit is required"),
+      .min(2, "Item name must be at least 2 characters")
+      .max(200, "Name must be less than 200 characters"),
+    description: z.string().max(1000, "Description must not exceed 1000 characters").optional(),
+    sku: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]+$/, "SKU must contain only letters, numbers, hyphens, and underscores")
+      .max(50, "SKU must not exceed 50 characters")
+      .optional(),
+    productCode: z
+      .string()
+      .regex(
+        /^[A-Za-z0-9_-]+$/,
+        "Product code must contain only letters, numbers, hyphens, and underscores"
+      )
+      .max(50, "Product code must not exceed 50 characters")
+      .optional(),
+    barcode: z
+      .string()
+      .regex(
+        /^[A-Za-z0-9_-]+$/,
+        "Barcode must contain only letters, numbers, hyphens, and underscores"
+      )
+      .max(100, "Barcode must not exceed 100 characters")
+      .optional(),
+    category: z.string().max(100, "Category must not exceed 100 characters").optional(),
+    brand: z.string().max(100, "Brand must not exceed 100 characters").optional(),
+    unit: z.nativeEnum(Unit),
     weight: z.number().min(0, "Weight must be positive").optional(),
-    dimensions: z.string().optional(),
-    color: z.string().optional(),
-    size: z.string().optional(),
+    dimensions: z.string().max(50, "Dimensions must not exceed 50 characters").optional(),
+    color: z.string().max(50, "Color must not exceed 50 characters").optional(),
+    size: z.string().max(20, "Size must not exceed 20 characters").optional(),
     currentStock: z.number().min(0, "Current stock must be positive"),
     minimumStock: z.number().min(0, "Minimum stock must be positive").optional(),
     maximumStock: z.number().min(0, "Maximum stock must be positive").optional(),
     sellingPrice: z.number().min(0, "Selling price must be positive"),
     costPrice: z.number().min(0, "Cost price must be positive").optional(),
-    supplierName: z.string().optional(),
-    isPerishable: z.boolean(),
+    supplierName: z.string().max(200, "Supplier name must not exceed 200 characters").optional(),
+    isPerishable: z.boolean().default(false),
     expiryDate: z.string().optional(),
-    isActive: z.boolean().optional(),
+    isActive: z.boolean().default(true).optional(),
   })
 );
 
@@ -415,7 +434,7 @@ const form = useForm({
     barcode: "",
     category: "",
     brand: "",
-    unit: "PIECES",
+    unit: Unit.PIECES,
     weight: undefined,
     dimensions: "",
     color: "",
@@ -437,19 +456,19 @@ const isSubmitting = computed(
   () => createMutation.isPending.value || updateMutation.isPending.value
 );
 const availableUnits = computed(
-  () => unitsQuery.data.value?.data || ["PIECES", "GRAMS", "KILOGRAMS", "LITERS"]
+  () => unitsQuery.data.value?.data || [Unit.PIECES, Unit.GRAMS, Unit.KILOGRAMS, Unit.LITERS]
 );
 const formValues = computed(() => form.values);
 
 // Currency state
-const sellingPriceCurrency = ref("USD");
-const costPriceCurrency = ref("USD");
+const sellingPriceCurrency = ref(CurrencyEnum.USD);
+const costPriceCurrency = ref(CurrencyEnum.USD);
 
 // Methods
 const resetForm = () => {
   form.resetForm();
-  sellingPriceCurrency.value = "USD";
-  costPriceCurrency.value = "USD";
+  sellingPriceCurrency.value = CurrencyEnum.USD;
+  costPriceCurrency.value = CurrencyEnum.USD;
 };
 
 const handleSubmit = async (values: any) => {
@@ -519,7 +538,7 @@ watch(
         barcode: newItem.barcode || "",
         category: newItem.category || "",
         brand: newItem.brand || "",
-        unit: newItem.unit || "PIECES",
+        unit: newItem.unit || Unit.PIECES,
         weight: newItem.weight,
         dimensions: newItem.dimensions || "",
         color: newItem.color || "",
