@@ -246,12 +246,6 @@ public class InventoryItem {
         private LocalDateTime updatedAt;
 
         // Entity Relationships
-        // Many-to-One relationship with Inventory entity (multiple items belong to one
-        // inventory)
-        @ManyToOne(optional = false, fetch = FetchType.EAGER)
-        @JoinColumn(name = "inventory_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_inventory_items_inventory"))
-        private Inventory inventory;
-
         // Many-to-One relationship with User entity (tracks who created this item)
         @ManyToOne(optional = false, fetch = FetchType.EAGER)
         @JsonIgnoreProperties({ "password", "phone", "lastLoginAt" })

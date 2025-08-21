@@ -292,7 +292,11 @@
             <FormLabel>Active Status</FormLabel>
             <FormControl>
               <div class="flex items-center space-x-2">
-                <Switch v-bind="componentField" />
+                <Switch
+                v-model="componentField.modelValue"
+                :checked="componentField.modelValue"
+                @update:model-value="(value: boolean) => componentField.onChange(value)"
+              />
                 <Label>Item is active</Label>
               </div>
             </FormControl>

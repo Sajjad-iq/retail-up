@@ -37,9 +37,7 @@ public class InventoryItemUpdateUtils {
 
     public void validate(InventoryItem existing, UpdateInventoryItemRequest request) {
         // Resolve inventory and guard it exists
-        Inventory inventory = existing.getInventory() != null
-                ? existing.getInventory()
-                : inventoryService.getInventoryById(existing.getInventoryId());
+        Inventory inventory = inventoryService.getInventoryById(existing.getInventoryId());
         if (inventory == null) {
             throw new NotFoundException("Inventory not found");
         }
