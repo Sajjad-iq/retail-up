@@ -110,12 +110,7 @@ import {
 
 // Composables
 const route = useRoute();
-const {
-  useInventoryItemsList,
-  useCreateInventoryItem,
-  useUpdateInventoryItem,
-  useDeleteInventoryItem,
-} = useInventoryItems();
+const { useInventoryItemsList, useDeleteInventoryItem } = useInventoryItems();
 
 // ===== REACTIVE STATE =====
 const selectedItem = ref<any>(null);
