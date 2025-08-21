@@ -10,11 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -23,7 +20,6 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.users.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -79,13 +75,11 @@ public class Inventory {
 
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "organization_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({ "inventories", "systemSettings" })
     private Organization organization;
 
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JsonIgnoreProperties({ "password", "phone", "lastLoginAt" })
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
-
-    @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<InventoryItem> inventoryItems;
 }

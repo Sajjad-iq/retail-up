@@ -37,7 +37,6 @@ export interface Inventory {
     updatedAt: string // LocalDateTime from backend
     organization?: any // Organization entity
     createdBy: any // User entity - was missing!
-    inventoryItems?: InventoryItem[]
 }
 
 // Backend InventoryItem structure (complete match)
@@ -73,7 +72,6 @@ export interface InventoryItem {
     inventoryId: string
     createdAt: string // LocalDateTime
     updatedAt: string // LocalDateTime
-    inventory?: Inventory
     createdBy?: any // User entity
 }
 

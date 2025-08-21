@@ -36,6 +36,7 @@ import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 import com.sajjadkademm.retail.users.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
