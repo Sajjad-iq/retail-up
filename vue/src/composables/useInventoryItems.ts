@@ -22,7 +22,6 @@ export function useInventoryItems() {
         sortDirection: string = 'desc',
         enabled: boolean = true
     ) => {
-        console.log("ID FROM COMPOSABLE ", inventoryId);
         return useQuery({
             queryKey: queryKeys.inventoryItems.list(inventoryId, filters, page, size, sortBy, sortDirection),
             queryFn: () => inventoryItemService.filterItemsPaginated(inventoryId, filters, page, size, sortBy, sortDirection),

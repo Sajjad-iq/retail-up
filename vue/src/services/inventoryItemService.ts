@@ -215,8 +215,6 @@ class InventoryItemService {
         sortBy,
         sortDirection
       })
-
-      console.log("ID FROM SERVICE ", inventoryId);
       // Add filter parameters
       if (filterRequest.category) params.append('category', filterRequest.category)
       if (filterRequest.brand) params.append('brand', filterRequest.brand)

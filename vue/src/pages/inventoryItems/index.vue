@@ -126,7 +126,7 @@ const filters = ref({
   searchTerm: "",
   category: "",
   brand: "",
-  isActive: "",
+  isActive: "all",
 });
 
 // Computed filter for API calls
@@ -134,7 +134,8 @@ const apiFilters = computed(() => ({
   searchTerm: filters.value.searchTerm,
   category: filters.value.category,
   brand: filters.value.brand,
-  isActive: filters.value.isActive === "all" ? undefined : filters.value.isActive === "true",
+  isActive:
+    filters.value.isActive === "all" ? undefined : filters.value.isActive === "true" ? true : false,
 }));
 
 // Queries
