@@ -188,6 +188,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import type { InventoryItem } from "@/types/global";
+import { formatDate } from "@/lib/utils";
 
 interface Props {
   open: boolean;
@@ -195,9 +196,4 @@ interface Props {
 }
 
 defineProps<Props>();
-
-const formatDate = (dateString: string) => {
-  if (!dateString) return "Not available";
-  return new Date(dateString).toLocaleDateString();
-};
 </script>
