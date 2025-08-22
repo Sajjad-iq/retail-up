@@ -91,9 +91,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { useInventoryItems } from "@/composables/useInventoryItems";
+import { queryClient } from "@/config/query";
 
 // Custom Components
 import {
@@ -122,7 +123,7 @@ const currentPage = ref(0);
 const pageSize = ref(20);
 
 // Filters
-const filters = ref({
+const filters = reactive({
   searchTerm: "",
   category: "",
   brand: "",
@@ -131,35 +132,24 @@ const filters = ref({
 
 // Computed filter for API calls
 const apiFilters = computed(() => ({
-  searchTerm: filters.value.searchTerm,
-  category: filters.value.category,
-  brand: filters.value.brand,
-  isActive:
-    filters.value.isActive === "all" ? undefined : filters.value.isActive === "true" ? true : false,
+  searchTerm: filters.searchTerm,
+  category: filters.category,
+  brand: filters.brand,
+  isActive: filters.isActive === "all" ? undefined : filters.isActive === "true" ? true : false,
 }));
 
-// Queries
+// Queries - Pass reactive refs to make the query reactive to parameter changes
 const inventoryItemsQuery = useInventoryItemsList(
   route.params.inventoryId as string,
-  apiFilters.value,
-  currentPage.value,
-  pageSize.value,
+  apiFilters,
+  currentPage,
+  pageSize,
   "createdAt",
   "desc",
   !!route.params.inventoryId
 );
 
-// Watch for filter changes and invalidate the query
-watch(
-  [filters, currentPage, () => route.params.inventoryId],
-  () => {
-    console.log("Filters changed:", filters.value);
-    console.log("API Filters:", apiFilters.value);
-    // Invalidate the current query to trigger a refetch with new parameters
-    inventoryItemsQuery.refetch();
-  },
-  { deep: true }
-);
+// No need for watch anymore since the query is now reactive to parameter changes
 
 // ===== COMPUTED =====
 const isLoading = computed(() => inventoryItemsQuery.isLoading.value);
@@ -183,17 +173,14 @@ const deleteMutation = useDeleteInventoryItem();
 
 const handleSearch = async () => {
   currentPage.value = 0;
-  // The watch will automatically recreate the query with new filters
-  // No need to manually refetch as the query will be recreated
+  // The watch will automatically invalidate the query cache and trigger a refetch
 };
 
 const clearFilters = () => {
-  filters.value = {
-    searchTerm: "",
-    category: "",
-    brand: "",
-    isActive: "all",
-  };
+  filters.searchTerm = "";
+  filters.category = "";
+  filters.brand = "";
+  filters.isActive = "all";
   currentPage.value = 0;
 };
 

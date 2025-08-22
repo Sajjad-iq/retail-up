@@ -240,7 +240,9 @@ class InventoryItemService {
       if (filterRequest.expiryStatus) params.append('expiryStatus', filterRequest.expiryStatus)
       if (filterRequest.expiryDays !== undefined) params.append('expiryDays', filterRequest.expiryDays.toString())
 
-      const response = await this.axios.get<PagedResponse<InventoryItem>>(`/inventory-items/inventory/${inventoryId}?${params}`)
+      const url = `/inventory-items/inventory/${inventoryId}?${params}`;
+      
+      const response = await this.axios.get<PagedResponse<InventoryItem>>(url)
       return { success: true, data: response.data }
     } catch (error: any) {
       const apiError = ErrorHandler.handleApiError(error)

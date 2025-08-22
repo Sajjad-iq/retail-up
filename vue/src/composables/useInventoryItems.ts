@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/vue-query'
+import { computed, unref, type Ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { inventoryItemService } from '@/services/inventoryItemService'
 import { toast } from 'vue-sonner'
@@ -14,18 +15,32 @@ export function useInventoryItems() {
 
     // Get inventory items with pagination and filtering
     const useInventoryItemsList = (
-        inventoryId: string,
-        filters: FilterRequest = {},
-        page: number = 0,
-        size: number = 20,
+        inventoryId: string | Ref<string>,
+        filters: FilterRequest | Ref<FilterRequest> = {},
+        page: number | Ref<number> = 0,
+        size: number | Ref<number> = 20,
         sortBy: string = 'createdAt',
         sortDirection: string = 'desc',
         enabled: boolean = true
     ) => {
         return useQuery({
-            queryKey: queryKeys.inventoryItems.list(inventoryId, filters, page, size, sortBy, sortDirection),
-            queryFn: () => inventoryItemService.filterItemsPaginated(inventoryId, filters, page, size, sortBy, sortDirection),
-            enabled: enabled && !!inventoryId,
+            queryKey: computed(() => queryKeys.inventoryItems.list(
+                unref(inventoryId), 
+                unref(filters), 
+                unref(page), 
+                unref(size), 
+                sortBy, 
+                sortDirection
+            )),
+            queryFn: () => inventoryItemService.filterItemsPaginated(
+                unref(inventoryId), 
+                unref(filters), 
+                unref(page), 
+                unref(size), 
+                sortBy, 
+                sortDirection
+            ),
+            enabled: enabled && !!unref(inventoryId),
         })
     }
 
