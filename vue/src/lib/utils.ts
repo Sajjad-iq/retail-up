@@ -28,3 +28,14 @@ export function debounce(func: Function, wait: number) {
     timeout = setTimeout(() => func( ...args), wait);
   };
 }   
+
+export function valueUpdater<T>(
+  updaterOrValue: T | (() => T),
+  fn: (value: T) => void
+) {
+  if (typeof updaterOrValue === "function") {
+    fn((updaterOrValue as () => T)())
+  } else {
+    fn(updaterOrValue)
+  }
+}   

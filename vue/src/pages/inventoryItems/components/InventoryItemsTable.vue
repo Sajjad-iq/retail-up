@@ -1,198 +1,138 @@
 <template>
-  <div class="bg-card rounded-lg border">
+  <div class="w-full">
     <!-- Table Header -->
-    <div class="px-6 py-4 border-b border-border">
+    <div class="px-6 py-4 border-b border-border bg-card rounded-lg border">
       <h3 class="text-lg font-medium text-foreground">Inventory Items</h3>
     </div>
 
+    <!-- Filters and Controls -->
+    <div class="flex gap-2 items-center py-4">
+      <Input
+        class="max-w-sm"
+        placeholder="Filter by name..."
+        :model-value="table.getColumn('name')?.getFilterValue() as string"
+        @update:model-value="table.getColumn('name')?.setFilterValue($event)"
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button variant="outline" class="ml-auto">
+            Columns <ChevronDown class="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuCheckboxItem
+            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+            :key="column.id"
+            class="capitalize"
+            :model-value="column.getIsVisible()"
+            @update:model-value="
+              (value) => {
+                column.toggleVisibility(!!value);
+              }
+            "
+          >
+            {{ column.id }}
+          </DropdownMenuCheckboxItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+
     <!-- Table -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-muted">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-            >
-              Item
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-            >
-              SKU/Barcode
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-            >
-              Category
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-            >
-              Stock
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-            >
-              Price
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-            >
-              Status
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-card divide-y divide-border">
-          <tr v-for="item in items" :key="item.id" class="hover:bg-muted">
-            <!-- Item Name & Description -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <div class="flex-shrink-0 h-10 w-10">
-                  <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                    <CubeIcon class="h-6 w-6 text-muted-foreground" />
-                  </div>
-                </div>
-                <div class="ml-4">
-                  <div class="text-sm font-medium text-foreground">{{ item.name }}</div>
-                  <div
-                    v-if="item.description"
-                    class="text-sm text-muted-foreground truncate max-w-xs"
-                  >
-                    {{ item.description }}
-                  </div>
-                </div>
-              </div>
-            </td>
+    <div class="rounded-md border bg-card">
+      <Table>
+        <TableHeader>
+          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+            <TableHead v-for="header in headerGroup.headers" :key="header.id">
+              <FlexRender
+                v-if="!header.isPlaceholder"
+                :render="header.column.columnDef.header"
+                :props="header.getContext()"
+              />
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <template v-if="table.getRowModel().rows?.length">
+            <template v-for="row in table.getRowModel().rows" :key="row.id">
+              <TableRow :data-state="row.getIsSelected() && 'selected'" class="hover:bg-muted">
+                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                </TableCell>
+              </TableRow>
+            </template>
+          </template>
 
-            <!-- SKU/Barcode -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="space-y-1">
-                <div v-if="item.sku" class="text-sm text-foreground">
-                  <span class="font-medium">SKU:</span> {{ item.sku }}
-                </div>
-                <div v-if="item.barcode" class="text-sm text-muted-foreground">
-                  <span class="font-medium">Barcode:</span> {{ item.barcode }}
-                </div>
-              </div>
-            </td>
-
-            <!-- Category & Brand -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="space-y-1">
-                <div v-if="item.category" class="text-sm text-foreground">
-                  {{ item.category }}
-                </div>
-                <div v-if="item.brand" class="text-sm text-muted-foreground">
-                  {{ item.brand }}
-                </div>
-              </div>
-            </td>
-
-            <!-- Stock Information -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="space-y-1">
-                <div class="text-sm text-foreground">
-                  <span class="font-medium">{{ item.currentStock }}</span>
-                  <span class="text-muted-foreground"> {{ item.unit }}</span>
-                </div>
-                <div v-if="item.minimumStock !== undefined" class="text-xs text-muted-foreground">
-                  Min: {{ item.minimumStock }}
-                </div>
-              </div>
-            </td>
-
-            <!-- Price Information -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="space-y-1">
-                <div class="text-sm text-foreground">
-                  <span class="font-medium">${{ item.sellingPrice.amount }}</span>
-                  <span class="text-xs text-muted-foreground">
-                    {{ item.sellingPrice.currency }}</span
-                  >
-                </div>
-                <div v-if="item.costPrice" class="text-xs text-muted-foreground">
-                  Cost: ${{ item.costPrice.amount }}
-                </div>
-              </div>
-            </td>
-
-            <!-- Status -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <Badge :variant="item.isActive ? 'default' : 'secondary'">
-                {{ item.isActive ? "Active" : "Inactive" }}
-              </Badge>
-            </td>
-
-            <!-- Actions -->
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <div class="flex items-center space-x-2">
-                <Button @click="$emit('view', item)" variant="ghost" size="sm" class="h-8 w-8 p-0">
-                  <EyeIcon class="h-4 w-4" />
-                </Button>
-                <Button @click="$emit('edit', item)" variant="ghost" size="sm" class="h-8 w-8 p-0">
-                  <PencilIcon class="h-4 w-4" />
-                </Button>
-                <Button
-                  @click="$emit('delete', item)"
-                  variant="ghost"
-                  size="sm"
-                  class="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                >
-                  <TrashIcon class="h-4 w-4" />
-                </Button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+          <TableRow v-else>
+            <TableCell :colspan="columns.length" class="h-24 text-center"> No results. </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
 
     <!-- Pagination -->
-    <div v-if="pagination" class="px-6 py-4 border-t border-border bg-muted">
-      <div class="flex items-center justify-between">
-        <div class="text-sm text-muted-foreground">
-          Showing {{ pagination.currentPage * pagination.pageSize + 1 }} to
-          {{
-            Math.min((pagination.currentPage + 1) * pagination.pageSize, pagination.totalElements)
-          }}
-          of {{ pagination.totalElements }} results
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <Button
-            @click="$emit('pageChange', pagination.currentPage - 1)"
-            :disabled="!pagination.hasPrevious"
-            variant="outline"
-            size="sm"
-          >
-            Previous
-          </Button>
-
-          <span class="text-sm text-muted-foreground">
-            Page {{ pagination.currentPage + 1 }} of {{ pagination.totalPages }}
-          </span>
-
-          <Button
-            @click="$emit('pageChange', pagination.currentPage + 1)"
-            :disabled="!pagination.hasNext"
-            variant="outline"
-            size="sm"
-          >
-            Next
-          </Button>
-        </div>
+    <div class="flex items-center justify-end space-x-2 py-4">
+      <div class="flex-1 text-sm text-muted-foreground">
+        {{ table.getFilteredSelectedRowModel().rows.length }} of
+        {{ table.getFilteredRowModel().rows.length }} row(s) selected.
+      </div>
+      <div class="space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.previousPage()"
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="!table.getCanNextPage()"
+          @click="table.nextPage()"
+        >
+          Next
+        </Button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from "@tanstack/vue-table";
+import {
+  FlexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useVueTable,
+} from "@tanstack/vue-table";
+import { ArrowUpDown, ChevronDown } from "lucide-vue-next";
+
+import { h, ref } from "vue";
+import { valueUpdater } from "@/components/ui/table/utils";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { CubeIcon, EyeIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
 
@@ -215,6 +155,210 @@ interface Emits {
   (e: "pageChange", page: number): void;
 }
 
-defineProps<Props>();
-defineEmits<Emits>();
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
+
+// Define columns for the data table
+const columns: ColumnDef<any>[] = [
+  {
+    id: "select",
+    header: ({ table }) =>
+      h(Checkbox, {
+        modelValue:
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate"),
+        "onUpdate:modelValue": (value) => table.toggleAllPageRowsSelected(!!value),
+        ariaLabel: "Select all",
+      }),
+    cell: ({ row }) =>
+      h(Checkbox, {
+        modelValue: row.getIsSelected(),
+        "onUpdate:modelValue": (value) => row.toggleSelected(!!value),
+        ariaLabel: "Select row",
+      }),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "name",
+    header: ({ column }) => {
+      return h(
+        Button,
+        {
+          variant: "ghost",
+          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+        },
+        () => ["Item", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
+      );
+    },
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "flex items-center" }, [
+        h("div", { class: "flex-shrink-0 h-10 w-10" }, [
+          h("div", { class: "h-10 w-10 rounded-lg bg-muted flex items-center justify-center" }, [
+            h(CubeIcon, { class: "h-6 w-6 text-muted-foreground" }),
+          ]),
+        ]),
+        h("div", { class: "ml-4" }, [
+          h("div", { class: "text-sm font-medium text-foreground" }, item.name),
+          item.description
+            ? h(
+                "div",
+                { class: "text-sm text-muted-foreground truncate max-w-xs" },
+                item.description
+              )
+            : null,
+        ]),
+      ]);
+    },
+  },
+  {
+    accessorKey: "sku",
+    header: "SKU/Barcode",
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "space-y-1" }, [
+        item.sku
+          ? h("div", { class: "text-sm text-foreground" }, [
+              h("span", { class: "font-medium" }, "SKU: "),
+              item.sku,
+            ])
+          : null,
+        item.barcode
+          ? h("div", { class: "text-sm text-muted-foreground" }, [
+              h("span", { class: "font-medium" }, "Barcode: "),
+              item.barcode,
+            ])
+          : null,
+      ]);
+    },
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "space-y-1" }, [
+        item.category ? h("div", { class: "text-sm text-foreground" }, item.category) : null,
+        item.brand ? h("div", { class: "text-sm text-muted-foreground" }, item.brand) : null,
+      ]);
+    },
+  },
+  {
+    accessorKey: "currentStock",
+    header: "Stock",
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "space-y-1" }, [
+        h("div", { class: "text-sm text-foreground" }, [
+          h("span", { class: "font-medium" }, item.currentStock),
+          h("span", { class: "text-muted-foreground" }, ` ${item.unit}`),
+        ]),
+        item.minimumStock !== undefined
+          ? h("div", { class: "text-xs text-muted-foreground" }, `Min: ${item.minimumStock}`)
+          : null,
+      ]);
+    },
+  },
+  {
+    accessorKey: "sellingPrice",
+    header: () => h("div", { class: "text-right" }, "Price"),
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "space-y-1 text-right" }, [
+        h("div", { class: "text-sm text-foreground" }, [
+          h("span", { class: "font-medium" }, `$${item.sellingPrice.amount}`),
+          h("span", { class: "text-xs text-muted-foreground" }, ` ${item.sellingPrice.currency}`),
+        ]),
+        item.costPrice
+          ? h("div", { class: "text-xs text-muted-foreground" }, `Cost: $${item.costPrice.amount}`)
+          : null,
+      ]);
+    },
+  },
+  {
+    accessorKey: "isActive",
+    header: "Status",
+    cell: ({ row }) => {
+      const item = row.original;
+      return h(
+        Badge,
+        { variant: item.isActive ? "default" : "secondary" },
+        item.isActive ? "Active" : "Inactive"
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "flex items-center space-x-2" }, [
+        h(
+          Button,
+          {
+            onClick: () => emit("view", item),
+            variant: "ghost",
+            size: "sm",
+            class: "h-8 w-8 p-0",
+          },
+          () => [h(EyeIcon, { class: "h-4 w-4" })]
+        ),
+        h(
+          Button,
+          {
+            onClick: () => emit("edit", item),
+            variant: "ghost",
+            size: "sm",
+            class: "h-8 w-8 p-0",
+          },
+          () => [h(PencilIcon, { class: "h-4 w-4" })]
+        ),
+        h(
+          Button,
+          {
+            onClick: () => emit("delete", item),
+            variant: "ghost",
+            size: "sm",
+            class: "h-8 w-8 p-0 text-red-600 hover:text-red-700",
+          },
+          () => [h(TrashIcon, { class: "h-4 w-4" })]
+        ),
+      ]);
+    },
+  },
+];
+
+const sorting = ref<SortingState>([]);
+const columnFilters = ref<ColumnFiltersState>([]);
+const columnVisibility = ref<VisibilityState>({});
+const rowSelection = ref({});
+
+const table = useVueTable({
+  data: props.items,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
+  onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
+  onColumnVisibilityChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnVisibility),
+  onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
+  state: {
+    get sorting() {
+      return sorting.value;
+    },
+    get columnFilters() {
+      return columnFilters.value;
+    },
+    get columnVisibility() {
+      return columnVisibility.value;
+    },
+    get rowSelection() {
+      return rowSelection.value;
+    },
+  },
+});
 </script>
