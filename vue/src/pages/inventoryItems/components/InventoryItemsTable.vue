@@ -61,29 +61,111 @@
       </Table>
     </div>
 
-    <!-- Pagination -->
-    <div class="flex items-center justify-end space-x-2 py-4">
-      <div class="flex-1 text-sm text-muted-foreground">
-        {{ table.getFilteredSelectedRowModel().rows.length }} of
-        {{ table.getFilteredRowModel().rows.length }} row(s) selected.
+    <!-- Enhanced Pagination -->
+    <div class="flex items-center justify-between py-4 px-6 border-t border-border bg-muted">
+      <!-- Left side - Selection info and page size -->
+      <div class="flex items-center space-x-6">
+        <div class="text-sm text-muted-foreground">
+          {{ table.getFilteredSelectedRowModel().rows.length }} of
+          {{ table.getFilteredRowModel().rows.length }} row(s) selected.
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-muted-foreground">Show</span>
+          <Select
+            :value="table.getState().pagination.pageSize.toString()"
+            @update:value="(value: string) => table.setPageSize(Number(value))"
+            defaultValue="20"
+          >
+            <SelectTrigger class="h-8 w-[65px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+          <span class="text-sm text-muted-foreground">per page</span>
+        </div>
       </div>
-      <div class="space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanPreviousPage()"
-          @click="table.previousPage()"
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanNextPage()"
-          @click="table.nextPage()"
-        >
-          Next
-        </Button>
+
+      <!-- Right side - Pagination controls -->
+      <div class="flex items-center space-x-6">
+        <!-- Page info -->
+        <div class="text-sm text-muted-foreground">
+          Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
+          <span class="ml-2"> ({{ table.getFilteredRowModel().rows.length }} total items) </span>
+        </div>
+
+        <!-- Pagination buttons -->
+        <div class="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="!table.getCanPreviousPage()"
+            @click="table.setPageIndex(0)"
+            class="h-8 w-8 p-0"
+          >
+            <span class="sr-only">First page</span>
+            <ChevronsLeft class="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="!table.getCanPreviousPage()"
+            @click="table.previousPage()"
+            class="h-8 w-8 p-0"
+          >
+            <span class="sr-only">Previous page</span>
+            <ChevronLeft class="h-4 w-4" />
+          </Button>
+
+          <!-- Page numbers -->
+          <div class="flex items-center space-x-1">
+            <template v-for="pageIndex in getVisiblePageNumbers()" :key="pageIndex">
+              <Button
+                v-if="typeof pageIndex === 'number'"
+                variant="outline"
+                size="sm"
+                :class="
+                  pageIndex === table.getState().pagination.pageIndex
+                    ? 'bg-primary text-primary-foreground'
+                    : ''
+                "
+                @click="table.setPageIndex(pageIndex)"
+                class="h-8 w-8 p-0"
+              >
+                {{ pageIndex + 1 }}
+              </Button>
+              <span v-else class="px-2 text-muted-foreground">...</span>
+            </template>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="!table.getCanNextPage()"
+            @click="table.nextPage()"
+            class="h-8 w-8 p-0"
+          >
+            <span class="sr-only">Next page</span>
+            <ChevronRight class="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="!table.getCanNextPage()"
+            @click="table.setPageIndex(table.getPageCount() - 1)"
+            class="h-8 w-8 p-0"
+          >
+            <span class="sr-only">Last page</span>
+            <ChevronsRight class="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   </div>
@@ -104,7 +186,14 @@ import {
   getSortedRowModel,
   useVueTable,
 } from "@tanstack/vue-table";
-import { ArrowUpDown, ChevronDown } from "lucide-vue-next";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+} from "lucide-vue-next";
 
 import { h, ref } from "vue";
 
@@ -116,6 +205,13 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   Table,
@@ -150,6 +246,42 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+// Helper function to get visible page numbers for pagination
+const getVisiblePageNumbers = (): (number | string)[] => {
+  const currentPage = table.getState().pagination.pageIndex;
+  const totalPages = table.getPageCount();
+  const delta = 2; // Number of pages to show on each side of current page
+
+  if (totalPages <= 7) {
+    // If total pages <= 7, show all pages
+    return Array.from({ length: totalPages }, (_, i) => i);
+  }
+
+  const start = Math.max(0, currentPage - delta);
+  const end = Math.min(totalPages - 1, currentPage + delta);
+
+  const pages: (number | string)[] = [];
+
+  // Always show first page
+  if (start > 0) {
+    pages.push(0);
+    if (start > 1) pages.push("...");
+  }
+
+  // Add pages around current page
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  // Always show last page
+  if (end < totalPages - 1) {
+    if (end < totalPages - 2) pages.push("...");
+    pages.push(totalPages - 1);
+  }
+
+  return pages;
+};
 
 // Define columns for the data table
 const columns: ColumnDef<InventoryItem>[] = [
