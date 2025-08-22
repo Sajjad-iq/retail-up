@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useInventoryItems } from "@/composables/useInventoryItems";
 
@@ -149,6 +149,18 @@ const inventoryItemsQuery = useInventoryItemsList(
   !!route.params.inventoryId
 );
 
+// Watch for filter changes and invalidate the query
+watch(
+  [filters, currentPage, () => route.params.inventoryId],
+  () => {
+    console.log("Filters changed:", filters.value);
+    console.log("API Filters:", apiFilters.value);
+    // Invalidate the current query to trigger a refetch with new parameters
+    inventoryItemsQuery.refetch();
+  },
+  { deep: true }
+);
+
 // ===== COMPUTED =====
 const isLoading = computed(() => inventoryItemsQuery.isLoading.value);
 const error = computed(() => inventoryItemsQuery.error.value);
@@ -169,9 +181,10 @@ const pagination = computed(() => {
 
 const deleteMutation = useDeleteInventoryItem();
 
-const handleSearch = () => {
+const handleSearch = async () => {
   currentPage.value = 0;
-  // The query will automatically refetch due to reactive dependencies
+  // The watch will automatically recreate the query with new filters
+  // No need to manually refetch as the query will be recreated
 };
 
 const clearFilters = () => {
