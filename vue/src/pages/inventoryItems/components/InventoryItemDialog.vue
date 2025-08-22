@@ -12,7 +12,7 @@
         </DialogDescription>
       </DialogHeader>
 
-      <form @submit="onSubmit" class="space-y-6">
+      <form @submit="onSubmit" class="space-y-6" :key="`form-${props.item?.id || 'new'}`">
         <!-- Basic Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField v-slot="{ componentField, errorMessage }" name="name">
@@ -276,7 +276,11 @@
         </div>
 
         <!-- Expiry Date (if perishable) -->
-        <FormField v-slot="{ componentField, errorMessage }" name="expiryDate">
+        <FormField
+          v-slot="{ componentField, errorMessage }"
+          name="expiryDate"
+          :key="`expiry-${props.item?.id || 'new'}`"
+        >
           <FormItem v-show="formValues.isPerishable">
             <FormLabel>Expiry Date</FormLabel>
             <FormControl>
@@ -535,14 +539,15 @@ const onSubmit = form.handleSubmit(handleSubmit);
 
 // Watchers
 watch(
-  () => props.item,
-  (newItem) => {
-    if (newItem && props.mode === "edit") {
+  () => [props.item, props.mode, props.open],
+  ([newItem, newMode, isOpen]) => {
+    if (isOpen && newItem && newMode === "edit") {
       // Use nextTick to ensure form is fully initialized
       nextTick(() => {
         populateFormWithItem(newItem);
       });
-    } else {
+    } else if (!isOpen) {
+      // Reset form when dialog closes
       resetForm();
     }
   },
@@ -558,47 +563,54 @@ watch(
 
 // Lifecycle
 onMounted(() => {
-  resetForm();
-
-  // If we're in edit mode and have an item, populate the form
+  // Don't reset form on mount if we're in edit mode
   if (props.mode === "edit" && props.item) {
     nextTick(() => {
       populateFormWithItem(props.item);
     });
+  } else {
+    resetForm();
   }
 });
 
 // Helper function to populate form with item data
 const populateFormWithItem = (item: any) => {
+  // Reset form first to clear any previous values
+  form.resetForm();
+
+  // Set form values with proper fallbacks
   form.setValues({
-    name: item.name || "",
-    description: item.description || "",
-    sku: item.sku || "",
-    productCode: item.productCode || "",
-    barcode: item.barcode || "",
-    category: item.category || "",
-    brand: item.brand || "",
-    unit: item.unit || Unit.PIECES,
-    weight: item.weight || undefined,
-    dimensions: item.dimensions || "",
-    color: item.color || "",
-    size: item.size || "",
-    currentStock: item.currentStock || 0,
-    minimumStock: item.minimumStock || undefined,
-    maximumStock: item.maximumStock || undefined,
-    sellingPrice: item.sellingPrice?.amount || 0,
-    costPrice: item.costPrice?.amount || undefined,
-    supplierName: item.supplierName || "",
-    isPerishable: item.isPerishable || false,
-    expiryDate: item.expiryDate || undefined,
-    isActive: item.isActive !== undefined ? item.isActive : true,
+    name: item.name ?? "",
+    description: item.description ?? "",
+    sku: item.sku ?? "",
+    productCode: item.productCode ?? "",
+    barcode: item.barcode ?? "",
+    category: item.category ?? "",
+    brand: item.brand ?? "",
+    unit: item.unit ?? Unit.PIECES,
+    weight: item.weight ?? undefined,
+    dimensions: item.dimensions ?? "",
+    color: item.color ?? "",
+    size: item.size ?? "",
+    currentStock: item.currentStock ?? 0,
+    minimumStock: item.minimumStock ?? undefined,
+    maximumStock: item.maximumStock ?? undefined,
+    sellingPrice: item.sellingPrice?.amount ?? 0,
+    costPrice: item.costPrice?.amount ?? undefined,
+    supplierName: item.supplierName ?? "",
+    isPerishable: item.isPerishable ?? false,
+    expiryDate: item.expiryDate ?? undefined,
+    isActive: item.isActive ?? true,
   });
 
+  // Set currency values
   if (item.sellingPrice?.currency) {
     sellingPriceCurrency.value = item.sellingPrice.currency;
   }
   if (item.costPrice?.currency) {
     costPriceCurrency.value = item.costPrice.currency;
   }
+
+  console.log("Form values after population:", form.values);
 };
 </script>
