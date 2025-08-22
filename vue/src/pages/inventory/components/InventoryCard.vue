@@ -106,7 +106,7 @@
       </Card>
     </DropdownMenuTrigger>
 
-    <DropdownMenuContent align="center" class="w-48">
+    <DropdownMenuContent side="right" class="w-48">
       <DropdownMenuItem @click="$emit('select', inventory)" class="cursor-pointer">
         <ArrowPathIcon class="h-4 w-4 mr-2 text-blue-600" />
         <span>Open Inventory</span>
@@ -146,7 +146,6 @@ import type { Inventory } from "@/types/global";
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -161,7 +160,6 @@ import {
   EyeIcon,
   ArchiveBoxIcon,
   CheckCircleIcon,
-  EllipsisVerticalIcon,
   MapPinIcon,
   CalendarIcon,
   ClockIcon,

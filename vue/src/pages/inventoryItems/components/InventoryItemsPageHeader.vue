@@ -8,7 +8,6 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <ThemeToggle />
       <Button @click="$emit('create')" class="flex items-center gap-2">
         <PlusIcon class="h-4 w-4" />
         Add Item
@@ -19,7 +18,6 @@
 
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PlusIcon } from "@heroicons/vue/24/outline";
 
 defineEmits<{
