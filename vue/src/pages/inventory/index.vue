@@ -57,6 +57,7 @@ import { ref, onMounted, watch } from "vue";
 import { useOrganization } from "@/composables/useOrganization";
 import { useInventory } from "@/composables/useInventory";
 import type { Inventory } from "@/types/global";
+import { useRouter } from "vue-router";
 
 // Custom Components
 import {
@@ -81,6 +82,8 @@ const {
   selectInventory: selectInventoryComposable,
   searchInventories,
 } = useInventory();
+
+const router = useRouter();
 
 // ===== REACTIVE STATE =====
 const searchQuery = ref("");
@@ -126,6 +129,7 @@ const viewInventoryDetails = (inventory: Inventory) => {
 
 const selectInventory = (inventory: Inventory) => {
   selectInventoryComposable(inventory);
+  router.push(`/inventory/${inventory.id}/items`);
 };
 
 const toggleInventoryStatus = async (inventory: Inventory) => {

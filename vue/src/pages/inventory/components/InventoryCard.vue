@@ -1,7 +1,6 @@
 <template>
   <Card
     class="inventory-card ratio-square hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-card to-muted/50"
-    @click="$emit('select', inventory)"
   >
     <CardHeader class="pb-4">
       <div class="flex items-start justify-between">
@@ -57,6 +56,10 @@
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-48">
+            <DropdownMenuItem @click="$emit('select', inventory)" class="cursor-pointer">
+              <ArrowPathIcon class="h-4 w-4 mr-2 text-blue-600" />
+              <span>Open Inventory</span>
+            </DropdownMenuItem>
             <DropdownMenuItem @click="$emit('edit', inventory)" class="cursor-pointer">
               <PencilIcon class="h-4 w-4 mr-2 text-blue-600" />
               <span>Edit Inventory</span>
@@ -162,6 +165,7 @@ import {
   MapPinIcon,
   CalendarIcon,
   ClockIcon,
+  ArrowPathIcon,
 } from "@heroicons/vue/24/outline";
 
 // Props

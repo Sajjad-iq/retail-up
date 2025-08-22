@@ -4,7 +4,6 @@
       v-for="inventory in filteredInventories"
       :key="inventory.id"
       :inventory="inventory"
-      @click="handleCardClick(inventory)"
       @select="$emit('select', $event)"
       @edit="$emit('edit', $event)"
       @view="$emit('view', $event)"
@@ -15,7 +14,6 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRouter } from "vue-router";
 import type { Inventory } from "@/types/global";
 import InventoryCard from "./InventoryCard.vue";
 
@@ -26,7 +24,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const router = useRouter();
 
 // Emits
 defineEmits<{
@@ -35,11 +32,6 @@ defineEmits<{
   view: [inventory: Inventory];
   toggleStatus: [inventory: Inventory];
 }>();
-
-// Methods
-const handleCardClick = (inventory: Inventory) => {
-  router.push(`/inventory/${inventory.id}/items`);
-};
 
 // Computed
 const filteredInventories = computed(() => {
