@@ -115,7 +115,7 @@ import {
 import { ArrowUpDown, ChevronDown } from "lucide-vue-next";
 
 import { h, ref } from "vue";
-import { valueUpdater } from "@/components/ui/table/utils";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -135,9 +135,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { CubeIcon, EyeIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
+import type { InventoryItem } from "@/types/global";
 
 interface Props {
-  items: any[];
+  items: InventoryItem[];
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -149,9 +150,9 @@ interface Props {
 }
 
 interface Emits {
-  (e: "edit", item: any): void;
-  (e: "delete", item: any): void;
-  (e: "view", item: any): void;
+  (e: "edit", item: InventoryItem): void;
+  (e: "delete", item: InventoryItem): void;
+  (e: "view", item: InventoryItem): void;
   (e: "pageChange", page: number): void;
 }
 
@@ -159,7 +160,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 // Define columns for the data table
-const columns: ColumnDef<any>[] = [
+const columns: ColumnDef<InventoryItem>[] = [
   {
     id: "select",
     header: ({ table }) =>
@@ -214,7 +215,7 @@ const columns: ColumnDef<any>[] = [
   },
   {
     accessorKey: "sku",
-    header: "SKU/Barcode",
+    header: "SKU/Code",
     cell: ({ row }) => {
       const item = row.original;
       return h("div", { class: "space-y-1" }, [
@@ -224,13 +225,23 @@ const columns: ColumnDef<any>[] = [
               item.sku,
             ])
           : null,
-        item.barcode
+        item.productCode
           ? h("div", { class: "text-sm text-muted-foreground" }, [
-              h("span", { class: "font-medium" }, "Barcode: "),
-              item.barcode,
+              h("span", { class: "font-medium" }, "Code: "),
+              item.productCode,
             ])
           : null,
       ]);
+    },
+  },
+  {
+    accessorKey: "barcode",
+    header: "Barcode",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.barcode
+        ? h("div", { class: "text-sm text-foreground font-mono" }, item.barcode)
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
     },
   },
   {
@@ -245,8 +256,25 @@ const columns: ColumnDef<any>[] = [
     },
   },
   {
+    accessorKey: "unit",
+    header: "Unit",
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "text-sm text-foreground" }, item.unit);
+    },
+  },
+  {
     accessorKey: "currentStock",
-    header: "Stock",
+    header: ({ column }) => {
+      return h(
+        Button,
+        {
+          variant: "ghost",
+          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+        },
+        () => ["Stock", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
+      );
+    },
     cell: ({ row }) => {
       const item = row.original;
       return h("div", { class: "space-y-1" }, [
@@ -257,12 +285,34 @@ const columns: ColumnDef<any>[] = [
         item.minimumStock !== undefined
           ? h("div", { class: "text-xs text-muted-foreground" }, `Min: ${item.minimumStock}`)
           : null,
+        item.maximumStock !== undefined
+          ? h("div", { class: "text-xs text-muted-foreground" }, `Max: ${item.maximumStock}`)
+          : null,
       ]);
     },
   },
   {
+    accessorKey: "costPrice",
+    header: () => h("div", { class: "text-right" }, "Cost Price"),
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.costPrice
+        ? h("div", { class: "text-sm text-foreground text-right" }, `$${item.costPrice.amount}`)
+        : h("div", { class: "text-sm text-muted-foreground text-right" }, "—");
+    },
+  },
+  {
     accessorKey: "sellingPrice",
-    header: () => h("div", { class: "text-right" }, "Price"),
+    header: ({ column }) => {
+      return h(
+        Button,
+        {
+          variant: "ghost",
+          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+        },
+        () => ["Selling Price", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
+      );
+    },
     cell: ({ row }) => {
       const item = row.original;
       return h("div", { class: "space-y-1 text-right" }, [
@@ -270,10 +320,44 @@ const columns: ColumnDef<any>[] = [
           h("span", { class: "font-medium" }, `$${item.sellingPrice.amount}`),
           h("span", { class: "text-xs text-muted-foreground" }, ` ${item.sellingPrice.currency}`),
         ]),
-        item.costPrice
-          ? h("div", { class: "text-xs text-muted-foreground" }, `Cost: $${item.costPrice.amount}`)
+        item.discountPrice
+          ? h("div", { class: "text-xs text-red-600" }, `Disc: $${item.discountPrice}`)
           : null,
       ]);
+    },
+  },
+  {
+    accessorKey: "totalSold",
+    header: ({ column }) => {
+      return h(
+        Button,
+        {
+          variant: "ghost",
+          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+        },
+        () => ["Total Sold", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
+      );
+    },
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "text-sm text-foreground" }, item.totalSold);
+    },
+  },
+  {
+    accessorKey: "totalRevenue",
+    header: ({ column }) => {
+      return h(
+        Button,
+        {
+          variant: "ghost",
+          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+        },
+        () => ["Revenue", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
+      );
+    },
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "text-sm text-foreground" }, `$${item.totalRevenue}`);
     },
   },
   {
@@ -285,6 +369,153 @@ const columns: ColumnDef<any>[] = [
         Badge,
         { variant: item.isActive ? "default" : "secondary" },
         item.isActive ? "Active" : "Inactive"
+      );
+    },
+  },
+  {
+    accessorKey: "isPerishable",
+    header: "Perishable",
+    cell: ({ row }) => {
+      const item = row.original;
+      return h(
+        Badge,
+        { variant: item.isPerishable ? "destructive" : "secondary" },
+        item.isPerishable ? "Yes" : "No"
+      );
+    },
+  },
+  {
+    accessorKey: "expiryDate",
+    header: "Expiry",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.expiryDate
+        ? h(
+            "div",
+            { class: "text-sm text-foreground" },
+            new Date(item.expiryDate).toLocaleDateString()
+          )
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "lastSoldDate",
+    header: "Last Sold",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.lastSoldDate
+        ? h(
+            "div",
+            { class: "text-sm text-foreground" },
+            new Date(item.lastSoldDate).toLocaleDateString()
+          )
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "weight",
+    header: "Weight",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.weight
+        ? h("div", { class: "text-sm text-foreground" }, `${item.weight} kg`)
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "dimensions",
+    header: "Dimensions",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.dimensions
+        ? h("div", { class: "text-sm text-foreground" }, item.dimensions)
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "color",
+    header: "Color",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.color
+        ? h("div", { class: "text-sm text-foreground" }, item.color)
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "size",
+    header: "Size",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.size
+        ? h("div", { class: "text-sm text-foreground" }, item.size)
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "discountStartDate",
+    header: "Discount Start",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.discountStartDate
+        ? h(
+            "div",
+            { class: "text-sm text-foreground" },
+            new Date(item.discountStartDate).toLocaleDateString()
+          )
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "discountEndDate",
+    header: "Discount End",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.discountEndDate
+        ? h(
+            "div",
+            { class: "text-sm text-foreground" },
+            new Date(item.discountEndDate).toLocaleDateString()
+          )
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "supplierName",
+    header: "Supplier",
+    cell: ({ row }) => {
+      const item = row.original;
+      return item.supplierName
+        ? h("div", { class: "text-sm text-foreground" }, item.supplierName)
+        : h("div", { class: "text-sm text-muted-foreground" }, "—");
+    },
+  },
+  {
+    accessorKey: "inventoryId",
+    header: "Inventory ID",
+    cell: ({ row }) => {
+      const item = row.original;
+      return h("div", { class: "text-sm text-foreground font-mono" }, item.inventoryId);
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => {
+      return h(
+        Button,
+        {
+          variant: "ghost",
+          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+        },
+        () => ["Created", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
+      );
+    },
+    cell: ({ row }) => {
+      const item = row.original;
+      return h(
+        "div",
+        { class: "text-sm text-foreground" },
+        new Date(item.createdAt).toLocaleDateString()
       );
     },
   },
@@ -335,17 +566,41 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const columnVisibility = ref<VisibilityState>({});
 const rowSelection = ref({});
 
-const table = useVueTable({
+const table = useVueTable<InventoryItem>({
   data: props.items,
   columns,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
-  onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
-  onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
-  onColumnVisibilityChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnVisibility),
-  onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
+  onSortingChange: (updaterOrValue) => {
+    if (typeof updaterOrValue === "function") {
+      sorting.value = updaterOrValue(sorting.value);
+    } else {
+      sorting.value = updaterOrValue;
+    }
+  },
+  onColumnFiltersChange: (updaterOrValue) => {
+    if (typeof updaterOrValue === "function") {
+      columnFilters.value = updaterOrValue(columnFilters.value);
+    } else {
+      columnFilters.value = updaterOrValue;
+    }
+  },
+  onColumnVisibilityChange: (updaterOrValue) => {
+    if (typeof updaterOrValue === "function") {
+      columnVisibility.value = updaterOrValue(columnVisibility.value);
+    } else {
+      columnVisibility.value = updaterOrValue;
+    }
+  },
+  onRowSelectionChange: (updaterOrValue) => {
+    if (typeof updaterOrValue === "function") {
+      rowSelection.value = updaterOrValue(rowSelection.value);
+    } else {
+      rowSelection.value = updaterOrValue;
+    }
+  },
   state: {
     get sorting() {
       return sorting.value;

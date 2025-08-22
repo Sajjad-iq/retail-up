@@ -30,11 +30,11 @@ export function debounce(func: Function, wait: number) {
 }   
 
 export function valueUpdater<T>(
-  updaterOrValue: T | (() => T),
+  updaterOrValue: T | ((old: T) => T),
   fn: (value: T) => void
 ) {
   if (typeof updaterOrValue === "function") {
-    fn((updaterOrValue as () => T)())
+    fn((updaterOrValue as (old: T) => T)(fn as any))
   } else {
     fn(updaterOrValue)
   }
