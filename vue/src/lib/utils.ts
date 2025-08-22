@@ -19,3 +19,12 @@ export function formatDate(dateString: string): string {
     return 'Invalid Date'
   }
 }
+
+
+export function debounce(func: Function, wait: number) {
+  let timeout: ReturnType<typeof setTimeout>;
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func( ...args), wait);
+  };
+}   

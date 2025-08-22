@@ -73,6 +73,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MagnifyingGlassIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/vue/24/outline";
+import { debounce } from "@/lib/utils";
 
 interface Props {
   searchQuery: string;
@@ -94,23 +95,29 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
+// Create debounced functions once
+const debouncedSearchQuery = debounce((value: string) => emit("update:searchQuery", value), 500);
+const debouncedCategory = debounce((value: string) => emit("update:category", value), 500);
+const debouncedBrand = debounce((value: string) => emit("update:brand", value), 500);
+const debouncedActiveOnly = debounce((value: string) => emit("update:activeOnly", value), 500);
+
 const searchQuery = computed({
   get: () => props.searchQuery,
-  set: (value) => emit("update:searchQuery", value),
+  set: (value) => debouncedSearchQuery(value),
 });
 
 const category = computed({
   get: () => props.category,
-  set: (value) => emit("update:category", value),
+  set: (value) => debouncedCategory(value),
 });
 
 const brand = computed({
   get: () => props.brand,
-  set: (value) => emit("update:brand", value),
+  set: (value) => debouncedBrand(value),
 });
 
 const activeOnly = computed({
   get: () => props.activeOnly,
-  set: (value) => emit("update:activeOnly", value),
+  set: (value) => debouncedActiveOnly(value),
 });
 </script>
