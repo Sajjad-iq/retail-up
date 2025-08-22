@@ -3,7 +3,7 @@ export { default as InventoryItemsSearchBar } from './InventoryItemsSearchBar.vu
 export { default as InventoryItemsCounts } from './InventoryItemsCounts.vue'
 export { default as InventoryItemsLoadingState } from './InventoryItemsLoadingState.vue'
 export { default as InventoryItemsErrorState } from './InventoryItemsErrorState.vue'
-export { default as InventoryItemsTable } from './InventoryItemsTable.vue'
+export { InventoryItemsTable } from './table'
 export { default as InventoryItemsEmptyState } from './InventoryItemsEmptyState.vue'
 export { default as InventoryItemDialog } from './InventoryItemDialog.vue'
 export { default as InventoryItemDetailsDialog } from './InventoryItemDetailsDialog.vue'
