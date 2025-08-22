@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-white rounded-lg border p-8">
+  <div class="bg-card rounded-lg border p-8">
     <div class="text-center">
-      <div class="mx-auto h-12 w-12 text-red-400">
+      <div class="mx-auto h-12 w-12 text-red-400 dark:text-red-300">
         <ExclamationTriangleIcon class="h-12 w-12" />
       </div>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">Error loading inventory items</h3>
-      <p class="mt-1 text-sm text-gray-500">
-        {{ error?.message || 'An unexpected error occurred while loading your inventory items.' }}
+      <h3 class="mt-2 text-sm font-medium text-foreground">Error loading inventory items</h3>
+      <p class="mt-1 text-sm text-muted-foreground">
+        {{ error?.message || "An unexpected error occurred while loading your inventory items." }}
       </p>
       <div class="mt-6">
         <Button @click="$emit('retry')" variant="outline">
@@ -19,17 +19,17 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import { Button } from "@/components/ui/button";
+import { ExclamationTriangleIcon, ArrowPathIcon } from "@heroicons/vue/24/outline";
 
 interface Props {
-  error: any
+  error: any;
 }
 
 interface Emits {
-  (e: 'retry'): void
+  (e: "retry"): void;
 }
 
-defineProps<Props>()
-defineEmits<Emits>()
+defineProps<Props>();
+defineEmits<Emits>();
 </script>

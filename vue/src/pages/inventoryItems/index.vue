@@ -1,19 +1,19 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-8">
+  <div class="min-h-screen bg-background p-8">
     <div class="max-w-7xl mx-auto">
       <!-- Page Header -->
       <InventoryItemsPageHeader @create="openCreateDialog" />
 
       <div v-if="route.params.inventoryId" class="mb-4 flex items-center justify-between">
         <div class="flex items-center space-x-2">
-          <span class="text-sm text-gray-600">
+          <span class="text-sm text-muted-foreground">
             Status: {{ isLoading ? "Loading..." : "Ready" }}
           </span>
         </div>
         <button
           @click="refreshItems"
           :disabled="isLoading"
-          class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="inline-flex items-center px-3 py-2 border border-border shadow-sm text-sm leading-4 font-medium rounded-md text-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

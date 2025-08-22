@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-white rounded-lg border p-4">
+  <div class="bg-card rounded-lg border p-4">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <!-- Search Input -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+        <label class="block text-sm font-medium text-foreground mb-1">Search</label>
         <Input
           v-model="searchQuery"
           placeholder="Search by name, SKU, or barcode"
@@ -14,19 +14,19 @@
 
       <!-- Category Filter -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+        <label class="block text-sm font-medium text-foreground mb-1">Category</label>
         <Input v-model="category" placeholder="Filter by category" class="w-full" />
       </div>
 
       <!-- Brand Filter -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+        <label class="block text-sm font-medium text-foreground mb-1">Brand</label>
         <Input v-model="brand" placeholder="Filter by brand" class="w-full" />
       </div>
 
       <!-- Active Status Filter -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <label class="block text-sm font-medium text-foreground mb-1">Status</label>
         <Select v-model="activeOnly">
           <SelectTrigger class="w-full">
             <SelectValue placeholder="All items" />

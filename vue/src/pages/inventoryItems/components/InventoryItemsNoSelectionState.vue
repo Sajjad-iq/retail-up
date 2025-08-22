@@ -1,11 +1,11 @@
 <template>
-  <div class="bg-white rounded-lg border p-8">
+  <div class="bg-card rounded-lg border p-8">
     <div class="text-center">
-      <div class="mx-auto h-12 w-12 text-gray-400">
+      <div class="mx-auto h-12 w-12 text-muted-foreground">
         <BuildingStorefrontIcon class="h-12 w-12" />
       </div>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">Select an inventory</h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <h3 class="mt-2 text-sm font-medium text-foreground">Select an inventory</h3>
+      <p class="mt-1 text-sm text-muted-foreground">
         Choose an inventory from the dropdown above to view and manage its items.
       </p>
       <div class="mt-6">
@@ -19,12 +19,12 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import { Button } from "@/components/ui/button";
+import { BuildingStorefrontIcon } from "@heroicons/vue/24/outline";
 
 interface Emits {
-  (e: 'selectInventory'): void
+  (e: "selectInventory"): void;
 }
 
-defineEmits<Emits>()
+defineEmits<Emits>();
 </script>
