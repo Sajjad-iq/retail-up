@@ -5,19 +5,11 @@
       <h3 class="text-lg font-medium text-foreground">Inventory Items</h3>
     </div>
 
-    <!-- Filters and Controls -->
+    <!-- Column Visibility Controls -->
     <div class="flex gap-2 items-center py-4">
-      <Input
-        class="max-w-sm"
-        placeholder="Filter by name..."
-        :model-value="table.getColumn('name')?.getFilterValue() as string"
-        @update:model-value="table.getColumn('name')?.setFilterValue($event)"
-      />
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button variant="outline" class="ml-auto">
-            Columns <ChevronDown class="ml-2 h-4 w-4" />
-          </Button>
+          <Button variant="outline"> Columns <ChevronDown class="ml-2 h-4 w-4" /> </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuCheckboxItem
@@ -124,7 +116,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+
 import {
   Table,
   TableBody,
@@ -563,7 +555,36 @@ const columns: ColumnDef<InventoryItem>[] = [
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
-const columnVisibility = ref<VisibilityState>({});
+const columnVisibility = ref<VisibilityState>({
+  // Essential columns - visible by default
+  select: true,
+  name: true,
+  sku: true,
+  currentStock: true,
+  sellingPrice: true,
+  isActive: true,
+  actions: true,
+
+  // Less important columns - hidden by default
+  barcode: false,
+  category: false,
+  unit: false,
+  costPrice: false,
+  totalSold: false,
+  totalRevenue: false,
+  isPerishable: false,
+  expiryDate: false,
+  lastSoldDate: false,
+  weight: false,
+  dimensions: false,
+  color: false,
+  size: false,
+  discountStartDate: false,
+  discountEndDate: false,
+  supplierName: false,
+  inventoryId: false,
+  createdAt: false,
+});
 const rowSelection = ref({});
 
 const table = useVueTable<InventoryItem>({
