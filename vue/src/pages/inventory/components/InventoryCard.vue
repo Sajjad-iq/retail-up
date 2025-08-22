@@ -1,40 +1,46 @@
 <template>
   <Card
-    class="inventory-card ratio-square hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-white to-gray-50/50"
+    class="inventory-card ratio-square hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-card to-muted/50"
     @click="$emit('select', inventory)"
   >
     <CardHeader class="pb-4">
       <div class="flex items-start justify-between">
         <div class="flex-1 min-w-0">
-          <CardTitle class="text-xl font-bold text-gray-900 truncate mb-2">
+          <CardTitle class="text-xl font-bold text-foreground truncate mb-2">
             {{ inventory.name }}
           </CardTitle>
-          
+
           <!-- Status and Item Count Row -->
           <div class="flex items-center gap-3 mb-3">
-            <Badge 
+            <Badge
               :variant="inventory.isActive ? 'default' : 'secondary'"
               class="px-3 py-1 text-sm font-medium"
             >
               <div class="flex items-center gap-1.5">
-                <div 
+                <div
                   :class="[
                     'w-2 h-2 rounded-full',
-                    inventory.isActive ? 'bg-green-500' : 'bg-gray-400'
+                    inventory.isActive ? 'bg-green-500' : 'bg-gray-400',
                   ]"
                 ></div>
-                {{ inventory.isActive ? 'Active' : 'Inactive' }}
+                {{ inventory.isActive ? "Active" : "Inactive" }}
               </div>
             </Badge>
-            
-            <Badge variant="outline" class="px-3 py-1 text-sm font-medium bg-blue-50 border-blue-200 text-blue-700">
+
+            <Badge
+              variant="outline"
+              class="px-3 py-1 text-sm font-medium bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+            >
               <ArchiveBoxIcon class="w-4 h-4 mr-1.5" />
               {{ inventory.inventoryItems?.length || 0 }} items
             </Badge>
           </div>
 
           <!-- Description -->
-          <div v-if="inventory.description" class="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
+          <div
+            v-if="inventory.description"
+            class="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed"
+          >
             {{ inventory.description }}
           </div>
         </div>
@@ -42,12 +48,12 @@
         <!-- Action Menu -->
         <DropdownMenu @click.stop>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              class="h-9 w-9 p-0 hover:bg-gray-100 rounded-full transition-colors"
+            <Button
+              variant="ghost"
+              size="sm"
+              class="h-9 w-9 p-0 hover:bg-accent rounded-full transition-colors"
             >
-              <EllipsisVerticalIcon class="h-4 w-4 text-gray-500" />
+              <EllipsisVerticalIcon class="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-48">
@@ -60,51 +66,62 @@
               <span>View Details</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
+            <DropdownMenuItem
               @click="$emit('toggleStatus', inventory)"
               :class="[
                 'cursor-pointer',
-                inventory.isActive ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'
+                inventory.isActive
+                  ? 'text-red-600 hover:text-red-700'
+                  : 'text-green-600 hover:text-green-700',
               ]"
             >
-              <component 
-                :is="inventory.isActive ? ArchiveBoxIcon : CheckCircleIcon" 
-                class="h-4 w-4 mr-2" 
+              <component
+                :is="inventory.isActive ? ArchiveBoxIcon : CheckCircleIcon"
+                class="h-4 w-4 mr-2"
               />
-              <span>{{ inventory.isActive ? 'Deactivate' : 'Activate' }}</span>
+              <span>{{ inventory.isActive ? "Deactivate" : "Activate" }}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </CardHeader>
-    
+
     <CardContent class="pt-0">
       <div class="space-y-4">
         <!-- Location Info -->
-        <div v-if="inventory.location" class="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
-          <MapPinIcon class="h-4 w-4 text-gray-500 flex-shrink-0" />
+        <div
+          v-if="inventory.location"
+          class="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-2 rounded-lg"
+        >
+          <MapPinIcon class="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <span class="truncate font-medium">{{ inventory.location }}</span>
         </div>
-        
+
         <!-- Stats Row -->
         <div class="grid grid-cols-2 gap-4 pt-2">
-          <div class="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-            <div class="text-2xl font-bold text-blue-600">
+          <div
+            class="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800"
+          >
+            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {{ inventory.inventoryItems?.length || 0 }}
             </div>
-            <div class="text-xs text-blue-700 font-medium">Total Items</div>
+            <div class="text-xs text-blue-700 dark:text-blue-300 font-medium">Total Items</div>
           </div>
-          
-          <div class="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-            <div class="text-2xl font-bold text-green-600">
-              {{ inventory.inventoryItems?.filter(item => item.isActive).length || 0 }}
+
+          <div
+            class="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800"
+          >
+            <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+              {{ inventory.inventoryItems?.filter((item) => item.isActive).length || 0 }}
             </div>
-            <div class="text-xs text-green-700 font-medium">Active Items</div>
+            <div class="text-xs text-green-700 dark:text-green-300 font-medium">Active Items</div>
           </div>
         </div>
-        
+
         <!-- Timestamps -->
-        <div class="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+        <div
+          class="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border"
+        >
           <div class="flex items-center gap-1">
             <CalendarIcon class="h-3 w-3" />
             <span>Created {{ formatDate(inventory.createdAt) }}</span>
@@ -120,20 +137,20 @@
 </template>
 
 <script setup lang="ts">
-import { formatDate } from '@/lib/utils'
-import type { Inventory } from '@/types/global'
+import { formatDate } from "@/lib/utils";
+import type { Inventory } from "@/types/global";
 
 // UI Components
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu";
 
 // Icons
 import {
@@ -145,22 +162,22 @@ import {
   MapPinIcon,
   CalendarIcon,
   ClockIcon,
-} from '@heroicons/vue/24/outline'
+} from "@heroicons/vue/24/outline";
 
 // Props
 interface Props {
-  inventory: Inventory
+  inventory: Inventory;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 
 // Emits
 defineEmits<{
-  select: [inventory: Inventory]
-  edit: [inventory: Inventory]
-  view: [inventory: Inventory]
-  toggleStatus: [inventory: Inventory]
-}>()
+  select: [inventory: Inventory];
+  edit: [inventory: Inventory];
+  view: [inventory: Inventory];
+  toggleStatus: [inventory: Inventory];
+}>();
 </script>
 
 <style scoped>
@@ -168,12 +185,12 @@ defineEmits<{
   width: 300px;
   --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --card-shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --card-border: 1px solid rgb(229 231 235);
-  --card-border-hover: 1px solid rgb(209 213 219);
-  
+  --card-border: 1px solid hsl(var(--border));
+  --card-border-hover: 1px solid hsl(var(--border) / 0.8);
+
   box-shadow: var(--card-shadow);
   border: var(--card-border);
-    aspect-ratio: 1/1;
+  aspect-ratio: 1/1;
 }
 
 .inventory-card:hover {
@@ -192,7 +209,7 @@ defineEmits<{
 /* Custom scrollbar for dropdown */
 :deep(.inventory-card .dropdown-menu-content) {
   scrollbar-width: thin;
-  scrollbar-color: rgb(156 163 175) transparent;
+  scrollbar-color: hsl(var(--muted-foreground)) transparent;
 }
 
 :deep(.inventory-card .dropdown-menu-content::-webkit-scrollbar) {
@@ -204,7 +221,7 @@ defineEmits<{
 }
 
 :deep(.inventory-card .dropdown-menu-content::-webkit-scrollbar-thumb) {
-  background-color: rgb(156 163 175);
+  background-color: hsl(var(--muted-foreground));
   border-radius: 3px;
 }
 
@@ -215,7 +232,7 @@ defineEmits<{
 
 /* Enhanced focus states */
 .inventory-card:focus-within {
-  outline: 2px solid rgb(59 130 246);
+  outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
 }
 
@@ -225,7 +242,7 @@ defineEmits<{
     --card-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
-  
+
   .inventory-card:hover {
     transform: translateY(-1px);
   }
