@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import MainLayout from '@/components/layout/MainLayout.vue'
-import { Toaster } from '@/components/ui/sonner'
-import { useAuth } from '@/composables/useAuth'
-import { useAuthStore } from '@/stores/auth'
-import 'vue-sonner/style.css' // vue-sonner v2 requires this import
+import { computed, onMounted } from "vue";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import MainLayout from "@/components/layout/MainLayout.vue";
+import { Toaster } from "@/components/ui/sonner";
+import { useAuth } from "@/composables/useAuth";
+import { useAuthStore } from "@/stores/auth";
+import "vue-sonner/style.css"; // vue-sonner v2 requires this import
 
-const { isAuthenticated, initialize } = useAuth()
-const authStore = useAuthStore()
+const { isAuthenticated, initialize } = useAuth();
+const authStore = useAuthStore();
 
 // Show main layout for authenticated users who have selected an organization
 // Show organization selection for authenticated users without organization
 // Show auth routes without main layout
 const showMainLayout = computed(() => {
-  return isAuthenticated.value && authStore.hasSelectedOrganization
-})
+  return isAuthenticated.value && authStore.hasSelectedOrganization;
+});
 
 const showOrganizationSelection = computed(() => {
-  return isAuthenticated.value && !authStore.hasSelectedOrganization
-})
+  return isAuthenticated.value && !authStore.hasSelectedOrganization;
+});
 
 onMounted(() => {
-  initialize()
-})
+  initialize();
+});
 </script>
 
 <template>
@@ -32,20 +32,20 @@ onMounted(() => {
     <MainLayout v-if="showMainLayout">
       <router-view />
     </MainLayout>
-    
+
     <!-- Show organization selection for authenticated users without organization -->
     <div v-else-if="showOrganizationSelection" class="min-h-screen bg-gray-50 w-full">
       <router-view />
     </div>
-    
+
     <!-- Show auth routes without main layout -->
     <router-view v-else />
-    
+
     <!-- Toast notifications -->
     <Toaster />
   </SidebarProvider>
 </template>
 
 <style>
-@import './assets/main.css';
+@import "./assets/main.css";
 </style>

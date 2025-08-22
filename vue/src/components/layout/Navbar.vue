@@ -6,6 +6,9 @@
 
     <!-- Right side actions -->
     <div class="flex items-center space-x-2">
+      <!-- Theme Toggle -->
+      <ThemeToggle />
+      
       <!-- Notifications -->
       <button class="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md relative">
         <Bell class="h-5 w-5" />
@@ -71,6 +74,7 @@ import { useAuth } from '@/composables/useAuth'
 import OrganizationSelector from '@/components/navigation/OrganizationSelector.vue'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import {
   DropdownMenu,
   DropdownMenuContent,
