@@ -96,10 +96,10 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 // Create debounced functions once
-const debouncedSearchQuery = debounce((value: string) => emit("update:searchQuery", value), 500);
-const debouncedCategory = debounce((value: string) => emit("update:category", value), 500);
-const debouncedBrand = debounce((value: string) => emit("update:brand", value), 500);
-const debouncedActiveOnly = debounce((value: string) => emit("update:activeOnly", value), 500);
+const debouncedSearchQuery = debounce((value: string) => emit("update:searchQuery", value), 700);
+const debouncedCategory = debounce((value: string) => emit("update:category", value), 700);
+const debouncedBrand = debounce((value: string) => emit("update:brand", value), 700);
+const debouncedActiveOnly = debounce((value: string) => emit("update:activeOnly", value), 700);
 
 const searchQuery = computed({
   get: () => props.searchQuery,
