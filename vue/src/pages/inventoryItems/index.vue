@@ -49,7 +49,8 @@
       <!-- Items Table -->
       <InventoryItemsTable
         v-else-if="inventoryItemsQuery.data.value"
-        :items="inventoryItemsQuery.data.value.data?.content || []"
+        :key="`table-${JSON.stringify(apiFilters)}-${currentPage}`"
+        :items="tableItems"
         :pagination="pagination"
         @edit="editItem"
         @delete="deleteItem"
@@ -95,6 +96,7 @@ import { ref, computed, watch, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { useInventoryItems } from "@/composables/useInventoryItems";
 import { queryClient } from "@/config/query";
+import { queryKeys } from "@/config/query";
 
 // Custom Components
 import {
@@ -108,6 +110,7 @@ import {
   InventoryItemsEmptyState,
   DeleteConfirmationDialog,
 } from "./components";
+import { toast } from "vue-sonner";
 
 // Composables
 const route = useRoute();
@@ -149,7 +152,22 @@ const inventoryItemsQuery = useInventoryItemsList(
   !!route.params.inventoryId
 );
 
-// No need for watch anymore since the query is now reactive to parameter changes
+// Watch for filter changes to ensure proper query handling
+watch(
+  () => [filters.searchTerm, filters.category, filters.brand, filters.isActive],
+  async () => {
+    // Reset to first page when filters change
+    currentPage.value = 0;
+
+    // Force a refetch when filters change
+    try {
+      await inventoryItemsQuery.refetch();
+    } catch (error) {
+      console.error("Filter change refetch error:", error);
+    }
+  },
+  { deep: true }
+);
 
 // ===== COMPUTED =====
 const isLoading = computed(() => inventoryItemsQuery.isLoading.value);
@@ -169,19 +187,37 @@ const pagination = computed(() => {
   };
 });
 
+// Computed table items to ensure reactivity
+const tableItems = computed(() => {
+  const items = inventoryItemsQuery.data.value?.data?.content || [];
+  return items;
+});
+
 const deleteMutation = useDeleteInventoryItem();
 
 const handleSearch = async () => {
   currentPage.value = 0;
-  // The watch will automatically invalidate the query cache and trigger a refetch
+  // Force a refetch when search is triggered
+  try {
+    await inventoryItemsQuery.refetch();
+  } catch (error) {
+    console.error("Search error:", error);
+  }
 };
 
-const clearFilters = () => {
+const clearFilters = async () => {
   filters.searchTerm = "";
   filters.category = "";
   filters.brand = "";
   filters.isActive = "all";
   currentPage.value = 0;
+
+  // Force a refetch after clearing filters
+  try {
+    await inventoryItemsQuery.refetch();
+  } catch (error) {
+    console.error("Clear filters error:", error);
+  }
 };
 
 const refreshItems = async () => {
@@ -194,7 +230,7 @@ const refreshItems = async () => {
   try {
     await inventoryItemsQuery.refetch();
   } catch (error) {
-    console.error("Error refreshing items:", error);
+    toast.error("Error refreshing items");
   }
 };
 
