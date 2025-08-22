@@ -276,15 +276,17 @@
         </div>
 
         <!-- Expiry Date (if perishable) -->
-        <FormField
-          v-slot="{ componentField, errorMessage }"
-          name="expiryDate"
-          v-if="formValues.isPerishable"
-        >
-          <FormItem>
+        <FormField v-slot="{ componentField, errorMessage }" name="expiryDate">
+          <FormItem v-show="formValues.isPerishable">
             <FormLabel>Expiry Date</FormLabel>
             <FormControl>
-              <Input type="date" v-bind="componentField" />
+              <DatePicker
+                :model-value="componentField.modelValue"
+                placeholder="Select expiry date"
+                @update:model-value="(value: any) => {
+                  componentField.onChange(value);
+                }"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -342,6 +344,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import DatePicker from "@/components/ui/datePicker/index.vue";
 import {
   Select,
   SelectContent,
@@ -352,10 +355,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useInventoryItems } from "@/composables/useInventoryItems";
-import type {
-  CreateInventoryItemRequest,
-  UpdateInventoryItemRequest,
-} from "@/services/inventoryItemService";
+import type { CreateInventoryItemRequest } from "@/services/inventoryItemService";
 import type { Currency } from "@/types/global";
 import { Unit, Currency as CurrencyEnum } from "@/types/global";
 
