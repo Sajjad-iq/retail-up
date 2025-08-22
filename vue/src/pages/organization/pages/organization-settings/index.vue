@@ -1,23 +1,24 @@
 <template>
   <!-- Main container with responsive padding and max width -->
-  <div class="min-h-screen bg-gray-50 p-8">
+  <div class="min-h-screen bg-background p-8">
     <div class="max-w-4xl mx-auto">
-
       <!-- Loading State: Shows spinner while loading -->
 
-
       <!-- Error State: Displays error message with retry button -->
-      <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div
+        v-if="error"
+        class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-6"
+      >
         <div class="flex items-center gap-3">
-          <ExclamationTriangleIcon class="h-6 w-6 text-red-600" />
+          <ExclamationTriangleIcon class="h-6 w-6 text-red-600 dark:text-red-400" />
           <div>
-            <h3 class="text-lg font-medium text-red-800">Error Loading Organization</h3>
-            <p class="text-red-700 mt-1">{{ error }}</p>
+            <h3 class="text-lg font-medium text-red-800 dark:text-red-200">
+              Error Loading Organization
+            </h3>
+            <p class="text-red-700 dark:text-red-300 mt-1">{{ error }}</p>
           </div>
         </div>
-        <Button @click="loadOrganization" variant="outline" class="mt-4">
-          Try Again
-        </Button>
+        <Button @click="loadOrganization" variant="outline" class="mt-4"> Try Again </Button>
       </div>
 
       <!-- Organization Settings Form: Main content when organization is loaded -->
@@ -27,7 +28,7 @@
           <CardHeader>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <BuildingOfficeIcon class="h-6 w-6 text-blue-600" />
+                <BuildingOfficeIcon class="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 <div>
                   <CardTitle>Organization Information</CardTitle>
                   <CardDescription>
@@ -35,16 +36,19 @@
                   </CardDescription>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="refreshOrganization"
-                :disabled="isLoading"
-                class="flex items-center gap-2"
-              >
-                <ArrowPathIcon class="h-4 w-4" />
-                Refresh
-              </Button>
+              <div class="flex items-center gap-3">
+                <ThemeToggle />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  @click="refreshOrganization"
+                  :disabled="isLoading"
+                  class="flex items-center gap-2"
+                >
+                  <ArrowPathIcon class="h-4 w-4" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -154,19 +158,10 @@
 
               <!-- Action Buttons: Reset and Save buttons with loading states -->
               <div class="flex items-center justify-end gap-4 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  @click="resetForm"
-                  :disabled="isSubmitting"
-                >
+                <Button type="button" variant="outline" @click="resetForm" :disabled="isSubmitting">
                   Reset
                 </Button>
-                <Button
-                  type="submit"
-                  :disabled="isSubmitting"
-                  class="min-w-[120px]"
-                >
+                <Button type="submit" :disabled="isSubmitting" class="min-w-[120px]">
                   <span v-if="isSubmitting" class="flex items-center gap-2">
                     <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     Saving...
@@ -190,20 +185,22 @@
             <!-- Three-column grid showing status, created date, and last updated date -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div class="text-center">
-                <div class="text-2xl font-bold text-blue-600">{{ organization.status }}</div>
-                <div class="text-sm text-gray-600">Current Status</div>
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {{ organization.status }}
+                </div>
+                <div class="text-sm text-muted-foreground">Current Status</div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-bold text-green-600">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">
                   {{ formatDate(organization.createdAt) }}
                 </div>
-                <div class="text-sm text-gray-600">Created</div>
+                <div class="text-sm text-muted-foreground">Created</div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-bold text-purple-600">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
                   {{ formatDate(organization.updatedAt) }}
                 </div>
-                <div class="text-sm text-gray-600">Last Updated</div>
+                <div class="text-sm text-muted-foreground">Last Updated</div>
               </div>
             </div>
           </CardContent>
@@ -212,12 +209,12 @@
 
       <!-- No Organization Selected: Fallback state when no organization is available -->
       <div v-else-if="isAuthInitialized && !isAuthLoading" class="text-center py-12">
-        <BuildingOfficeIcon class="h-16 w-16 text-gray-400 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No Organization Selected</h3>
-        <p class="text-gray-600 mb-6">Please select an organization to view and edit its settings.</p>
-        <Button @click="goToOrganizationSelection" variant="outline">
-          Select Organization
-        </Button>
+        <BuildingOfficeIcon class="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+        <h3 class="text-lg font-medium text-foreground mb-2">No Organization Selected</h3>
+        <p class="text-muted-foreground mb-6">
+          Please select an organization to view and edit its settings.
+        </p>
+        <Button @click="goToOrganizationSelection" variant="outline"> Select Organization </Button>
       </div>
     </div>
   </div>
@@ -225,39 +222,37 @@
 
 <script setup lang="ts">
 // Vue Composition API imports
-import { ref,  onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
 
 // Form validation imports
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import * as z from 'zod'
+import { useForm } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import * as z from "zod";
 
 // Custom composables and services
-import { useOrganization } from '@/composables/useOrganization'
-import { useAuth } from '@/composables/useAuth'
-import { formatDate } from '@/lib/utils'
+import { useOrganization } from "@/composables/useOrganization";
+import { useAuth } from "@/composables/useAuth";
+import { formatDate } from "@/lib/utils";
 
 // Toast notification
-import { toast } from 'vue-sonner'
+import { toast } from "vue-sonner";
 
 // Type imports
-import type { OrganizationResponse, UpdateOrganizationRequest } from '@/services/organizationService'
-import { OrganizationStatus } from '@/types/global'
+import type {
+  OrganizationResponse,
+  UpdateOrganizationRequest,
+} from "@/services/organizationService";
+import { OrganizationStatus } from "@/types/global";
 
 // UI Components - Form elements
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 // Reusable spinner component for loading states with customizable colors and messages
-import { Spinner } from '@/components/ui/spinner'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Spinner } from "@/components/ui/spinner";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 // UI Components - Select dropdown
 import {
@@ -266,7 +261,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 
 // Heroicons for visual elements
 import {
@@ -274,26 +269,26 @@ import {
   ExclamationTriangleIcon,
   ChartBarIcon,
   ArrowPathIcon,
-} from '@heroicons/vue/24/outline'
+} from "@heroicons/vue/24/outline";
 
 // Router instance for navigation
-const router = useRouter()
+const router = useRouter();
 
 // Organization composable for managing organization state
-const { selectedOrganization, getOrganizationById, updateOrganization } = useOrganization()
+const { selectedOrganization, getOrganizationById, updateOrganization } = useOrganization();
 
 // Authentication composable for user information
-const { user, isLoading: isAuthLoading, isInitialized: isAuthInitialized } = useAuth()
+const { user, isLoading: isAuthLoading, isInitialized: isAuthInitialized } = useAuth();
 
 // ===== REACTIVE STATE =====
 // Current organization data
-const organization = ref<OrganizationResponse | null>(null)
+const organization = ref<OrganizationResponse | null>(null);
 // Loading state for initial data fetch (organization details)
-const isLoading = ref(false)
+const isLoading = ref(false);
 // Loading state for form submission
-const isSubmitting = ref(false)
+const isSubmitting = ref(false);
 // Error message for failed operations
-const error = ref<string | null>(null)
+const error = ref<string | null>(null);
 
 // ===== LOADING STATE HIERARCHY =====
 // 1. isAuthInitialized: Authentication system is ready
@@ -303,28 +298,30 @@ const error = ref<string | null>(null)
 
 // ===== FORM VALIDATION SCHEMA =====
 // Zod schema for form validation with required and optional fields
-const formSchema = toTypedSchema(z.object({
-  name: z.string().min(1, 'Organization name is required'),
-  description: z.string().optional(),
-  address: z.string().optional(),
-  phone: z.string().min(1, 'Phone number is required'),
-  domain: z.string().min(1, 'Domain is required'),
-  status: z.nativeEnum(OrganizationStatus) // Uses the OrganizationStatus enum
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string().min(1, "Organization name is required"),
+    description: z.string().optional(),
+    address: z.string().optional(),
+    phone: z.string().min(1, "Phone number is required"),
+    domain: z.string().min(1, "Domain is required"),
+    status: z.nativeEnum(OrganizationStatus), // Uses the OrganizationStatus enum
+  })
+);
 
 // ===== FORM INSTANCE =====
 // Initialize form with validation schema and default values
 const form = useForm({
   validationSchema: formSchema,
   initialValues: {
-    name: '',
-    description: '',
-    address: '',
-    phone: '',
-    domain: '',
-    status: OrganizationStatus.ACTIVE // Default to ACTIVE status
-  }
-})
+    name: "",
+    description: "",
+    address: "",
+    phone: "",
+    domain: "",
+    status: OrganizationStatus.ACTIVE, // Default to ACTIVE status
+  },
+});
 
 // ===== METHODS =====
 
@@ -335,39 +332,39 @@ const form = useForm({
 const loadOrganization = async () => {
   // Check if we already have the same organization data loaded FIRST
   if (organization.value?.id === selectedOrganization.value?.id) {
-    return
-  }
-  
-  // Prevent multiple simultaneous calls
-  if (isLoading.value) {
-    return
-  }
-  
-  // Check if an organization is selected
-  if (!selectedOrganization.value?.id) {
-    error.value = 'No organization selected'
-    return
+    return;
   }
 
-  isLoading.value = true
-  error.value = null
+  // Prevent multiple simultaneous calls
+  if (isLoading.value) {
+    return;
+  }
+
+  // Check if an organization is selected
+  if (!selectedOrganization.value?.id) {
+    error.value = "No organization selected";
+    return;
+  }
+
+  isLoading.value = true;
+  error.value = null;
 
   try {
     // Use the composable method instead of calling the service directly
-    const orgData = await getOrganizationById(selectedOrganization.value.id)
-    
+    const orgData = await getOrganizationById(selectedOrganization.value.id);
+
     if (orgData) {
-      organization.value = orgData
-      populateForm(orgData) // Populate form with fetched data
+      organization.value = orgData;
+      populateForm(orgData); // Populate form with fetched data
     } else {
-      error.value = 'Failed to load organization details'
+      error.value = "Failed to load organization details";
     }
   } catch (err) {
-    error.value = 'An error occurred while loading organization details'
+    error.value = "An error occurred while loading organization details";
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 /**
  * Populates the form with organization data
@@ -375,15 +372,15 @@ const loadOrganization = async () => {
  */
 const populateForm = (org: OrganizationResponse) => {
   const formData = {
-    name: org.name || '',
-    description: org.description || '',
-    address: org.address || '',
-    phone: org.phone || '',
-    domain: org.domain || '',
-    status: org.status || OrganizationStatus.ACTIVE
-  }
-  form.setValues(formData)
-}
+    name: org.name || "",
+    description: org.description || "",
+    address: org.address || "",
+    phone: org.phone || "",
+    domain: org.domain || "",
+    status: org.status || OrganizationStatus.ACTIVE,
+  };
+  form.setValues(formData);
+};
 
 /**
  * Resets the form to the current organization values
@@ -391,9 +388,9 @@ const populateForm = (org: OrganizationResponse) => {
  */
 const resetForm = () => {
   if (organization.value) {
-    populateForm(organization.value)
+    populateForm(organization.value);
   }
-}
+};
 
 /**
  * Handles form submission and updates organization data
@@ -401,16 +398,16 @@ const resetForm = () => {
  */
 const handleSubmit = async (values: any) => {
   // Validation checks
-  if (!organization.value){
-    toast.error('No organization selected')
-    return
+  if (!organization.value) {
+    toast.error("No organization selected");
+    return;
   }
-  if (!user.value?.id){
-    toast.error('No user selected')
-    return
+  if (!user.value?.id) {
+    toast.error("No user selected");
+    return;
   }
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
 
   try {
     // Prepare update data
@@ -420,34 +417,30 @@ const handleSubmit = async (values: any) => {
       address: values.address,
       phone: values.phone,
       domain: values.domain,
-      status: values.status
-    }
+      status: values.status,
+    };
 
     // Use the composable method which handles store and localStorage updates
-    const success = await updateOrganization(
-      organization.value.id,
-      user.value.id,
-      updateData
-    )
+    const success = await updateOrganization(organization.value.id, user.value.id, updateData);
 
     if (success) {
       // Refresh the organization data to get the latest from the store
-      await loadOrganization()
+      await loadOrganization();
     }
   } catch (err) {
-    toast.error('An error occurred while updating organization')
+    toast.error("An error occurred while updating organization");
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
+};
 
 /**
  * Form submission handler that integrates with vee-validate
  * @param values - Validated form values
  */
 const onSubmit = form.handleSubmit(async (values) => {
-  await handleSubmit(values)
-})
+  await handleSubmit(values);
+});
 
 /**
  * Refreshes the organization data
@@ -455,27 +448,25 @@ const onSubmit = form.handleSubmit(async (values) => {
  */
 const refreshOrganization = async () => {
   if (selectedOrganization.value?.id) {
-    await loadOrganization()
+    await loadOrganization();
   }
-}
+};
 
 /**
  * Navigates to organization selection page
  * Used when no organization is currently selected
  */
 const goToOrganizationSelection = () => {
-  router.push('/organization-selection')
-}
-
+  router.push("/organization-selection");
+};
 
 // ===== LIFECYCLE HOOKS =====
 // Load organization data when component mounts
 onMounted(() => {
   if (selectedOrganization.value) {
-    loadOrganization()
+    loadOrganization();
   } else {
-    toast.info('No organization selected on mount')
+    toast.info("No organization selected on mount");
   }
-})
+});
 </script>
-
