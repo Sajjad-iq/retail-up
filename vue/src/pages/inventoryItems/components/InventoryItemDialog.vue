@@ -119,7 +119,7 @@
               </Select>
               <FormMessage />
             </FormItem>
-            </FormField>
+          </FormField>
         </div>
 
         <!-- Pricing -->
@@ -262,7 +262,11 @@
               <FormLabel>Perishable Item</FormLabel>
               <FormControl>
                 <div class="flex items-center space-x-2">
-                  <Switch v-bind="componentField" />
+                  <Switch
+                    v-model="componentField.modelValue"
+                    :checked="componentField.modelValue"
+                    @update:model-value="(value: boolean) => componentField.onChange(value)"
+                  />
                   <Label>Mark as perishable</Label>
                 </div>
               </FormControl>
@@ -293,10 +297,10 @@
             <FormControl>
               <div class="flex items-center space-x-2">
                 <Switch
-                v-model="componentField.modelValue"
-                :checked="componentField.modelValue"
-                @update:model-value="(value: boolean) => componentField.onChange(value)"
-              />
+                  v-model="componentField.modelValue"
+                  :checked="componentField.modelValue"
+                  @update:model-value="(value: boolean) => componentField.onChange(value)"
+                />
                 <Label>Item is active</Label>
               </div>
             </FormControl>
@@ -323,7 +327,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, nextTick } from "vue";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
@@ -534,41 +538,15 @@ watch(
   () => props.item,
   (newItem) => {
     if (newItem && props.mode === "edit") {
-      form.setValues({
-        name: newItem.name || "",
-        description: newItem.description || "",
-        sku: newItem.sku || "",
-        productCode: newItem.productCode || "",
-        barcode: newItem.barcode || "",
-        category: newItem.category || "",
-        brand: newItem.brand || "",
-        unit: newItem.unit || Unit.PIECES,
-        weight: newItem.weight,
-        dimensions: newItem.dimensions || "",
-        color: newItem.color || "",
-        size: newItem.size || "",
-        currentStock: newItem.currentStock || 0,
-        minimumStock: newItem.minimumStock,
-        maximumStock: newItem.maximumStock,
-        sellingPrice: newItem.sellingPrice?.amount || 0,
-        costPrice: newItem.costPrice?.amount,
-        supplierName: newItem.supplierName || "",
-        isPerishable: newItem.isPerishable || false,
-        expiryDate: newItem.expiryDate,
-        isActive: newItem.isActive,
+      // Use nextTick to ensure form is fully initialized
+      nextTick(() => {
+        populateFormWithItem(newItem);
       });
-
-      if (newItem.sellingPrice?.currency) {
-        sellingPriceCurrency.value = newItem.sellingPrice.currency;
-      }
-      if (newItem.costPrice?.currency) {
-        costPriceCurrency.value = newItem.costPrice.currency;
-      }
     } else {
       resetForm();
     }
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 watch(
@@ -581,5 +559,46 @@ watch(
 // Lifecycle
 onMounted(() => {
   resetForm();
+
+  // If we're in edit mode and have an item, populate the form
+  if (props.mode === "edit" && props.item) {
+    nextTick(() => {
+      populateFormWithItem(props.item);
+    });
+  }
 });
+
+// Helper function to populate form with item data
+const populateFormWithItem = (item: any) => {
+  form.setValues({
+    name: item.name || "",
+    description: item.description || "",
+    sku: item.sku || "",
+    productCode: item.productCode || "",
+    barcode: item.barcode || "",
+    category: item.category || "",
+    brand: item.brand || "",
+    unit: item.unit || Unit.PIECES,
+    weight: item.weight || undefined,
+    dimensions: item.dimensions || "",
+    color: item.color || "",
+    size: item.size || "",
+    currentStock: item.currentStock || 0,
+    minimumStock: item.minimumStock || undefined,
+    maximumStock: item.maximumStock || undefined,
+    sellingPrice: item.sellingPrice?.amount || 0,
+    costPrice: item.costPrice?.amount || undefined,
+    supplierName: item.supplierName || "",
+    isPerishable: item.isPerishable || false,
+    expiryDate: item.expiryDate || undefined,
+    isActive: item.isActive !== undefined ? item.isActive : true,
+  });
+
+  if (item.sellingPrice?.currency) {
+    sellingPriceCurrency.value = item.sellingPrice.currency;
+  }
+  if (item.costPrice?.currency) {
+    costPriceCurrency.value = item.costPrice.currency;
+  }
+};
 </script>
