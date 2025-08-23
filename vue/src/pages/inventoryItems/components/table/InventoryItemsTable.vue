@@ -187,7 +187,6 @@ import {
   useVueTable,
 } from "@tanstack/vue-table";
 import {
-  ArrowUpDown,
   ChevronDown,
   ChevronsLeft,
   ChevronLeft,
@@ -195,10 +194,9 @@ import {
   ChevronsRight,
 } from "lucide-vue-next";
 
-import { h, ref } from "vue";
+import { ref } from "vue";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -221,8 +219,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { CubeIcon, EyeIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
 import type { InventoryItem } from "@/types/global";
 import { createColumns } from "./columns";
 

@@ -95,8 +95,6 @@
 import { ref, computed, watch, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { useInventoryItems } from "@/composables/useInventoryItems";
-import { queryClient } from "@/config/query";
-import { queryKeys } from "@/config/query";
 
 // Custom Components
 import {
@@ -111,6 +109,7 @@ import {
   DeleteConfirmationDialog,
 } from "./components";
 import { toast } from "vue-sonner";
+import { queryUtils } from "@/config/query";
 
 // Composables
 const route = useRoute();
@@ -152,23 +151,6 @@ const inventoryItemsQuery = useInventoryItemsList(
   !!route.params.inventoryId
 );
 
-// Watch for filter changes to ensure proper query handling
-watch(
-  () => [filters.searchTerm, filters.category, filters.brand, filters.isActive],
-  async () => {
-    // Reset to first page when filters change
-    currentPage.value = 0;
-
-    // Force a refetch when filters change
-    try {
-      await inventoryItemsQuery.refetch();
-    } catch (error) {
-      console.error("Filter change refetch error:", error);
-    }
-  },
-  { deep: true }
-);
-
 // ===== COMPUTED =====
 const isLoading = computed(() => inventoryItemsQuery.isLoading.value);
 const error = computed(() => inventoryItemsQuery.error.value);
@@ -197,7 +179,8 @@ const deleteMutation = useDeleteInventoryItem();
 
 const handleSearch = async () => {
   currentPage.value = 0;
-  // Force a refetch when search is triggered
+  // Invalidate cache and force a refetch when search is triggered
+  queryUtils.clearAll();
   try {
     await inventoryItemsQuery.refetch();
   } catch (error) {
@@ -212,7 +195,8 @@ const clearFilters = async () => {
   filters.isActive = "all";
   currentPage.value = 0;
 
-  // Force a refetch after clearing filters
+  // Invalidate cache and force a refetch after clearing filters
+  queryUtils.clearAll();
   try {
     await inventoryItemsQuery.refetch();
   } catch (error) {
@@ -225,6 +209,9 @@ const refreshItems = async () => {
   if (!route.params.inventoryId || (route.params.inventoryId as string).length === 0) {
     return;
   }
+
+  // Invalidate the specific query cache first to ensure fresh data
+  queryUtils.clearAll();
 
   // Manually refetch the current query
   try {
@@ -273,6 +260,10 @@ const confirmDelete = async () => {
 };
 
 const handleDialogSuccess = async () => {
+  // Invalidate the specific query cache first to ensure fresh data
+  queryUtils.clearAll();
+
+  // Then refetch the current query
   await inventoryItemsQuery.refetch();
   showDialog.value = false;
 };

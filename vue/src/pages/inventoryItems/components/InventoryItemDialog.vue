@@ -359,7 +359,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useInventoryItems } from "@/composables/useInventoryItems";
-import type { CreateInventoryItemRequest } from "@/services/inventoryItemService";
+import type {
+  CreateInventoryItemRequest,
+  UpdateInventoryItemRequest,
+} from "@/services/inventoryItemService";
 import type { Currency } from "@/types/global";
 import { Unit, Currency as CurrencyEnum } from "@/types/global";
 
@@ -485,7 +488,7 @@ const resetForm = () => {
 
 const handleSubmit = async (values: any) => {
   try {
-    const formData: CreateInventoryItemRequest = {
+    const formData: CreateInventoryItemRequest | UpdateInventoryItemRequest = {
       userId: "", // Will be set by the service
       inventoryId: props.inventoryId,
       name: values.name,
@@ -516,10 +519,11 @@ const handleSubmit = async (values: any) => {
       supplierName: values.supplierName,
       isPerishable: values.isPerishable,
       expiryDate: values.expiryDate,
+      isActive: values.isActive,
     };
 
     if (props.mode === "create") {
-      const newItem = await createMutation.mutateAsync(formData);
+      const newItem = await createMutation.mutateAsync(formData as CreateInventoryItemRequest);
       if (newItem.success) {
         resetForm();
         emit("success");
@@ -527,7 +531,7 @@ const handleSubmit = async (values: any) => {
     } else {
       const updatedItem = await updateMutation.mutateAsync({
         id: props.item.id,
-        itemData: formData,
+        itemData: formData as UpdateInventoryItemRequest,
         inventoryId: props.inventoryId,
       });
       if (updatedItem.success) {

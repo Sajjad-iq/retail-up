@@ -3,7 +3,7 @@ import { computed, unref, type Ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { inventoryItemService } from '@/services/inventoryItemService'
 import { toast } from 'vue-sonner'
-import { queryClient, queryKeys, queryUtils } from '@/config/query'
+import { queryClient, queryKeys,queryUtils} from '@/config/query'
 import type {
     CreateInventoryItemRequest,
     UpdateInventoryItemRequest,
