@@ -9,16 +9,11 @@ import "vue-sonner/style.css"; // vue-sonner v2 requires this import
 
 const { isAuthenticated, initialize } = useAuth();
 const authStore = useAuthStore();
-
 // Show main layout for authenticated users who have selected an organization
 // Show organization selection for authenticated users without organization
 // Show auth routes without main layout
 const showMainLayout = computed(() => {
   return isAuthenticated.value && authStore.hasSelectedOrganization;
-});
-
-const showOrganizationSelection = computed(() => {
-  return isAuthenticated.value && !authStore.hasSelectedOrganization;
 });
 
 onMounted(() => {
@@ -34,12 +29,9 @@ onMounted(() => {
     </MainLayout>
 
     <!-- Show organization selection for authenticated users without organization -->
-    <div v-else-if="showOrganizationSelection" class="min-h-screen bg-gray-50 w-full">
+    <div v-else class="min-h-screen w-full">
       <router-view />
     </div>
-
-    <!-- Show auth routes without main layout -->
-    <router-view v-else />
 
     <!-- Toast notifications -->
     <Toaster />
