@@ -519,17 +519,22 @@ const handleSubmit = async (values: any) => {
     };
 
     if (props.mode === "create") {
-      await createMutation.mutateAsync(formData);
+      const newItem = await createMutation.mutateAsync(formData);
+      if (newItem.success) {
+        resetForm();
+        emit("success");
+      }
     } else {
-      await updateMutation.mutateAsync({
+      const updatedItem = await updateMutation.mutateAsync({
         id: props.item.id,
         itemData: formData,
         inventoryId: props.inventoryId,
       });
+      if (updatedItem.success) {
+        resetForm();
+        emit("success");
+      }
     }
-
-    emit("success");
-    resetForm();
   } catch (error) {
     console.error("Form submission error:", error);
   }
@@ -552,13 +557,6 @@ watch(
     }
   },
   { immediate: true, deep: true }
-);
-
-watch(
-  () => props.inventoryId,
-  (newId) => {
-    // Update form when inventory changes
-  }
 );
 
 // Lifecycle
@@ -610,7 +608,5 @@ const populateFormWithItem = (item: any) => {
   if (item.costPrice?.currency) {
     costPriceCurrency.value = item.costPrice.currency;
   }
-
-  console.log("Form values after population:", form.values);
 };
 </script>

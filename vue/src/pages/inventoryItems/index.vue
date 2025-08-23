@@ -272,8 +272,8 @@ const confirmDelete = async () => {
   selectedItem.value = null;
 };
 
-const handleDialogSuccess = () => {
+const handleDialogSuccess = async () => {
+  await inventoryItemsQuery.refetch();
   showDialog.value = false;
-  // The queries will automatically refetch due to cache invalidation
 };
 </script>
