@@ -46,11 +46,6 @@ public class InventoryItemUpdateUtils {
             throw new BadRequestException("This Inventory Disabled");
         }
 
-        // Guard: item must be active for updates
-        if (Boolean.FALSE.equals(existing.getIsActive())) {
-            throw new BadRequestException("This Item Disabled");
-        }
-
         // name is required
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new BadRequestException("Name is required");
