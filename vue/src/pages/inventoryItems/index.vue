@@ -59,6 +59,7 @@
         @delete="deleteItem"
         @view="viewItemDetails"
         @page-change="handlePageChange"
+        @page-size-change="handlePageSizeChange"
       />
 
       <!-- Empty State -->
@@ -284,5 +285,10 @@ const handleImportSuccess = async () => {
   // Invalidate cache and refetch after successful import
   queryUtils.clearAll();
   await inventoryItemsQuery.refetch();
+};
+
+const handlePageSizeChange = (size: number) => {
+  pageSize.value = size;
+  refreshItems();
 };
 </script>

@@ -72,21 +72,16 @@
 
         <div class="flex items-center space-x-2">
           <span class="text-sm text-muted-foreground">Show</span>
-          <Select
+          <select
             :value="table.getState().pagination.pageSize.toString()"
-            @update:value="(value: string) => table.setPageSize(Number(value))"
-            defaultValue="20"
+            @change="handlePageSizeChange"
+            class="h-8 w-[65px] border border-border rounded-md bg-background text-foreground text-sm px-2"
           >
-            <SelectTrigger class="h-8 w-[65px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
           <span class="text-sm text-muted-foreground">per page</span>
         </div>
       </div>
@@ -172,12 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-} from "@tanstack/vue-table";
+import type { ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/vue-table";
 import {
   FlexRender,
   getCoreRowModel,
@@ -203,13 +193,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import {
   Table,
@@ -239,10 +222,27 @@ interface Emits {
   (e: "delete", item: InventoryItem): void;
   (e: "view", item: InventoryItem): void;
   (e: "pageChange", page: number): void;
+  (e: "pageSizeChange", pageSize: number): void;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+// Handle page size change
+const handlePageSizeChange = (event: Event) => {
+  const value = (event.target as HTMLSelectElement).value;
+  const newPageSize = Number(value);
+
+  // Update table pagination
+  table.setPageSize(newPageSize);
+
+  // Update local pagination state
+  pagination.value.pageSize = newPageSize;
+  pagination.value.pageIndex = 0; // Reset to first page
+
+  // Emit to parent
+  emit("pageSizeChange", newPageSize);
+};
 
 // Define columns for the data table
 const columns = createColumns({
@@ -289,6 +289,10 @@ const getVisiblePageNumbers = (): (number | string)[] => {
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: props.pagination?.pageSize || 20,
+});
 const columnVisibility = ref<VisibilityState>({
   // Essential columns - visible by default
   select: true,
@@ -355,12 +359,22 @@ const table = useVueTable<InventoryItem>({
       rowSelection.value = updaterOrValue;
     }
   },
+  onPaginationChange: (updaterOrValue) => {
+    if (typeof updaterOrValue === "function") {
+      pagination.value = updaterOrValue(pagination.value);
+    } else {
+      pagination.value = updaterOrValue;
+    }
+  },
   state: {
     get sorting() {
       return sorting.value;
     },
     get columnFilters() {
       return columnFilters.value;
+    },
+    get pagination() {
+      return pagination.value;
     },
     get columnVisibility() {
       return columnVisibility.value;
