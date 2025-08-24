@@ -284,7 +284,5 @@ const handleImportSuccess = async () => {
   // Invalidate cache and refetch after successful import
   queryUtils.clearAll();
   await inventoryItemsQuery.refetch();
-  importSuccess();
-  toast.success("Items imported successfully");
 };
 </script>

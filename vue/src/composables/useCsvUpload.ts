@@ -69,11 +69,11 @@ export function useCsvUpload() {
     if (!uploadResult) return ''
 
     if (uploadResult.failedItems === 0) {
-      return 'border-green-200 bg-green-50'
+      return 'border-border bg-muted'
     } else if (uploadResult.successfulItems === 0) {
-      return 'border-red-200 bg-red-50'
+      return 'border-border bg-muted'
     } else {
-      return 'border-yellow-200 bg-yellow-50'
+      return 'border-border bg-muted'
     }
   }
 

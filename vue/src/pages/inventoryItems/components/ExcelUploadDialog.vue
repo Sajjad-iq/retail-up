@@ -92,17 +92,17 @@
         <div v-if="uploadResult" class="space-y-3">
           <div class="p-4 rounded-lg border" :class="getResultBorderClass()">
             <div class="flex items-center space-x-2">
-              <CheckCircle v-if="uploadResult.successfulItems > 0" class="w-5 h-5 text-green-600" />
-              <AlertCircle v-if="uploadResult.failedItems > 0" class="w-5 h-5 text-red-600" />
+              <CheckCircle v-if="uploadResult.successfulItems > 0" class="w-5 h-5 text-green-400" />
+              <AlertCircle v-if="uploadResult.failedItems > 0" class="w-5 h-5 text-red-400" />
               <h4 class="font-medium">Upload Complete</h4>
             </div>
 
             <div class="mt-2 space-y-1 text-sm">
               <p>Total rows processed: {{ uploadResult.totalRows }}</p>
-              <p class="text-green-600">
+              <p class="text-blue-400">
                 Successfully created: {{ uploadResult.successfulItems }} items
               </p>
-              <p v-if="uploadResult.failedItems > 0" class="text-red-600">
+              <p v-if="uploadResult.failedItems > 0" class="text-red-400">
                 Failed: {{ uploadResult.failedItems }} items
               </p>
             </div>
@@ -110,10 +110,8 @@
             <!-- Error Details -->
             <div v-if="uploadResult.errors && uploadResult.errors.length > 0" class="mt-3">
               <details class="text-sm">
-                <summary class="cursor-pointer text-red-600 font-medium">
-                  View Error Details
-                </summary>
-                <ul class="mt-2 space-y-1 text-xs text-red-600">
+                <summary class="cursor-pointer text-red-400 font-medium">View Errors</summary>
+                <ul class="mt-2 space-y-1 text-xs text-red-400">
                   <li v-for="(error, index) in uploadResult.errors" :key="index">
                     {{ error }}
                   </li>
@@ -130,7 +128,9 @@
           </Button>
           <Button type="button" @click="handleUpload" :disabled="!selectedFile || isUploading">
             <span v-if="isUploading" class="flex items-center gap-2">
-              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <div
+                class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"
+              ></div>
               Uploading...
             </span>
             <span v-else>Upload Items</span>
@@ -142,10 +142,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { toast } from "vue-sonner";
 import { useAuthStore } from "@/stores/auth";
-import { excelUploadService, type ExcelUploadResponse } from "@/services/excelUploadService";
+import { excelUploadService } from "@/services/excelUploadService";
 import { useCsvUpload } from "@/composables/useCsvUpload";
 
 // UI Components
@@ -167,13 +167,7 @@ interface Props {
   inventoryId: string;
 }
 
-interface Emits {
-  (e: "update:open", value: boolean): void;
-  (e: "success"): void;
-}
-
 const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
 
 // Auth store
 const authStore = useAuthStore();
@@ -187,9 +181,6 @@ const fileInput = ref<HTMLInputElement>();
 // Extract state from composable
 const { selectedFile, isDragOver, isUploading, isDownloading, uploadProgress, uploadResult } =
   csvUpload;
-
-// Computed
-const canUpload = computed(() => selectedFile.value && !isUploading.value);
 
 // Methods
 const triggerFileInput = () => {
@@ -249,14 +240,12 @@ const handleUpload = async () => {
       authStore.user?.id || "",
       (message) => {
         toast.success(message);
-        emit("success");
       },
       (message) => {
         toast.error(message);
       }
     );
   } catch (error) {
-    console.error("Upload failed:", error);
     toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"));
   }
 };
