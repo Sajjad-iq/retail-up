@@ -34,7 +34,7 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/vue/24/outline";
 import { Upload, Download } from "lucide-vue-next";
 import { toast } from "vue-sonner";
-import { useCsvExport } from "@/composables/useCsvExport";
+import { useCsvExport } from "@/pages/inventoryItems/composeables/useCsvExport";
 
 interface Props {
   items: any[];

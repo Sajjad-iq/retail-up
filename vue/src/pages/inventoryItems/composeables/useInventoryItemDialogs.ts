@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
 import { excelUploadService } from '@/services/excelUploadService'
-import { useCsvUpload } from '@/composables/useCsvUpload'
+import { useCsvUpload } from '@/pages/inventoryItems/composeables/useCsvUpload'
 
 export function useInventoryItemDialogs() {
   // Dialog state
@@ -69,33 +69,17 @@ export function useInventoryItemDialogs() {
     selectedItem.value = null
   }
 
-  // Excel upload methods
+  // Excel upload methods (simplified using CSV composable convenience methods)
   const triggerFileInput = () => {
     csvUpload.triggerFileInput(fileInput)
   }
 
   const handleFileSelect = (event: Event) => {
-    csvUpload.handleFileSelect(
-      event,
-      () => {
-        toast.success("File selected successfully")
-      },
-      (error) => {
-        toast.error(error)
-      }
-    )
+    csvUpload.handleFileSelectWithToast(event, toast)
   }
 
   const handleFileDrop = (event: DragEvent) => {
-    csvUpload.handleFileDrop(
-      event,
-      () => {
-        toast.success("File selected successfully")
-      },
-      (error) => {
-        toast.error(error)
-      }
-    )
+    csvUpload.handleFileDropWithToast(event, toast)
   }
 
   const removeFile = () => {
@@ -107,30 +91,20 @@ export function useInventoryItemDialogs() {
   }
 
   const downloadTemplate = async () => {
-    await csvUpload.handleTemplateDownload(
+    await csvUpload.handleTemplateDownloadWithToast(
       () => excelUploadService.downloadTemplate(),
-      () => {
-        toast.success("Template downloaded successfully")
-      },
-      (error) => {
-        toast.error(error)
-      }
+      toast
     )
   }
 
   const handleUpload = async (inventoryId: string) => {
     try {
-      await csvUpload.handleUpload(
+      await csvUpload.handleUploadWithToast(
         (file: File, inventoryId: string, userId: string) =>
           excelUploadService.uploadCsvFile(file, inventoryId, userId),
         inventoryId,
         authStore.user?.id || "",
-        (message) => {
-          toast.success(message)
-        },
-        (message) => {
-          toast.error(message)
-        }
+        toast
       )
     } catch (error) {
       toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"))

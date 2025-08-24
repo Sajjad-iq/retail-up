@@ -144,7 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { useInventoryItemDialogs } from "@/composables/useInventoryItemDialogs";
+import { useInventoryItemDialogs } from "@/pages/inventoryItems/composeables/useInventoryItemDialogs";
 
 // UI Components
 import {

@@ -80,7 +80,7 @@ export function useCsvUpload() {
   /**
    * Handle file selection and validation
    */
-  const handleFileSelect = (event: Event, onSuccess: () => void, onError: (error: string) => void): void => {
+  const handleFileSelect = (event: Event, onSuccess?: () => void, onError?: (error: string) => void): void => {
     const target = event.target as HTMLInputElement
     if (target.files && target.files[0]) {
       const file = target.files[0]
@@ -88,10 +88,10 @@ export function useCsvUpload() {
       
       if (validation.isValid) {
         selectedFile.value = file
-        onSuccess()
+        onSuccess?.()
       } else {
         selectedFile.value = null
-        onError(validation.error || 'Invalid file')
+        onError?.(validation.error || 'Invalid file')
       }
     }
   }
@@ -99,7 +99,7 @@ export function useCsvUpload() {
   /**
    * Handle file drop and validation
    */
-  const handleFileDrop = (event: DragEvent, onSuccess: () => void, onError: (error: string) => void): void => {
+  const handleFileDrop = (event: DragEvent, onSuccess?: () => void, onError?: (error: string) => void): void => {
     isDragOver.value = false
     if (event.dataTransfer?.files && event.dataTransfer.files[0]) {
       const file = event.dataTransfer.files[0]
@@ -107,10 +107,10 @@ export function useCsvUpload() {
       
       if (validation.isValid) {
         selectedFile.value = file
-        onSuccess()
+        onSuccess?.()
       } else {
         selectedFile.value = null
-        onError(validation.error || 'Invalid file')
+        onError?.(validation.error || 'Invalid file')
       }
     }
   }
@@ -171,23 +171,23 @@ export function useCsvUpload() {
   /**
    * Process upload result and show appropriate messages
    */
-  const processUploadResult = (result: any, onSuccess: (message: string) => void, onError: (message: string) => void): any => {
+  const processUploadResult = (result: any, onSuccess?: (message: string) => void, onError?: (message: string) => void): any => {
     uploadProgress.value = 100
 
     if (result.success && result.data) {
       uploadResult.value = result.data
 
       if (result.data.successfulItems > 0) {
-        onSuccess(`Successfully uploaded ${result.data.successfulItems} items`)
+        onSuccess?.(`Successfully uploaded ${result.data.successfulItems} items`)
       }
 
       if (result.data.failedItems > 0) {
-        onError(`${result.data.failedItems} items failed to upload`)
+        onError?.(`${result.data.failedItems} items failed to upload`)
       }
 
       return result.data
     } else {
-      onError(result.error || 'Upload failed')
+      onError?.(result.error || 'Upload failed')
       return null
     }
   }
@@ -195,20 +195,20 @@ export function useCsvUpload() {
   /**
    * Handle template download
    */
-  const handleTemplateDownload = async (downloadService: any, onSuccess: () => void, onError: (error: string) => void) => {
+  const handleTemplateDownload = async (downloadService: any, onSuccess?: () => void, onError?: (error: string) => void) => {
     try {
       isDownloading.value = true
       const result = await downloadService()
 
       if (result.success && result.data) {
         downloadTemplateFromBlob(result.data)
-        onSuccess()
+        onSuccess?.()
       } else {
-        onError(result.error || 'Failed to download template')
+        onError?.(result.error || 'Failed to download template')
       }
     } catch (error) {
       console.error('Download error:', error)
-      onError('Failed to download template')
+      onError?.('Failed to download template')
     } finally {
       isDownloading.value = false
     }
@@ -221,14 +221,14 @@ export function useCsvUpload() {
     uploadService: any,
     inventoryId: string,
     userId: string,
-    onSuccess: (message: string) => void,
-    onError: (message: string) => void,
+    onSuccess?: (message: string) => void,
+    onError?: (message: string) => void,
     onComplete?: () => void
   ) => {
     const validation = validateUploadPrerequisites(selectedFile.value, userId)
     
     if (!validation.isValid) {
-      onError(validation.error || 'Validation failed')
+      onError?.(validation.error || 'Validation failed')
       return
     }
 
@@ -250,10 +250,63 @@ export function useCsvUpload() {
       }
     } catch (error) {
       console.error('Upload error:', error)
-      onError('Failed to upload file')
+      onError?.('Failed to upload file')
     } finally {
       isUploading.value = false
     }
+  }
+
+  /**
+   * Handle upload with toast notifications (convenience wrapper)
+   */
+  const handleUploadWithToast = async (
+    uploadService: any,
+    inventoryId: string,
+    userId: string,
+    toast: any,
+    onComplete?: () => void
+  ) => {
+    await handleUpload(
+      uploadService,
+      inventoryId,
+      userId,
+      (message) => toast.success(message),
+      (message) => toast.error(message),
+      onComplete
+    )
+  }
+
+  /**
+   * Handle template download with toast notifications (convenience wrapper)
+   */
+  const handleTemplateDownloadWithToast = async (downloadService: any, toast: any) => {
+    await handleTemplateDownload(
+      downloadService,
+      () => toast.success("Template downloaded successfully"),
+      (error) => toast.error(error)
+    )
+  }
+
+  /**
+   * Handle file selection with toast notifications (convenience wrapper)
+   */
+  const handleFileSelectWithToast = (event: Event, toast: any) => {
+    handleFileSelect(
+      event,
+      () => toast.success("File selected successfully"),
+      (error) => toast.error(error)
+    )
+  }
+
+  /**
+   * Handle file drop with toast notifications (convenience wrapper)
+   */
+  const handleFileDropWithToast = (event: DragEvent, toast: any) => {
+    handleFileDrop(
+      event,
+      () => toast.success("File selected successfully"),
+      (error) => toast.error(error)
+    )
   }
 
   return {
@@ -281,6 +334,12 @@ export function useCsvUpload() {
     // Upload/Download
     handleUpload,
     handleTemplateDownload,
+    
+    // Convenience methods with toast
+    handleUploadWithToast,
+    handleTemplateDownloadWithToast,
+    handleFileSelectWithToast,
+    handleFileDropWithToast,
     
     // Utilities
     formatFileSize,

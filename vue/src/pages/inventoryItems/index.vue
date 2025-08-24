@@ -105,7 +105,7 @@
 import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useInventoryItems } from "@/composables/useInventoryItems";
-import { useInventoryItemDialogs } from "@/composables/useInventoryItemDialogs";
+import { useInventoryItemDialogs } from "@/pages/inventoryItems/composeables/useInventoryItemDialogs";
 import type { SearchFilters } from "./components/InventoryItemsSearchBar.vue";
 
 // Custom Components
