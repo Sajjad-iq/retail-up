@@ -48,10 +48,16 @@ public class ExcelUploadService {
     /**
      * Process Excel file and create inventory items
      */
-    @Transactional(rollbackFor = { Exception.class })
+    @Transactional(rollbackFor = { BadRequestException.class })
     public ExcelUploadResponse processExcelFile(MultipartFile file, String inventoryId, User user) {
         try {
             List<CreateInventoryItemRequest> items = parseExcelFile(file, inventoryId); // List of items to be created
+
+            if (items.isEmpty()) {
+                throw new BadRequestException(
+                        "No valid rows found in the CSV file. Please check the file format and ensure it contains data.");
+            }
+
             List<InventoryItem> createdItems = new ArrayList<>(); // List of created items
             List<String> errors = new ArrayList<>(); // List of errors
 
@@ -59,8 +65,25 @@ public class ExcelUploadService {
                 try {
                     CreateInventoryItemRequest itemRequest = items.get(i);
 
-                    // Check if the item already exists
-                    Optional<InventoryItem> existingItem = inventoryItemRepository.findById(itemRequest.getId());
+                    // Check if the item already exists by SKU, barcode, or product code
+                    Optional<InventoryItem> existingItem = Optional.empty();
+
+                    if (itemRequest.getSku() != null && !itemRequest.getSku().trim().isEmpty()) {
+                        existingItem = inventoryItemRepository.findBySkuAndInventoryId(itemRequest.getSku(),
+                                inventoryId);
+                    }
+
+                    if (existingItem.isEmpty() && itemRequest.getBarcode() != null
+                            && !itemRequest.getBarcode().trim().isEmpty()) {
+                        existingItem = inventoryItemRepository.findByBarcodeAndInventoryId(itemRequest.getBarcode(),
+                                inventoryId);
+                    }
+
+                    if (existingItem.isEmpty() && itemRequest.getProductCode() != null
+                            && !itemRequest.getProductCode().trim().isEmpty()) {
+                        existingItem = inventoryItemRepository
+                                .findByProductCodeAndInventoryId(itemRequest.getProductCode(), inventoryId);
+                    }
 
                     // If the item already exists, update it
                     if (existingItem.isPresent()) {
@@ -91,16 +114,23 @@ public class ExcelUploadService {
                         updateRequest.setExpiryDate(itemRequest.getExpiryDate());
                         updateRequest.setIsActive(true);
 
-                        InventoryItem updated = inventoryItemService.updateInventoryItem(itemRequest.getId(),
+                        InventoryItem updated = inventoryItemService.updateInventoryItem(existingItem.get().getId(),
                                 updateRequest);
                         createdItems.add(updated);
                     } else {
                         // If the item does not exist, create it
+                        // Set the actual user ID before creating
+                        itemRequest.setUserId(user.getId());
                         InventoryItem created = inventoryItemService.createInventoryItem(itemRequest);
                         createdItems.add(created);
                     }
                 } catch (Exception e) {
-                    errors.add("Row " + (i + 2) + ": " + e.getMessage());
+                    // Log the error for debugging
+                    String errorMessage = "Row " + (i + 2) + ": " + e.getMessage();
+                    if (e.getCause() != null) {
+                        errorMessage += " (Caused by: " + e.getCause().getMessage() + ")";
+                    }
+                    errors.add(errorMessage);
                 }
             }
 
@@ -122,21 +152,39 @@ public class ExcelUploadService {
      */
     private List<CreateInventoryItemRequest> parseExcelFile(MultipartFile file, String inventoryId) throws IOException {
         List<CreateInventoryItemRequest> items = new ArrayList<>();
+        final int EXPECTED_COLUMNS = 25; // Based on the CSV template structure
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             boolean isFirstLine = true;
 
             while ((line = reader.readLine()) != null) {
+
                 if (isFirstLine) {
                     isFirstLine = false;
                     continue; // Skip header row
                 }
 
-                if (line.trim().isEmpty())
+                if (line.trim().isEmpty()) {
                     continue;
+                }
 
-                String[] values = line.split(",");
+                String[] values = parseCsvLine(line);
+
+                // Validate column count
+                if (values.length < EXPECTED_COLUMNS) {
+                    String[] paddedValues = new String[EXPECTED_COLUMNS];
+                    System.arraycopy(values, 0, paddedValues, 0, values.length);
+                    for (int j = values.length; j < EXPECTED_COLUMNS; j++) {
+                        paddedValues[j] = "";
+                    }
+                    values = paddedValues;
+                } else if (values.length > EXPECTED_COLUMNS) {
+                    String[] truncatedValues = new String[EXPECTED_COLUMNS];
+                    System.arraycopy(values, 0, truncatedValues, 0, EXPECTED_COLUMNS);
+                    values = truncatedValues;
+                }
+
                 CreateInventoryItemRequest item = parseRow(values, inventoryId);
                 if (item != null) {
                     items.add(item);
@@ -148,34 +196,97 @@ public class ExcelUploadService {
     }
 
     /**
+     * Parse a CSV line, handling quoted fields and commas within fields
+     */
+    private String[] parseCsvLine(String line) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ',' && !inQuotes) {
+                result.add(current.toString().trim());
+                current = new StringBuilder();
+            } else {
+                current.append(c);
+            }
+        }
+
+        // Add the last field
+        result.add(current.toString().trim());
+
+        return result.toArray(new String[0]);
+    }
+
+    /**
      * Parse a single row from CSV and convert to CreateInventoryItemRequest
      */
     private CreateInventoryItemRequest parseRow(String[] values, String inventoryId) {
         try {
+            // Validate required fields first
+            String name = getStringValue(values, 0);
+            String unitStr = getStringValue(values, 7);
+            String currentStockStr = getStringValue(values, 12);
+            String sellingPriceAmountStr = getStringValue(values, 17);
+            String sellingPriceCurrencyStr = getStringValue(values, 18);
+
+            // Check required fields
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("Name is required");
+            }
+
+            if (unitStr == null || unitStr.trim().isEmpty()) {
+                throw new IllegalArgumentException("Unit is required");
+            }
+
+            if (currentStockStr == null || currentStockStr.trim().isEmpty()) {
+                throw new IllegalArgumentException("Current stock is required");
+            }
+
+            if (sellingPriceAmountStr == null || sellingPriceAmountStr.trim().isEmpty()) {
+                throw new IllegalArgumentException("Selling price amount is required");
+            }
+
+            if (sellingPriceCurrencyStr == null || sellingPriceCurrencyStr.trim().isEmpty()) {
+                throw new IllegalArgumentException("Selling price currency is required");
+            }
+
             CreateInventoryItemRequest item = new CreateInventoryItemRequest();
-            item.setName(getStringValue(values, 0));
+            item.setName(name);
             item.setDescription(getStringValue(values, 1));
             item.setSku(getStringValue(values, 2));
             item.setProductCode(getStringValue(values, 3));
             item.setBarcode(getStringValue(values, 4));
             item.setCategory(getStringValue(values, 5));
             item.setBrand(getStringValue(values, 6));
-            item.setUnit(parseUnit(getStringValue(values, 7)));
+            item.setUnit(parseUnit(unitStr));
             item.setWeight(parseBigDecimal(getStringValue(values, 8)));
             item.setDimensions(getStringValue(values, 9));
             item.setColor(getStringValue(values, 10));
             item.setSize(getStringValue(values, 11));
-            item.setCurrentStock(parseInteger(getStringValue(values, 12)));
+            item.setCurrentStock(parseInteger(currentStockStr));
             item.setMinimumStock(parseInteger(getStringValue(values, 13)));
             item.setMaximumStock(parseInteger(getStringValue(values, 14)));
             item.setCostPrice(parseMoney(getStringValue(values, 15), getStringValue(values, 16)));
-            item.setSellingPrice(parseMoney(getStringValue(values, 17), getStringValue(values, 18)));
+            item.setSellingPrice(parseMoney(sellingPriceAmountStr, sellingPriceCurrencyStr));
             item.setDiscountPrice(parseBigDecimal(getStringValue(values, 19)));
             item.setDiscountStartDate(parseDateTime(getStringValue(values, 20)));
             item.setDiscountEndDate(parseDateTime(getStringValue(values, 21)));
             item.setSupplierName(getStringValue(values, 22));
             item.setIsPerishable(parseBoolean(getStringValue(values, 23)));
-            item.setExpiryDate(parseDate(getStringValue(values, 24)));
+
+            // Handle expiry date - if empty string, set to null
+            String expiryDateStr = getStringValue(values, 24);
+            if (expiryDateStr != null && expiryDateStr.trim().isEmpty()) {
+                item.setExpiryDate(null);
+            } else {
+                item.setExpiryDate(parseDate(expiryDateStr));
+            }
+
             item.setInventoryId(inventoryId);
             item.setUserId("temp-user-id"); // This id will be overridden by the user id in the controller
 
@@ -192,7 +303,10 @@ public class ExcelUploadService {
         if (index >= values.length)
             return null;
         String value = values[index];
-        return value != null ? value.trim() : null;
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return value.trim();
     }
 
     private Integer parseInteger(String value) {

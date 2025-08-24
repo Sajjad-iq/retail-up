@@ -53,9 +53,10 @@ public class ExcelUploadUtils {
         }
         template.append("\n");
 
-        // Add example row
-        template.append(
-                "Sample Product,Product description,SAMPLE001,PROD001,123456789,Electronics,Brand Name,PIECES,100.5,10x5x2,Black,Medium,50,10,100,25.00,USD,29.99,USD,24.99,2024-01-01,2024-12-31,Supplier Inc,false,2025-12-31");
+        // Add example row with valid data that passes validation
+        // Note: When isPerishable is false, expiryDate should be empty/null
+        String exampleRow = "Sample Product,Product description,SAMPLE001,PROD001,123456789,Electronics,Brand Name,PIECES,100.5,10x5x2,Black,Medium,50,10,100,25.00,USD,29.99,USD,24.99,2024-01-01,2024-12-31,Supplier Inc,false,";
+        template.append(exampleRow);
 
         return template.toString();
     }

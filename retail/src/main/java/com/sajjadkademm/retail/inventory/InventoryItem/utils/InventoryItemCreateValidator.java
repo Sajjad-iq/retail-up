@@ -90,8 +90,11 @@ public class InventoryItemCreateValidator {
             request.setProductCode(request.getProductCode().trim());
 
         // Friendly uniqueness checks within inventory scope
-        if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {
-            throw new ConflictException("Item with SKU '" + request.getSku() + "' already exists in this inventory");
+        if (request.getSku() != null && !request.getSku().trim().isEmpty()) {
+            if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {
+                throw new ConflictException(
+                        "Item with SKU '" + request.getSku() + "' already exists in this inventory");
+            }
         }
         if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
             if (inventoryItemRepository.existsByBarcodeAndInventoryId(request.getBarcode(), request.getInventoryId())) {
@@ -163,10 +166,13 @@ public class InventoryItemCreateValidator {
                 throw new BadRequestException("Expiry date must be in the future for perishable items");
             }
         } else if (Boolean.FALSE.equals(isPerishable)) {
+            // For non-perishable items, expiry date should be null or empty
+            // Allow empty string from CSV to be treated as null
             if (expiryDate != null) {
                 throw new BadRequestException("Expiry date must be null for non-perishable items");
             }
         }
+        // If isPerishable is null (not specified), don't enforce expiry date rules
 
         // Hand off validated dependencies
         return new ValidatedCreateInventoryItemContext(inventory, user);

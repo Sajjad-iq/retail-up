@@ -241,19 +241,24 @@ const downloadTemplate = async () => {
 };
 
 const handleUpload = async () => {
-  await csvUpload.handleUpload(
-    (file: File, inventoryId: string, userId: string) =>
-      excelUploadService.uploadCsvFile(file, inventoryId, userId),
-    props.inventoryId,
-    authStore.user?.id || "",
-    (message) => {
-      toast.success(message);
-      emit("success");
-    },
-    (message) => {
-      toast.error(message);
-    }
-  );
+  try {
+    await csvUpload.handleUpload(
+      (file: File, inventoryId: string, userId: string) =>
+        excelUploadService.uploadCsvFile(file, inventoryId, userId),
+      props.inventoryId,
+      authStore.user?.id || "",
+      (message) => {
+        toast.success(message);
+        emit("success");
+      },
+      (message) => {
+        toast.error(message);
+      }
+    );
+  } catch (error) {
+    console.error("Upload failed:", error);
+    toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
 };
 
 const getResultBorderClass = () => {
