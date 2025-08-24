@@ -183,13 +183,7 @@ public class ExcelUploadService {
             String sellingPriceAmountStr = getStringValue(values, 17);
             String sellingPriceCurrencyStr = getStringValue(values, 18);
 
-            // Validate required fields (validation will be done by validator utilities
-            // later)
-            validateRequiredField(name, "Name");
-            validateRequiredField(unitStr, "Unit");
-            validateRequiredField(currentStockStr, "Current stock");
-            validateRequiredField(sellingPriceAmountStr, "Selling price amount");
-            validateRequiredField(sellingPriceCurrencyStr, "Selling price currency");
+            // Note: Detailed validation will be done by validator utilities later
 
             CreateInventoryItemRequest item = new CreateInventoryItemRequest();
             item.setName(name);
@@ -345,15 +339,6 @@ public class ExcelUploadService {
         updateRequest.setExpiryDate(createRequest.getExpiryDate());
         updateRequest.setIsActive(true);
         return updateRequest;
-    }
-
-    /**
-     * Validate required field for basic CSV parsing
-     */
-    private void validateRequiredField(String value, String fieldName) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException(fieldName + " is required");
-        }
     }
 
     // Helper methods for parsing different data types

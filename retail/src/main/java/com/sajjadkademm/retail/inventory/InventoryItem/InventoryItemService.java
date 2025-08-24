@@ -66,21 +66,6 @@ public class InventoryItemService {
     }
 
     /**
-     * Create inventory item without validation (for Excel upload)
-     * This method is used when validation is handled externally
-     */
-    @Transactional(rollbackFor = { Exception.class })
-    public InventoryItem createInventoryItemWithoutValidation(CreateInventoryItemRequest request, User user) {
-        // Create and save the inventory item
-        InventoryItem saved = createInventoryItemInternal(request, user);
-
-        // Record initial stock movement
-        recordInitialStockMovement(saved, user);
-
-        return saved;
-    }
-
-    /**
      * Create inventory item for Excel upload with result object
      * Returns a result object instead of throwing exceptions
      */
