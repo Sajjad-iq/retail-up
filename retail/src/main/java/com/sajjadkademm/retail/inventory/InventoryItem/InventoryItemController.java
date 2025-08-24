@@ -115,6 +115,18 @@ public class InventoryItemController {
         }
 
         /**
+         * Delete inventory item endpoint
+         */
+        @Operation(summary = "Delete Inventory Item", description = "Hard delete an inventory item from the database. Related movements are automatically deleted via database cascade.", operationId = "deleteInventoryItem")
+        @ApiResponse(responseCode = "200", description = "Inventory item deleted successfully")
+        @DeleteMapping("/{id}")
+        public ResponseEntity<Void> deleteInventoryItem(
+                        @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id) {
+                inventoryItemService.deleteInventoryItem(id);
+                return ResponseEntity.ok().build();
+        }
+
+        /**
          * Get inventory item by SKU endpoint
          */
         @Operation(summary = "Get Inventory Item by SKU", description = "Retrieve inventory item details by SKU within an inventory", operationId = "getInventoryItemBySku")

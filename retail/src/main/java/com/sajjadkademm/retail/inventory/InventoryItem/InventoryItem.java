@@ -11,6 +11,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
@@ -22,6 +24,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.math.BigDecimal;
+import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -34,6 +37,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
+import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovement;
 import com.sajjadkademm.retail.users.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -233,6 +237,11 @@ public class InventoryItem {
         @Column(name = "inventory_id", nullable = false)
         @NotNull(message = "Inventory ID is required")
         private String inventoryId;
+
+        // Inventory Movements (One-to-Many relationship)
+        @OneToMany(mappedBy = "inventoryItem", cascade = CascadeType.ALL, orphanRemoval = true)
+        @JsonIgnoreProperties("inventoryItem")
+        private List<InventoryMovement> inventoryMovements;
 
         // Audit Trail
         // Timestamp when the record was created (auto-generated)

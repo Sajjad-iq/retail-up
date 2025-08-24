@@ -179,14 +179,17 @@ public class InventoryItemService {
     }
 
     /**
-     * Delete inventory item (soft delete by setting isActive to false)
+     * Delete inventory item (hard delete from database)
+     * Related inventory movements are automatically deleted via JPA cascade
      */
+    @Transactional(rollbackFor = { Exception.class })
     public void deleteInventoryItem(String id) {
         InventoryItem item = inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found"));
 
-        item.setIsActive(false);
-        inventoryItemRepository.save(item);
+        // Delete the inventory item - related movements are automatically deleted via
+        // cascade
+        inventoryItemRepository.deleteById(id);
     }
 
     /**

@@ -395,5 +395,4 @@ public class InventoryMovementService {
     public List<InventoryMovement> getMovementsByReference(String referenceType, String referenceId) {
         return movementRepository.findByReferenceTypeAndReferenceIdOrderByCreatedAtDesc(referenceType, referenceId);
     }
-
 }
