@@ -8,7 +8,7 @@
           v-model="searchQuery"
           placeholder="Search by name, SKU, or barcode"
           class="w-full"
-          @keyup.enter="$emit('search')"
+          @keyup.enter="handleSearch"
         />
       </div>
 
@@ -43,11 +43,11 @@
     <!-- Action Buttons -->
     <div class="flex items-center justify-between mt-4">
       <div class="flex items-center gap-2">
-        <Button @click="$emit('search')" variant="default" class="flex items-center gap-2">
+        <Button @click="handleSearch" variant="default" class="flex items-center gap-2">
           <MagnifyingGlassIcon class="h-4 w-4" />
           Search
         </Button>
-        <Button @click="$emit('clear-filters')" variant="outline" class="flex items-center gap-2">
+        <Button @click="handleClearFilters" variant="outline" class="flex items-center gap-2">
           <XMarkIcon class="h-4 w-4" />
           Clear
         </Button>
@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -75,49 +75,88 @@ import {
 import { MagnifyingGlassIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/vue/24/outline";
 import { debounce } from "@/lib/utils";
 
-interface Props {
-  searchQuery: string;
+export interface SearchFilters {
+  searchTerm: string;
   category: string;
   brand: string;
-  activeOnly: string;
+  isActive: string;
 }
 
 interface Emits {
-  (e: "update:searchQuery", value: string): void;
-  (e: "update:category", value: string): void;
-  (e: "update:brand", value: string): void;
-  (e: "update:activeOnly", value: string): void;
-  (e: "search"): void;
+  (e: "filters-changed", filters: SearchFilters): void;
+  (e: "search", filters: SearchFilters): void;
   (e: "clear-filters"): void;
   (e: "refresh"): void;
 }
 
-const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-// Create debounced functions once
-const debouncedSearchQuery = debounce((value: string) => emit("update:searchQuery", value), 700);
-const debouncedCategory = debounce((value: string) => emit("update:category", value), 700);
-const debouncedBrand = debounce((value: string) => emit("update:brand", value), 700);
-const debouncedActiveOnly = debounce((value: string) => emit("update:activeOnly", value), 700);
+// Internal filter state
+const filters = ref<SearchFilters>({
+  searchTerm: "",
+  category: "",
+  brand: "",
+  isActive: "all",
+});
 
+// Computed properties for v-model
 const searchQuery = computed({
-  get: () => props.searchQuery,
-  set: (value) => debouncedSearchQuery(value),
+  get: () => filters.value.searchTerm,
+  set: (value) => {
+    filters.value.searchTerm = value;
+    debouncedFiltersChanged();
+  },
 });
 
 const category = computed({
-  get: () => props.category,
-  set: (value) => debouncedCategory(value),
+  get: () => filters.value.category,
+  set: (value) => {
+    filters.value.category = value;
+    debouncedFiltersChanged();
+  },
 });
 
 const brand = computed({
-  get: () => props.brand,
-  set: (value) => debouncedBrand(value),
+  get: () => filters.value.brand,
+  set: (value) => {
+    filters.value.brand = value;
+    debouncedFiltersChanged();
+  },
 });
 
 const activeOnly = computed({
-  get: () => props.activeOnly,
-  set: (value) => debouncedActiveOnly(value),
+  get: () => filters.value.isActive,
+  set: (value) => {
+    filters.value.isActive = value;
+    debouncedFiltersChanged();
+  },
+});
+
+// Debounced function to emit filter changes
+const debouncedFiltersChanged = debounce(() => {
+  emit("filters-changed", { ...filters.value });
+}, 500);
+
+// Handle search action
+const handleSearch = () => {
+  emit("search", { ...filters.value });
+};
+
+// Handle clear filters
+const handleClearFilters = () => {
+  filters.value = {
+    searchTerm: "",
+    category: "",
+    brand: "",
+    isActive: "all",
+  };
+  emit("clear-filters");
+  emit("filters-changed", { ...filters.value });
+};
+
+// Expose current filters for parent components
+defineExpose({
+  filters: computed(() => filters.value),
+  clearFilters: handleClearFilters,
 });
 </script>

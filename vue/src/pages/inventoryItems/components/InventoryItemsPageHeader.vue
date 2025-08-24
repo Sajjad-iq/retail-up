@@ -15,7 +15,7 @@
       </Button>
 
       <!-- Excel Export Button -->
-      <Button variant="outline" @click="$emit('export')" class="flex items-center gap-2">
+      <Button variant="outline" @click="handleExport" class="flex items-center gap-2">
         <Download class="h-4 w-4" />
         Export Excel
       </Button>
@@ -33,10 +33,37 @@
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/vue/24/outline";
 import { Upload, Download } from "lucide-vue-next";
+import { toast } from "vue-sonner";
+import { useCsvExport } from "@/composables/useCsvExport";
+
+interface Props {
+  items: any[];
+  filters: any;
+}
+
+const props = defineProps<Props>();
 
 defineEmits<{
   create: [];
   import: [];
-  export: [];
 }>();
+
+const csvExport = useCsvExport();
+
+const handleExport = () => {
+  if (!props.items || props.items.length === 0) {
+    toast.error("No items to export");
+    return;
+  }
+
+  try {
+    const csvContent = csvExport.convertToCsv(props.items);
+    const filename = csvExport.generateFilename(props.filters);
+    csvExport.downloadCsv(csvContent, filename);
+    toast.success("Items exported successfully");
+  } catch (error) {
+    console.error("Export error:", error);
+    toast.error("Failed to export items");
+  }
+};
 </script>

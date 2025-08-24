@@ -3,9 +3,10 @@
     <div class="max-w-7xl mx-auto">
       <!-- Page Header -->
       <InventoryItemsPageHeader
+        :items="tableItems"
+        :filters="currentFilters"
         @create="openCreateDialog"
         @import="openImportDialog"
-        @export="handleExport"
       />
 
       <div v-if="route.params.inventoryId" class="mb-4 flex items-center justify-between">
@@ -34,12 +35,10 @@
       <!-- Search and Filter Bar -->
       <div v-if="route.params.inventoryId" class="mb-6">
         <InventoryItemsSearchBar
-          v-model:search-query="filters.searchTerm"
-          v-model:category="filters.category"
-          v-model:brand="filters.brand"
-          v-model:active-only="filters.isActive"
+          ref="searchBarRef"
+          @filters-changed="handleFiltersChanged"
           @search="handleSearch"
-          @clear-filters="clearFilters"
+          @clear-filters="handleClearFilters"
           @refresh="refreshItems"
         />
       </div>
@@ -103,9 +102,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, reactive } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useInventoryItems } from "@/composables/useInventoryItems";
+import { useInventoryItemDialogs } from "@/composables/useInventoryItemDialogs";
+import type { SearchFilters } from "./components/InventoryItemsSearchBar.vue";
 
 // Custom Components
 import {
@@ -122,24 +123,37 @@ import {
 } from "./components";
 import { toast } from "vue-sonner";
 import { queryUtils } from "@/config/query";
-import { useCsvExport } from "@/composables/useCsvExport";
 
 // Composables
 const route = useRoute();
 const { useInventoryItemsList, useDeleteInventoryItem } = useInventoryItems();
+const dialogs = useInventoryItemDialogs();
+
+// Extract dialog state and actions
+const {
+  selectedItem,
+  showDialog,
+  showDetailsDialog,
+  showDeleteDialog,
+  showImportDialog,
+  dialogMode,
+  openCreateDialog,
+  editItem,
+  viewItemDetails,
+  deleteItem,
+  openImportDialog,
+  handleDialogSuccess: dialogSuccess,
+  handleImportSuccess: importSuccess,
+  handleDeleteConfirm,
+} = dialogs;
 
 // ===== REACTIVE STATE =====
-const selectedItem = ref<any>(null);
-const showDialog = ref(false);
-const showDetailsDialog = ref(false);
-const showDeleteDialog = ref(false);
-const showImportDialog = ref(false);
-const dialogMode = ref<"create" | "edit">("create");
 const currentPage = ref(0);
 const pageSize = ref(20);
+const searchBarRef = ref();
 
-// Filters
-const filters = reactive({
+// Current filters from search component
+const currentFilters = ref<SearchFilters>({
   searchTerm: "",
   category: "",
   brand: "",
@@ -148,10 +162,15 @@ const filters = reactive({
 
 // Computed filter for API calls
 const apiFilters = computed(() => ({
-  searchTerm: filters.searchTerm,
-  category: filters.category,
-  brand: filters.brand,
-  isActive: filters.isActive === "all" ? undefined : filters.isActive === "true" ? true : false,
+  searchTerm: currentFilters.value.searchTerm,
+  category: currentFilters.value.category,
+  brand: currentFilters.value.brand,
+  isActive:
+    currentFilters.value.isActive === "all"
+      ? undefined
+      : currentFilters.value.isActive === "true"
+      ? true
+      : false,
 }));
 
 // Queries - Pass reactive refs to make the query reactive to parameter changes
@@ -191,7 +210,14 @@ const tableItems = computed(() => {
 
 const deleteMutation = useDeleteInventoryItem();
 
-const handleSearch = async () => {
+// Handle filter changes from search component
+const handleFiltersChanged = (filters: SearchFilters) => {
+  currentFilters.value = { ...filters };
+  currentPage.value = 0;
+};
+
+const handleSearch = async (filters: SearchFilters) => {
+  currentFilters.value = { ...filters };
   currentPage.value = 0;
   // Invalidate cache and force a refetch when search is triggered
   queryUtils.clearAll();
@@ -202,13 +228,8 @@ const handleSearch = async () => {
   }
 };
 
-const clearFilters = async () => {
-  filters.searchTerm = "";
-  filters.category = "";
-  filters.brand = "";
-  filters.isActive = "all";
+const handleClearFilters = async () => {
   currentPage.value = 0;
-
   // Invalidate cache and force a refetch after clearing filters
   queryUtils.clearAll();
   try {
@@ -239,28 +260,6 @@ const handlePageChange = (page: number) => {
   currentPage.value = page;
 };
 
-const openCreateDialog = () => {
-  selectedItem.value = null;
-  dialogMode.value = "create";
-  showDialog.value = true;
-};
-
-const editItem = (item: any) => {
-  selectedItem.value = item;
-  dialogMode.value = "edit";
-  showDialog.value = true;
-};
-
-const viewItemDetails = (item: any) => {
-  selectedItem.value = item;
-  showDetailsDialog.value = true;
-};
-
-const deleteItem = (item: any) => {
-  selectedItem.value = item;
-  showDeleteDialog.value = true;
-};
-
 const confirmDelete = async () => {
   if (!selectedItem.value || !route.params.inventoryId) return;
 
@@ -269,8 +268,7 @@ const confirmDelete = async () => {
     inventoryId: route.params.inventoryId as string,
   });
 
-  showDeleteDialog.value = false;
-  selectedItem.value = null;
+  handleDeleteConfirm();
 };
 
 const handleDialogSuccess = async () => {
@@ -279,37 +277,14 @@ const handleDialogSuccess = async () => {
 
   // Then refetch the current query
   await inventoryItemsQuery.refetch();
-  showDialog.value = false;
-};
-
-const openImportDialog = () => {
-  showImportDialog.value = true;
+  dialogSuccess();
 };
 
 const handleImportSuccess = async () => {
   // Invalidate cache and refetch after successful import
   queryUtils.clearAll();
   await inventoryItemsQuery.refetch();
-  showImportDialog.value = false;
+  importSuccess();
   toast.success("Items imported successfully");
-};
-
-const csvExport = useCsvExport();
-
-const handleExport = () => {
-  if (!tableItems.value || tableItems.value.length === 0) {
-    toast.error("No items to export");
-    return;
-  }
-
-  try {
-    const csvContent = csvExport.convertToCsv(tableItems.value);
-    const filename = csvExport.generateFilename(filters);
-    csvExport.downloadCsv(csvContent, filename);
-    toast.success("Items exported successfully");
-  } catch (error) {
-    console.error("Export error:", error);
-    toast.error("Failed to export items");
-  }
 };
 </script>
