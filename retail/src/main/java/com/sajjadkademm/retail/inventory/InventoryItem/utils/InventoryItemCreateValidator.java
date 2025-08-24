@@ -23,6 +23,8 @@ import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -33,52 +35,114 @@ public class InventoryItemCreateValidator {
     private final OrganizationService organizationService;
     private final InventoryItemRepository inventoryItemRepository;
 
-    public ValidatedCreateInventoryItemContext validate(CreateInventoryItemRequest request) {
-        // Resolve and validate inventory
-        Inventory inventory = inventoryService.getInventoryById(request.getInventoryId());
-        if (inventory == null) {
-            throw new NotFoundException("Inventory not found");
+    /**
+     * Validation result containing errors and validated entities
+     */
+    public static class ValidationResult {
+        private final List<String> errors;
+        private final Inventory inventory;
+        private final User user;
+        private final boolean isValid;
+
+        public ValidationResult(List<String> errors, Inventory inventory, User user) {
+            this.errors = errors;
+            this.inventory = inventory;
+            this.user = user;
+            this.isValid = errors.isEmpty();
+        }
+
+        public List<String> getErrors() {
+            return errors;
+        }
+
+        public Inventory getInventory() {
+            return inventory;
+        }
+
+        public User getUser() {
+            return user;
+        }
+
+        public boolean isValid() {
+            return isValid;
+        }
+
+        public boolean hasErrors() {
+            return !errors.isEmpty();
+        }
+    }
+
+    /**
+     * Validate request and collect all errors instead of throwing exceptions
+     */
+    public ValidationResult validateAndCollectErrors(CreateInventoryItemRequest request) {
+        List<String> errors = new ArrayList<>();
+        Inventory inventory = null;
+        User user = null;
+
+        try {
+            // Resolve and validate inventory
+            inventory = inventoryService.getInventoryById(request.getInventoryId());
+            if (inventory == null) {
+                errors.add("Inventory not found");
+            }
+        } catch (Exception e) {
+            errors.add("Failed to resolve inventory: " + e.getMessage());
         }
 
         // name is required
         if (request.getName() == null || request.getName().trim().isEmpty()) {
-            throw new BadRequestException("Name is required");
+            errors.add("Name is required");
         }
 
         // unit is required
         if (request.getUnit() == null) {
-            throw new BadRequestException("Unit is required");
+            errors.add("Unit is required");
         }
 
         // current stock must be greater than or equal to 0
-        // current stock is required
         if (request.getCurrentStock() == null || request.getCurrentStock() < 0) {
-            throw new BadRequestException("Current stock cannot be negative");
+            errors.add("Current stock cannot be negative");
         }
+
         // minimum stock must be greater than or equal to 0
         if (request.getMinimumStock() != null && request.getMinimumStock() < 0) {
-            throw new BadRequestException("Minimum stock cannot be negative");
+            errors.add("Minimum stock cannot be negative");
         }
 
-        Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
-        if (organization == null) {
-            throw new NotFoundException("Organization not found");
-        }
-        OrganizationValidationUtils.assertOrganizationIsActive(organization);
+        // Validate organization if inventory was resolved
+        if (inventory != null) {
+            try {
+                Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
+                if (organization == null) {
+                    errors.add("Organization not found");
+                } else {
+                    try {
+                        OrganizationValidationUtils.assertOrganizationIsActive(organization);
+                    } catch (Exception e) {
+                        errors.add("Organization validation failed: " + e.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                errors.add("Failed to resolve organization: " + e.getMessage());
+            }
 
-        // Guard: inventory must be active
-        if (inventory.getIsActive() == false) {
-            throw new BadRequestException("This Inventory Disabled");
+            // Guard: inventory must be active
+            if (inventory.getIsActive() == false) {
+                errors.add("This Inventory is disabled");
+            }
         }
 
         // Resolve creating user
-        User user = userService.getUserById(request.getUserId());
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new UnauthorizedException("Only Active Users Can Create Inventory Items");
+        try {
+            user = userService.getUserById(request.getUserId());
+            if (user == null) {
+                errors.add("User not found");
+            } else if (user.getStatus() != UserStatus.ACTIVE) {
+                errors.add("Only Active Users Can Create Inventory Items");
+            }
+        } catch (Exception e) {
+            errors.add("Failed to resolve user: " + e.getMessage());
         }
 
         // Normalize string inputs
@@ -90,23 +154,38 @@ public class InventoryItemCreateValidator {
             request.setProductCode(request.getProductCode().trim());
 
         // Friendly uniqueness checks within inventory scope
-        if (request.getSku() != null && !request.getSku().trim().isEmpty()) {
-            if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {
-                throw new ConflictException(
-                        "Item with SKU '" + request.getSku() + "' already exists in this inventory");
+        if (inventory != null) {
+            if (request.getSku() != null && !request.getSku().trim().isEmpty()) {
+                try {
+                    if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {
+                        errors.add("Item with SKU '" + request.getSku() + "' already exists in this inventory");
+                    }
+                } catch (Exception e) {
+                    errors.add("Failed to check SKU uniqueness: " + e.getMessage());
+                }
             }
-        }
-        if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
-            if (inventoryItemRepository.existsByBarcodeAndInventoryId(request.getBarcode(), request.getInventoryId())) {
-                throw new ConflictException(
-                        "Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
+
+            if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
+                try {
+                    if (inventoryItemRepository.existsByBarcodeAndInventoryId(request.getBarcode(),
+                            request.getInventoryId())) {
+                        errors.add("Item with barcode '" + request.getBarcode() + "' already exists in this inventory");
+                    }
+                } catch (Exception e) {
+                    errors.add("Failed to check barcode uniqueness: " + e.getMessage());
+                }
             }
-        }
-        if (request.getProductCode() != null && !request.getProductCode().trim().isEmpty()) {
-            if (inventoryItemRepository.existsByProductCodeAndInventoryId(request.getProductCode(),
-                    request.getInventoryId())) {
-                throw new ConflictException(
-                        "Item with product code '" + request.getProductCode() + "' already exists in this inventory");
+
+            if (request.getProductCode() != null && !request.getProductCode().trim().isEmpty()) {
+                try {
+                    if (inventoryItemRepository.existsByProductCodeAndInventoryId(request.getProductCode(),
+                            request.getInventoryId())) {
+                        errors.add("Item with product code '" + request.getProductCode()
+                                + "' already exists in this inventory");
+                    }
+                } catch (Exception e) {
+                    errors.add("Failed to check product code uniqueness: " + e.getMessage());
+                }
             }
         }
 
@@ -115,10 +194,10 @@ public class InventoryItemCreateValidator {
         Integer maxStock = request.getMaximumStock();
         Integer currentStock = request.getCurrentStock();
         if (maxStock != null && minStock != null && maxStock < minStock) {
-            throw new BadRequestException("Maximum stock cannot be less than minimum stock");
+            errors.add("Maximum stock cannot be less than minimum stock");
         }
         if (maxStock != null && currentStock != null && currentStock > maxStock) {
-            throw new BadRequestException("Current stock cannot exceed maximum stock");
+            errors.add("Current stock cannot exceed maximum stock");
         }
 
         Money costPrice = request.getCostPrice();
@@ -126,15 +205,15 @@ public class InventoryItemCreateValidator {
 
         // Validate currency is provided
         if (sellingPrice != null && sellingPrice.getCurrency() == null) {
-            throw new BadRequestException("Currency is required for selling price");
+            errors.add("Currency is required for selling price");
         }
         if (costPrice != null && costPrice.getCurrency() == null) {
-            throw new BadRequestException("Currency is required for cost price");
+            errors.add("Currency is required for cost price");
         }
 
         if (costPrice != null && sellingPrice != null
                 && costPrice.getAmount().compareTo(sellingPrice.getAmount()) > 0) {
-            throw new BadRequestException("Selling price cannot be less than cost price");
+            errors.add("Selling price cannot be less than cost price");
         }
 
         BigDecimal discountPrice = request.getDiscountPrice();
@@ -142,17 +221,16 @@ public class InventoryItemCreateValidator {
         LocalDateTime discountEnd = request.getDiscountEndDate();
         if (discountPrice != null) {
             if (sellingPrice == null) {
-                throw new BadRequestException("Selling price is required when discount price is provided");
+                errors.add("Selling price is required when discount price is provided");
             }
             if (discountPrice.compareTo(sellingPrice.getAmount()) > 0) {
-                throw new BadRequestException("Discount price cannot exceed selling price");
+                errors.add("Discount price cannot exceed selling price");
             }
             if (discountStart == null || discountEnd == null) {
-                throw new BadRequestException(
-                        "Discount start and end dates are required when discount price is provided");
+                errors.add("Discount start and end dates are required when discount price is provided");
             }
-            if (discountStart.isAfter(discountEnd)) {
-                throw new BadRequestException("Discount start date cannot be after discount end date");
+            if (discountStart != null && discountEnd != null && discountStart.isAfter(discountEnd)) {
+                errors.add("Discount start date cannot be after discount end date");
             }
         }
 
@@ -160,21 +238,33 @@ public class InventoryItemCreateValidator {
         LocalDate expiryDate = request.getExpiryDate();
         if (Boolean.TRUE.equals(isPerishable)) {
             if (expiryDate == null) {
-                throw new BadRequestException("Expiry date is required for perishable items");
-            }
-            if (!expiryDate.isAfter(LocalDate.now())) {
-                throw new BadRequestException("Expiry date must be in the future for perishable items");
+                errors.add("Expiry date is required for perishable items");
+            } else if (!expiryDate.isAfter(LocalDate.now())) {
+                errors.add("Expiry date must be in the future for perishable items");
             }
         } else if (Boolean.FALSE.equals(isPerishable)) {
             // For non-perishable items, expiry date should be null or empty
             // Allow empty string from CSV to be treated as null
             if (expiryDate != null) {
-                throw new BadRequestException("Expiry date must be null for non-perishable items");
+                errors.add("Expiry date must be null for non-perishable items");
             }
         }
         // If isPerishable is null (not specified), don't enforce expiry date rules
 
-        // Hand off validated dependencies
-        return new ValidatedCreateInventoryItemContext(inventory, user);
+        return new ValidationResult(errors, inventory, user);
+    }
+
+    /**
+     * Original validate method for backward compatibility (throws exceptions)
+     */
+    public ValidatedCreateInventoryItemContext validate(CreateInventoryItemRequest request) {
+        ValidationResult result = validateAndCollectErrors(request);
+
+        if (result.hasErrors()) {
+            // For backward compatibility, throw the first error
+            throw new BadRequestException(result.getErrors().get(0));
+        }
+
+        return new ValidatedCreateInventoryItemContext(result.getInventory(), result.getUser());
     }
 }

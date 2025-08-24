@@ -1,7 +1,5 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
@@ -55,26 +53,16 @@ public class InventoryItemService {
      */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryItem createInventoryItem(CreateInventoryItemRequest request) {
-        try {
-            // Validate request and fetch required entities
-            ValidatedCreateInventoryItemContext context = inventoryItemCreateValidator.validate(request);
-            User user = context.getUser();
+        // Validate request using the validator utility
+        ValidatedCreateInventoryItemContext context = inventoryItemCreateValidator.validate(request);
 
-            // Create and save the inventory item
-            InventoryItem saved = createInventoryItemInternal(request, user);
+        // Create and save the inventory item
+        InventoryItem saved = createInventoryItemInternal(request, context.getUser());
 
-            // Record initial stock movement
-            recordInitialStockMovement(saved, user);
+        // Record initial stock movement
+        recordInitialStockMovement(saved, context.getUser());
 
-            return saved;
-
-        } catch (ConflictException e) {
-            throw e;
-        } catch (BadRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new BadRequestException("Failed to create inventory item: " + e.getMessage(), e);
-        }
+        return saved;
     }
 
     /**
@@ -83,18 +71,13 @@ public class InventoryItemService {
      */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryItem createInventoryItemWithoutValidation(CreateInventoryItemRequest request, User user) {
-        try {
-            // Create and save the inventory item
-            InventoryItem saved = createInventoryItemInternal(request, user);
+        // Create and save the inventory item
+        InventoryItem saved = createInventoryItemInternal(request, user);
 
-            // Record initial stock movement
-            recordInitialStockMovement(saved, user);
+        // Record initial stock movement
+        recordInitialStockMovement(saved, user);
 
-            return saved;
-
-        } catch (Exception e) {
-            throw new BadRequestException("Failed to create inventory item: " + e.getMessage(), e);
-        }
+        return saved;
     }
 
     /**
@@ -103,29 +86,24 @@ public class InventoryItemService {
      */
     @Transactional(rollbackFor = { Exception.class })
     public CreateInventoryItemResult createInventoryItemForExcelUpload(CreateInventoryItemRequest request, User user) {
+        // Use the new validation method that collects errors
+        InventoryItemCreateValidator.ValidationResult validationResult = inventoryItemCreateValidator
+                .validateAndCollectErrors(request);
+
+        // Return failure result if validation errors exist
+        return validationResult.hasErrors()
+                ? CreateInventoryItemResult.failure(String.join("; ", validationResult.getErrors()))
+                : createInventoryItemSuccessfully(request, user);
+    }
+
+    /**
+     * Helper method to create inventory item successfully
+     */
+    private CreateInventoryItemResult createInventoryItemSuccessfully(CreateInventoryItemRequest request, User user) {
         try {
-            // Basic validation for required fields
-            if (request.getName() == null || request.getName().trim().isEmpty()) {
-                return CreateInventoryItemResult.failure("Name is required");
-            }
-            if (request.getUnit() == null) {
-                return CreateInventoryItemResult.failure("Unit is required");
-            }
-            if (request.getCurrentStock() == null || request.getCurrentStock() < 0) {
-                return CreateInventoryItemResult.failure("Current stock must be non-negative");
-            }
-            if (request.getSellingPrice() == null) {
-                return CreateInventoryItemResult.failure("Selling price is required");
-            }
-
-            // Create and save the inventory item
             InventoryItem saved = createInventoryItemInternal(request, user);
-
-            // Record initial stock movement
             recordInitialStockMovement(saved, user);
-
             return CreateInventoryItemResult.success(saved);
-
         } catch (Exception e) {
             return CreateInventoryItemResult.failure("Failed to create inventory item: " + e.getMessage());
         }
@@ -174,7 +152,8 @@ public class InventoryItemService {
      */
     private void recordInitialStockMovement(InventoryItem item, User user) {
         Integer initialStock = item.getCurrentStock();
-        if (initialStock != null && initialStock >= 0) {
+        // Only record movement if stock is positive
+        if (initialStock != null && initialStock > 0) {
             inventoryMovementService.recordStockIn(
                     user,
                     item,
@@ -190,36 +169,23 @@ public class InventoryItemService {
      */
     @Transactional(rollbackFor = { Exception.class })
     public InventoryItem updateInventoryItem(String id, UpdateInventoryItemRequest request) {
-        try {
-            InventoryItem item = inventoryItemRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Inventory item not found"));
+        InventoryItem item = inventoryItemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
 
-            // get user
-            // validation
-            inventoryItemUpdateValidator.validate(item, request);
+        // Use validator utility for validation
+        inventoryItemUpdateValidator.validate(item, request);
 
-            // capture original stock before applying updates
-            Integer originalStock = item.getCurrentStock();
+        // Capture original stock before applying updates
+        Integer originalStock = item.getCurrentStock();
 
-            // apply field updates
-            inventoryItemUpdateValidator.applyUpdates(item, request);
+        // Apply field updates using validator utility
+        inventoryItemUpdateValidator.applyUpdates(item, request);
 
-            // track stock movements
-            InventoryItem updated = inventoryItemRepository.save(item);
+        // Save and track stock movements
+        InventoryItem updated = inventoryItemRepository.save(item);
+        inventoryItemUpdateValidator.trackStockMovements(updated, request, inventoryMovementService, originalStock);
 
-            inventoryItemUpdateValidator.trackStockMovements(updated, request, inventoryMovementService, originalStock);
-
-            return updated;
-        } catch (ConflictException e) {
-            throw e;
-        } catch (BadRequestException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            // Preserve NotFound for tests that assert this specific error
-            throw e;
-        } catch (Exception e) {
-            throw new BadRequestException("Failed to update inventory item: " + e.getMessage(), e);
-        }
+        return updated;
     }
 
     /**
@@ -252,7 +218,8 @@ public class InventoryItemService {
      */
     @Transactional(rollbackFor = { Exception.class })
     public void deleteInventoryItem(String id) {
-        InventoryItem item = inventoryItemRepository.findById(id)
+        // Verify item exists before deleting
+        inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found"));
 
         // Delete the inventory item - related movements are automatically deleted via

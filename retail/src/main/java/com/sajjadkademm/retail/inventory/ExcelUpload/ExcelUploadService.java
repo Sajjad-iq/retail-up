@@ -8,6 +8,8 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRe
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemUpdateUtils;
+import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
 import com.sajjadkademm.retail.users.User;
@@ -38,12 +40,18 @@ import java.util.Optional;
 public class ExcelUploadService {
     private final InventoryItemService inventoryItemService;
     private final InventoryItemRepository inventoryItemRepository;
+    private final InventoryItemUpdateUtils inventoryItemUpdateUtils;
+    private final InventoryMovementService inventoryMovementService;
 
     @Autowired
     public ExcelUploadService(InventoryItemService inventoryItemService,
-            InventoryItemRepository inventoryItemRepository) {
+            InventoryItemRepository inventoryItemRepository,
+            InventoryItemUpdateUtils inventoryItemUpdateUtils,
+            InventoryMovementService inventoryMovementService) {
         this.inventoryItemService = inventoryItemService;
         this.inventoryItemRepository = inventoryItemRepository;
+        this.inventoryItemUpdateUtils = inventoryItemUpdateUtils;
+        this.inventoryMovementService = inventoryMovementService;
     }
 
     /**
@@ -64,76 +72,15 @@ public class ExcelUploadService {
 
             for (int i = 0; i < items.size(); i++) {
                 CreateInventoryItemRequest itemRequest = items.get(i);
+                itemRequest.setUserId(user.getId());
 
-                // Check if the item already exists by SKU, barcode, or product code
-                Optional<InventoryItem> existingItem = Optional.empty();
+                int rowNumber = i + 2; // CSV row number (accounting for header)
 
-                if (itemRequest.getSku() != null && !itemRequest.getSku().trim().isEmpty()) {
-                    existingItem = inventoryItemRepository.findBySkuAndInventoryId(itemRequest.getSku(),
-                            inventoryId);
-                }
+                // Find existing item using validator utilities
+                Optional<InventoryItem> existingItem = findExistingItem(itemRequest, inventoryId);
 
-                if (existingItem.isEmpty() && itemRequest.getBarcode() != null
-                        && !itemRequest.getBarcode().trim().isEmpty()) {
-                    existingItem = inventoryItemRepository.findByBarcodeAndInventoryId(itemRequest.getBarcode(),
-                            inventoryId);
-                }
-
-                if (existingItem.isEmpty() && itemRequest.getProductCode() != null
-                        && !itemRequest.getProductCode().trim().isEmpty()) {
-                    existingItem = inventoryItemRepository
-                            .findByProductCodeAndInventoryId(itemRequest.getProductCode(), inventoryId);
-                }
-
-                // If the item already exists, update it
-                if (existingItem.isPresent()) {
-                    try {
-                        UpdateInventoryItemRequest updateRequest = new UpdateInventoryItemRequest();
-                        updateRequest.setUserId(user.getId());
-                        updateRequest.setName(itemRequest.getName());
-                        updateRequest.setDescription(itemRequest.getDescription());
-                        updateRequest.setSku(itemRequest.getSku());
-                        updateRequest.setProductCode(itemRequest.getProductCode());
-                        updateRequest.setBarcode(itemRequest.getBarcode());
-                        updateRequest.setCategory(itemRequest.getCategory());
-                        updateRequest.setBrand(itemRequest.getBrand());
-                        updateRequest.setUnit(itemRequest.getUnit());
-                        updateRequest.setWeight(itemRequest.getWeight());
-                        updateRequest.setDimensions(itemRequest.getDimensions());
-                        updateRequest.setColor(itemRequest.getColor());
-                        updateRequest.setSize(itemRequest.getSize());
-                        updateRequest.setCurrentStock(itemRequest.getCurrentStock());
-                        updateRequest.setMinimumStock(itemRequest.getMinimumStock());
-                        updateRequest.setMaximumStock(itemRequest.getMaximumStock());
-                        updateRequest.setCostPrice(itemRequest.getCostPrice());
-                        updateRequest.setSellingPrice(itemRequest.getSellingPrice());
-                        updateRequest.setDiscountPrice(itemRequest.getDiscountPrice());
-                        updateRequest.setDiscountStartDate(itemRequest.getDiscountStartDate());
-                        updateRequest.setDiscountEndDate(itemRequest.getDiscountEndDate());
-                        updateRequest.setSupplierName(itemRequest.getSupplierName());
-                        updateRequest.setIsPerishable(itemRequest.getIsPerishable());
-                        updateRequest.setExpiryDate(itemRequest.getExpiryDate());
-                        updateRequest.setIsActive(true);
-
-                        InventoryItem updated = inventoryItemService.updateInventoryItem(existingItem.get().getId(),
-                                updateRequest);
-                        createdItems.add(updated);
-                    } catch (Exception e) {
-                        String errorMessage = "Row " + (i + 2) + ": Failed to update existing item - " + e.getMessage();
-                        errors.add(errorMessage);
-                    }
-                } else {
-                    // If the item does not exist, create it
-                    // Set the actual user ID before creating
-                    itemRequest.setUserId(user.getId());
-                    CreateInventoryItemResult result = inventoryItemService
-                            .createInventoryItemForExcelUpload(itemRequest, user);
-                    if (result.isSuccess()) {
-                        createdItems.add(result.getItem());
-                    } else {
-                        errors.add("Row " + (i + 2) + ": " + result.getErrorMessage());
-                    }
-                }
+                // Process item (create or update) using validator utilities
+                processInventoryItem(existingItem, itemRequest, user, rowNumber, createdItems, errors);
             }
 
             return ExcelUploadResponse.builder()
@@ -229,33 +176,20 @@ public class ExcelUploadService {
      */
     private CreateInventoryItemRequest parseRow(String[] values, String inventoryId) {
         try {
-            // Validate required fields first
+            // Extract and validate required fields using validator utilities
             String name = getStringValue(values, 0);
             String unitStr = getStringValue(values, 7);
             String currentStockStr = getStringValue(values, 12);
             String sellingPriceAmountStr = getStringValue(values, 17);
             String sellingPriceCurrencyStr = getStringValue(values, 18);
 
-            // Check required fields
-            if (name == null || name.trim().isEmpty()) {
-                throw new IllegalArgumentException("Name is required");
-            }
-
-            if (unitStr == null || unitStr.trim().isEmpty()) {
-                throw new IllegalArgumentException("Unit is required");
-            }
-
-            if (currentStockStr == null || currentStockStr.trim().isEmpty()) {
-                throw new IllegalArgumentException("Current stock is required");
-            }
-
-            if (sellingPriceAmountStr == null || sellingPriceAmountStr.trim().isEmpty()) {
-                throw new IllegalArgumentException("Selling price amount is required");
-            }
-
-            if (sellingPriceCurrencyStr == null || sellingPriceCurrencyStr.trim().isEmpty()) {
-                throw new IllegalArgumentException("Selling price currency is required");
-            }
+            // Validate required fields (validation will be done by validator utilities
+            // later)
+            validateRequiredField(name, "Name");
+            validateRequiredField(unitStr, "Unit");
+            validateRequiredField(currentStockStr, "Current stock");
+            validateRequiredField(sellingPriceAmountStr, "Selling price amount");
+            validateRequiredField(sellingPriceCurrencyStr, "Selling price currency");
 
             CreateInventoryItemRequest item = new CreateInventoryItemRequest();
             item.setName(name);
@@ -281,13 +215,8 @@ public class ExcelUploadService {
             item.setSupplierName(getStringValue(values, 22));
             item.setIsPerishable(parseBoolean(getStringValue(values, 23)));
 
-            // Handle expiry date - if empty string, set to null
-            String expiryDateStr = getStringValue(values, 24);
-            if (expiryDateStr != null && expiryDateStr.trim().isEmpty()) {
-                item.setExpiryDate(null);
-            } else {
-                item.setExpiryDate(parseDate(expiryDateStr));
-            }
+            // Handle expiry date - let validator utilities handle null/empty validation
+            item.setExpiryDate(parseDate(getStringValue(values, 24)));
 
             item.setInventoryId(inventoryId);
             item.setUserId("temp-user-id"); // This id will be overridden by the user id in the controller
@@ -296,6 +225,134 @@ public class ExcelUploadService {
         } catch (Exception e) {
             // Return null for invalid rows, they will be counted as errors
             return null;
+        }
+    }
+
+    /**
+     * Find existing inventory item by SKU, barcode, or product code
+     */
+    private Optional<InventoryItem> findExistingItem(CreateInventoryItemRequest itemRequest, String inventoryId) {
+        // Check by SKU first
+        if (itemRequest.getSku() != null && !itemRequest.getSku().trim().isEmpty()) {
+            Optional<InventoryItem> existing = inventoryItemRepository.findBySkuAndInventoryId(itemRequest.getSku(),
+                    inventoryId);
+            if (existing.isPresent())
+                return existing;
+        }
+
+        // Check by barcode
+        if (itemRequest.getBarcode() != null && !itemRequest.getBarcode().trim().isEmpty()) {
+            Optional<InventoryItem> existing = inventoryItemRepository
+                    .findByBarcodeAndInventoryId(itemRequest.getBarcode(), inventoryId);
+            if (existing.isPresent())
+                return existing;
+        }
+
+        // Check by product code
+        if (itemRequest.getProductCode() != null && !itemRequest.getProductCode().trim().isEmpty()) {
+            return inventoryItemRepository.findByProductCodeAndInventoryId(itemRequest.getProductCode(), inventoryId);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Process inventory item (create new or update existing) using validator
+     * utilities
+     */
+    private void processInventoryItem(Optional<InventoryItem> existingItem, CreateInventoryItemRequest itemRequest,
+            User user, int rowNumber, List<InventoryItem> createdItems, List<String> errors) {
+        try {
+            if (existingItem.isPresent()) {
+                updateExistingItem(existingItem.get(), itemRequest, user, rowNumber, createdItems, errors);
+            } else {
+                createNewItem(itemRequest, user, rowNumber, createdItems, errors);
+            }
+        } catch (Exception e) {
+            errors.add("Row " + rowNumber + ": Unexpected error - " + e.getMessage());
+        }
+    }
+
+    /**
+     * Update existing inventory item using validator utilities
+     */
+    private void updateExistingItem(InventoryItem existingItem, CreateInventoryItemRequest itemRequest, User user,
+            int rowNumber, List<InventoryItem> createdItems, List<String> errors) {
+        UpdateInventoryItemRequest updateRequest = createUpdateRequestFromCreateRequest(itemRequest, user.getId());
+
+        // Use validator utility to validate and collect errors
+        InventoryItemUpdateUtils.ValidationResult validationResult = inventoryItemUpdateUtils
+                .validateAndCollectErrors(existingItem, updateRequest);
+
+        if (validationResult.hasErrors()) {
+            String errorMessage = String.join("; ", validationResult.getErrors());
+            errors.add("Row " + rowNumber + ": " + errorMessage);
+        } else {
+            // Use validator utility to apply updates and track movements
+            Integer originalStock = existingItem.getCurrentStock();
+            inventoryItemUpdateUtils.applyUpdates(existingItem, updateRequest);
+            InventoryItem updated = inventoryItemRepository.save(existingItem);
+            inventoryItemUpdateUtils.trackStockMovements(updated, updateRequest, inventoryMovementService,
+                    originalStock);
+            createdItems.add(updated);
+        }
+    }
+
+    /**
+     * Create new inventory item using validator utilities
+     */
+    private void createNewItem(CreateInventoryItemRequest itemRequest, User user, int rowNumber,
+            List<InventoryItem> createdItems, List<String> errors) {
+        // Use service method that leverages validator utilities
+        CreateInventoryItemResult result = inventoryItemService.createInventoryItemForExcelUpload(itemRequest, user);
+
+        if (result.isSuccess()) {
+            createdItems.add(result.getItem());
+        } else {
+            errors.add("Row " + rowNumber + ": " + result.getErrorMessage());
+        }
+    }
+
+    /**
+     * Create UpdateInventoryItemRequest from CreateInventoryItemRequest
+     */
+    private UpdateInventoryItemRequest createUpdateRequestFromCreateRequest(CreateInventoryItemRequest createRequest,
+            String userId) {
+        UpdateInventoryItemRequest updateRequest = new UpdateInventoryItemRequest();
+        updateRequest.setUserId(userId);
+        updateRequest.setName(createRequest.getName());
+        updateRequest.setDescription(createRequest.getDescription());
+        updateRequest.setSku(createRequest.getSku());
+        updateRequest.setProductCode(createRequest.getProductCode());
+        updateRequest.setBarcode(createRequest.getBarcode());
+        updateRequest.setCategory(createRequest.getCategory());
+        updateRequest.setBrand(createRequest.getBrand());
+        updateRequest.setUnit(createRequest.getUnit());
+        updateRequest.setWeight(createRequest.getWeight());
+        updateRequest.setDimensions(createRequest.getDimensions());
+        updateRequest.setColor(createRequest.getColor());
+        updateRequest.setSize(createRequest.getSize());
+        updateRequest.setCurrentStock(createRequest.getCurrentStock());
+        updateRequest.setMinimumStock(createRequest.getMinimumStock());
+        updateRequest.setMaximumStock(createRequest.getMaximumStock());
+        updateRequest.setCostPrice(createRequest.getCostPrice());
+        updateRequest.setSellingPrice(createRequest.getSellingPrice());
+        updateRequest.setDiscountPrice(createRequest.getDiscountPrice());
+        updateRequest.setDiscountStartDate(createRequest.getDiscountStartDate());
+        updateRequest.setDiscountEndDate(createRequest.getDiscountEndDate());
+        updateRequest.setSupplierName(createRequest.getSupplierName());
+        updateRequest.setIsPerishable(createRequest.getIsPerishable());
+        updateRequest.setExpiryDate(createRequest.getExpiryDate());
+        updateRequest.setIsActive(true);
+        return updateRequest;
+    }
+
+    /**
+     * Validate required field for basic CSV parsing
+     */
+    private void validateRequiredField(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " is required");
         }
     }
 
