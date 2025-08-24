@@ -8,3 +8,4 @@ export { default as InventoryItemsEmptyState } from './InventoryItemsEmptyState.
 export { default as InventoryItemDialog } from './InventoryItemDialog.vue'
 export { default as InventoryItemDetailsDialog } from './InventoryItemDetailsDialog.vue'
 export { default as DeleteConfirmationDialog } from './DeleteConfirmationDialog.vue'
+export { default as ExcelUploadDialog } from './ExcelUploadDialog.vue'

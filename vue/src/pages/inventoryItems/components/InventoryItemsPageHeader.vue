@@ -8,6 +8,19 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <!-- Excel Import Button -->
+      <Button variant="outline" @click="$emit('import')" class="flex items-center gap-2">
+        <Upload class="h-4 w-4" />
+        Import Excel
+      </Button>
+
+      <!-- Excel Export Button -->
+      <Button variant="outline" @click="$emit('export')" class="flex items-center gap-2">
+        <Download class="h-4 w-4" />
+        Export Excel
+      </Button>
+
+      <!-- Add Item Button -->
       <Button @click="$emit('create')" class="flex items-center gap-2">
         <PlusIcon class="h-4 w-4" />
         Add Item
@@ -19,8 +32,11 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/vue/24/outline";
+import { Upload, Download } from "lucide-vue-next";
 
 defineEmits<{
   create: [];
+  import: [];
+  export: [];
 }>();
 </script>

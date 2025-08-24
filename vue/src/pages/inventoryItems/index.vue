@@ -2,7 +2,11 @@
   <div class="min-h-screen bg-background p-8">
     <div class="max-w-7xl mx-auto">
       <!-- Page Header -->
-      <InventoryItemsPageHeader @create="openCreateDialog" />
+      <InventoryItemsPageHeader
+        @create="openCreateDialog"
+        @import="openImportDialog"
+        @export="handleExport"
+      />
 
       <div v-if="route.params.inventoryId" class="mb-4 flex items-center justify-between">
         <div class="flex items-center space-x-2">
@@ -74,6 +78,13 @@
         @success="handleDialogSuccess"
       />
 
+      <!-- Excel Import Dialog -->
+      <ExcelUploadDialog
+        v-model:open="showImportDialog"
+        :inventory-id="route.params.inventoryId as string"
+        @success="handleImportSuccess"
+      />
+
       <!-- Item Details Dialog -->
       <InventoryItemDetailsDialog
         v-model:open="showDetailsDialog"
@@ -107,9 +118,11 @@ import {
   InventoryItemsTable,
   InventoryItemsEmptyState,
   DeleteConfirmationDialog,
+  ExcelUploadDialog,
 } from "./components";
 import { toast } from "vue-sonner";
 import { queryUtils } from "@/config/query";
+import { useCsvExport } from "@/composables/useCsvExport";
 
 // Composables
 const route = useRoute();
@@ -120,6 +133,7 @@ const selectedItem = ref<any>(null);
 const showDialog = ref(false);
 const showDetailsDialog = ref(false);
 const showDeleteDialog = ref(false);
+const showImportDialog = ref(false);
 const dialogMode = ref<"create" | "edit">("create");
 const currentPage = ref(0);
 const pageSize = ref(20);
@@ -266,5 +280,36 @@ const handleDialogSuccess = async () => {
   // Then refetch the current query
   await inventoryItemsQuery.refetch();
   showDialog.value = false;
+};
+
+const openImportDialog = () => {
+  showImportDialog.value = true;
+};
+
+const handleImportSuccess = async () => {
+  // Invalidate cache and refetch after successful import
+  queryUtils.clearAll();
+  await inventoryItemsQuery.refetch();
+  showImportDialog.value = false;
+  toast.success("Items imported successfully");
+};
+
+const csvExport = useCsvExport();
+
+const handleExport = () => {
+  if (!tableItems.value || tableItems.value.length === 0) {
+    toast.error("No items to export");
+    return;
+  }
+
+  try {
+    const csvContent = csvExport.convertToCsv(tableItems.value);
+    const filename = csvExport.generateFilename(filters);
+    csvExport.downloadCsv(csvContent, filename);
+    toast.success("Items exported successfully");
+  } catch (error) {
+    console.error("Export error:", error);
+    toast.error("Failed to export items");
+  }
 };
 </script>
