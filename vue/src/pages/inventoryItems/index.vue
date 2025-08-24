@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useInventoryItems } from "@/composables/useInventoryItems";
 import { useInventoryItemDialogs } from "@/composables/useInventoryItemDialogs";
@@ -127,9 +127,6 @@ import { queryUtils } from "@/config/query";
 // Composables
 const route = useRoute();
 const { useInventoryItemsList, useDeleteInventoryItem } = useInventoryItems();
-const dialogs = useInventoryItemDialogs();
-
-// Extract dialog state and actions
 const {
   selectedItem,
   showDialog,
@@ -145,7 +142,7 @@ const {
   handleDialogSuccess: dialogSuccess,
   handleImportSuccess: importSuccess,
   handleDeleteConfirm,
-} = dialogs;
+} = useInventoryItemDialogs();
 
 // ===== REACTIVE STATE =====
 const currentPage = ref(0);
@@ -267,6 +264,9 @@ const confirmDelete = async () => {
     id: selectedItem.value.id,
     inventoryId: route.params.inventoryId as string,
   });
+  queryUtils.clearAll();
+
+  await inventoryItemsQuery.refetch();
 
   handleDeleteConfirm();
 };
