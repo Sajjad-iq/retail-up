@@ -64,7 +64,7 @@
       <!-- Empty State -->
       <InventoryItemsEmptyState
         v-else-if="route.params.inventoryId"
-        :search-query="filters.searchTerm"
+        :search-query="currentFilters.searchTerm"
         @create="openCreateDialog"
       />
 
