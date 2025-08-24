@@ -1,5 +1,5 @@
 import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useAuth } from '@/composables/useAuth'
 import { AccountType } from '@/types/global'
 
 export async function authGuard(
@@ -7,28 +7,38 @@ export async function authGuard(
     from: RouteLocationNormalized,
     next: NavigationGuardNext
 ) {
-    const authStore = useAuthStore()
     const requiresAuth = (to.meta as any)?.requiresAuth
+    const org = localStorage.getItem('selected_organization')
+    const token = localStorage.getItem('token')
 
-    // Check if authentication is required
-    if (requiresAuth && !authStore.isAuthenticated) {
-        next({ name: 'Auth' })
-        return
-    }
+    console.log(token, 'token')
+    console.log(org, 'organization')
+    console.log(to.name, 'to')
+    console.log(from.name, 'from')
+    console.log(requiresAuth, 'requiresAuth')
 
-    // If user is not authenticated, allow navigation to auth page
-    if (!authStore.isAuthenticated) {
+    // If route doesn't require auth, allow navigation
+    if (!requiresAuth) {
+        // But if user is authenticated and has no org, redirect to org selection
+        if (token && !org && to.name !== 'OrganizationSelection') {
+            next({ name: 'OrganizationSelection' })
+            return
+        }
         next()
         return
     }
 
-    // Check if user needs to select an organization first
-    if (!authStore.hasSelectedOrganization && to.name !== 'OrganizationSelection' && AccountType.USER) {
-        next({ name: 'OrganizationSelection' })
+    // If user is not authenticated, redirect to auth page
+    if (!token) {
+        next({ name: 'Auth' })
         return
     }
 
- 
+    // If user is authenticated but has no organization, redirect to organization selection
+    if (!org && to.name !== 'OrganizationSelection') {
+        next({ name: 'OrganizationSelection' })
+        return
+    }
 
     // Allow navigation for all other cases
     next()
