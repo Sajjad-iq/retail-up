@@ -9,6 +9,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.utils.dto.Currency;
 
@@ -62,31 +63,31 @@ public class ExcelUploadService {
             List<String> errors = new ArrayList<>(); // List of errors
 
             for (int i = 0; i < items.size(); i++) {
-                try {
-                    CreateInventoryItemRequest itemRequest = items.get(i);
+                CreateInventoryItemRequest itemRequest = items.get(i);
 
-                    // Check if the item already exists by SKU, barcode, or product code
-                    Optional<InventoryItem> existingItem = Optional.empty();
+                // Check if the item already exists by SKU, barcode, or product code
+                Optional<InventoryItem> existingItem = Optional.empty();
 
-                    if (itemRequest.getSku() != null && !itemRequest.getSku().trim().isEmpty()) {
-                        existingItem = inventoryItemRepository.findBySkuAndInventoryId(itemRequest.getSku(),
-                                inventoryId);
-                    }
+                if (itemRequest.getSku() != null && !itemRequest.getSku().trim().isEmpty()) {
+                    existingItem = inventoryItemRepository.findBySkuAndInventoryId(itemRequest.getSku(),
+                            inventoryId);
+                }
 
-                    if (existingItem.isEmpty() && itemRequest.getBarcode() != null
-                            && !itemRequest.getBarcode().trim().isEmpty()) {
-                        existingItem = inventoryItemRepository.findByBarcodeAndInventoryId(itemRequest.getBarcode(),
-                                inventoryId);
-                    }
+                if (existingItem.isEmpty() && itemRequest.getBarcode() != null
+                        && !itemRequest.getBarcode().trim().isEmpty()) {
+                    existingItem = inventoryItemRepository.findByBarcodeAndInventoryId(itemRequest.getBarcode(),
+                            inventoryId);
+                }
 
-                    if (existingItem.isEmpty() && itemRequest.getProductCode() != null
-                            && !itemRequest.getProductCode().trim().isEmpty()) {
-                        existingItem = inventoryItemRepository
-                                .findByProductCodeAndInventoryId(itemRequest.getProductCode(), inventoryId);
-                    }
+                if (existingItem.isEmpty() && itemRequest.getProductCode() != null
+                        && !itemRequest.getProductCode().trim().isEmpty()) {
+                    existingItem = inventoryItemRepository
+                            .findByProductCodeAndInventoryId(itemRequest.getProductCode(), inventoryId);
+                }
 
-                    // If the item already exists, update it
-                    if (existingItem.isPresent()) {
+                // If the item already exists, update it
+                if (existingItem.isPresent()) {
+                    try {
                         UpdateInventoryItemRequest updateRequest = new UpdateInventoryItemRequest();
                         updateRequest.setUserId(user.getId());
                         updateRequest.setName(itemRequest.getName());
@@ -117,20 +118,21 @@ public class ExcelUploadService {
                         InventoryItem updated = inventoryItemService.updateInventoryItem(existingItem.get().getId(),
                                 updateRequest);
                         createdItems.add(updated);
+                    } catch (Exception e) {
+                        String errorMessage = "Row " + (i + 2) + ": Failed to update existing item - " + e.getMessage();
+                        errors.add(errorMessage);
+                    }
+                } else {
+                    // If the item does not exist, create it
+                    // Set the actual user ID before creating
+                    itemRequest.setUserId(user.getId());
+                    CreateInventoryItemResult result = inventoryItemService
+                            .createInventoryItemForExcelUpload(itemRequest, user);
+                    if (result.isSuccess()) {
+                        createdItems.add(result.getItem());
                     } else {
-                        // If the item does not exist, create it
-                        // Set the actual user ID before creating
-                        itemRequest.setUserId(user.getId());
-                        InventoryItem created = inventoryItemService.createInventoryItem(itemRequest);
-                        createdItems.add(created);
+                        errors.add("Row " + (i + 2) + ": " + result.getErrorMessage());
                     }
-                } catch (Exception e) {
-                    // Log the error for debugging
-                    String errorMessage = "Row " + (i + 2) + ": " + e.getMessage();
-                    if (e.getCause() != null) {
-                        errorMessage += " (Caused by: " + e.getCause().getMessage() + ")";
-                    }
-                    errors.add(errorMessage);
                 }
             }
 

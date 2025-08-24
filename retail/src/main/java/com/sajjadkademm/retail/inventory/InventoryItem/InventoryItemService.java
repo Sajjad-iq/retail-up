@@ -4,6 +4,7 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
@@ -59,52 +60,11 @@ public class InventoryItemService {
             ValidatedCreateInventoryItemContext context = inventoryItemCreateValidator.validate(request);
             User user = context.getUser();
 
-            // get initial stock from request
-            Integer initialStock = request.getCurrentStock();
+            // Create and save the inventory item
+            InventoryItem saved = createInventoryItemInternal(request, user);
 
-            // create inventory item
-            InventoryItem item = InventoryItem.builder()
-                    .name(request.getName())
-                    .description(request.getDescription())
-                    .sku(request.getSku())
-                    .productCode(request.getProductCode())
-                    .barcode(request.getBarcode())
-                    .category(request.getCategory())
-                    .brand(request.getBrand())
-                    .unit(request.getUnit())
-                    .weight(request.getWeight())
-                    .dimensions(request.getDimensions())
-                    .color(request.getColor())
-                    .size(request.getSize())
-                    .currentStock(request.getCurrentStock())
-                    .minimumStock(request.getMinimumStock())
-                    .maximumStock(request.getMaximumStock())
-                    .costPrice(request.getCostPrice())
-                    .sellingPrice(request.getSellingPrice())
-                    .discountPrice(request.getDiscountPrice())
-                    .discountStartDate(request.getDiscountStartDate())
-                    .discountEndDate(request.getDiscountEndDate())
-                    .supplierName(request.getSupplierName())
-                    .isPerishable(request.getIsPerishable() != null ? request.getIsPerishable() : false)
-                    .expiryDate(request.getExpiryDate())
-                    .inventoryId(request.getInventoryId())
-                    .isActive(true)
-                    .createdBy(user)
-                    .build();
-
-            // save inventory item
-            InventoryItem saved = inventoryItemRepository.save(item);
-
-            // record initial STOCK_IN movement via movement service helpers
-            if (initialStock != null && initialStock >= 0) {
-                inventoryMovementService.recordStockIn(
-                        user,
-                        saved,
-                        initialStock,
-                        "Initial stock on item creation",
-                        ReferenceType.CREATION,
-                        saved.getId());
-            }
+            // Record initial stock movement
+            recordInitialStockMovement(saved, user);
 
             return saved;
 
@@ -114,6 +74,114 @@ public class InventoryItemService {
             throw e;
         } catch (Exception e) {
             throw new BadRequestException("Failed to create inventory item: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create inventory item without validation (for Excel upload)
+     * This method is used when validation is handled externally
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public InventoryItem createInventoryItemWithoutValidation(CreateInventoryItemRequest request, User user) {
+        try {
+            // Create and save the inventory item
+            InventoryItem saved = createInventoryItemInternal(request, user);
+
+            // Record initial stock movement
+            recordInitialStockMovement(saved, user);
+
+            return saved;
+
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to create inventory item: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create inventory item for Excel upload with result object
+     * Returns a result object instead of throwing exceptions
+     */
+    @Transactional(rollbackFor = { Exception.class })
+    public CreateInventoryItemResult createInventoryItemForExcelUpload(CreateInventoryItemRequest request, User user) {
+        try {
+            // Basic validation for required fields
+            if (request.getName() == null || request.getName().trim().isEmpty()) {
+                return CreateInventoryItemResult.failure("Name is required");
+            }
+            if (request.getUnit() == null) {
+                return CreateInventoryItemResult.failure("Unit is required");
+            }
+            if (request.getCurrentStock() == null || request.getCurrentStock() < 0) {
+                return CreateInventoryItemResult.failure("Current stock must be non-negative");
+            }
+            if (request.getSellingPrice() == null) {
+                return CreateInventoryItemResult.failure("Selling price is required");
+            }
+
+            // Create and save the inventory item
+            InventoryItem saved = createInventoryItemInternal(request, user);
+
+            // Record initial stock movement
+            recordInitialStockMovement(saved, user);
+
+            return CreateInventoryItemResult.success(saved);
+
+        } catch (Exception e) {
+            return CreateInventoryItemResult.failure("Failed to create inventory item: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Internal method to create inventory item (extracted logic)
+     */
+    private InventoryItem createInventoryItemInternal(CreateInventoryItemRequest request, User user) {
+        // Create inventory item
+        InventoryItem item = InventoryItem.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .sku(request.getSku())
+                .productCode(request.getProductCode())
+                .barcode(request.getBarcode())
+                .category(request.getCategory())
+                .brand(request.getBrand())
+                .unit(request.getUnit())
+                .weight(request.getWeight())
+                .dimensions(request.getDimensions())
+                .color(request.getColor())
+                .size(request.getSize())
+                .currentStock(request.getCurrentStock())
+                .minimumStock(request.getMinimumStock())
+                .maximumStock(request.getMaximumStock())
+                .costPrice(request.getCostPrice())
+                .sellingPrice(request.getSellingPrice())
+                .discountPrice(request.getDiscountPrice())
+                .discountStartDate(request.getDiscountStartDate())
+                .discountEndDate(request.getDiscountEndDate())
+                .supplierName(request.getSupplierName())
+                .isPerishable(request.getIsPerishable() != null ? request.getIsPerishable() : false)
+                .expiryDate(request.getExpiryDate())
+                .inventoryId(request.getInventoryId())
+                .isActive(true)
+                .createdBy(user)
+                .build();
+
+        // Save inventory item
+        return inventoryItemRepository.save(item);
+    }
+
+    /**
+     * Record initial stock movement for newly created item
+     */
+    private void recordInitialStockMovement(InventoryItem item, User user) {
+        Integer initialStock = item.getCurrentStock();
+        if (initialStock != null && initialStock >= 0) {
+            inventoryMovementService.recordStockIn(
+                    user,
+                    item,
+                    initialStock,
+                    "Initial stock on item creation",
+                    ReferenceType.CREATION,
+                    item.getId());
         }
     }
 
