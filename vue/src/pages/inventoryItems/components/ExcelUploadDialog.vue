@@ -40,8 +40,8 @@
             class="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors"
             :class="{ 'border-primary bg-primary/5': isDragOver }"
             @drop.prevent="handleFileDrop"
-            @dragover.prevent="csvUpload.setDragOver(true)"
-            @dragleave.prevent="csvUpload.setDragOver(false)"
+            @dragover.prevent="setDragOver(true)"
+            @dragleave.prevent="setDragOver(false)"
             @click="triggerFileInput"
           >
             <div v-if="!selectedFile" class="space-y-2">
@@ -92,17 +92,17 @@
         <div v-if="uploadResult" class="space-y-3">
           <div class="p-4 rounded-lg border" :class="getResultBorderClass()">
             <div class="flex items-center space-x-2">
-              <CheckCircle v-if="uploadResult.successfulItems > 0" class="w-5 h-5 text-green-400" />
-              <AlertCircle v-if="uploadResult.failedItems > 0" class="w-5 h-5 text-red-400" />
+              <CheckCircle v-if="uploadResult.successfulItems > 0" class="w-5 h-5 text-chart-1" />
+              <AlertCircle v-if="uploadResult.failedItems > 0" class="w-5 h-5 text-destructive" />
               <h4 class="font-medium">Upload Complete</h4>
             </div>
 
             <div class="mt-2 space-y-1 text-sm">
               <p>Total rows processed: {{ uploadResult.totalRows }}</p>
-              <p class="text-blue-400">
+              <p class="text-chart-1">
                 Successfully created: {{ uploadResult.successfulItems }} items
               </p>
-              <p v-if="uploadResult.failedItems > 0" class="text-red-400">
+              <p v-if="uploadResult.failedItems > 0" class="text-destructive">
                 Failed: {{ uploadResult.failedItems }} items
               </p>
             </div>
@@ -110,8 +110,10 @@
             <!-- Error Details -->
             <div v-if="uploadResult.errors && uploadResult.errors.length > 0" class="mt-3">
               <details class="text-sm">
-                <summary class="cursor-pointer text-red-400 font-medium">View Errors</summary>
-                <ul class="mt-2 space-y-1 text-xs text-red-400">
+                <summary class="cursor-pointer text-destructive font-medium">
+                  View Error Details
+                </summary>
+                <ul class="mt-2 space-y-1 text-xs text-destructive">
                   <li v-for="(error, index) in uploadResult.errors" :key="index">
                     {{ error }}
                   </li>
@@ -142,11 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { toast } from "vue-sonner";
-import { useAuthStore } from "@/stores/auth";
-import { excelUploadService } from "@/services/excelUploadService";
-import { useCsvUpload } from "@/composables/useCsvUpload";
+import { useInventoryItemDialogs } from "@/composables/useInventoryItemDialogs";
 
 // UI Components
 import {
@@ -169,88 +167,28 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Auth store
-const authStore = useAuthStore();
+// Use the composable for all dialog and upload functionality
+const {
+  fileInput,
+  selectedFile,
+  isDragOver,
+  isUploading,
+  isDownloading,
+  uploadProgress,
+  uploadResult,
+  triggerFileInput,
+  handleFileSelect,
+  handleFileDrop,
+  removeFile,
+  formatFileSize,
+  downloadTemplate,
+  getResultBorderClass,
+  setDragOver,
+  handleUpload: handleUploadFromComposable,
+} = useInventoryItemDialogs();
 
-// CSV upload composable
-const csvUpload = useCsvUpload();
-
-// File handling
-const fileInput = ref<HTMLInputElement>();
-
-// Extract state from composable
-const { selectedFile, isDragOver, isUploading, isDownloading, uploadProgress, uploadResult } =
-  csvUpload;
-
-// Methods
-const triggerFileInput = () => {
-  csvUpload.triggerFileInput(fileInput);
-};
-
-const handleFileSelect = (event: Event) => {
-  csvUpload.handleFileSelect(
-    event,
-    () => {
-      toast.success("File selected successfully");
-    },
-    (error) => {
-      toast.error(error);
-    }
-  );
-};
-
-const handleFileDrop = (event: DragEvent) => {
-  csvUpload.handleFileDrop(
-    event,
-    () => {
-      toast.success("File selected successfully");
-    },
-    (error) => {
-      toast.error(error);
-    }
-  );
-};
-
-const removeFile = () => {
-  csvUpload.resetUploadState();
-};
-
-const formatFileSize = (bytes: number): string => {
-  return csvUpload.formatFileSize(bytes);
-};
-
-const downloadTemplate = async () => {
-  await csvUpload.handleTemplateDownload(
-    () => excelUploadService.downloadTemplate(),
-    () => {
-      toast.success("Template downloaded successfully");
-    },
-    (error) => {
-      toast.error(error);
-    }
-  );
-};
-
+// Handle upload with inventory ID
 const handleUpload = async () => {
-  try {
-    await csvUpload.handleUpload(
-      (file: File, inventoryId: string, userId: string) =>
-        excelUploadService.uploadCsvFile(file, inventoryId, userId),
-      props.inventoryId,
-      authStore.user?.id || "",
-      (message) => {
-        toast.success(message);
-      },
-      (message) => {
-        toast.error(message);
-      }
-    );
-  } catch (error) {
-    toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"));
-  }
-};
-
-const getResultBorderClass = () => {
-  return csvUpload.getResultBorderClass(uploadResult.value);
+  await handleUploadFromComposable(props.inventoryId);
 };
 </script>

@@ -1,4 +1,8 @@
 import { ref } from 'vue'
+import { toast } from 'vue-sonner'
+import { useAuthStore } from '@/stores/auth'
+import { excelUploadService } from '@/services/excelUploadService'
+import { useCsvUpload } from '@/composables/useCsvUpload'
 
 export function useInventoryItemDialogs() {
   // Dialog state
@@ -8,6 +12,14 @@ export function useInventoryItemDialogs() {
   const showDeleteDialog = ref(false)
   const showImportDialog = ref(false)
   const dialogMode = ref<'create' | 'edit'>('create')
+
+  // Excel upload state and composable
+  const authStore = useAuthStore()
+  const csvUpload = useCsvUpload()
+  const fileInput = ref<HTMLInputElement>()
+
+  // Extract state from CSV upload composable
+  const { selectedFile, isDragOver, isUploading, isDownloading, uploadProgress, uploadResult } = csvUpload
 
   // Dialog actions
   const openCreateDialog = () => {
@@ -57,6 +69,82 @@ export function useInventoryItemDialogs() {
     selectedItem.value = null
   }
 
+  // Excel upload methods
+  const triggerFileInput = () => {
+    csvUpload.triggerFileInput(fileInput)
+  }
+
+  const handleFileSelect = (event: Event) => {
+    csvUpload.handleFileSelect(
+      event,
+      () => {
+        toast.success("File selected successfully")
+      },
+      (error) => {
+        toast.error(error)
+      }
+    )
+  }
+
+  const handleFileDrop = (event: DragEvent) => {
+    csvUpload.handleFileDrop(
+      event,
+      () => {
+        toast.success("File selected successfully")
+      },
+      (error) => {
+        toast.error(error)
+      }
+    )
+  }
+
+  const removeFile = () => {
+    csvUpload.resetUploadState()
+  }
+
+  const formatFileSize = (bytes: number): string => {
+    return csvUpload.formatFileSize(bytes)
+  }
+
+  const downloadTemplate = async () => {
+    await csvUpload.handleTemplateDownload(
+      () => excelUploadService.downloadTemplate(),
+      () => {
+        toast.success("Template downloaded successfully")
+      },
+      (error) => {
+        toast.error(error)
+      }
+    )
+  }
+
+  const handleUpload = async (inventoryId: string) => {
+    try {
+      await csvUpload.handleUpload(
+        (file: File, inventoryId: string, userId: string) =>
+          excelUploadService.uploadCsvFile(file, inventoryId, userId),
+        inventoryId,
+        authStore.user?.id || "",
+        (message) => {
+          toast.success(message)
+        },
+        (message) => {
+          toast.error(message)
+        }
+      )
+    } catch (error) {
+      toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"))
+    }
+  }
+
+  const getResultBorderClass = () => {
+    return csvUpload.getResultBorderClass(uploadResult.value)
+  }
+
+  const setDragOver = (value: boolean) => {
+    csvUpload.setDragOver(value)
+  }
+
   return {
     // State
     selectedItem,
@@ -65,6 +153,15 @@ export function useInventoryItemDialogs() {
     showDeleteDialog,
     showImportDialog,
     dialogMode,
+
+    // Excel upload state
+    fileInput,
+    selectedFile,
+    isDragOver,
+    isUploading,
+    isDownloading,
+    uploadProgress,
+    uploadResult,
 
     // Actions
     openCreateDialog,
@@ -75,6 +172,17 @@ export function useInventoryItemDialogs() {
     closeAllDialogs,
     handleDialogSuccess,
     handleImportSuccess,
-    handleDeleteConfirm
+    handleDeleteConfirm,
+
+    // Excel upload methods
+    triggerFileInput,
+    handleFileSelect,
+    handleFileDrop,
+    removeFile,
+    formatFileSize,
+    downloadTemplate,
+    handleUpload,
+    getResultBorderClass,
+    setDragOver
   }
 }
