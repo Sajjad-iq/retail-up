@@ -15,7 +15,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
+import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.UserStatus;
@@ -40,6 +40,7 @@ public class InventoryItemCreateValidator {
     private final OrganizationService organizationService;
     private final InventoryItemRepository inventoryItemRepository;
     private final LocalizedErrorService localizedErrorService;
+    private final OrganizationValidationUtils organizationValidationUtils;
 
     /**
      * Validation result containing errors and validated entities
@@ -129,7 +130,7 @@ public class InventoryItemCreateValidator {
                             .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage()));
                 } else {
                     try {
-                        OrganizationValidationUtils.assertOrganizationIsActive(organization);
+                        organizationValidationUtils.assertOrganizationIsActive(organization);
                     } catch (Exception e) {
                         errors.add(localizedErrorService.getLocalizedMessage(
                                 OrganizationErrorCode.ORGANIZATION_VALIDATION_FAILED.getMessage()) + ": "

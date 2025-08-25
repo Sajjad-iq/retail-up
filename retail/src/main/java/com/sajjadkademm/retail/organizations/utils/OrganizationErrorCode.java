@@ -19,7 +19,17 @@ public enum OrganizationErrorCode {
     INVALID_ORGANIZATION_DATA("ORG006", "invalid.organization.data"),
     ORGANIZATION_DELETION_FAILED("ORG007", "organization.deletion.failed"),
     ORGANIZATION_UPDATE_FAILED("ORG008", "organization.update.failed"),
-    ORGANIZATION_CREATION_FAILED("ORG009", "organization.creation.failed");
+    ORGANIZATION_CREATION_FAILED("ORG009", "organization.creation.failed"),
+
+    // User-related Organization Errors
+    USER_NOT_FOUND("ORG010", "user.not.found"),
+    USER_NOT_ACTIVE("ORG011", "user.not.active"),
+    USER_CANNOT_CREATE_ORGANIZATION("ORG012", "user.cannot.create.organization"),
+    USER_CANNOT_UPDATE_ORGANIZATION("ORG013", "user.cannot.update.organization"),
+    USER_NOT_ORGANIZATION_CREATOR("ORG014", "user.not.organization.creator"),
+
+    // Validation Errors
+    SEARCH_TERM_EMPTY("ORG015", "search.term.empty");
 
     private final String code;
     private final String message;

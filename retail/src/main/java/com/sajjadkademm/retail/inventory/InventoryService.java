@@ -7,7 +7,7 @@ import com.sajjadkademm.retail.inventory.dto.CreateInventoryRequest;
 import com.sajjadkademm.retail.inventory.dto.UpdateInventoryRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
+import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.UserStatus;
@@ -24,14 +24,17 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final OrganizationService organizationService;
     private final UserService userService;
+    private final OrganizationValidationUtils organizationValidationUtils;
 
     @Autowired
     public InventoryService(InventoryRepository inventoryRepository,
             OrganizationService organizationService,
-            UserService userService) {
+            UserService userService,
+            OrganizationValidationUtils organizationValidationUtils) {
         this.inventoryRepository = inventoryRepository;
         this.organizationService = organizationService;
         this.userService = userService;
+        this.organizationValidationUtils = organizationValidationUtils;
     }
 
     /**
@@ -47,7 +50,7 @@ public class InventoryService {
             }
 
             // Guard: only active organizations can create inventories
-            OrganizationValidationUtils.assertOrganizationIsActive(organization);
+            organizationValidationUtils.assertOrganizationIsActive(organization);
 
             // Resolve creating user and ensure it exists
             User user = userService.getUserById(request.getUserId());
@@ -102,7 +105,7 @@ public class InventoryService {
         }
 
         // Guard: disallow updates if parent organization is not active
-        OrganizationValidationUtils.assertOrganizationIsActive(inventory.getOrganization());
+        organizationValidationUtils.assertOrganizationIsActive(inventory.getOrganization());
 
         // Apply changes
         if (request.getName() != null) {

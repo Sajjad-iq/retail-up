@@ -15,7 +15,7 @@ import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
+import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.dto.UserStatus;
@@ -39,6 +39,7 @@ public class InventoryItemUpdateUtils {
     private final OrganizationService organizationService;
     private final UserRepository userRepository;
     private final LocalizedErrorService localizedErrorService;
+    private final OrganizationValidationUtils organizationValidationUtils;
 
     /**
      * Validation result containing errors and validated entities
@@ -134,7 +135,7 @@ public class InventoryItemUpdateUtils {
                             .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage()));
                 } else {
                     try {
-                        OrganizationValidationUtils.assertOrganizationIsActive(organization);
+                        organizationValidationUtils.assertOrganizationIsActive(organization);
                     } catch (Exception e) {
                         errors.add(
                                 localizedErrorService.getLocalizedMessage(

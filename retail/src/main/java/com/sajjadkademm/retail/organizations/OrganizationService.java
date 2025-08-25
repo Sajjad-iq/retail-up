@@ -7,11 +7,14 @@ import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
+import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.AccountType;
 import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,14 +27,20 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final SystemSettingsService systemSettingsService;
     private final UserService userService;
+    private final LocalizedErrorService localizedErrorService;
+    private final OrganizationValidationUtils organizationValidationUtils;
 
     @Autowired
     public OrganizationService(OrganizationRepository organizationRepository,
             SystemSettingsService systemSettingsService,
-            UserService userService) {
+            UserService userService,
+            LocalizedErrorService localizedErrorService,
+            OrganizationValidationUtils organizationValidationUtils) {
         this.organizationRepository = organizationRepository;
         this.systemSettingsService = systemSettingsService;
         this.userService = userService;
+        this.localizedErrorService = localizedErrorService;
+        this.organizationValidationUtils = organizationValidationUtils;
     }
 
     /**
@@ -44,26 +53,33 @@ public class OrganizationService {
         try {
             // Check if organization with same phone already exists
             if (organizationRepository.existsByPhone(request.getPhone())) {
-                throw new ConflictException("Organization with phone " + request.getPhone() + " already exists");
+                throw new ConflictException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
+                                request.getPhone()));
             }
 
             // Check if organization with same domain already exists
             if (organizationRepository.existsByDomain(request.getDomain())) {
-                throw new ConflictException("Organization with domain " + request.getDomain() + " already exists");
+                throw new ConflictException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
+                                request.getDomain()));
             }
 
             // Check if user exists
             User user = userService.getUserById(request.getUserId());
             if (user == null) {
-                throw new NotFoundException("User not found");
+                throw new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.USER_NOT_FOUND.getMessage()));
             }
 
             if (user.getAccountType() != AccountType.USER) {
-                throw new UnauthorizedException("Only Users Can Crate Organizations");
+                throw new UnauthorizedException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.USER_CANNOT_CREATE_ORGANIZATION.getMessage()));
             }
 
             if (user.getStatus() != UserStatus.ACTIVE) {
-                throw new UnauthorizedException("Only Active Users Can Crate Organizations");
+                throw new UnauthorizedException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ACTIVE.getMessage()));
             }
 
             Organization organization = Organization.builder()
@@ -89,7 +105,9 @@ public class OrganizationService {
         } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
-            throw new BadRequestException("Failed to create organization: " + e.getMessage(), e);
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_CREATION_FAILED.getMessage()) + ": "
+                    + e.getMessage(), e);
         }
     }
 
@@ -98,42 +116,53 @@ public class OrganizationService {
      */
     public Organization updateOrganization(String id, UpdateOrganizationRequest request) {
         Organization organization = organizationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Organization not found"));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage())));
 
         // assert organization is active before updates
         if (organization.getStatus() == OrganizationStatus.REJECTED
                 || organization.getStatus() == OrganizationStatus.SUSPENDED
                 || organization.getStatus() == OrganizationStatus.DELETED) {
-            throw new BadRequestException("This Organization Rejected or Suspended or Deleted");
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_INACTIVE.getMessage()));
         }
+
         if (request.getPhone() != null && !request.getPhone().equals(organization.getPhone())) {
             if (organizationRepository.existsByPhone(request.getPhone())) {
-                throw new ConflictException("Organization with phone " + request.getPhone() + " already exists");
+                throw new ConflictException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
+                                request.getPhone()));
             }
         }
 
         if (request.getDomain() != null && !request.getDomain().equals(organization.getDomain())) {
             if (organizationRepository.existsByDomain(request.getDomain())) {
-                throw new ConflictException("Organization with domain " + request.getDomain() + " already exists");
+                throw new ConflictException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
+                                request.getDomain()));
             }
         }
 
         // Check if user exists
         User user = userService.getUserById(request.getUserId());
         if (user == null) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_FOUND.getMessage()));
         }
 
         if (user.getAccountType() != AccountType.USER) {
-            throw new UnauthorizedException("Only Users Can Update Organizations");
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.USER_CANNOT_UPDATE_ORGANIZATION.getMessage()));
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new UnauthorizedException("Only Active Users Can Update Organizations");
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ACTIVE.getMessage()));
         }
 
         if (user.getId() != organization.getCreatedBy().getId()) {
-            throw new UnauthorizedException("Only the creator of the organization can update it");
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
         // Update organization fields
@@ -154,7 +183,8 @@ public class OrganizationService {
      */
     public Organization getOrganizationById(String id) {
         return organizationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Organization not found"));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage())));
     }
 
     /**
@@ -169,7 +199,8 @@ public class OrganizationService {
      */
     public List<Organization> searchOrganizations(String searchTerm) {
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            throw new BadRequestException("Search term cannot be empty");
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.SEARCH_TERM_EMPTY.getMessage()));
         }
 
         return organizationRepository.searchOrganizations(searchTerm.trim());

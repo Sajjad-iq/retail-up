@@ -8,7 +8,7 @@ import com.sajjadkademm.retail.utils.dto.Currency;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationRepository;
-import com.sajjadkademm.retail.organizations.OrganizationValidationUtils;
+import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +20,7 @@ public class SystemSettingsService {
 
         private final SystemSettingRepository systemSettingRepository;
         private final OrganizationRepository organizationRepository;
+        private final OrganizationValidationUtils organizationValidationUtils;
 
         /**
          * Get system settings for an organization
@@ -43,7 +44,7 @@ public class SystemSettingsService {
                                                 "Organization not found"));
 
                 // assert organization is active
-                OrganizationValidationUtils.assertOrganizationIsActive(organization);
+                organizationValidationUtils.assertOrganizationIsActive(organization);
 
                 setting.setBackupRetentionDays(request.getBackupRetentionDays());
                 setting.setTimezone(request.getTimezone());
@@ -67,7 +68,7 @@ public class SystemSettingsService {
                                                 "Organization not found"));
 
                 // assert organization is active
-                OrganizationValidationUtils.assertOrganizationIsActive(organization);
+                organizationValidationUtils.assertOrganizationIsActive(organization);
 
                 SystemSetting defaultSettings = createDefaultSystemSettings(organizationId);
                 defaultSettings.setId(setting.getId());
