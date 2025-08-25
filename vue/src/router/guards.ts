@@ -11,12 +11,6 @@ export async function authGuard(
     const org = localStorage.getItem('selected_organization')
     const token = localStorage.getItem('token')
 
-    console.log(token, 'token')
-    console.log(org, 'organization')
-    console.log(to.name, 'to')
-    console.log(from.name, 'from')
-    console.log(requiresAuth, 'requiresAuth')
-
     // If route doesn't require auth, allow navigation
     if (!requiresAuth) {
         // But if user is authenticated and has no org, redirect to org selection
