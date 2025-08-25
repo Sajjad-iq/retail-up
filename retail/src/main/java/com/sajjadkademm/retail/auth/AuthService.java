@@ -7,6 +7,8 @@ import com.sajjadkademm.retail.config.utils.JwtUtil;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
+import com.sajjadkademm.retail.auth.AuthErrorCode;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.UserService;
@@ -30,6 +32,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final JwtUtil jwtUtil;
+    private final LocalizedErrorService localizedErrorService;
 
     /**
      * Authenticate user with email/phone and password
@@ -39,19 +42,22 @@ public class AuthService {
         Optional<User> userOpt = findUserByEmailOrPhone(request.getEmailOrPhone());
 
         if (userOpt.isEmpty()) {
-            throw new NotFoundException("User not found with identifier: " + request.getEmailOrPhone());
+            throw new NotFoundException(localizedErrorService
+                    .getLocalizedMessage(AuthErrorCode.AUTH_USER_NOT_FOUND.getMessage(), request.getEmailOrPhone()));
         }
 
         User user = userOpt.get();
 
         // Check if user is active
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new UnauthorizedException("Account is not active");
+            throw new UnauthorizedException(
+                    localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_ACCOUNT_NOT_ACTIVE.getMessage()));
         }
 
         // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid credentials");
+            throw new UnauthorizedException(
+                    localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_INVALID_CREDENTIALS.getMessage()));
         }
 
         // Update last login time
@@ -68,7 +74,7 @@ public class AuthService {
                 .phone(user.getPhone())
                 .status(user.getStatus())
                 .accountType(user.getAccountType())
-                .message("Login successful")
+                .message(localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_LOGIN_SUCCESSFUL.getMessage()))
                 .build();
     }
 
@@ -79,12 +85,14 @@ public class AuthService {
 
         // Check if phone already exists
         if (userRepository.existsByPhone(request.getPhone()) || request.getPhone().isEmpty()) {
-            throw new ConflictException("Phone number already exists or is empty: " + request.getPhone());
+            throw new ConflictException(localizedErrorService
+                    .getLocalizedMessage(AuthErrorCode.AUTH_PHONE_ALREADY_EXISTS.getMessage(), request.getPhone()));
         }
 
         // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("Email already exists: " + request.getEmail());
+            throw new ConflictException(localizedErrorService
+                    .getLocalizedMessage(AuthErrorCode.AUTH_EMAIL_ALREADY_EXISTS.getMessage(), request.getEmail()));
         }
 
         // Create new user
@@ -110,7 +118,8 @@ public class AuthService {
                 .phone(savedUser.getPhone())
                 .status(savedUser.getStatus())
                 .accountType(savedUser.getAccountType())
-                .message("Registration successful")
+                .message(localizedErrorService
+                        .getLocalizedMessage(AuthErrorCode.AUTH_REGISTRATION_SUCCESSFUL.getMessage()))
                 .build();
     }
 
@@ -155,12 +164,14 @@ public class AuthService {
     public boolean changePassword(String userId, String oldPassword, String newPassword) {
         User user = userService.getUserById(userId);
         if (user == null) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException(
+                    localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_USER_NOT_FOUND.getMessage(), userId));
         }
 
         // Verify old password
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new UnauthorizedException("Old password is incorrect");
+            throw new UnauthorizedException(
+                    localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_OLD_PASSWORD_INCORRECT.getMessage()));
         }
 
         // Update password
@@ -212,7 +223,8 @@ public class AuthService {
                     .phone(phone)
                     .status(user.getStatus())
                     .accountType(user.getAccountType())
-                    .message("Token is valid")
+                    .message(localizedErrorService
+                            .getLocalizedMessage(AuthErrorCode.AUTH_TOKEN_VALID.getMessage()))
                     .build();
 
         } catch (Exception e) {

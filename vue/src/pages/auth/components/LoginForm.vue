@@ -82,8 +82,6 @@ const router = useRouter();
 const handleLogin = async (form: LoginForm): Promise<void> => {
   const result = await login(form.emailOrPhone, form.password);
   if (result.success) {
-    console.log("Login successful");
-    toast.success("Login successful!");
     router.push("/organization-selection");
   } else {
     // Show error toast

@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.config;
+package com.sajjadkademm.retail.config.locales;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class LocaleConfig {
     @Bean
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
-        resolver.setDefaultLocale(Locale.ENGLISH); // Default to Arabic
+        resolver.setDefaultLocale(Locale.ENGLISH); // Default to English
         return resolver;
     }
 

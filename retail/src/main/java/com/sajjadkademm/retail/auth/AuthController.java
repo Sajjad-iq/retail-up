@@ -6,6 +6,8 @@ import com.sajjadkademm.retail.auth.dto.LoginRequest;
 import com.sajjadkademm.retail.auth.dto.LoginResponse;
 import com.sajjadkademm.retail.auth.dto.RegisterRequest;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.auth.AuthErrorCode;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class AuthController {
 
     private final AuthService authService;
+    private final LocalizedErrorService localizedErrorService;
 
     /**
      * User login endpoint
@@ -165,7 +168,8 @@ public class AuthController {
 
         return ResponseEntity.ok(AuthResponse.builder()
                 .success(true)
-                .message("Password changed successfully")
+                .message(localizedErrorService
+                        .getLocalizedMessage(AuthErrorCode.AUTH_PASSWORD_CHANGED_SUCCESSFULLY.getMessage()))
                 .build());
     }
 
@@ -199,7 +203,9 @@ public class AuthController {
     public ResponseEntity<LoginResponse> validateToken(
             @Parameter(description = "Authorization header with Bearer token", required = true, example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") @RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new BadRequestException("Invalid authorization header");
+            throw new BadRequestException(
+                    localizedErrorService.getLocalizedMessage(
+                            AuthErrorCode.AUTH_HEADER_INVALID.getMessage()));
         }
 
         String token = authHeader.substring(7);
@@ -208,7 +214,9 @@ public class AuthController {
         if (userInfo != null) {
             return ResponseEntity.ok(userInfo);
         } else {
-            throw new BadRequestException("Token is invalid or expired");
+            throw new BadRequestException(
+                    localizedErrorService.getLocalizedMessage(
+                            AuthErrorCode.AUTH_TOKEN_INVALID.getMessage()));
         }
     }
 

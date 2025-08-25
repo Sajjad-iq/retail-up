@@ -20,7 +20,7 @@ import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
-import com.sajjadkademm.retail.inventory.InventoryItem.utils.LocalizedErrorService;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 import com.sajjadkademm.retail.users.UserErrorCode;
 

@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryItem.utils;
+package com.sajjadkademm.retail.config.locales;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
