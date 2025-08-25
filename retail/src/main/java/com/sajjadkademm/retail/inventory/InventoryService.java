@@ -12,6 +12,8 @@ import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.inventory.utils.InventoryErrorCode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,16 +27,19 @@ public class InventoryService {
     private final OrganizationService organizationService;
     private final UserService userService;
     private final OrganizationValidationUtils organizationValidationUtils;
+    private final LocalizedErrorService localizedErrorService;
 
     @Autowired
     public InventoryService(InventoryRepository inventoryRepository,
             OrganizationService organizationService,
             UserService userService,
-            OrganizationValidationUtils organizationValidationUtils) {
+            OrganizationValidationUtils organizationValidationUtils,
+            LocalizedErrorService localizedErrorService) {
         this.inventoryRepository = inventoryRepository;
         this.organizationService = organizationService;
         this.userService = userService;
         this.organizationValidationUtils = organizationValidationUtils;
+        this.localizedErrorService = localizedErrorService;
     }
 
     /**
@@ -46,7 +51,8 @@ public class InventoryService {
             // Resolve organization and ensure it exists
             Organization organization = organizationService.getOrganizationById(request.getOrganizationId());
             if (organization == null) {
-                throw new NotFoundException("Organization not found with ");
+                throw new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.ORGANIZATION_NOT_FOUND.getMessage()));
             }
 
             // Guard: only active organizations can create inventories
@@ -55,17 +61,20 @@ public class InventoryService {
             // Resolve creating user and ensure it exists
             User user = userService.getUserById(request.getUserId());
             if (user == null) {
-                throw new NotFoundException("User not found");
+                throw new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.USER_NOT_FOUND.getMessage()));
             }
 
             if (user.getStatus() != UserStatus.ACTIVE) {
-                throw new UnauthorizedException("Only Active Users Can Crate Inventories");
+                throw new UnauthorizedException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.USER_NOT_ACTIVE.getMessage()));
             }
 
             // Uniqueness: name must be unique within organization
             if (inventoryRepository.existsByNameAndOrganizationId(request.getName(), request.getOrganizationId())) {
-                throw new ConflictException(
-                        "Inventory with name '" + request.getName() + "' already exists in this organization");
+                throw new ConflictException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.INVENTORY_NAME_DUPLICATE.getMessage(),
+                                request.getName()));
             }
 
             // Persist
@@ -85,7 +94,8 @@ public class InventoryService {
         } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
-            throw new BadRequestException("Failed to create inventory: " + e.getMessage(), e);
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.INVENTORY_CREATION_FAILED.getMessage()), e);
         }
     }
 
@@ -94,13 +104,15 @@ public class InventoryService {
      */
     public Inventory updateInventory(String id, UpdateInventoryRequest request) {
         Inventory inventory = inventoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage(), id)));
 
         // Uniqueness: name must be unique within organization when changed
         if (request.getName() != null && !request.getName().equals(inventory.getName())) {
             if (inventoryRepository.existsByNameAndOrganizationId(request.getName(), inventory.getOrganizationId())) {
-                throw new ConflictException(
-                        "Inventory with name '" + request.getName() + "' already exists in this organization");
+                throw new ConflictException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.INVENTORY_NAME_DUPLICATE.getMessage(),
+                                request.getName()));
             }
         }
 
@@ -128,7 +140,8 @@ public class InventoryService {
      */
     public Inventory getInventoryById(String id) {
         return inventoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage(), id)));
     }
 
     /**
@@ -157,7 +170,8 @@ public class InventoryService {
      */
     public void deleteInventory(String id) {
         Inventory inventory = inventoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory not found"));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage(), id)));
 
         inventory.setIsActive(false);
         inventoryRepository.save(inventory);
