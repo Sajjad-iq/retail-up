@@ -66,28 +66,48 @@ public class InventoryItemService {
     }
 
     /**
-     * Create inventory item for Excel upload with result object
-     * Returns a result object instead of throwing exceptions
+     * Create inventory item with validation error collection instead of throwing
+     * exceptions.
+     * This method is designed for batch operations where we want to collect all
+     * errors
+     * rather than fail fast on the first validation issue.
+     * 
+     * @param request The inventory item creation request
+     * @param user    The user performing the operation
+     * @return CreateInventoryItemResult containing either the created item or error
+     *         message
      */
     @Transactional(rollbackFor = { Exception.class })
-    public CreateInventoryItemResult createInventoryItemForExcelUpload(CreateInventoryItemRequest request, User user) {
-        // Use the new validation method that collects errors
+    public CreateInventoryItemResult createInventoryItemWithErrorCollection(CreateInventoryItemRequest request,
+            User user) {
+        // Validate request and collect all errors without throwing exceptions
         InventoryItemCreateValidator.ValidationResult validationResult = inventoryItemCreateValidator
                 .validateAndCollectErrors(request);
 
         // Return failure result if validation errors exist
-        return validationResult.hasErrors()
-                ? CreateInventoryItemResult.failure(String.join("; ", validationResult.getErrors()))
-                : createInventoryItemSuccessfully(request, user);
+        if (validationResult.hasErrors()) {
+            return CreateInventoryItemResult.failure(String.join("; ", validationResult.getErrors()));
+        }
+
+        // Create inventory item if validation passes
+        return createInventoryItemSafely(request, user);
     }
 
     /**
-     * Helper method to create inventory item successfully
+     * Helper method to create inventory item with exception handling
+     * 
+     * @param request The validated inventory item creation request
+     * @param user    The user performing the operation
+     * @return CreateInventoryItemResult with success or failure status
      */
-    private CreateInventoryItemResult createInventoryItemSuccessfully(CreateInventoryItemRequest request, User user) {
+    private CreateInventoryItemResult createInventoryItemSafely(CreateInventoryItemRequest request, User user) {
         try {
+            // Create and save the inventory item
             InventoryItem saved = createInventoryItemInternal(request, user);
+
+            // Record initial stock movement for tracking
             recordInitialStockMovement(saved, user);
+
             return CreateInventoryItemResult.success(saved);
         } catch (Exception e) {
             return CreateInventoryItemResult.failure("Failed to create inventory item: " + e.getMessage());
@@ -95,10 +115,15 @@ public class InventoryItemService {
     }
 
     /**
-     * Internal method to create inventory item (extracted logic)
+     * Internal method to create and save inventory item entity.
+     * This method builds the InventoryItem entity from the request and persists it.
+     * 
+     * @param request The inventory item creation request containing all item data
+     * @param user    The user creating the item (used for audit trail)
+     * @return The persisted InventoryItem entity
      */
     private InventoryItem createInventoryItemInternal(CreateInventoryItemRequest request, User user) {
-        // Create inventory item
+        // Build inventory item entity from request data
         InventoryItem item = InventoryItem.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -128,12 +153,17 @@ public class InventoryItemService {
                 .createdBy(user)
                 .build();
 
-        // Save inventory item
+        // Persist inventory item to database
         return inventoryItemRepository.save(item);
     }
 
     /**
-     * Record initial stock movement for newly created item
+     * Record initial stock movement for newly created item.
+     * This creates an inventory movement record to track the initial stock being
+     * added.
+     * 
+     * @param item The newly created inventory item
+     * @param user The user who created the item
      */
     private void recordInitialStockMovement(InventoryItem item, User user) {
         Integer initialStock = item.getCurrentStock();

@@ -55,40 +55,52 @@ public class ExcelUploadService {
     }
 
     /**
-     * Process Excel file and create inventory items
+     * Process Excel file and batch create/update inventory items.
+     * This method handles the entire Excel upload workflow including parsing,
+     * validation, creation/updating of items, and error collection.
+     * 
+     * @param file        The uploaded Excel/CSV file
+     * @param inventoryId The target inventory ID for the items
+     * @param user        The user performing the upload operation
+     * @return ExcelUploadResponse with summary of results and any errors
+     * @throws BadRequestException if file processing fails
      */
     @Transactional(rollbackFor = { BadRequestException.class })
     public ExcelUploadResponse processExcelFile(MultipartFile file, String inventoryId, User user) {
         try {
-            List<CreateInventoryItemRequest> items = parseExcelFile(file, inventoryId); // List of items to be created
+            // Parse the Excel/CSV file into inventory item requests
+            List<CreateInventoryItemRequest> items = parseExcelFile(file, inventoryId);
 
             if (items.isEmpty()) {
                 throw new BadRequestException(
                         "No valid rows found in the CSV file. Please check the file format and ensure it contains data.");
             }
 
-            List<InventoryItem> createdItems = new ArrayList<>(); // List of created items
-            List<String> errors = new ArrayList<>(); // List of errors
+            // Collections to track processing results
+            List<InventoryItem> processedItems = new ArrayList<>();
+            List<String> processingErrors = new ArrayList<>();
 
+            // Process each item from the Excel file
             for (int i = 0; i < items.size(); i++) {
                 CreateInventoryItemRequest itemRequest = items.get(i);
                 itemRequest.setUserId(user.getId());
 
-                int rowNumber = i + 2; // CSV row number (accounting for header)
+                int rowNumber = i + 2; // CSV row number (accounting for header row)
 
-                // Find existing item using validator utilities
-                Optional<InventoryItem> existingItem = findExistingItem(itemRequest, inventoryId);
+                // Check if item already exists (by SKU, barcode, or product code)
+                Optional<InventoryItem> existingItem = findExistingItemByIdentifiers(itemRequest, inventoryId);
 
-                // Process item (create or update) using validator utilities
-                processInventoryItem(existingItem, itemRequest, user, rowNumber, createdItems, errors);
+                // Process item: create new or update existing
+                processInventoryItem(existingItem, itemRequest, user, rowNumber, processedItems, processingErrors);
             }
 
+            // Build and return response with processing summary
             return ExcelUploadResponse.builder()
                     .totalRows(items.size())
-                    .successfulItems(createdItems.size())
-                    .failedItems(errors.size())
-                    .createdItems(createdItems)
-                    .errors(errors)
+                    .successfulItems(processedItems.size())
+                    .failedItems(processingErrors.size())
+                    .createdItems(processedItems)
+                    .errors(processingErrors)
                     .build();
 
         } catch (Exception e) {
@@ -223,9 +235,18 @@ public class ExcelUploadService {
     }
 
     /**
-     * Find existing inventory item by SKU, barcode, or product code
+     * Find existing inventory item by unique identifiers (SKU, barcode, or product
+     * code).
+     * This method checks for duplicates before creating new items during Excel
+     * upload.
+     * Priority order: SKU -> Barcode -> Product Code
+     * 
+     * @param itemRequest The item request containing potential identifiers
+     * @param inventoryId The inventory to search within
+     * @return Optional containing existing item if found, empty otherwise
      */
-    private Optional<InventoryItem> findExistingItem(CreateInventoryItemRequest itemRequest, String inventoryId) {
+    private Optional<InventoryItem> findExistingItemByIdentifiers(CreateInventoryItemRequest itemRequest,
+            String inventoryId) {
         // Check by SKU first
         if (itemRequest.getSku() != null && !itemRequest.getSku().trim().isEmpty()) {
             Optional<InventoryItem> existing = inventoryItemRepository.findBySkuAndInventoryId(itemRequest.getSku(),
@@ -251,8 +272,17 @@ public class ExcelUploadService {
     }
 
     /**
-     * Process inventory item (create new or update existing) using validator
-     * utilities
+     * Process an inventory item from Excel upload by either creating new or
+     * updating existing item.
+     * Determines whether to create or update based on finding existing items by
+     * SKU, barcode, or product code.
+     * 
+     * @param existingItem Optional existing item found by unique identifiers
+     * @param itemRequest  The item data from Excel row
+     * @param user         The user performing the upload
+     * @param rowNumber    The Excel row number for error reporting
+     * @param createdItems List to collect successfully processed items
+     * @param errors       List to collect error messages for failed items
      */
     private void processInventoryItem(Optional<InventoryItem> existingItem, CreateInventoryItemRequest itemRequest,
             User user, int rowNumber, List<InventoryItem> createdItems, List<String> errors) {
@@ -268,24 +298,37 @@ public class ExcelUploadService {
     }
 
     /**
-     * Update existing inventory item using validator utilities
+     * Update existing inventory item found during Excel upload.
+     * Converts the create request to an update request and applies validation and
+     * updates.
+     * 
+     * @param existingItem The existing inventory item to update
+     * @param itemRequest  The new item data from Excel row
+     * @param user         The user performing the upload
+     * @param rowNumber    The Excel row number for error reporting
+     * @param createdItems List to add successfully updated items
+     * @param errors       List to add error messages for failed updates
      */
     private void updateExistingItem(InventoryItem existingItem, CreateInventoryItemRequest itemRequest, User user,
             int rowNumber, List<InventoryItem> createdItems, List<String> errors) {
-        UpdateInventoryItemRequest updateRequest = createUpdateRequestFromCreateRequest(itemRequest, user.getId());
+        // Convert create request to update request for existing item
+        UpdateInventoryItemRequest updateRequest = convertCreateToUpdateRequest(itemRequest, user.getId());
 
-        // Use validator utility to validate and collect errors
+        // Validate update request and collect all errors without throwing exceptions
         InventoryItemUpdateUtils.ValidationResult validationResult = inventoryItemUpdateUtils
                 .validateAndCollectErrors(existingItem, updateRequest);
 
         if (validationResult.hasErrors()) {
+            // Collect validation errors for this row
             String errorMessage = String.join("; ", validationResult.getErrors());
             errors.add("Row " + rowNumber + ": " + errorMessage);
         } else {
-            // Use validator utility to apply updates and track movements
+            // Apply updates if validation passes
             Integer originalStock = existingItem.getCurrentStock();
             inventoryItemUpdateUtils.applyUpdates(existingItem, updateRequest);
             InventoryItem updated = inventoryItemRepository.save(existingItem);
+
+            // Track inventory movements for audit trail
             inventoryItemUpdateUtils.trackStockMovements(updated, updateRequest, inventoryMovementService,
                     originalStock);
             createdItems.add(updated);
@@ -293,12 +336,22 @@ public class ExcelUploadService {
     }
 
     /**
-     * Create new inventory item using validator utilities
+     * Create new inventory item for Excel batch processing.
+     * Uses error collection approach to avoid stopping the entire batch on first
+     * error.
+     * 
+     * @param itemRequest  The inventory item creation request from Excel row
+     * @param user         The user performing the upload
+     * @param rowNumber    The row number in Excel for error reporting
+     * @param createdItems List to add successfully created items
+     * @param errors       List to add error messages for failed items
      */
     private void createNewItem(CreateInventoryItemRequest itemRequest, User user, int rowNumber,
             List<InventoryItem> createdItems, List<String> errors) {
-        // Use service method that leverages validator utilities
-        CreateInventoryItemResult result = inventoryItemService.createInventoryItemForExcelUpload(itemRequest, user);
+        // Use inventory service method designed for batch operations with error
+        // collection
+        CreateInventoryItemResult result = inventoryItemService.createInventoryItemWithErrorCollection(itemRequest,
+                user);
 
         if (result.isSuccess()) {
             createdItems.add(result.getItem());
@@ -308,9 +361,15 @@ public class ExcelUploadService {
     }
 
     /**
-     * Create UpdateInventoryItemRequest from CreateInventoryItemRequest
+     * Convert CreateInventoryItemRequest to UpdateInventoryItemRequest.
+     * This mapping is needed when we find an existing item during Excel upload
+     * and need to update it with the new data from the Excel row.
+     * 
+     * @param createRequest The original creation request from Excel row
+     * @param userId        The ID of the user performing the operation
+     * @return UpdateInventoryItemRequest with mapped data
      */
-    private UpdateInventoryItemRequest createUpdateRequestFromCreateRequest(CreateInventoryItemRequest createRequest,
+    private UpdateInventoryItemRequest convertCreateToUpdateRequest(CreateInventoryItemRequest createRequest,
             String userId) {
         UpdateInventoryItemRequest updateRequest = new UpdateInventoryItemRequest();
         updateRequest.setUserId(userId);
