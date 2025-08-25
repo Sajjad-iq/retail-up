@@ -20,6 +20,7 @@ import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.LocalizedErrorService;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 import com.sajjadkademm.retail.users.UserErrorCode;
 
@@ -37,6 +38,7 @@ public class InventoryItemUpdateUtils {
     private final InventoryService inventoryService;
     private final OrganizationService organizationService;
     private final UserRepository userRepository;
+    private final LocalizedErrorService localizedErrorService;
 
     /**
      * Validation result containing errors and validated entities
@@ -87,35 +89,40 @@ public class InventoryItemUpdateUtils {
             // Resolve inventory and guard it exists
             inventory = inventoryService.getInventoryById(existing.getInventoryId());
             if (inventory == null) {
-                errors.add(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage());
+                errors.add(
+                        localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage()));
             } else {
                 // Guard: inventory must be active
                 if (Boolean.FALSE.equals(inventory.getIsActive())) {
-                    errors.add(InventoryErrorCode.INVENTORY_DISABLED.getMessage());
+                    errors.add(localizedErrorService
+                            .getLocalizedMessage(InventoryErrorCode.INVENTORY_DISABLED.getMessage()));
                 }
             }
         } catch (Exception e) {
-            errors.add(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage() + ": " + e.getMessage());
+            errors.add(localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage())
+                    + ": " + e.getMessage());
         }
 
         // name is required
         if (request.getName() == null || request.getName().trim().isEmpty()) {
-            errors.add(InventoryErrorCode.NAME_REQUIRED.getMessage());
+            errors.add(localizedErrorService.getLocalizedMessage(InventoryErrorCode.NAME_REQUIRED.getMessage()));
         }
 
         // unit is required
         if (request.getUnit() == null) {
-            errors.add(InventoryErrorCode.UNIT_REQUIRED.getMessage());
+            errors.add(localizedErrorService.getLocalizedMessage(InventoryErrorCode.UNIT_REQUIRED.getMessage()));
         }
 
         // current stock must be greater than or equal to 0
         if (request.getCurrentStock() == null || request.getCurrentStock() < 0) {
-            errors.add(InventoryErrorCode.STOCK_CANNOT_BE_NEGATIVE.getMessage());
+            errors.add(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.STOCK_CANNOT_BE_NEGATIVE.getMessage()));
         }
 
         // minimum stock must be greater than or equal to 0
         if (request.getMinimumStock() != null && request.getMinimumStock() < 0) {
-            errors.add(InventoryErrorCode.STOCK_CANNOT_BE_NEGATIVE.getMessage());
+            errors.add(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.STOCK_CANNOT_BE_NEGATIVE.getMessage()));
         }
 
         // Resolve organization and ensure it is active
@@ -123,18 +130,21 @@ public class InventoryItemUpdateUtils {
             try {
                 Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
                 if (organization == null) {
-                    errors.add(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage());
+                    errors.add(localizedErrorService
+                            .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage()));
                 } else {
                     try {
                         OrganizationValidationUtils.assertOrganizationIsActive(organization);
                     } catch (Exception e) {
                         errors.add(
-                                OrganizationErrorCode.ORGANIZATION_VALIDATION_FAILED.getMessage() + ": "
+                                localizedErrorService.getLocalizedMessage(
+                                        OrganizationErrorCode.ORGANIZATION_VALIDATION_FAILED.getMessage()) + ": "
                                         + e.getMessage());
                     }
                 }
             } catch (Exception e) {
-                errors.add(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage() + ": " + e.getMessage());
+                errors.add(localizedErrorService.getLocalizedMessage(
+                        OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage()) + ": " + e.getMessage());
             }
         }
 
@@ -143,12 +153,13 @@ public class InventoryItemUpdateUtils {
             user = userRepository.findById(request.getUserId())
                     .orElse(null);
             if (user == null) {
-                errors.add(UserErrorCode.USER_NOT_FOUND.getMessage());
+                errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage()));
             } else if (user.getStatus() != UserStatus.ACTIVE) {
-                errors.add(UserErrorCode.USER_NOT_ACTIVE.getMessage());
+                errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_ACTIVE.getMessage()));
             }
         } catch (Exception e) {
-            errors.add(UserErrorCode.USER_NOT_FOUND.getMessage() + ": " + e.getMessage());
+            errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage()) + ": "
+                    + e.getMessage());
         }
 
         // Normalize string inputs
@@ -167,10 +178,12 @@ public class InventoryItemUpdateUtils {
                     boolean isChangingSku = !request.getSku().equals(existing.getSku());
                     if (isChangingSku && inventoryItemRepository
                             .existsBySkuAndInventoryId(request.getSku(), existing.getInventoryId())) {
-                        errors.add(InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage() + " '" + request.getSku() + "'");
+                        errors.add(localizedErrorService.getLocalizedMessage(
+                                InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage()) + " '" + request.getSku() + "'");
                     }
                 } catch (Exception e) {
-                    errors.add(InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage() + ": " + e.getMessage());
+                    errors.add(localizedErrorService.getLocalizedMessage(
+                            InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage()) + ": " + e.getMessage());
                 }
             }
 
@@ -179,11 +192,13 @@ public class InventoryItemUpdateUtils {
                     boolean isChangingBarcode = !request.getBarcode().equals(existing.getBarcode());
                     if (isChangingBarcode && inventoryItemRepository
                             .existsByBarcodeAndInventoryId(request.getBarcode(), existing.getInventoryId())) {
-                        errors.add(InventoryErrorCode.BARCODE_ALREADY_EXISTS.getMessage() + " '" + request.getBarcode()
+                        errors.add(localizedErrorService.getLocalizedMessage(
+                                InventoryErrorCode.BARCODE_ALREADY_EXISTS.getMessage()) + " '" + request.getBarcode()
                                 + "'");
                     }
                 } catch (Exception e) {
-                    errors.add(InventoryErrorCode.BARCODE_ALREADY_EXISTS.getMessage() + ": " + e.getMessage());
+                    errors.add(localizedErrorService.getLocalizedMessage(
+                            InventoryErrorCode.BARCODE_ALREADY_EXISTS.getMessage()) + ": " + e.getMessage());
                 }
             }
 
@@ -192,12 +207,14 @@ public class InventoryItemUpdateUtils {
                     boolean isChangingProductCode = !request.getProductCode().equals(existing.getProductCode());
                     if (isChangingProductCode && inventoryItemRepository
                             .existsByProductCodeAndInventoryId(request.getProductCode(), existing.getInventoryId())) {
-                        errors.add(InventoryErrorCode.PRODUCT_CODE_ALREADY_EXISTS.getMessage() + " '"
+                        errors.add(localizedErrorService
+                                .getLocalizedMessage(InventoryErrorCode.PRODUCT_CODE_ALREADY_EXISTS.getMessage()) + " '"
                                 + request.getProductCode()
                                 + "'");
                     }
                 } catch (Exception e) {
-                    errors.add(InventoryErrorCode.PRODUCT_CODE_ALREADY_EXISTS.getMessage() + ": " + e.getMessage());
+                    errors.add(localizedErrorService.getLocalizedMessage(
+                            InventoryErrorCode.PRODUCT_CODE_ALREADY_EXISTS.getMessage()) + ": " + e.getMessage());
                 }
             }
         }
@@ -208,10 +225,12 @@ public class InventoryItemUpdateUtils {
         Integer currentStock = request.getCurrentStock() != null ? request.getCurrentStock()
                 : existing.getCurrentStock();
         if (maxStock != null && minStock != null && maxStock < minStock) {
-            errors.add(InventoryErrorCode.MAX_STOCK_LESS_THAN_MIN.getMessage());
+            errors.add(
+                    localizedErrorService.getLocalizedMessage(InventoryErrorCode.MAX_STOCK_LESS_THAN_MIN.getMessage()));
         }
         if (maxStock != null && currentStock != null && currentStock > maxStock) {
-            errors.add(InventoryErrorCode.CURRENT_STOCK_EXCEEDS_MAX.getMessage());
+            errors.add(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.CURRENT_STOCK_EXCEEDS_MAX.getMessage()));
         }
 
         Money costPrice = request.getCostPrice() != null ? request.getCostPrice()
@@ -221,15 +240,18 @@ public class InventoryItemUpdateUtils {
 
         // Validate currency is provided when updating pricing
         if (request.getCostPrice() != null && request.getCostPrice().getCurrency() == null) {
-            errors.add(InventoryErrorCode.CURRENCY_REQUIRED_FOR_COST_PRICE.getMessage());
+            errors.add(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.CURRENCY_REQUIRED_FOR_COST_PRICE.getMessage()));
         }
         if (request.getSellingPrice() != null && request.getSellingPrice().getCurrency() == null) {
-            errors.add(InventoryErrorCode.CURRENCY_REQUIRED_FOR_SELLING_PRICE.getMessage());
+            errors.add(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.CURRENCY_REQUIRED_FOR_SELLING_PRICE.getMessage()));
         }
 
         if (costPrice != null && sellingPrice != null
                 && costPrice.getAmount().compareTo(sellingPrice.getAmount()) > 0) {
-            errors.add(InventoryErrorCode.SELLING_PRICE_LESS_THAN_COST.getMessage());
+            errors.add(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.SELLING_PRICE_LESS_THAN_COST.getMessage()));
         }
 
         BigDecimal discountPrice = request.getDiscountPrice();
@@ -240,17 +262,21 @@ public class InventoryItemUpdateUtils {
             BigDecimal effectiveSelling = sellingPrice != null ? sellingPrice.getAmount() : null; // may be from request
                                                                                                   // or existing
             if (discountPrice != null && effectiveSelling == null) {
-                errors.add(InventoryErrorCode.SELLING_PRICE_REQUIRED_FOR_DISCOUNT.getMessage());
+                errors.add(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.SELLING_PRICE_REQUIRED_FOR_DISCOUNT.getMessage()));
             }
             if (discountPrice != null && effectiveSelling != null && discountPrice.compareTo(effectiveSelling) > 0) {
-                errors.add(InventoryErrorCode.DISCOUNT_PRICE_EXCEEDS_SELLING.getMessage());
+                errors.add(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.DISCOUNT_PRICE_EXCEEDS_SELLING.getMessage()));
             }
             if (discountPrice != null) {
                 if (discountStart == null || discountEnd == null) {
-                    errors.add(InventoryErrorCode.DISCOUNT_DATES_REQUIRED.getMessage());
+                    errors.add(localizedErrorService
+                            .getLocalizedMessage(InventoryErrorCode.DISCOUNT_DATES_REQUIRED.getMessage()));
                 }
                 if (discountStart != null && discountEnd != null && discountStart.isAfter(discountEnd)) {
-                    errors.add(InventoryErrorCode.DISCOUNT_START_AFTER_END.getMessage());
+                    errors.add(localizedErrorService
+                            .getLocalizedMessage(InventoryErrorCode.DISCOUNT_START_AFTER_END.getMessage()));
                 }
             }
         }
@@ -260,13 +286,16 @@ public class InventoryItemUpdateUtils {
         LocalDate expiryDate = request.getExpiryDate() != null ? request.getExpiryDate() : existing.getExpiryDate();
         if (Boolean.TRUE.equals(isPerishable)) {
             if (expiryDate == null) {
-                errors.add(InventoryErrorCode.EXPIRY_DATE_REQUIRED_FOR_PERISHABLE.getMessage());
+                errors.add(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.EXPIRY_DATE_REQUIRED_FOR_PERISHABLE.getMessage()));
             } else if (!expiryDate.isAfter(LocalDate.now())) {
-                errors.add(InventoryErrorCode.EXPIRY_DATE_MUST_BE_FUTURE.getMessage());
+                errors.add(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.EXPIRY_DATE_MUST_BE_FUTURE.getMessage()));
             }
         } else if (Boolean.FALSE.equals(isPerishable)) {
             if (expiryDate != null) {
-                errors.add(InventoryErrorCode.EXPIRY_DATE_MUST_BE_NULL_FOR_NON_PERISHABLE.getMessage());
+                errors.add(localizedErrorService.getLocalizedMessage(
+                        InventoryErrorCode.EXPIRY_DATE_MUST_BE_NULL_FOR_NON_PERISHABLE.getMessage()));
             }
         }
 
@@ -369,7 +398,8 @@ public class InventoryItemUpdateUtils {
 
         // Resolve user and ensure it is active
         User actor = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(
+                        localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage())));
 
         if (request.getSku() != null && !request.getSku().equals(item.getSku())) {
             inventoryMovementService.recordAdjustmentToTarget(

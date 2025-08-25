@@ -11,15 +11,15 @@ package com.sajjadkademm.retail.organizations;
 public enum OrganizationErrorCode {
 
     // Organization Errors (ORG001-ORG099)
-    ORGANIZATION_NOT_FOUND("ORG001", "Organization not found"),
-    ORGANIZATION_DISABLED("ORG002", "Organization is disabled"),
-    ORGANIZATION_INACTIVE("ORG003", "Organization is inactive"),
-    ORGANIZATION_VALIDATION_FAILED("ORG004", "Organization validation failed"),
-    ORGANIZATION_ALREADY_EXISTS("ORG005", "Organization already exists"),
-    INVALID_ORGANIZATION_DATA("ORG006", "Invalid organization data"),
-    ORGANIZATION_DELETION_FAILED("ORG007", "Failed to delete organization"),
-    ORGANIZATION_UPDATE_FAILED("ORG008", "Failed to update organization"),
-    ORGANIZATION_CREATION_FAILED("ORG009", "Failed to create organization");
+    ORGANIZATION_NOT_FOUND("ORG001", "organization.not.found"),
+    ORGANIZATION_DISABLED("ORG002", "organization.disabled"),
+    ORGANIZATION_INACTIVE("ORG003", "organization.inactive"),
+    ORGANIZATION_VALIDATION_FAILED("ORG004", "organization.validation.failed"),
+    ORGANIZATION_ALREADY_EXISTS("ORG005", "organization.already.exists"),
+    INVALID_ORGANIZATION_DATA("ORG006", "invalid.organization.data"),
+    ORGANIZATION_DELETION_FAILED("ORG007", "organization.deletion.failed"),
+    ORGANIZATION_UPDATE_FAILED("ORG008", "organization.update.failed"),
+    ORGANIZATION_CREATION_FAILED("ORG009", "organization.creation.failed");
 
     private final String code;
     private final String message;

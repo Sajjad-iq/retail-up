@@ -10,6 +10,7 @@ class HttpService {
             timeout: 10000,
             headers: {
                 'Content-Type': 'application/json',
+                'Accept-Language': 'ar-SA'
             },
         })
 

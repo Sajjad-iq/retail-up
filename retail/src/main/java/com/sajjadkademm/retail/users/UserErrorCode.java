@@ -11,16 +11,16 @@ package com.sajjadkademm.retail.users;
 public enum UserErrorCode {
 
     // User Errors (USR001-USR099)
-    USER_NOT_FOUND("USR001", "User not found"),
-    USER_DISABLED("USR002", "User is disabled"),
-    USER_INACTIVE("USR003", "User is inactive"),
-    USER_NOT_ACTIVE("USR004", "Only Active Users Can Update Inventory Items"),
-    USER_ALREADY_EXISTS("USR005", "User already exists"),
-    INVALID_USER_DATA("USR006", "Invalid user data"),
-    USER_DELETION_FAILED("USR007", "Failed to delete user"),
-    USER_UPDATE_FAILED("USR008", "Failed to update user"),
-    USER_CREATION_FAILED("USR009", "Failed to create user"),
-    INSUFFICIENT_PERMISSIONS("USR010", "Insufficient permissions to perform operation");
+    USER_NOT_FOUND("USR001", "user.not.found"),
+    USER_DISABLED("USR002", "user.disabled"),
+    USER_INACTIVE("USR003", "user.inactive"),
+    USER_NOT_ACTIVE("USR004", "user.not.active"),
+    USER_ALREADY_EXISTS("USR005", "user.already.exists"),
+    INVALID_USER_DATA("USR006", "invalid.user.data"),
+    USER_DELETION_FAILED("USR007", "user.deletion.failed"),
+    USER_UPDATE_FAILED("USR008", "user.update.failed"),
+    USER_CREATION_FAILED("USR009", "user.creation.failed"),
+    INSUFFICIENT_PERMISSIONS("USR010", "insufficient.permissions");
 
     private final String code;
     private final String message;
