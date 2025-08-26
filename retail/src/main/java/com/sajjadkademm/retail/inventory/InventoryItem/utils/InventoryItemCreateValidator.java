@@ -11,19 +11,16 @@ import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 import com.sajjadkademm.retail.users.UserErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
-import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,7 +33,6 @@ import java.util.List;
 public class InventoryItemCreateValidator {
 
     private final InventoryService inventoryService;
-    private final UserService userService;
     private final OrganizationService organizationService;
     private final InventoryItemRepository inventoryItemRepository;
     private final LocalizedErrorService localizedErrorService;
@@ -160,10 +156,11 @@ public class InventoryItemCreateValidator {
             // organization)
             if (inventory != null && !user.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
                 errors.add(localizedErrorService.getLocalizedMessage(
-                        "User does not have access to this organization"));
+                        InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
             }
         } catch (Exception e) {
-            errors.add("Authentication error: " + e.getMessage());
+            errors.add(localizedErrorService.getLocalizedMessage(
+                    InventoryErrorCode.USER_NOT_AUTHENTICATED.getMessage()) + ": " + e.getMessage());
         }
 
         // Normalize string inputs

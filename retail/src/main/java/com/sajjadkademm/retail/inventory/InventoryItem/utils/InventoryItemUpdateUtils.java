@@ -19,10 +19,10 @@ import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.dto.UserStatus;
-import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 import com.sajjadkademm.retail.users.UserErrorCode;
+import com.sajjadkademm.retail.config.SecurityUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -151,15 +151,12 @@ public class InventoryItemUpdateUtils {
 
         // Resolve user and ensure it is active
         try {
-            user = userRepository.findById(request.getUserId())
-                    .orElse(null);
-            if (user == null) {
-                errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage()));
-            } else if (user.getStatus() != UserStatus.ACTIVE) {
+            user = SecurityUtils.getCurrentUser();
+            if (user.getStatus() != UserStatus.ACTIVE) {
                 errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_ACTIVE.getMessage()));
             }
         } catch (Exception e) {
-            errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage()) + ": "
+            errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_ACTIVE.getMessage()) + ": "
                     + e.getMessage());
         }
 
@@ -398,9 +395,7 @@ public class InventoryItemUpdateUtils {
             InventoryMovementService inventoryMovementService, Integer originalStock) {
 
         // Resolve user and ensure it is active
-        User actor = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new NotFoundException(
-                        localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage())));
+        User actor = SecurityUtils.getCurrentUser();
 
         if (request.getSku() != null && !request.getSku().equals(item.getSku())) {
             inventoryMovementService.recordAdjustmentToTarget(

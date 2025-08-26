@@ -77,10 +77,18 @@ public enum InventoryErrorCode {
     BATCH_VALIDATION_FAILED("INV505", "Batch validation failed"),
 
     // Inventory Movement Errors (INV600-INV699)
-    INSUFFICIENT_STOCK("INV600", "Insufficient stock for operation"),
-    INVALID_MOVEMENT_TYPE("INV601", "Invalid movement type"),
-    MOVEMENT_VALIDATION_FAILED("INV602", "Movement validation failed"),
-    STOCK_ADJUSTMENT_ERROR("INV603", "Error adjusting stock levels");
+    INSUFFICIENT_STOCK("INV600", "insufficient.stock"),
+    INVALID_MOVEMENT_TYPE("INV601", "invalid.movement.type"),
+    MOVEMENT_VALIDATION_FAILED("INV602", "movement.validation.failed"),
+    STOCK_ADJUSTMENT_ERROR("INV603", "stock.adjustment.error"),
+
+    // User Access Control Errors (INV700-INV799)
+    USER_NOT_ORGANIZATION_CREATOR("INV700", "user.not.organization.creator"),
+    USER_NOT_AUTHENTICATED("INV701", "user.not.authenticated"),
+
+    // Inventory Item Operation Errors (INV800-INV899)
+    INVENTORY_ITEM_NOT_FOUND("INV800", "inventory.item.not.found"),
+    ITEM_CREATION_FAILED("INV801", "item.creation.failed");
 
     private final String code;
     private final String message;

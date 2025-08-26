@@ -5,6 +5,8 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class InventoryItemController {
 
         private final InventoryItemService inventoryItemService;
+        private final LocalizedErrorService localizedErrorService;
 
         /**
          * Create inventory item endpoint

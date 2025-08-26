@@ -17,6 +17,8 @@ import com.sajjadkademm.retail.config.SecurityUtils;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,6 +42,7 @@ public class InventoryItemService {
 
     private final InventoryMovementService inventoryMovementService;
     private final InventoryService inventoryService;
+    private final LocalizedErrorService localizedErrorService;
 
     @Autowired
     public InventoryItemService(InventoryItemRepository inventoryItemRepository,
@@ -47,12 +50,14 @@ public class InventoryItemService {
             InventoryItemCreateValidator inventoryItemCreateValidator,
             InventoryItemUpdateUtils inventoryItemUpdateValidator,
             InventoryMovementService inventoryMovementService,
-            InventoryService inventoryService) {
+            InventoryService inventoryService,
+            LocalizedErrorService localizedErrorService) {
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryItemCreateValidator = inventoryItemCreateValidator;
         this.inventoryItemUpdateValidator = inventoryItemUpdateValidator;
         this.inventoryMovementService = inventoryMovementService;
         this.inventoryService = inventoryService;
+        this.localizedErrorService = localizedErrorService;
     }
 
     /**
@@ -118,7 +123,8 @@ public class InventoryItemService {
 
             return CreateInventoryItemResult.success(saved);
         } catch (Exception e) {
-            return CreateInventoryItemResult.failure("Failed to create inventory item: " + e.getMessage());
+            return CreateInventoryItemResult.failure(localizedErrorService.getLocalizedMessage(
+                    InventoryErrorCode.ITEM_CREATION_FAILED.getMessage()) + ": " + e.getMessage());
         }
     }
 
@@ -230,7 +236,8 @@ public class InventoryItemService {
      */
     public InventoryItem getInventoryItemById(String id) {
         InventoryItem item = inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService.getLocalizedMessage(
+                        InventoryErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage())));
 
         // Check if user has access to the inventory item (user must be the creator of
         // the organization)
@@ -245,7 +252,8 @@ public class InventoryItemService {
      */
     public InventoryItem getInventoryItemBySku(String sku, String inventoryId) {
         InventoryItem item = inventoryItemRepository.findBySkuAndInventoryId(sku, inventoryId)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with SKU: " + sku));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService.getLocalizedMessage(
+                        InventoryErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage()) + " with SKU: " + sku));
 
         // Check if user has access to the inventory item
         checkUserAccessToInventoryItem(item);
@@ -259,7 +267,8 @@ public class InventoryItemService {
      */
     public InventoryItem getInventoryItemByBarcode(String barcode, String inventoryId) {
         InventoryItem item = inventoryItemRepository.findByBarcodeAndInventoryId(barcode, inventoryId)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found with barcode: " + barcode));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService.getLocalizedMessage(
+                        InventoryErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage()) + " with barcode: " + barcode));
 
         // Check if user has access to the inventory item
         checkUserAccessToInventoryItem(item);
@@ -276,7 +285,8 @@ public class InventoryItemService {
     public void deleteInventoryItem(String id) {
         // Verify item exists and check access before deleting
         InventoryItem item = inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService.getLocalizedMessage(
+                        InventoryErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage())));
 
         // Check if user has access to the inventory item
         checkUserAccessToInventoryItem(item);
@@ -397,7 +407,8 @@ public class InventoryItemService {
         // Get inventory and check if user has access to it
         Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
         if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
-            throw new UnauthorizedException("User does not have access to this inventory item");
+            throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
+                    InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
     }
 
@@ -411,7 +422,8 @@ public class InventoryItemService {
         // Get inventory and check access
         Inventory inventory = inventoryService.getInventoryById(inventoryId);
         if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
-            throw new UnauthorizedException("User does not have access to this inventory");
+            throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
+                    InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
     }
 }
