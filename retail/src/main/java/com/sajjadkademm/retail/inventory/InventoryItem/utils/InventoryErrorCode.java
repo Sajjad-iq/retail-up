@@ -26,7 +26,7 @@ public enum InventoryErrorCode {
     EXPIRY_DATE_REQUIRED_FOR_PERISHABLE("INV013", "expiry.date.required.for.perishable"),
     EXPIRY_DATE_MUST_BE_FUTURE("INV014", "expiry.date.must.be.future"),
     EXPIRY_DATE_MUST_BE_NULL_FOR_NON_PERISHABLE("INV015", "expiry.date.must.be.null.for.non.perishable"),
-    SKU_ALREADY_EXISTS("INV016", "sku.already.exists"),
+
     BARCODE_ALREADY_EXISTS("INV017", "barcode.already.exists"),
     PRODUCT_CODE_ALREADY_EXISTS("INV018", "product.code.already.exists"),
 

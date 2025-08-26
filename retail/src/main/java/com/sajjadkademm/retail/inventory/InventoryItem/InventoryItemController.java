@@ -1,10 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.*;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
@@ -49,47 +45,10 @@ public class InventoryItemController {
          * organization creator)
          */
         @Operation(summary = "Create Inventory Item", description = "Create a new inventory item in an inventory (only if current user is the organization creator)", operationId = "createInventoryItem")
-        @ApiResponse(responseCode = "200", description = "Inventory item created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class), examples = @ExampleObject(name = "Created Inventory Item", value = """
-                        {
-                            "id": "item123",
-                            "name": "Laptop Computer",
-                            "description": "High-performance laptop for business use",
-                            "sku": "LAPTOP001",
-                            "barcode": "1234567890123",
-                            "category": "Electronics",
-                            "brand": "TechCorp",
-                            "unit": "PIECES",
-                            "currentStock": 50,
-                            "minimumStock": 10,
-                            "maximumStock": 100,
-                            "costPrice": 800.00,
-                            "sellingPrice": 1200.00,
-                            "isActive": true,
-                            "inventoryId": "inv123",
-                            "createdAt": "2024-12-19T10:30:00",
-                            "updatedAt": "2024-12-19T10:30:00",
-                            "createdBy": "user123"
-                        }
-                        """)))
+        @ApiResponse(responseCode = "200", description = "Inventory item created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class), examples = @ExampleObject(name = "Created Inventory Item", value = "{\"id\": \"item123\", \"name\": \"Laptop Computer\", \"description\": \"High-performance laptop for business use\", \"barcode\": \"1234567890123\", \"category\": \"Electronics\", \"brand\": \"TechCorp\", \"unit\": \"PIECES\", \"currentStock\": 50, \"minimumStock\": 10, \"maximumStock\": 100, \"costPrice\": 800.00, \"sellingPrice\": 1200.00, \"isActive\": true, \"inventoryId\": \"inv123\", \"createdAt\": \"2024-12-19T10:30:00\", \"updatedAt\": \"2024-12-19T10:30:00\", \"createdBy\": \"user123\"}")))
         @PostMapping
         public ResponseEntity<InventoryItem> createInventoryItem(
-                        @Parameter(description = "Inventory item creation request", required = true, content = @Content(schema = @Schema(implementation = CreateInventoryItemRequest.class), examples = @ExampleObject(name = "Create Inventory Item Request", value = """
-                                        {
-                                            "inventoryId": "inv123",
-                                            "name": "Laptop Computer",
-                                            "description": "High-performance laptop for business use",
-                                            "sku": "LAPTOP001",
-                                            "barcode": "1234567890123",
-                                            "category": "Electronics",
-                                            "brand": "TechCorp",
-                                            "unit": "PIECES",
-                                            "currentStock": 50,
-                                            "minimumStock": 10,
-                                            "maximumStock": 100,
-                                            "costPrice": 800.00,
-                                            "sellingPrice": 1200.00
-                                        }
-                                        """))) @Valid @RequestBody CreateInventoryItemRequest request) {
+                        @Parameter(description = "Inventory item creation request", required = true, content = @Content(schema = @Schema(implementation = CreateInventoryItemRequest.class), examples = @ExampleObject(name = "Create Inventory Item Request", value = "{\"inventoryId\": \"inv123\", \"name\": \"Laptop Computer\", \"description\": \"High-performance laptop for business use\", \"barcode\": \"1234567890123\", \"category\": \"Electronics\", \"brand\": \"TechCorp\", \"unit\": \"PIECES\", \"currentStock\": 50, \"minimumStock\": 10, \"maximumStock\": 100, \"costPrice\": 800.00, \"sellingPrice\": 1200.00}"))) @Valid @RequestBody CreateInventoryItemRequest request) {
                 InventoryItem response = inventoryItemService.createInventoryItem(request);
                 return ResponseEntity.ok(response);
         }
@@ -134,19 +93,6 @@ public class InventoryItemController {
         }
 
         /**
-         * Get inventory item by SKU endpoint
-         */
-        @Operation(summary = "Get Inventory Item by SKU", description = "Retrieve inventory item details by SKU within an inventory", operationId = "getInventoryItemBySku")
-        @ApiResponse(responseCode = "200", description = "Inventory item found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class)))
-        @GetMapping("/sku/{sku}/inventory/{inventoryId}")
-        public ResponseEntity<InventoryItem> getInventoryItemBySku(
-                        @Parameter(description = "SKU", required = true, example = "LAPTOP001") @PathVariable String sku,
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                InventoryItem response = inventoryItemService.getInventoryItemBySku(sku, inventoryId);
-                return ResponseEntity.ok(response);
-        }
-
-        /**
          * Get inventory item by barcode endpoint
          */
         @Operation(summary = "Get Inventory Item by Barcode", description = "Retrieve inventory item details by barcode within an inventory", operationId = "getInventoryItemByBarcode")
@@ -175,7 +121,7 @@ public class InventoryItemController {
                         @Parameter(description = "Sort direction (asc/desc)", example = "desc") @RequestParam(defaultValue = "desc") String sortDirection,
 
                         // Search parameter
-                        @Parameter(description = "Search query for item name, SKU, or barcode", example = "laptop") @RequestParam(required = false) String search,
+                        @Parameter(description = "Search query for item name, barcode, or product code", example = "laptop") @RequestParam(required = false) String search,
 
                         // Basic filters
                         @Parameter(description = "Category filter", example = "Electronics") @RequestParam(required = false) String category,

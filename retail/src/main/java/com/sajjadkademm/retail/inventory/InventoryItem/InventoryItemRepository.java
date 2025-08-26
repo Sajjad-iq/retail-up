@@ -14,9 +14,6 @@ import java.util.Optional;
 public interface InventoryItemRepository
               extends JpaRepository<InventoryItem, String>, PagingAndSortingRepository<InventoryItem, String> {
 
-       // Find item by SKU within an inventory
-       Optional<InventoryItem> findBySkuAndInventoryId(String sku, String inventoryId);
-
        // Find item by barcode within an inventory
        Optional<InventoryItem> findByBarcodeAndInventoryId(String barcode, String inventoryId);
 
@@ -67,8 +64,8 @@ public interface InventoryItemRepository
        @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.discountPrice IS NOT NULL AND i.discountStartDate <= CURRENT_TIMESTAMP AND i.discountEndDate >= CURRENT_TIMESTAMP AND i.isActive = true")
        List<InventoryItem> findItemsWithActiveDiscounts(@Param("inventoryId") String inventoryId);
 
-       // Search items by name, SKU, barcode, or product code within an inventory
-       @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND (i.name LIKE %:searchTerm% OR i.sku LIKE %:searchTerm% OR i.barcode LIKE %:searchTerm% OR i.productCode LIKE %:searchTerm%)")
+       // Search items by name, barcode, or product code within an inventory
+       @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND (i.name LIKE %:searchTerm% OR i.barcode LIKE %:searchTerm% OR i.productCode LIKE %:searchTerm%)")
        List<InventoryItem> searchItems(@Param("inventoryId") String inventoryId,
                      @Param("searchTerm") String searchTerm);
 
@@ -83,9 +80,6 @@ public interface InventoryItemRepository
        // Calculate total inventory cost (cost price amount * current stock)
        @Query("SELECT COALESCE(SUM(i.costPrice.amount * i.currentStock), 0) FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.costPrice IS NOT NULL AND i.isActive = true")
        BigDecimal calculateTotalInventoryCost(@Param("inventoryId") String inventoryId);
-
-       // Check if SKU exists within an inventory
-       boolean existsBySkuAndInventoryId(String sku, String inventoryId);
 
        // Check if barcode exists within an inventory
        boolean existsByBarcodeAndInventoryId(String barcode, String inventoryId);
@@ -147,7 +141,7 @@ public interface InventoryItemRepository
        Page<InventoryItem> findItemsWithActiveDiscounts(@Param("inventoryId") String inventoryId, Pageable pageable);
 
        // Search items with pagination
-       @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND (i.name LIKE %:searchTerm% OR i.sku LIKE %:searchTerm% OR i.barcode LIKE %:searchTerm% OR i.productCode LIKE %:searchTerm%)")
+       @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND (i.name LIKE %:searchTerm% OR i.barcode LIKE %:searchTerm% OR i.productCode LIKE %:searchTerm%)")
        Page<InventoryItem> searchItems(@Param("inventoryId") String inventoryId, @Param("searchTerm") String searchTerm,
                      Pageable pageable);
 
@@ -166,7 +160,7 @@ public interface InventoryItemRepository
                      "AND (:maxCostPrice IS NULL OR i.costPrice.amount <= :maxCostPrice) " +
                      "AND (:minSellingPrice IS NULL OR i.sellingPrice.amount >= :minSellingPrice) " +
                      "AND (:maxSellingPrice IS NULL OR i.sellingPrice.amount <= :maxSellingPrice) " +
-                     "AND (:searchTerm IS NULL OR i.name LIKE %:searchTerm% OR i.sku LIKE %:searchTerm% OR i.barcode LIKE %:searchTerm% OR i.productCode LIKE %:searchTerm%)")
+                     "AND (:searchTerm IS NULL OR i.name LIKE %:searchTerm% OR i.barcode LIKE %:searchTerm% OR i.productCode LIKE %:searchTerm%)")
        Page<InventoryItem> findWithFilters(
                      @Param("inventoryId") String inventoryId,
                      @Param("category") String category,

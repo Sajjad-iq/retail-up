@@ -27,7 +27,7 @@ public class FilterRequest {
     private String supplierName;
     private String color;
     private String size;
-    private String searchTerm; // For name, SKU, or barcode search
+    private String searchTerm; // For name, barcode, or product code search
 
     // Stock filters
     private Boolean lowStock;

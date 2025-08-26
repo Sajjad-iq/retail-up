@@ -164,8 +164,7 @@ public class InventoryItemCreateValidator {
         }
 
         // Normalize string inputs
-        if (request.getSku() != null)
-            request.setSku(request.getSku().trim());
+
         if (request.getBarcode() != null)
             request.setBarcode(request.getBarcode().trim());
         if (request.getProductCode() != null)
@@ -173,17 +172,6 @@ public class InventoryItemCreateValidator {
 
         // Friendly uniqueness checks within inventory scope
         if (inventory != null) {
-            if (request.getSku() != null && !request.getSku().trim().isEmpty()) {
-                try {
-                    if (inventoryItemRepository.existsBySkuAndInventoryId(request.getSku(), request.getInventoryId())) {
-                        errors.add(localizedErrorService.getLocalizedMessage(
-                                InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage()) + " '" + request.getSku() + "'");
-                    }
-                } catch (Exception e) {
-                    errors.add(localizedErrorService.getLocalizedMessage(
-                            InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage()) + ": " + e.getMessage());
-                }
-            }
 
             if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
                 try {

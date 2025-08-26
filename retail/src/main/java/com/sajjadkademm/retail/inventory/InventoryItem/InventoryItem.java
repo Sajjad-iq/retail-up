@@ -54,10 +54,8 @@ import lombok.Builder;
 @Builder
 @Table(name = "inventory_items", indexes = {
                 @Index(name = "idx_inventory_items_name", columnList = "name"),
-                @Index(name = "idx_inventory_items_sku", columnList = "sku"),
                 @Index(name = "idx_inventory_items_barcode", columnList = "barcode"),
                 @Index(name = "idx_inventory_items_inventory_id", columnList = "inventory_id"),
-                @Index(name = "idx_inventory_items_sku_inventory", columnList = "sku,inventory_id"),
                 @Index(name = "idx_inventory_items_barcode_inventory", columnList = "barcode,inventory_id"),
                 @Index(name = "idx_inventory_items_product_code", columnList = "product_code"),
                 @Index(name = "idx_inventory_items_category", columnList = "category"),
@@ -67,7 +65,6 @@ import lombok.Builder;
                 @Index(name = "idx_inventory_items_expiry_date", columnList = "expiry_date"),
                 @Index(name = "idx_inventory_items_low_stock", columnList = "current_stock,minimum_stock")
 }, uniqueConstraints = {
-                @UniqueConstraint(name = "uk_inventory_items_sku_inventory", columnNames = { "sku", "inventory_id" }),
                 @UniqueConstraint(name = "uk_inventory_items_barcode_inventory", columnNames = { "barcode",
                                 "inventory_id" }),
                 @UniqueConstraint(name = "uk_inventory_items_product_code_inventory", columnNames = { "product_code",
@@ -91,12 +88,7 @@ public class InventoryItem {
         @Size(max = 1000)
         private String description;
 
-        // Stock Keeping Unit - Unique identifier for inventory tracking and management
-        @Column(name = "sku")
-        @Size(min = 3, max = 50)
-        private String sku;
-
-        // Internal product code for business operations (different from SKU)
+        // Internal product code for business operations
         @Column(name = "product_code", length = 50)
         @Size(max = 50)
         private String productCode;

@@ -9,6 +9,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.inventory.Inventory;
@@ -165,25 +166,9 @@ public class InventoryItemUpdateUtils {
             request.setBarcode(request.getBarcode().trim());
         if (request.getProductCode() != null)
             request.setProductCode(request.getProductCode().trim());
-        if (request.getSku() != null) {
-            request.setSku(request.getSku().trim());
-        }
 
         // Friendly uniqueness checks within inventory scope (only when changed)
         if (inventory != null) {
-            if (request.getSku() != null && !request.getSku().trim().isEmpty()) {
-                try {
-                    boolean isChangingSku = !request.getSku().equals(existing.getSku());
-                    if (isChangingSku && inventoryItemRepository
-                            .existsBySkuAndInventoryId(request.getSku(), existing.getInventoryId())) {
-                        errors.add(localizedErrorService.getLocalizedMessage(
-                                InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage()) + " '" + request.getSku() + "'");
-                    }
-                } catch (Exception e) {
-                    errors.add(localizedErrorService.getLocalizedMessage(
-                            InventoryErrorCode.SKU_ALREADY_EXISTS.getMessage()) + ": " + e.getMessage());
-                }
-            }
 
             if (request.getBarcode() != null && !request.getBarcode().trim().isEmpty()) {
                 try {
@@ -326,9 +311,6 @@ public class InventoryItemUpdateUtils {
         if (request.getBarcode() != null) {
             item.setBarcode(request.getBarcode());
         }
-        if (request.getSku() != null) {
-            item.setSku(request.getSku());
-        }
         if (request.getCategory() != null) {
             item.setCategory(request.getCategory());
         }
@@ -396,16 +378,6 @@ public class InventoryItemUpdateUtils {
 
         // Resolve user and ensure it is active
         User actor = SecurityUtils.getCurrentUser();
-
-        if (request.getSku() != null && !request.getSku().equals(item.getSku())) {
-            inventoryMovementService.recordAdjustmentToTarget(
-                    actor,
-                    item,
-                    item.getCurrentStock(),
-                    "SKU updated via item update",
-                    ReferenceType.INFO_UPDATE,
-                    item.getId());
-        }
 
         // Track stock changes
         if (request.getCurrentStock() != null && !request.getCurrentStock().equals(originalStock)) {

@@ -86,7 +86,7 @@ public class ExcelUploadService {
 
                 int rowNumber = i + 2; // CSV row number (accounting for header row)
 
-                // Check if item already exists (by SKU, barcode, or product code)
+                // Check if item already exists (by barcode or product code)
                 Optional<InventoryItem> existingItem = findExistingItemByIdentifiers(itemRequest, inventoryId);
 
                 // Process item: create new or update existing
@@ -199,7 +199,7 @@ public class ExcelUploadService {
             CreateInventoryItemRequest item = new CreateInventoryItemRequest();
             item.setName(name);
             item.setDescription(getStringValue(values, 1));
-            item.setSku(getStringValue(values, 2));
+
             item.setProductCode(getStringValue(values, 3));
             item.setBarcode(getStringValue(values, 4));
             item.setCategory(getStringValue(values, 5));
@@ -233,11 +233,11 @@ public class ExcelUploadService {
     }
 
     /**
-     * Find existing inventory item by unique identifiers (SKU, barcode, or product
+     * Find existing inventory item by unique identifiers (barcode or product
      * code).
      * This method checks for duplicates before creating new items during Excel
      * upload.
-     * Priority order: SKU -> Barcode -> Product Code
+     * Priority order: Barcode -> Product Code
      * 
      * @param itemRequest The item request containing potential identifiers
      * @param inventoryId The inventory to search within
@@ -245,13 +245,6 @@ public class ExcelUploadService {
      */
     private Optional<InventoryItem> findExistingItemByIdentifiers(CreateInventoryItemRequest itemRequest,
             String inventoryId) {
-        // Check by SKU first
-        if (itemRequest.getSku() != null && !itemRequest.getSku().trim().isEmpty()) {
-            Optional<InventoryItem> existing = inventoryItemRepository.findBySkuAndInventoryId(itemRequest.getSku(),
-                    inventoryId);
-            if (existing.isPresent())
-                return existing;
-        }
 
         // Check by barcode
         if (itemRequest.getBarcode() != null && !itemRequest.getBarcode().trim().isEmpty()) {
@@ -273,7 +266,7 @@ public class ExcelUploadService {
      * Process an inventory item from Excel upload by either creating new or
      * updating existing item.
      * Determines whether to create or update based on finding existing items by
-     * SKU, barcode, or product code.
+     * barcode or product code.
      * 
      * @param existingItem Optional existing item found by unique identifiers
      * @param itemRequest  The item data from Excel row
@@ -372,7 +365,7 @@ public class ExcelUploadService {
         updateRequest.setUserId(userId);
         updateRequest.setName(createRequest.getName());
         updateRequest.setDescription(createRequest.getDescription());
-        updateRequest.setSku(createRequest.getSku());
+
         updateRequest.setProductCode(createRequest.getProductCode());
         updateRequest.setBarcode(createRequest.getBarcode());
         updateRequest.setCategory(createRequest.getCategory());

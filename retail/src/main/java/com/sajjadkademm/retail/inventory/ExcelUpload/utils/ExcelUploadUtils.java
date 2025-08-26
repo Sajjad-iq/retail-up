@@ -29,7 +29,7 @@ public class ExcelUploadUtils {
      */
     public static String[] getExpectedHeaders() {
         return new String[] {
-                "Name", "Description", "SKU", "Product Code", "Barcode",
+                "Name", "Description", "Product Code", "Barcode",
                 "Category", "Brand", "Unit", "Weight", "Dimensions",
                 "Color", "Size", "Current Stock", "Minimum Stock", "Maximum Stock",
                 "Cost Price Amount", "Cost Price Currency", "Selling Price Amount",

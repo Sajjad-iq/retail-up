@@ -6,6 +6,8 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRe
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
+import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemCreateValidator;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.ValidatedCreateInventoryItemContext;
 import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryItemUpdateUtils;
@@ -141,7 +143,6 @@ public class InventoryItemService {
         InventoryItem item = InventoryItem.builder()
                 .name(request.getName())
                 .description(request.getDescription())
-                .sku(request.getSku())
                 .productCode(request.getProductCode())
                 .barcode(request.getBarcode())
                 .category(request.getCategory())
@@ -170,6 +171,7 @@ public class InventoryItemService {
         // Persist inventory item to database
         return inventoryItemRepository.save(item);
     }
+
 
     /**
      * Record initial stock movement for newly created item.
@@ -227,21 +229,6 @@ public class InventoryItemService {
 
         // Check if user has access to the inventory item (user must be the creator of
         // the organization)
-        checkUserAccessToInventoryItem(item);
-
-        return item;
-    }
-
-    /**
-     * Get inventory item by SKU within an inventory (only for users with access to
-     * the organization)
-     */
-    public InventoryItem getInventoryItemBySku(String sku, String inventoryId) {
-        InventoryItem item = inventoryItemRepository.findBySkuAndInventoryId(sku, inventoryId)
-                .orElseThrow(() -> new NotFoundException(localizedErrorService.getLocalizedMessage(
-                        InventoryErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage()) + " with SKU: " + sku));
-
-        // Check if user has access to the inventory item
         checkUserAccessToInventoryItem(item);
 
         return item;
