@@ -129,20 +129,6 @@ public class InventoryItemService {
     }
 
     /**
-     * Create inventory item with user parameter (for backward compatibility)
-     * 
-     * @deprecated Use
-     *             createInventoryItemWithErrorCollection(CreateInventoryItemRequest)
-     *             instead
-     */
-    @Deprecated
-    @Transactional(rollbackFor = { Exception.class })
-    public CreateInventoryItemResult createInventoryItemWithErrorCollection(CreateInventoryItemRequest request,
-            User user) {
-        return createInventoryItemWithErrorCollection(request);
-    }
-
-    /**
      * Internal method to create and save inventory item entity.
      * This method builds the InventoryItem entity from the request and persists it.
      * 

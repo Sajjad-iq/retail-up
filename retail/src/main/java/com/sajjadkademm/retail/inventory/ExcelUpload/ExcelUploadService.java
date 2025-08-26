@@ -348,8 +348,7 @@ public class ExcelUploadService {
             List<InventoryItem> createdItems, List<String> errors) {
         // Use inventory service method designed for batch operations with error
         // collection
-        CreateInventoryItemResult result = inventoryItemService.createInventoryItemWithErrorCollection(itemRequest,
-                user);
+        CreateInventoryItemResult result = inventoryItemService.createInventoryItemWithErrorCollection(itemRequest);
 
         if (result.isSuccess()) {
             createdItems.add(result.getItem());
