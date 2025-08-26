@@ -21,7 +21,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Inventory management controller providing CRUD operations for
- * inventories within organizations.
+ * inventories within organizations. All operations are scoped to the current
+ * authenticated user.
  * 
  * @author Sajjad Kadem
  * @version 1.0
@@ -31,15 +32,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/inventories")
 @RequiredArgsConstructor
-@Tag(name = "Inventories", description = "Inventory management endpoints")
+@Tag(name = "Inventories", description = "Inventory management endpoints (user-scoped)")
 public class InventoryController {
 
     private final InventoryService inventoryService;
 
     /**
      * Create inventory endpoint
+     * Creates a new inventory for an organization (only if the current user is the
+     * organization creator)
      */
-    @Operation(summary = "Create Inventory", description = "Create a new inventory for an organization", operationId = "createInventory")
+    @Operation(summary = "Create Inventory", description = "Create a new inventory for an organization (only if current user is the organization creator)", operationId = "createInventory")
     @ApiResponse(responseCode = "200", description = "Inventory created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Inventory.class), examples = @ExampleObject(name = "Created Inventory", value = """
             {
                 "id": "inv123",
@@ -57,7 +60,6 @@ public class InventoryController {
     public ResponseEntity<Inventory> createInventory(
             @Parameter(description = "Inventory creation request", required = true, content = @Content(schema = @Schema(implementation = CreateInventoryRequest.class), examples = @ExampleObject(name = "Create Inventory Request", value = """
                     {
-                        "userId": "user123",
                         "organizationId": "org123",
                         "name": "Main Warehouse",
                         "description": "Primary storage facility for all products",
@@ -70,8 +72,9 @@ public class InventoryController {
 
     /**
      * Update inventory endpoint
+     * Updates an inventory (only if the current user is the organization creator)
      */
-    @Operation(summary = "Update Inventory", description = "Update an existing inventory's information", operationId = "updateInventory")
+    @Operation(summary = "Update Inventory", description = "Update an existing inventory (only if current user is the organization creator)", operationId = "updateInventory")
     @ApiResponse(responseCode = "200", description = "Inventory updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Inventory.class), examples = @ExampleObject(name = "Updated Inventory", value = """
             {
                 "id": "inv123",
@@ -101,8 +104,10 @@ public class InventoryController {
 
     /**
      * Get inventory by ID endpoint
+     * Returns inventory details only if the current user is the organization
+     * creator
      */
-    @Operation(summary = "Get Inventory by ID", description = "Retrieve inventory details by its unique identifier", operationId = "getInventoryById")
+    @Operation(summary = "Get Inventory by ID", description = "Retrieve inventory details by ID (only if current user is the organization creator)", operationId = "getInventoryById")
     @ApiResponse(responseCode = "200", description = "Inventory found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Inventory.class), examples = @ExampleObject(name = "Inventory Details", value = """
             {
                 "id": "inv123",
@@ -125,8 +130,9 @@ public class InventoryController {
 
     /**
      * Get all inventories for an organization endpoint
+     * Returns inventories only if the current user is the organization creator
      */
-    @Operation(summary = "Get Inventories by Organization", description = "Retrieve all inventories for a specific organization", operationId = "getInventoriesByOrganization")
+    @Operation(summary = "Get Inventories by Organization", description = "Retrieve all inventories for a specific organization (only if current user is the organization creator)", operationId = "getInventoriesByOrganization")
     @ApiResponse(responseCode = "200", description = "List of inventories retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Inventory.class, type = "array"), examples = @ExampleObject(name = "Inventories List", value = """
             [
                 {
@@ -162,8 +168,10 @@ public class InventoryController {
 
     /**
      * Get active inventories for an organization endpoint
+     * Returns active inventories only if the current user is the organization
+     * creator
      */
-    @Operation(summary = "Get Active Inventories by Organization", description = "Retrieve all active inventories for a specific organization", operationId = "getActiveInventoriesByOrganization")
+    @Operation(summary = "Get Active Inventories by Organization", description = "Retrieve all active inventories for a specific organization (only if current user is the organization creator)", operationId = "getActiveInventoriesByOrganization")
     @ApiResponse(responseCode = "200", description = "List of active inventories retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Inventory.class, type = "array")))
     @GetMapping("/organization/{organizationId}/active")
     public ResponseEntity<List<Inventory>> getActiveInventoriesByOrganization(
@@ -174,8 +182,9 @@ public class InventoryController {
 
     /**
      * Search inventories endpoint
+     * Searches inventories only if the current user is the organization creator
      */
-    @Operation(summary = "Search Inventories", description = "Search inventories by name within an organization", operationId = "searchInventories")
+    @Operation(summary = "Search Inventories", description = "Search inventories by name within an organization (only if current user is the organization creator)", operationId = "searchInventories")
     @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Inventory.class, type = "array"), examples = @ExampleObject(name = "Search Results", value = """
             [
                 {
@@ -201,8 +210,9 @@ public class InventoryController {
 
     /**
      * Delete inventory endpoint
+     * Deletes an inventory only if the current user is the organization creator
      */
-    @Operation(summary = "Delete Inventory", description = "Soft delete an inventory by setting isActive to false", operationId = "deleteInventory")
+    @Operation(summary = "Delete Inventory", description = "Soft delete an inventory by setting isActive to false (only if current user is the organization creator)", operationId = "deleteInventory")
     @ApiResponse(responseCode = "200", description = "Inventory deleted successfully")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInventory(

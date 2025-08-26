@@ -14,6 +14,7 @@ import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.inventory.utils.InventoryErrorCode;
+import com.sajjadkademm.retail.config.SecurityUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,6 @@ import java.util.List;
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final OrganizationService organizationService;
-    private final UserService userService;
     private final OrganizationValidationUtils organizationValidationUtils;
     private final LocalizedErrorService localizedErrorService;
 
@@ -48,6 +48,9 @@ public class InventoryService {
     @Transactional(rollbackFor = { Exception.class })
     public Inventory createInventory(CreateInventoryRequest request) {
         try {
+            // Get current authenticated user
+            User currentUser = SecurityUtils.getCurrentUser();
+
             // Resolve organization and ensure it exists
             Organization organization = organizationService.getOrganizationById(request.getOrganizationId());
             if (organization == null) {
@@ -58,16 +61,17 @@ public class InventoryService {
             // Guard: only active organizations can create inventories
             organizationValidationUtils.assertOrganizationIsActive(organization);
 
-            // Resolve creating user and ensure it exists
-            User user = userService.getUserById(request.getUserId());
-            if (user == null) {
-                throw new NotFoundException(localizedErrorService
-                        .getLocalizedMessage(InventoryErrorCode.USER_NOT_FOUND.getMessage()));
-            }
-
-            if (user.getStatus() != UserStatus.ACTIVE) {
+            // Validate current user permissions
+            if (currentUser.getStatus() != UserStatus.ACTIVE) {
                 throw new UnauthorizedException(localizedErrorService
                         .getLocalizedMessage(InventoryErrorCode.USER_NOT_ACTIVE.getMessage()));
+            }
+
+            // Check if user has access to the organization (user must be the creator of the
+            // organization)
+            if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
+                throw new UnauthorizedException(localizedErrorService
+                        .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
             }
 
             // Uniqueness: name must be unique within organization
@@ -84,7 +88,7 @@ public class InventoryService {
                     .location(request.getLocation())
                     .organizationId(request.getOrganizationId())
                     .isActive(true)
-                    .createdBy(user)
+                    .createdBy(currentUser)
                     .build();
 
             return inventoryRepository.save(inventory);
@@ -106,6 +110,16 @@ public class InventoryService {
         Inventory inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(localizedErrorService
                         .getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage(), id)));
+
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Check if user has access to the inventory (user must be the creator of the
+        // organization)
+        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        }
 
         // Uniqueness: name must be unique within organization when changed
         if (request.getName() != null && !request.getName().equals(inventory.getName())) {
@@ -136,32 +150,77 @@ public class InventoryService {
     }
 
     /**
-     * Get inventory by ID
+     * Get inventory by ID (only for users with access to the organization)
      */
     public Inventory getInventoryById(String id) {
-        return inventoryRepository.findById(id)
+        Inventory inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(localizedErrorService
                         .getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage(), id)));
+
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Check if user has access to the inventory (user must be the creator of the
+        // organization)
+        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        }
+
+        return inventory;
     }
 
     /**
-     * Get all inventories for an organization
+     * Get all inventories for an organization (only for users with access to the
+     * organization)
      */
     public List<Inventory> getInventoriesByOrganization(String organizationId) {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Verify user has access to the organization
+        Organization organization = organizationService.getOrganizationById(organizationId);
+        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        }
+
         return inventoryRepository.findByOrganizationId(organizationId);
     }
 
     /**
-     * Get active inventories for an organization
+     * Get active inventories for an organization (only for users with access to the
+     * organization)
      */
     public List<Inventory> getActiveInventoriesByOrganization(String organizationId) {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Verify user has access to the organization
+        Organization organization = organizationService.getOrganizationById(organizationId);
+        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        }
+
         return inventoryRepository.findByOrganizationIdAndIsActiveTrue(organizationId);
     }
 
     /**
-     * Search inventories by name within an organization
+     * Search inventories by name within an organization (only for users with access
+     * to the organization)
      */
     public List<Inventory> searchInventories(String organizationId, String searchTerm) {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Verify user has access to the organization
+        Organization organization = organizationService.getOrganizationById(organizationId);
+        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        }
+
         return inventoryRepository.searchInventoriesByOrganization(organizationId, searchTerm);
     }
 
@@ -172,6 +231,16 @@ public class InventoryService {
         Inventory inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(localizedErrorService
                         .getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage(), id)));
+
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Check if user has access to the inventory (user must be the creator of the
+        // organization)
+        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        }
 
         inventory.setIsActive(false);
         inventoryRepository.save(inventory);

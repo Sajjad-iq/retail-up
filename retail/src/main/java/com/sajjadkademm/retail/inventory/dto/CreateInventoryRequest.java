@@ -13,11 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateInventoryRequest {
 
-    @NotBlank(message = "User ID is required")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "User ID must contain only alphanumeric characters, hyphens, and underscores")
-    @Size(min = 20, max = 255, message = "User ID must be between 20 and 255 characters")
-    private String userId;
-
     @NotBlank(message = "Organization ID is required")
     @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Organization ID must contain only alphanumeric characters, hyphens, and underscores")
     @Size(min = 20, max = 255, message = "Organization ID must be between 20 and 255 characters")
