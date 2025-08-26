@@ -13,6 +13,10 @@ import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementServ
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
+import com.sajjadkademm.retail.inventory.Inventory;
+import com.sajjadkademm.retail.inventory.InventoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,17 +39,20 @@ public class InventoryItemService {
     private final InventoryItemUpdateUtils inventoryItemUpdateValidator;
 
     private final InventoryMovementService inventoryMovementService;
+    private final InventoryService inventoryService;
 
     @Autowired
     public InventoryItemService(InventoryItemRepository inventoryItemRepository,
             SystemSettingsService systemSettingsService,
             InventoryItemCreateValidator inventoryItemCreateValidator,
             InventoryItemUpdateUtils inventoryItemUpdateValidator,
-            InventoryMovementService inventoryMovementService) {
+            InventoryMovementService inventoryMovementService,
+            InventoryService inventoryService) {
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryItemCreateValidator = inventoryItemCreateValidator;
         this.inventoryItemUpdateValidator = inventoryItemUpdateValidator;
         this.inventoryMovementService = inventoryMovementService;
+        this.inventoryService = inventoryService;
     }
 
     /**
@@ -73,13 +80,14 @@ public class InventoryItemService {
      * rather than fail fast on the first validation issue.
      * 
      * @param request The inventory item creation request
-     * @param user    The user performing the operation
      * @return CreateInventoryItemResult containing either the created item or error
      *         message
      */
     @Transactional(rollbackFor = { Exception.class })
-    public CreateInventoryItemResult createInventoryItemWithErrorCollection(CreateInventoryItemRequest request,
-            User user) {
+    public CreateInventoryItemResult createInventoryItemWithErrorCollection(CreateInventoryItemRequest request) {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
         // Validate request and collect all errors without throwing exceptions
         InventoryItemCreateValidator.ValidationResult validationResult = inventoryItemCreateValidator
                 .validateAndCollectErrors(request);
@@ -90,7 +98,7 @@ public class InventoryItemService {
         }
 
         // Create inventory item if validation passes
-        return createInventoryItemSafely(request, user);
+        return createInventoryItemSafely(request, currentUser);
     }
 
     /**
@@ -105,13 +113,27 @@ public class InventoryItemService {
             // Create and save the inventory item
             InventoryItem saved = createInventoryItemInternal(request, user);
 
-            // Record initial stock movement for tracking
+            // Record initial stock movement
             recordInitialStockMovement(saved, user);
 
             return CreateInventoryItemResult.success(saved);
         } catch (Exception e) {
             return CreateInventoryItemResult.failure("Failed to create inventory item: " + e.getMessage());
         }
+    }
+
+    /**
+     * Create inventory item with user parameter (for backward compatibility)
+     * 
+     * @deprecated Use
+     *             createInventoryItemWithErrorCollection(CreateInventoryItemRequest)
+     *             instead
+     */
+    @Deprecated
+    @Transactional(rollbackFor = { Exception.class })
+    public CreateInventoryItemResult createInventoryItemWithErrorCollection(CreateInventoryItemRequest request,
+            User user) {
+        return createInventoryItemWithErrorCollection(request);
     }
 
     /**
@@ -204,38 +226,60 @@ public class InventoryItemService {
     }
 
     /**
-     * Get inventory item by ID
+     * Get inventory item by ID (only for users with access to the organization)
      */
     public InventoryItem getInventoryItemById(String id) {
-        return inventoryItemRepository.findById(id)
+        InventoryItem item = inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found"));
+
+        // Check if user has access to the inventory item (user must be the creator of
+        // the organization)
+        checkUserAccessToInventoryItem(item);
+
+        return item;
     }
 
     /**
-     * Get inventory item by SKU within an inventory
+     * Get inventory item by SKU within an inventory (only for users with access to
+     * the organization)
      */
     public InventoryItem getInventoryItemBySku(String sku, String inventoryId) {
-        return inventoryItemRepository.findBySkuAndInventoryId(sku, inventoryId)
+        InventoryItem item = inventoryItemRepository.findBySkuAndInventoryId(sku, inventoryId)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found with SKU: " + sku));
+
+        // Check if user has access to the inventory item
+        checkUserAccessToInventoryItem(item);
+
+        return item;
     }
 
     /**
-     * Get inventory item by barcode within an inventory
+     * Get inventory item by barcode within an inventory (only for users with access
+     * to the organization)
      */
     public InventoryItem getInventoryItemByBarcode(String barcode, String inventoryId) {
-        return inventoryItemRepository.findByBarcodeAndInventoryId(barcode, inventoryId)
+        InventoryItem item = inventoryItemRepository.findByBarcodeAndInventoryId(barcode, inventoryId)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found with barcode: " + barcode));
+
+        // Check if user has access to the inventory item
+        checkUserAccessToInventoryItem(item);
+
+        return item;
     }
 
     /**
      * Delete inventory item (hard delete from database)
      * Related inventory movements are automatically deleted via JPA cascade
+     * Only organization creators can delete inventory items
      */
     @Transactional(rollbackFor = { Exception.class })
     public void deleteInventoryItem(String id) {
-        // Verify item exists before deleting
-        inventoryItemRepository.findById(id)
+        // Verify item exists and check access before deleting
+        InventoryItem item = inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory item not found"));
+
+        // Check if user has access to the inventory item
+        checkUserAccessToInventoryItem(item);
 
         // Delete the inventory item - related movements are automatically deleted via
         // cascade
@@ -243,26 +287,38 @@ public class InventoryItemService {
     }
 
     /**
-     * Get item count in an inventory
+     * Get item count in an inventory (only for users with access to the
+     * organization)
      */
     public long getItemCountByInventory(String inventoryId) {
+        // Check if user has access to the inventory
+        checkUserAccessToInventory(inventoryId);
+
         return inventoryItemRepository.countByInventoryId(inventoryId);
     }
 
     /**
-     * Get active item count in an inventory
+     * Get active item count in an inventory (only for users with access to the
+     * organization)
      */
     public long getActiveItemCountByInventory(String inventoryId) {
+        // Check if user has access to the inventory
+        checkUserAccessToInventory(inventoryId);
+
         return inventoryItemRepository.countByInventoryIdAndIsActiveTrue(inventoryId);
     }
 
     // Paginated methods
 
     /**
-     * Advanced filtering with pagination
+     * Advanced filtering with pagination (only for users with access to the
+     * organization)
      */
     public PagedResponse<InventoryItem> filterItemsPaginated(String inventoryId, FilterRequest filterRequest, int page,
             int size, String sortBy, String sortDirection) {
+        // Check if user has access to the inventory
+        checkUserAccessToInventory(inventoryId);
+
         Pageable pageable = createPageable(page, size, sortBy, sortDirection);
 
         Page<InventoryItem> pageResult = inventoryItemRepository.findWithFilters(
@@ -329,4 +385,33 @@ public class InventoryItemService {
                 .build();
     }
 
+    // Security helper methods
+
+    /**
+     * Check if current user has access to the inventory item
+     */
+    private void checkUserAccessToInventoryItem(InventoryItem item) {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Get inventory and check if user has access to it
+        Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
+        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+            throw new UnauthorizedException("User does not have access to this inventory item");
+        }
+    }
+
+    /**
+     * Check if current user has access to the inventory
+     */
+    private void checkUserAccessToInventory(String inventoryId) {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Get inventory and check access
+        Inventory inventory = inventoryService.getInventoryById(inventoryId);
+        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+            throw new UnauthorizedException("User does not have access to this inventory");
+        }
+    }
 }

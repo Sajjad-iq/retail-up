@@ -20,11 +20,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateInventoryItemRequest {
 
-    @NotBlank(message = "User ID is required")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "User ID must contain only alphanumeric characters, hyphens, and underscores")
-    @Size(min = 20, max = 255, message = "User ID must be between 20 and 255 characters")
-    private String userId;
-
     // temporary id required for excelUpload module to update existing items
     // not actually needed for creation
     private String id;
@@ -102,11 +97,14 @@ public class CreateInventoryItemRequest {
 
     private LocalDateTime discountEndDate;
 
+    // Supplier name for quick reference without joining tables
     @Size(max = 200, message = "Supplier name must not exceed 200 characters")
     private String supplierName;
 
     // Expiry and Perishability
+    // Whether the product has an expiration date (food, medicine, etc.)
     private Boolean isPerishable = false;
 
+    // Expiry date for perishable items
     private LocalDate expiryDate;
 }

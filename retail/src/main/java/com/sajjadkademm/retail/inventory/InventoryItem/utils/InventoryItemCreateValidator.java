@@ -22,6 +22,8 @@ import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 import com.sajjadkademm.retail.users.UserErrorCode;
+import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -147,17 +149,21 @@ public class InventoryItemCreateValidator {
             }
         }
 
-        // Resolve creating user
+        // Get current authenticated user
         try {
-            user = userService.getUserById(request.getUserId());
-            if (user == null) {
-                errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage()));
-            } else if (user.getStatus() != UserStatus.ACTIVE) {
+            user = SecurityUtils.getCurrentUser();
+            if (user.getStatus() != UserStatus.ACTIVE) {
                 errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_ACTIVE.getMessage()));
             }
+
+            // Check if user has access to the organization (user must be the creator of the
+            // organization)
+            if (inventory != null && !user.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+                errors.add(localizedErrorService.getLocalizedMessage(
+                        "User does not have access to this organization"));
+            }
         } catch (Exception e) {
-            errors.add(localizedErrorService.getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage()) + ": "
-                    + e.getMessage());
+            errors.add("Authentication error: " + e.getMessage());
         }
 
         // Normalize string inputs

@@ -24,7 +24,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Inventory item management controller providing CRUD operations for
- * inventory items within inventories.
+ * inventory items within inventories. All operations are scoped to the current
+ * authenticated user.
  * 
  * @author Sajjad Kadem
  * @version 1.0
@@ -34,15 +35,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/inventory-items")
 @RequiredArgsConstructor
-@Tag(name = "Inventory Items", description = "Inventory item management endpoints")
+@Tag(name = "Inventory Items", description = "Inventory item management endpoints (user-scoped)")
 public class InventoryItemController {
 
         private final InventoryItemService inventoryItemService;
 
         /**
          * Create inventory item endpoint
+         * Creates a new inventory item in an inventory (only if the current user is the
+         * organization creator)
          */
-        @Operation(summary = "Create Inventory Item", description = "Create a new inventory item in an inventory", operationId = "createInventoryItem")
+        @Operation(summary = "Create Inventory Item", description = "Create a new inventory item in an inventory (only if current user is the organization creator)", operationId = "createInventoryItem")
         @ApiResponse(responseCode = "200", description = "Inventory item created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class), examples = @ExampleObject(name = "Created Inventory Item", value = """
                         {
                             "id": "item123",
@@ -69,7 +72,6 @@ public class InventoryItemController {
         public ResponseEntity<InventoryItem> createInventoryItem(
                         @Parameter(description = "Inventory item creation request", required = true, content = @Content(schema = @Schema(implementation = CreateInventoryItemRequest.class), examples = @ExampleObject(name = "Create Inventory Item Request", value = """
                                         {
-                                            "userId": "user123",
                                             "inventoryId": "inv123",
                                             "name": "Laptop Computer",
                                             "description": "High-performance laptop for business use",
@@ -91,8 +93,10 @@ public class InventoryItemController {
 
         /**
          * Update inventory item endpoint
+         * Updates an inventory item (only if the current user is the organization
+         * creator)
          */
-        @Operation(summary = "Update Inventory Item", description = "Update an existing inventory item's information", operationId = "updateInventoryItem")
+        @Operation(summary = "Update Inventory Item", description = "Update an existing inventory item (only if current user is the organization creator)", operationId = "updateInventoryItem")
         @ApiResponse(responseCode = "200", description = "Inventory item updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class)))
         @PutMapping("/{id}")
         public ResponseEntity<InventoryItem> updateInventoryItem(

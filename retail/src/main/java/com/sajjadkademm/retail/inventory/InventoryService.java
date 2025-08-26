@@ -32,12 +32,10 @@ public class InventoryService {
     @Autowired
     public InventoryService(InventoryRepository inventoryRepository,
             OrganizationService organizationService,
-            UserService userService,
             OrganizationValidationUtils organizationValidationUtils,
             LocalizedErrorService localizedErrorService) {
         this.inventoryRepository = inventoryRepository;
         this.organizationService = organizationService;
-        this.userService = userService;
         this.organizationValidationUtils = organizationValidationUtils;
         this.localizedErrorService = localizedErrorService;
     }

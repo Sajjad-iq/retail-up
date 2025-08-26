@@ -83,7 +83,6 @@ public class ExcelUploadService {
             // Process each item from the Excel file
             for (int i = 0; i < items.size(); i++) {
                 CreateInventoryItemRequest itemRequest = items.get(i);
-                itemRequest.setUserId(user.getId());
 
                 int rowNumber = i + 2; // CSV row number (accounting for header row)
 
@@ -225,7 +224,6 @@ public class ExcelUploadService {
             item.setExpiryDate(parseDate(getStringValue(values, 24)));
 
             item.setInventoryId(inventoryId);
-            item.setUserId("temp-user-id"); // This id will be overridden by the user id in the controller
 
             return item;
         } catch (Exception e) {
