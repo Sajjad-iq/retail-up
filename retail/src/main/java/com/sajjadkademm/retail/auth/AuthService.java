@@ -14,6 +14,7 @@ import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.users.dto.AccountType;
+import com.sajjadkademm.retail.config.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -159,24 +160,21 @@ public class AuthService {
     }
 
     /**
-     * Change user password
+     * Change current user password
      */
-    public boolean changePassword(String userId, String oldPassword, String newPassword) {
-        User user = userService.getUserById(userId);
-        if (user == null) {
-            throw new NotFoundException(
-                    localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_USER_NOT_FOUND.getMessage(), userId));
-        }
+    public boolean changePassword(String oldPassword, String newPassword) {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
 
         // Verify old password
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
             throw new UnauthorizedException(
                     localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_OLD_PASSWORD_INCORRECT.getMessage()));
         }
 
         // Update password
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userService.updateUser(userId, user);
+        currentUser.setPassword(passwordEncoder.encode(newPassword));
+        userService.updateUser(currentUser.getId(), currentUser);
 
         return true;
     }
