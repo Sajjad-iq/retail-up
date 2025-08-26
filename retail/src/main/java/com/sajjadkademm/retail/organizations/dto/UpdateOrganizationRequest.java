@@ -12,9 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateOrganizationRequest {
 
-    @NotBlank(message = "User ID is required")
-    private String userId;
-
     @NotBlank(message = "Organization name is required")
     @Size(min = 2, max = 255, message = "Organization name must be between 2 and 255 characters")
     private String name;
@@ -35,8 +32,7 @@ public class UpdateOrganizationRequest {
 
     private OrganizationStatus status;
 
-    public UpdateOrganizationRequest( String userId, String domain, String name, String description, String address) {
-        this.userId = userId;
+    public UpdateOrganizationRequest(String domain, String name, String description, String address) {
         this.name = name;
         this.description = description;
         this.address = address;

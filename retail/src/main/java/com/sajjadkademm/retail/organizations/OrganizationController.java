@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Organization management controller providing CRUD operations for
- * organizations.
+ * organizations. All operations are scoped to the current authenticated user.
  * 
  * @author Sajjad Kadem
  * @version 1.0
@@ -31,15 +31,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/organizations")
 @RequiredArgsConstructor
-@Tag(name = "Organizations", description = "Organization management endpoints")
+@Tag(name = "Organizations", description = "Organization management endpoints (user-scoped)")
 public class OrganizationController {
 
     private final OrganizationService organizationService;
 
     /**
      * Create organization endpoint
+     * Creates a new organization for the current authenticated user
      */
-    @Operation(summary = "Create Organization", description = "Create a new organization with the provided details", operationId = "createOrganization")
+    @Operation(summary = "Create Organization", description = "Create a new organization for the current authenticated user", operationId = "createOrganization")
     @ApiResponse(responseCode = "200", description = "Organization created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class), examples = @ExampleObject(name = "Created Organization", value = """
             {
                 "id": "org123",
@@ -58,7 +59,6 @@ public class OrganizationController {
     public ResponseEntity<Organization> createOrganization(
             @Parameter(description = "Organization creation request", required = true, content = @Content(schema = @Schema(implementation = CreateOrganizationRequest.class), examples = @ExampleObject(name = "Create Organization Request", value = """
                     {
-                        "userId": "user123",
                         "name": "Acme Corporation",
                         "domain": "acme.com",
                         "description": "A leading retail company specializing in electronics and home appliances",
@@ -72,8 +72,9 @@ public class OrganizationController {
 
     /**
      * Update organization endpoint
+     * Updates an organization (only if the current user is the creator)
      */
-    @Operation(summary = "Update Organization", description = "Update an existing organization's information", operationId = "updateOrganization")
+    @Operation(summary = "Update Organization", description = "Update an existing organization (only if current user is the creator)", operationId = "updateOrganization")
     @ApiResponse(responseCode = "200", description = "Organization updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class), examples = @ExampleObject(name = "Updated Organization", value = """
             {
                 "id": "org123",
@@ -105,8 +106,9 @@ public class OrganizationController {
 
     /**
      * Get organization by ID endpoint
+     * Returns organization details only if the current user is the creator
      */
-    @Operation(summary = "Get Organization by ID", description = "Retrieve organization details by its unique identifier", operationId = "getOrganizationById")
+    @Operation(summary = "Get Organization by ID", description = "Retrieve organization details by ID (only if current user is the creator)", operationId = "getOrganizationById")
     @ApiResponse(responseCode = "200", description = "Organization found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class), examples = @ExampleObject(name = "Organization Details", value = """
             {
                 "id": "org123",
@@ -129,10 +131,10 @@ public class OrganizationController {
     }
 
     /**
-     * Get all organizations endpoint
+     * Get all organizations for the current user
      */
-    @Operation(summary = "Get All Organizations", description = "Retrieve a list of all organizations", operationId = "getAllOrganizations")
-    @ApiResponse(responseCode = "200", description = "List of organizations retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class, type = "array"), examples = @ExampleObject(name = "Organizations List", value = """
+    @Operation(summary = "Get User Organizations", description = "Retrieve all organizations created by the current authenticated user", operationId = "getUserOrganizations")
+    @ApiResponse(responseCode = "200", description = "List of user organizations retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class, type = "array"), examples = @ExampleObject(name = "User Organizations List", value = """
             [
                 {
                     "id": "org123",
@@ -145,31 +147,19 @@ public class OrganizationController {
                     "createdAt": "2024-12-19T10:30:00",
                     "updatedAt": "2024-12-19T10:30:00",
                     "createdBy": "user123"
-                },
-                {
-                    "id": "org456",
-                    "name": "Tech Solutions",
-                    "domain": "techsolutions.com",
-                    "description": "Technology solutions provider",
-                    "address": "789 Tech Blvd, San Francisco, CA 94102",
-                    "phone": "+1-555-987-6543",
-                    "status": "DISABLED",
-                    "createdAt": "2024-12-19T11:30:00",
-                    "updatedAt": "2024-12-19T11:30:00",
-                    "createdBy": "user456"
                 }
             ]
             """)))
     @GetMapping
-    public ResponseEntity<List<Organization>> getAllOrganizations() {
+    public ResponseEntity<List<Organization>> getUserOrganizations() {
         List<Organization> response = organizationService.getAllOrganizations();
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Search organizations endpoint
+     * Search organizations for the current user
      */
-    @Operation(summary = "Search Organizations", description = "Search organizations by name or domain", operationId = "searchOrganizations")
+    @Operation(summary = "Search User Organizations", description = "Search organizations created by the current authenticated user", operationId = "searchUserOrganizations")
     @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Organization.class, type = "array"), examples = @ExampleObject(name = "Search Results", value = """
             [
                 {
@@ -187,7 +177,7 @@ public class OrganizationController {
             ]
             """)))
     @GetMapping("/search")
-    public ResponseEntity<List<Organization>> searchOrganizations(
+    public ResponseEntity<List<Organization>> searchUserOrganizations(
             @Parameter(description = "Search query for organization name or domain", required = true, example = "acme") @RequestParam String q) {
         List<Organization> response = organizationService.searchOrganizations(q);
         return ResponseEntity.ok(response);

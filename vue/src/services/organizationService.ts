@@ -5,7 +5,6 @@ import type { OrganizationStatus } from '@/types/global'
 
 // Backend CreateOrganizationRequest structure
 export interface CreateOrganizationRequest {
-    userId: string
     name: string
     domain: string
     description?: string
@@ -31,7 +30,6 @@ export interface OrganizationResponse {
 
 // Backend UpdateOrganizationRequest structure
 export interface UpdateOrganizationRequest {
-    userId: string
     name: string
     description: string
     address: string

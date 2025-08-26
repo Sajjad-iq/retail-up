@@ -15,6 +15,7 @@ import com.sajjadkademm.retail.users.dto.AccountType;
 import com.sajjadkademm.retail.users.dto.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
+import com.sajjadkademm.retail.config.SecurityUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,9 @@ public class OrganizationService {
     @Transactional(rollbackFor = { Exception.class })
     public Organization createOrganization(CreateOrganizationRequest request) {
         try {
+            // Get current authenticated user
+            User currentUser = SecurityUtils.getCurrentUser();
+
             // Check if organization with same phone already exists
             if (organizationRepository.existsByPhone(request.getPhone())) {
                 throw new ConflictException(localizedErrorService
@@ -65,19 +69,13 @@ public class OrganizationService {
                                 request.getDomain()));
             }
 
-            // Check if user exists
-            User user = userService.getUserById(request.getUserId());
-            if (user == null) {
-                throw new NotFoundException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.USER_NOT_FOUND.getMessage()));
-            }
-
-            if (user.getAccountType() != AccountType.USER) {
+            // Validate current user permissions
+            if (currentUser.getAccountType() != AccountType.USER) {
                 throw new UnauthorizedException(localizedErrorService
                         .getLocalizedMessage(OrganizationErrorCode.USER_CANNOT_CREATE_ORGANIZATION.getMessage()));
             }
 
-            if (user.getStatus() != UserStatus.ACTIVE) {
+            if (currentUser.getStatus() != UserStatus.ACTIVE) {
                 throw new UnauthorizedException(localizedErrorService
                         .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ACTIVE.getMessage()));
             }
@@ -88,7 +86,7 @@ public class OrganizationService {
                     .description(request.getDescription())
                     .address(request.getAddress())
                     .phone(request.getPhone())
-                    .createdBy(user)
+                    .createdBy(currentUser)
                     .build();
 
             // Save the organization first
@@ -96,7 +94,7 @@ public class OrganizationService {
 
             // Create and save default settings for the organization
             // If this fails, the entire transaction will be rolled back
-            systemSettingsService.createAndSaveDefaultSystemSettings(savedOrganization.getId(), request.getUserId());
+            systemSettingsService.createAndSaveDefaultSystemSettings(savedOrganization.getId(), currentUser.getId());
 
             return savedOrganization;
 
@@ -143,24 +141,21 @@ public class OrganizationService {
             }
         }
 
-        // Check if user exists
-        User user = userService.getUserById(request.getUserId());
-        if (user == null) {
-            throw new NotFoundException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_FOUND.getMessage()));
-        }
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
 
-        if (user.getAccountType() != AccountType.USER) {
+        // Validate current user permissions
+        if (currentUser.getAccountType() != AccountType.USER) {
             throw new UnauthorizedException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.USER_CANNOT_UPDATE_ORGANIZATION.getMessage()));
         }
 
-        if (user.getStatus() != UserStatus.ACTIVE) {
+        if (currentUser.getStatus() != UserStatus.ACTIVE) {
             throw new UnauthorizedException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ACTIVE.getMessage()));
         }
 
-        if (user.getId() != organization.getCreatedBy().getId()) {
+        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
@@ -179,23 +174,36 @@ public class OrganizationService {
     }
 
     /**
-     * Get organization by ID
+     * Get organization by ID (only for organization creators or admins)
      */
     public Organization getOrganizationById(String id) {
-        return organizationRepository.findById(id)
+        Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(localizedErrorService
                         .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage())));
+
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        // Check if user is the creator of the organization or has admin privileges
+        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
+            // TODO: Add admin role check here when role system is implemented
+            throw new UnauthorizedException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        }
+
+        return organization;
     }
 
     /**
-     * Get all organizations
+     * Get all organizations for the current user
      */
     public List<Organization> getAllOrganizations() {
-        return organizationRepository.findAll();
+        User currentUser = SecurityUtils.getCurrentUser();
+        return organizationRepository.findByCreatedBy(currentUser);
     }
 
     /**
-     * Search organizations
+     * Search organizations for the current user
      */
     public List<Organization> searchOrganizations(String searchTerm) {
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
@@ -203,7 +211,8 @@ public class OrganizationService {
                     .getLocalizedMessage(OrganizationErrorCode.SEARCH_TERM_EMPTY.getMessage()));
         }
 
-        return organizationRepository.searchOrganizations(searchTerm.trim());
+        User currentUser = SecurityUtils.getCurrentUser();
+        return organizationRepository.searchOrganizationsByUser(searchTerm.trim(), currentUser.getId());
     }
 
     /**
