@@ -69,10 +69,6 @@ public interface InventoryItemRepository
        List<InventoryItem> searchItems(@Param("inventoryId") String inventoryId,
                      @Param("searchTerm") String searchTerm);
 
-       // Find top selling items
-       @Query("SELECT i FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.isActive = true ORDER BY i.totalSold DESC LIMIT :limit")
-       List<InventoryItem> findTopSellingItems(@Param("inventoryId") String inventoryId, @Param("limit") int limit);
-
        // Calculate total inventory value (selling price amount * current stock)
        @Query("SELECT COALESCE(SUM(i.sellingPrice.amount * i.currentStock), 0) FROM InventoryItem i WHERE i.inventoryId = :inventoryId AND i.isActive = true")
        BigDecimal calculateTotalInventoryValue(@Param("inventoryId") String inventoryId);

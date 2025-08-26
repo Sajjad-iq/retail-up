@@ -26,11 +26,7 @@ import java.time.LocalDate;
 import java.math.BigDecimal;
 import java.util.List;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -206,23 +202,6 @@ public class InventoryItem {
         @NotNull
         @Builder.Default
         private Boolean isActive = true;
-
-        // Sales Analytics
-        // Total quantity sold since product creation (lifetime sales)
-        @Column(name = "total_sold")
-        @Min(value = 0, message = "Total sold cannot be negative")
-        @Builder.Default
-        private Integer totalSold = 0;
-
-        // Total revenue generated from this product (lifetime revenue)
-        @Column(name = "total_revenue", precision = 15, scale = 2)
-        @DecimalMin(value = "0.0", message = "Total revenue cannot be negative")
-        @Builder.Default
-        private BigDecimal totalRevenue = BigDecimal.ZERO;
-
-        // Date when the product was last sold
-        @Column(name = "last_sold_date")
-        private LocalDateTime lastSoldDate;
 
         // Inventory Association
         // Foreign key reference to the inventory this item belongs to
