@@ -10,7 +10,6 @@ export interface CreateInventoryItemRequest {
   inventoryId: string
   name: string
   description?: string
-  sku?: string
   productCode?: string
   barcode?: string
   category?: string
@@ -38,7 +37,6 @@ export interface UpdateInventoryItemRequest {
   userId: string // Required by backend validation
   name?: string
   description?: string
-  sku?: string
   productCode?: string
   barcode?: string
   category?: string
@@ -70,7 +68,7 @@ export interface FilterRequest {
   supplierName?: string
   color?: string
   size?: string
-  searchTerm?: string // For name, SKU, or barcode search
+  searchTerm?: string // For name, barcode, or product code search
 
   // Stock filters
   lowStock?: boolean
@@ -144,16 +142,7 @@ class InventoryItemService {
     }
   }
 
-  // Get inventory item by SKU within an inventory
-  async getInventoryItemBySku(sku: string, inventoryId: string): Promise<ApiResponse<InventoryItem>> {
-    try {
-      const response = await this.axios.get<InventoryItem>(`/inventory-items/sku/${sku}/inventory/${inventoryId}`)
-      return { success: true, data: response.data }
-    } catch (error: any) {
-      const apiError = ErrorHandler.handleApiError(error)
-      return { success: false, error: ErrorHandler.getErrorMessage(apiError) }
-    }
-  }
+
 
   // Get inventory item by barcode within an inventory
   async getInventoryItemByBarcode(barcode: string, inventoryId: string): Promise<ApiResponse<InventoryItem>> {

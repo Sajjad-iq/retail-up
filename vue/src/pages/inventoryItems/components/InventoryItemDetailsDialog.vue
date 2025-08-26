@@ -26,13 +26,6 @@
                 {{ item.name }}
               </p>
             </div>
-
-            <div class="space-y-3">
-              <Label class="text-sm font-medium text-muted-foreground">SKU</Label>
-              <p class="text-base font-mono text-foreground p-3 bg-muted/50 rounded-md">
-                {{ item.sku || "Not specified" }}
-              </p>
-            </div>
           </div>
 
           <div class="space-y-3 mt-4">
@@ -252,22 +245,6 @@
                   {{ item.isActive ? "Active" : "Inactive" }}
                 </Badge>
               </div>
-            </div>
-
-            <div class="space-y-3">
-              <Label class="text-sm font-medium text-muted-foreground">Total Sold</Label>
-              <p class="text-2xl font-bold text-foreground p-3 bg-muted/50 rounded-md">
-                {{ item.totalSold || 0 }}
-              </p>
-            </div>
-
-            <div class="space-y-3">
-              <Label class="text-sm font-medium text-muted-foreground">Total Revenue</Label>
-              <p
-                class="text-2xl font-bold text-green-700 p-3 bg-green-50 border border-green-200 rounded-md"
-              >
-                ${{ item.totalRevenue || 0 }}
-              </p>
             </div>
           </div>
         </div>

@@ -25,15 +25,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="sku">
-            <FormItem>
-              <FormLabel>SKU</FormLabel>
-              <FormControl>
-                <Input placeholder="Stock Keeping Unit" v-bind="componentField" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+
         </div>
 
         <FormField v-slot="{ componentField, errorMessage }" name="description">
@@ -398,11 +390,7 @@ const formSchema = toTypedSchema(
       .min(2, "Item name must be at least 2 characters")
       .max(200, "Name must be less than 200 characters"),
     description: z.string().max(1000, "Description must not exceed 1000 characters").optional(),
-    sku: z
-      .string()
-      .regex(/^[A-Za-z0-9_-]+$/, "SKU must contain only letters, numbers, hyphens, and underscores")
-      .max(50, "SKU must not exceed 50 characters")
-      .optional(),
+
     productCode: z
       .string()
       .regex(
@@ -444,7 +432,6 @@ const form = useForm({
   initialValues: {
     name: "",
     description: "",
-    sku: "",
     productCode: "",
     barcode: "",
     category: "",
@@ -493,7 +480,6 @@ const handleSubmit = async (values: any) => {
       inventoryId: props.inventoryId,
       name: values.name,
       description: values.description,
-      sku: values.sku,
       productCode: values.productCode,
       barcode: values.barcode,
       category: values.category,
@@ -584,7 +570,6 @@ const populateFormWithItem = (item: any) => {
   form.setValues({
     name: item.name ?? "",
     description: item.description ?? "",
-    sku: item.sku ?? "",
     productCode: item.productCode ?? "",
     barcode: item.barcode ?? "",
     category: item.category ?? "",

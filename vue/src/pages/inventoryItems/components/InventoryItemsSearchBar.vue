@@ -6,7 +6,7 @@
         <label class="block text-sm font-medium text-foreground mb-1">Search</label>
         <Input
           v-model="searchQuery"
-          placeholder="Search by name, SKU, or barcode"
+          placeholder="Search by name, barcode, or product code"
           class="w-full"
           @keyup.enter="handleSearch"
         />

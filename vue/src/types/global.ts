@@ -44,7 +44,6 @@ export interface InventoryItem {
     id: string
     name: string
     description?: string
-    sku?: string
     productCode?: string
     barcode?: string
     category?: string
@@ -66,9 +65,6 @@ export interface InventoryItem {
     isPerishable: boolean
     expiryDate?: string // LocalDate
     isActive: boolean
-    totalSold: number
-    totalRevenue: number
-    lastSoldDate?: string // LocalDateTime
     inventoryId: string
     createdAt: string // LocalDateTime
     updatedAt: string // LocalDateTime

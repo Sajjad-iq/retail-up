@@ -72,27 +72,7 @@ export const createColumns = (emit: EmitFunctions): ColumnDef<InventoryItem>[] =
       ]);
     },
   },
-  {
-    accessorKey: "sku",
-    header: "SKU/Code",
-    cell: ({ row }) => {
-      const item = row.original;
-      return h("div", { class: "space-y-1" }, [
-        item.sku
-          ? h("div", { class: "text-sm text-foreground" }, [
-              h("span", { class: "font-medium" }, "SKU: "),
-              item.sku,
-            ])
-          : null,
-        item.productCode
-          ? h("div", { class: "text-sm text-muted-foreground" }, [
-              h("span", { class: "font-medium" }, "Code: "),
-              item.productCode,
-            ])
-          : null,
-      ]);
-    },
-  },
+
   {
     accessorKey: "barcode",
     header: "Barcode",
@@ -185,40 +165,7 @@ export const createColumns = (emit: EmitFunctions): ColumnDef<InventoryItem>[] =
       ]);
     },
   },
-  {
-    accessorKey: "totalSold",
-    header: ({ column }) => {
-      return h(
-        Button,
-        {
-          variant: "ghost",
-          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-        },
-        () => ["Total Sold", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
-      );
-    },
-    cell: ({ row }) => {
-      const item = row.original;
-      return h("div", { class: "text-sm text-foreground" }, item.totalSold);
-    },
-  },
-  {
-    accessorKey: "totalRevenue",
-    header: ({ column }) => {
-      return h(
-        Button,
-        {
-          variant: "ghost",
-          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-        },
-        () => ["Revenue", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
-      );
-    },
-    cell: ({ row }) => {
-      const item = row.original;
-      return h("div", { class: "text-sm text-foreground" }, `$${item.totalRevenue}`);
-    },
-  },
+
   {
     accessorKey: "isActive",
     header: "Status",
@@ -257,20 +204,7 @@ export const createColumns = (emit: EmitFunctions): ColumnDef<InventoryItem>[] =
         : h("div", { class: "text-sm text-muted-foreground" }, "—");
     },
   },
-  {
-    accessorKey: "lastSoldDate",
-    header: "Last Sold",
-    cell: ({ row }) => {
-      const item = row.original;
-      return item.lastSoldDate
-        ? h(
-            "div",
-            { class: "text-sm text-foreground" },
-            new Date(item.lastSoldDate).toLocaleDateString()
-          )
-        : h("div", { class: "text-sm text-muted-foreground" }, "—");
-    },
-  },
+
   {
     accessorKey: "weight",
     header: "Weight",

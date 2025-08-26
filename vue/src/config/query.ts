@@ -38,7 +38,7 @@ export const queryKeys = {
         list: (inventoryId: string, filters: any, page: number, size: number, sortBy: string, sortDirection: string) =>
             [...queryKeys.inventoryItems.lists(inventoryId), { filters, page, size, sortBy, sortDirection }] as const,
         details: (id: string) => [...queryKeys.inventoryItems.all, 'detail', id] as const,
-        bySku: (sku: string, inventoryId: string) => [...queryKeys.inventoryItems.all, 'sku', sku, inventoryId] as const,
+
         byBarcode: (barcode: string, inventoryId: string) => [...queryKeys.inventoryItems.all, 'barcode', barcode, inventoryId] as const,
         counts: (inventoryId: string) => [...queryKeys.inventoryItems.all, 'counts', inventoryId] as const,
         units: () => [...queryKeys.inventoryItems.all, 'units'] as const,

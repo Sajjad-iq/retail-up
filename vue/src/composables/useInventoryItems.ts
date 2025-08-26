@@ -53,14 +53,7 @@ export function useInventoryItems() {
         })
     }
 
-    // Get inventory item by SKU
-    const useInventoryItemBySku = (sku: string, inventoryId: string, enabled: boolean = true) => {
-        return useQuery({
-            queryKey: queryKeys.inventoryItems.bySku(sku, inventoryId),
-            queryFn: () => inventoryItemService.getInventoryItemBySku(sku, inventoryId),
-            enabled: enabled && !!sku && !!inventoryId,
-        })
-    }
+
 
     // Get inventory item by barcode
     const useInventoryItemByBarcode = (barcode: string, inventoryId: string, enabled: boolean = true) => {
@@ -191,7 +184,6 @@ export function useInventoryItems() {
         // Query hooks
         useInventoryItemsList,
         useInventoryItem,
-        useInventoryItemBySku,
         useInventoryItemByBarcode,
         useItemCounts,
         useAvailableUnits,

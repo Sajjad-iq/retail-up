@@ -7,7 +7,7 @@ export function useCsvExport() {
   const convertToCsv = (items: InventoryItem[]): string => {
     // Define CSV headers (matching backend template structure)
     const headers = [
-      'Name', 'Description', 'SKU', 'Product Code', 'Barcode',
+      'Name', 'Description', 'Product Code', 'Barcode',
       'Category', 'Brand', 'Unit', 'Weight', 'Dimensions',
       'Color', 'Size', 'Current Stock', 'Minimum Stock', 'Maximum Stock',
       'Cost Price Amount', 'Cost Price Currency', 'Selling Price Amount',
@@ -19,7 +19,6 @@ export function useCsvExport() {
     const csvRows = items.map(item => [
       item.name || '',
       item.description || '',
-      item.sku || '',
       item.productCode || '',
       item.barcode || '',
       item.category || '',
