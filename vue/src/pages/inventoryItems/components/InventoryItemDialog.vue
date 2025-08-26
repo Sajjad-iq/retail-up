@@ -15,7 +15,7 @@
       <form @submit="onSubmit" class="space-y-6" :key="`form-${props.item?.id || 'new'}`">
         <!-- Basic Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="name">
+          <FormField v-slot="{ componentField }" name="name">
             <FormItem>
               <FormLabel>Item Name *</FormLabel>
               <FormControl>
@@ -26,7 +26,7 @@
           </FormField>
         </div>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="description">
+        <FormField v-slot="{ componentField }" name="description">
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
@@ -38,7 +38,7 @@
 
         <!-- Product Details -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="category">
+          <FormField v-slot="{ componentField }" name="category">
             <FormItem>
               <FormLabel>Category</FormLabel>
               <FormControl>
@@ -48,7 +48,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="brand">
+          <FormField v-slot="{ componentField }" name="brand">
             <FormItem>
               <FormLabel>Brand</FormLabel>
               <FormControl>
@@ -58,7 +58,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="barcode">
+          <FormField v-slot="{ componentField }" name="barcode">
             <FormItem>
               <FormLabel>Barcode</FormLabel>
               <FormControl>
@@ -71,7 +71,7 @@
 
         <!-- Stock Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="currentStock">
+          <FormField v-slot="{ componentField }" name="currentStock">
             <FormItem>
               <FormLabel>Current Stock *</FormLabel>
               <FormControl>
@@ -81,7 +81,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="unit">
+          <FormField v-slot="{ componentField }" name="unit">
             <FormItem>
               <FormLabel>Unit *</FormLabel>
               <Select v-bind="componentField">
@@ -103,7 +103,7 @@
 
         <!-- Stock Limits -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="minimumStock">
+          <FormField v-slot="{ componentField }" name="minimumStock">
             <FormItem>
               <FormLabel>Minimum Stock</FormLabel>
               <FormControl>
@@ -113,7 +113,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="maximumStock">
+          <FormField v-slot="{ componentField }" name="maximumStock">
             <FormItem>
               <FormLabel>Maximum Stock</FormLabel>
               <FormControl>
@@ -126,7 +126,7 @@
 
         <!-- Pricing -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="sellingPrice">
+          <FormField v-slot="{ componentField }" name="sellingPrice">
             <FormItem>
               <FormLabel>Selling Price *</FormLabel>
               <FormControl>
@@ -155,7 +155,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="costPrice">
+          <FormField v-slot="{ componentField }" name="costPrice">
             <FormItem>
               <FormLabel>Cost Price</FormLabel>
               <FormControl>
@@ -187,7 +187,7 @@
 
         <!-- Additional Details -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="supplierName">
+          <FormField v-slot="{ componentField }" name="supplierName">
             <FormItem>
               <FormLabel>Supplier</FormLabel>
               <FormControl>
@@ -197,7 +197,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="productCode">
+          <FormField v-slot="{ componentField }" name="productCode">
             <FormItem>
               <FormLabel>Product Code</FormLabel>
               <FormControl>
@@ -210,7 +210,7 @@
 
         <!-- Discount Information -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="discountPrice">
+          <FormField v-slot="{ componentField }" name="discountPrice">
             <FormItem>
               <FormLabel>Discount Price</FormLabel>
               <FormControl>
@@ -226,7 +226,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="discountStartDate">
+          <FormField v-slot="{ componentField }" name="discountStartDate">
             <FormItem>
               <FormLabel>Discount Start Date</FormLabel>
               <FormControl>
@@ -242,7 +242,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="discountEndDate">
+          <FormField v-slot="{ componentField }" name="discountEndDate">
             <FormItem>
               <FormLabel>Discount End Date</FormLabel>
               <FormControl>
@@ -261,7 +261,7 @@
 
         <!-- Physical Attributes -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="weight">
+          <FormField v-slot="{ componentField }" name="weight">
             <FormItem>
               <FormLabel>Weight (g)</FormLabel>
               <FormControl>
@@ -277,7 +277,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="dimensions">
+          <FormField v-slot="{ componentField }" name="dimensions">
             <FormItem>
               <FormLabel>Dimensions</FormLabel>
               <FormControl>
@@ -287,7 +287,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="color">
+          <FormField v-slot="{ componentField }" name="color">
             <FormItem>
               <FormLabel>Color</FormLabel>
               <FormControl>
@@ -300,7 +300,7 @@
 
         <!-- Variants -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField v-slot="{ componentField, errorMessage }" name="size">
+          <FormField v-slot="{ componentField }" name="size">
             <FormItem>
               <FormLabel>Size</FormLabel>
               <FormControl>
@@ -310,7 +310,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="isPerishable">
+          <FormField v-slot="{ componentField }" name="isPerishable">
             <FormItem>
               <FormLabel>Perishable Item</FormLabel>
               <FormControl>
@@ -330,7 +330,7 @@
 
         <!-- Expiry Date (if perishable) -->
         <FormField
-          v-slot="{ componentField, errorMessage }"
+          v-slot="{ componentField }"
           name="expiryDate"
           :key="`expiry-${props.item?.id || 'new'}`"
         >
@@ -350,7 +350,7 @@
         </FormField>
 
         <!-- Status (for edit mode) -->
-        <FormField v-slot="{ componentField, errorMessage }" name="isActive" v-if="mode === 'edit'">
+        <FormField v-slot="{ componentField }" name="isActive" v-if="mode === 'edit'">
           <FormItem>
             <FormLabel>Active Status</FormLabel>
             <FormControl>
@@ -488,11 +488,11 @@ const formSchema = toTypedSchema(
     supplierName: z.string().max(200, "Supplier name must not exceed 200 characters").optional(),
 
     // Expiry and Perishability
-    isPerishable: z.boolean().default(false),
+    isPerishable: z.boolean(),
     expiryDate: z.string().optional(),
 
     // Status
-    isActive: z.boolean().default(true),
+    isActive: z.boolean(),
   })
 );
 
@@ -546,25 +546,41 @@ const resetForm = () => {
   costPriceCurrency.value = CurrencyEnum.USD;
 };
 
+// Helper function to convert empty strings to null
+const cleanEmptyStrings = (value: any): any => {
+  if (typeof value === "string" && value.trim() === "") {
+    return null;
+  }
+  return value;
+};
+
+// Helper function to ensure boolean values
+const ensureBoolean = (value: any, defaultValue: boolean = false): boolean => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  return defaultValue;
+};
+
 const handleSubmit = async (values: any) => {
   try {
     const formData: CreateInventoryItemRequest | UpdateInventoryItemRequest = {
       userId: "", // Will be set by the service
       inventoryId: props.inventoryId,
       name: values.name,
-      description: values.description,
-      productCode: values.productCode,
-      barcode: values.barcode,
-      category: values.category,
-      brand: values.brand,
+      description: cleanEmptyStrings(values.description),
+      productCode: cleanEmptyStrings(values.productCode),
+      barcode: cleanEmptyStrings(values.barcode),
+      category: cleanEmptyStrings(values.category),
+      brand: cleanEmptyStrings(values.brand),
       unit: values.unit,
-      weight: values.weight,
-      dimensions: values.dimensions,
-      color: values.color,
-      size: values.size,
+      weight: values.weight || null,
+      dimensions: cleanEmptyStrings(values.dimensions),
+      color: cleanEmptyStrings(values.color),
+      size: cleanEmptyStrings(values.size),
       currentStock: values.currentStock,
-      minimumStock: values.minimumStock,
-      maximumStock: values.maximumStock,
+      minimumStock: values.minimumStock || null,
+      maximumStock: values.maximumStock || null,
       costPrice: values.costPrice
         ? { amount: values.costPrice, currency: costPriceCurrency.value as Currency }
         : undefined,
@@ -572,13 +588,13 @@ const handleSubmit = async (values: any) => {
         amount: values.sellingPrice,
         currency: sellingPriceCurrency.value as Currency,
       },
-      discountPrice: values.discountPrice,
-      discountStartDate: values.discountStartDate,
-      discountEndDate: values.discountEndDate,
-      supplierName: values.supplierName,
-      isPerishable: values.isPerishable,
-      expiryDate: values.expiryDate,
-      isActive: values.isActive,
+      discountPrice: values.discountPrice || null,
+      discountStartDate: cleanEmptyStrings(values.discountStartDate),
+      discountEndDate: cleanEmptyStrings(values.discountEndDate),
+      supplierName: cleanEmptyStrings(values.supplierName),
+      isPerishable: ensureBoolean(values.isPerishable, false),
+      expiryDate: cleanEmptyStrings(values.expiryDate),
+      isActive: ensureBoolean(values.isActive, true),
     };
 
     if (props.mode === "create") {
@@ -661,9 +677,9 @@ const populateFormWithItem = (item: any) => {
     discountStartDate: item.discountStartDate ?? undefined,
     discountEndDate: item.discountEndDate ?? undefined,
     supplierName: item.supplierName ?? "",
-    isPerishable: item.isPerishable ?? false,
+    isPerishable: ensureBoolean(item.isPerishable, false),
     expiryDate: item.expiryDate ?? undefined,
-    isActive: item.isActive ?? true,
+    isActive: ensureBoolean(item.isActive, true),
   });
 
   // Set currency values
