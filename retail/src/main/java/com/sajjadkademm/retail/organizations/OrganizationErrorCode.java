@@ -1,5 +1,7 @@
 package com.sajjadkademm.retail.organizations;
 
+import lombok.Getter;
+
 /**
  * Centralized error codes for organization operations.
  * Provides consistent error handling across all organization-related services.
@@ -8,6 +10,7 @@ package com.sajjadkademm.retail.organizations;
  * @version 1.0
  * @since 2024-12-19
  */
+@Getter
 public enum OrganizationErrorCode {
 
     // Organization Errors (ORG001-ORG099)

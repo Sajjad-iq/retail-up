@@ -19,8 +19,6 @@ import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.dto.UserStatus;
-import com.sajjadkademm.retail.exceptions.UnauthorizedException;
-import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 import com.sajjadkademm.retail.users.UserErrorCode;
