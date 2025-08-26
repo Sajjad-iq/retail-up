@@ -33,20 +33,18 @@ public class UpdateInventoryItemRequest {
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
-    @Size(max = 50, message = "Product code must not exceed 50 characters")
-    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Product code must contain only letters, numbers, hyphens, and underscores")
+    @Size(max = 300, message = "Product code must not exceed 300 characters")
     private String productCode;
 
     // Product Identification
-    @Size(max = 100, message = "Barcode must not exceed 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Barcode must contain only letters, numbers, hyphens, and underscores")
+    @Size(max = 300, message = "Barcode must not exceed 300 characters")
     private String barcode;
 
     // Product Classification
-    @Size(max = 100, message = "Category must not exceed 100 characters")
+    @Size(max = 200, message = "Category must not exceed 200 characters")
     private String category;
 
-    @Size(max = 100, message = "Brand must not exceed 100 characters")
+    @Size(max = 200, message = "Brand must not exceed 200 characters")
     private String brand;
 
     private Unit unit;

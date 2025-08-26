@@ -24,8 +24,6 @@
               <FormMessage />
             </FormItem>
           </FormField>
-
-
         </div>
 
         <FormField v-slot="{ componentField, errorMessage }" name="description">
@@ -72,7 +70,7 @@
         </div>
 
         <!-- Stock Information -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField v-slot="{ componentField, errorMessage }" name="currentStock">
             <FormItem>
               <FormLabel>Current Stock *</FormLabel>
@@ -83,17 +81,6 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="minimumStock">
-            <FormItem>
-              <FormLabel>Minimum Stock</FormLabel>
-              <FormControl>
-                <Input type="number" min="0" placeholder="0" v-bind="componentField" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <!-- Unit Selection -->
           <FormField v-slot="{ componentField, errorMessage }" name="unit">
             <FormItem>
               <FormLabel>Unit *</FormLabel>
@@ -109,6 +96,29 @@
                   </SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
+
+        <!-- Stock Limits -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField v-slot="{ componentField, errorMessage }" name="minimumStock">
+            <FormItem>
+              <FormLabel>Minimum Stock</FormLabel>
+              <FormControl>
+                <Input type="number" min="0" placeholder="0" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="maximumStock">
+            <FormItem>
+              <FormLabel>Maximum Stock</FormLabel>
+              <FormControl>
+                <Input type="number" min="0" placeholder="0" v-bind="componentField" />
+              </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
@@ -192,6 +202,57 @@
               <FormLabel>Product Code</FormLabel>
               <FormControl>
                 <Input placeholder="Internal product code" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
+
+        <!-- Discount Information -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField v-slot="{ componentField, errorMessage }" name="discountPrice">
+            <FormItem>
+              <FormLabel>Discount Price</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="discountStartDate">
+            <FormItem>
+              <FormLabel>Discount Start Date</FormLabel>
+              <FormControl>
+                <DatePicker
+                  :model-value="componentField.modelValue"
+                  placeholder="Select start date"
+                  @update:model-value="(value: any) => {
+                    componentField.onChange(value);
+                  }"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="discountEndDate">
+            <FormItem>
+              <FormLabel>Discount End Date</FormLabel>
+              <FormControl>
+                <DatePicker
+                  :model-value="componentField.modelValue"
+                  placeholder="Select end date"
+                  @update:model-value="(value: any) => {
+                    componentField.onChange(value);
+                  }"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -382,47 +443,56 @@ const unitsQuery = useAvailableUnits();
 const createMutation = useCreateInventoryItem();
 const updateMutation = useUpdateInventoryItem();
 
-// Form validation schema
+// Form validation schema - matches backend DTO exactly
 const formSchema = toTypedSchema(
   z.object({
+    // Basic Product Information
     name: z
       .string()
       .min(2, "Item name must be at least 2 characters")
-      .max(200, "Name must be less than 200 characters"),
+      .max(200, "Item name must not exceed 200 characters"),
     description: z.string().max(1000, "Description must not exceed 1000 characters").optional(),
+    productCode: z.string().max(300, "Product code must not exceed 300 characters").optional(),
 
-    productCode: z
-      .string()
-      .regex(
-        /^[A-Za-z0-9_-]+$/,
-        "Product code must contain only letters, numbers, hyphens, and underscores"
-      )
-      .max(50, "Product code must not exceed 50 characters")
-      .optional(),
-    barcode: z
-      .string()
-      .regex(
-        /^[A-Za-z0-9_-]+$/,
-        "Barcode must contain only letters, numbers, hyphens, and underscores"
-      )
-      .max(100, "Barcode must not exceed 100 characters")
-      .optional(),
-    category: z.string().max(100, "Category must not exceed 100 characters").optional(),
-    brand: z.string().max(100, "Brand must not exceed 100 characters").optional(),
+    // Product Identification
+    barcode: z.string().max(300, "Barcode must not exceed 300 characters").optional(),
+
+    // Product Classification
+    category: z.string().max(200, "Category must not exceed 200 characters").optional(),
+    brand: z.string().max(200, "Brand must not exceed 200 characters").optional(),
+
+    // Unit (required)
     unit: z.nativeEnum(Unit),
-    weight: z.number().min(0, "Weight must be positive").optional(),
+
+    // Physical Attributes
+    weight: z.number().min(0, "Weight cannot be negative").optional(),
     dimensions: z.string().max(50, "Dimensions must not exceed 50 characters").optional(),
+
+    // Product Variants
     color: z.string().max(50, "Color must not exceed 50 characters").optional(),
     size: z.string().max(20, "Size must not exceed 20 characters").optional(),
-    currentStock: z.number().min(0, "Current stock must be positive"),
-    minimumStock: z.number().min(0, "Minimum stock must be positive").optional(),
-    maximumStock: z.number().min(0, "Maximum stock must be positive").optional(),
+
+    // Stock Management
+    currentStock: z.number().min(0, "Current stock cannot be negative"),
+    minimumStock: z.number().min(0, "Minimum stock cannot be negative").optional(),
+    maximumStock: z.number().min(0, "Maximum stock cannot be negative").optional(),
+
+    // Pricing Information
     sellingPrice: z.number().min(0, "Selling price must be positive"),
     costPrice: z.number().min(0, "Cost price must be positive").optional(),
+    discountPrice: z.number().min(0, "Discount price cannot be negative").optional(),
+    discountStartDate: z.string().optional(),
+    discountEndDate: z.string().optional(),
+
+    // Supplier
     supplierName: z.string().max(200, "Supplier name must not exceed 200 characters").optional(),
-    isPerishable: z.boolean(),
+
+    // Expiry and Perishability
+    isPerishable: z.boolean().default(false),
     expiryDate: z.string().optional(),
-    isActive: z.boolean(),
+
+    // Status
+    isActive: z.boolean().default(true),
   })
 );
 
@@ -446,6 +516,9 @@ const form = useForm({
     maximumStock: undefined,
     sellingPrice: 0,
     costPrice: undefined,
+    discountPrice: undefined,
+    discountStartDate: undefined,
+    discountEndDate: undefined,
     supplierName: "",
     isPerishable: false,
     expiryDate: undefined,
@@ -499,9 +572,9 @@ const handleSubmit = async (values: any) => {
         amount: values.sellingPrice,
         currency: sellingPriceCurrency.value as Currency,
       },
-      discountPrice: undefined,
-      discountStartDate: undefined,
-      discountEndDate: undefined,
+      discountPrice: values.discountPrice,
+      discountStartDate: values.discountStartDate,
+      discountEndDate: values.discountEndDate,
       supplierName: values.supplierName,
       isPerishable: values.isPerishable,
       expiryDate: values.expiryDate,
@@ -584,6 +657,9 @@ const populateFormWithItem = (item: any) => {
     maximumStock: item.maximumStock ?? undefined,
     sellingPrice: item.sellingPrice?.amount ?? 0,
     costPrice: item.costPrice?.amount ?? undefined,
+    discountPrice: item.discountPrice ?? undefined,
+    discountStartDate: item.discountStartDate ?? undefined,
+    discountEndDate: item.discountEndDate ?? undefined,
     supplierName: item.supplierName ?? "",
     isPerishable: item.isPerishable ?? false,
     expiryDate: item.expiryDate ?? undefined,
