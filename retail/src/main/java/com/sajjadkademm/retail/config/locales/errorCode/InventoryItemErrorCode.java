@@ -26,20 +26,9 @@ public enum InventoryItemErrorCode {
     EXPIRY_DATE_REQUIRED_FOR_PERISHABLE("INV013", "expiry.date.required.for.perishable"),
     EXPIRY_DATE_MUST_BE_FUTURE("INV014", "expiry.date.must.be.future"),
     EXPIRY_DATE_MUST_BE_NULL_FOR_NON_PERISHABLE("INV015", "expiry.date.must.be.null.for.non.perishable"),
-
+    SKU_ALREADY_EXISTS("INV016", "sku.already.exists"),
     BARCODE_ALREADY_EXISTS("INV017", "barcode.already.exists"),
     PRODUCT_CODE_ALREADY_EXISTS("INV018", "product.code.already.exists"),
-
-    // Business Rule Errors (INV100-INV199)
-    INVENTORY_NOT_FOUND("INV100", "inventory.not.found"),
-    INVENTORY_DISABLED("INV101", "inventory.disabled"),
-    INVENTORY_NAME_DUPLICATE("INV102", "inventory.name.duplicate"),
-    INVENTORY_CREATION_FAILED("INV103", "inventory.creation.failed"),
-
-    // User Access Control Errors (INV700-INV799)
-    USER_NOT_ORGANIZATION_CREATOR("INV700", "user.not.organization.creator"),
-    USER_NOT_AUTHENTICATED("INV701", "user.not.authenticated"),
-    USER_NOT_ACTIVE("INV702", "user.not.active"),
 
     // Inventory Item Operation Errors (INV800-INV899)
     INVENTORY_ITEM_NOT_FOUND("INV800", "inventory.item.not.found"),

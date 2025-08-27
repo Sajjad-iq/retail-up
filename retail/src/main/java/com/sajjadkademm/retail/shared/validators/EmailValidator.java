@@ -1,0 +1,89 @@
+package com.sajjadkademm.retail.shared.validators;
+
+import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.exceptions.ConflictException;
+import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * Centralized validation helpers for email rules.
+ * Provides reusable checks to keep services/utilities consistent and DRY.
+ */
+@Component
+public class EmailValidator {
+
+    private final LocalizedErrorService localizedErrorService;
+
+    @Autowired
+    public EmailValidator(LocalizedErrorService localizedErrorService) {
+        this.localizedErrorService = localizedErrorService;
+    }
+
+    /**
+     * Validates email format according to business rules.
+     * Checks if email is valid format and within length constraints.
+     *
+     * @param email the email to validate
+     * @throws BadRequestException when email validation fails
+     */
+    public void validateEmailFormat(String email) {
+        if (email != null && !email.trim().isEmpty()) {
+            if (email.trim().length() > 255) {
+                throw new BadRequestException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+            }
+
+            // Basic email format validation
+            if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+                throw new BadRequestException(localizedErrorService
+                        .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+            }
+        }
+    }
+
+    /**
+     * Validates email format and checks for uniqueness.
+     * Combines format validation with existence check.
+     *
+     * @param email         the email to validate
+     * @param existsChecker functional interface to check if email exists
+     * @throws BadRequestException when email validation fails
+     * @throws ConflictException   when email already exists
+     */
+    public void validateEmailFormatAndUniqueness(String email, EmailExistsChecker existsChecker) {
+        validateEmailFormat(email);
+
+        if (email != null && !email.trim().isEmpty() && existsChecker.exists(email)) {
+            throw new ConflictException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(), email));
+        }
+    }
+
+    /**
+     * Validates email uniqueness when updating.
+     * Only checks if the new email is different from the current one.
+     *
+     * @param newEmail      the new email
+     * @param currentEmail  the current email
+     * @param existsChecker functional interface to check if email exists
+     * @throws BadRequestException when email validation fails
+     * @throws ConflictException   when email already exists
+     */
+    public void validateEmailForUpdate(String newEmail, String currentEmail, EmailExistsChecker existsChecker) {
+        if (newEmail != null && !newEmail.equals(currentEmail)) {
+            validateEmailFormatAndUniqueness(newEmail, existsChecker);
+        }
+    }
+
+    /**
+     * Functional interface for checking if an email exists.
+     * This allows the validator to be decoupled from specific repository
+     * implementations.
+     */
+    @FunctionalInterface
+    public interface EmailExistsChecker {
+        boolean exists(String email);
+    }
+}

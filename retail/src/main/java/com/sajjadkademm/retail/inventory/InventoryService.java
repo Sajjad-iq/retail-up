@@ -1,5 +1,7 @@
 package com.sajjadkademm.retail.inventory;
 
+import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
@@ -52,7 +54,7 @@ public class InventoryService {
             Organization organization = organizationService.getOrganizationById(request.getOrganizationId());
             if (organization == null) {
                 throw new NotFoundException(localizedErrorService
-                        .getLocalizedMessage(InventoryErrorCode.ORGANIZATION_NOT_FOUND.getMessage()));
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage()));
             }
 
             // Guard: only active organizations can create inventories
@@ -61,14 +63,14 @@ public class InventoryService {
             // Validate current user permissions
             if (currentUser.getStatus() != UserStatus.ACTIVE) {
                 throw new UnauthorizedException(localizedErrorService
-                        .getLocalizedMessage(InventoryErrorCode.USER_NOT_ACTIVE.getMessage()));
+                        .getLocalizedMessage(UserErrorCode.USER_NOT_ACTIVE.getMessage()));
             }
 
             // Check if user has access to the organization (user must be the creator of the
             // organization)
             if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
                 throw new UnauthorizedException(localizedErrorService
-                        .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                        .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
             }
 
             // Uniqueness: name must be unique within organization
@@ -115,7 +117,7 @@ public class InventoryService {
         // organization)
         if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
         // Uniqueness: name must be unique within organization when changed
@@ -161,7 +163,7 @@ public class InventoryService {
         // organization)
         if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
         return inventory;
@@ -179,7 +181,7 @@ public class InventoryService {
         Organization organization = organizationService.getOrganizationById(organizationId);
         if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
         return inventoryRepository.findByOrganizationId(organizationId);
@@ -197,7 +199,7 @@ public class InventoryService {
         Organization organization = organizationService.getOrganizationById(organizationId);
         if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
         return inventoryRepository.findByOrganizationIdAndIsActiveTrue(organizationId);
@@ -215,7 +217,7 @@ public class InventoryService {
         Organization organization = organizationService.getOrganizationById(organizationId);
         if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
         return inventoryRepository.searchInventoriesByOrganization(organizationId, searchTerm);
@@ -236,7 +238,7 @@ public class InventoryService {
         // organization)
         if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(InventoryErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
         inventory.setIsActive(false);

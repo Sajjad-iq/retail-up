@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
+import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
@@ -379,7 +380,7 @@ public class InventoryItemService {
         Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
         if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
-                    InventoryItemErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
     }
 
@@ -394,7 +395,7 @@ public class InventoryItemService {
         Inventory inventory = inventoryService.getInventoryById(inventoryId);
         if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
-                    InventoryItemErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                    UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
     }
 }

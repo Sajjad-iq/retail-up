@@ -4,16 +4,12 @@ import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
-import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
-import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
-import com.sajjadkademm.retail.shared.enums.AccountType;
-import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.config.SecurityUtils;
 
@@ -55,30 +51,23 @@ public class OrganizationService {
             // Get current authenticated user
             User currentUser = SecurityUtils.getCurrentUser();
 
+            // Validate current user permissions
+            organizationValidationUtils.validateUserCanCreateOrganization(currentUser);
+
+            // Validate organization data
+            organizationValidationUtils.validateOrganizationCreationData(
+                    request.getName(),
+                    request.getDomain(),
+                    request.getDescription(),
+                    request.getAddress(),
+                    request.getPhone(),
+                    request.getEmail());
+
             // Check if organization with same phone already exists
-            if (organizationRepository.existsByPhone(request.getPhone())) {
-                throw new ConflictException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
-                                request.getPhone()));
-            }
+            organizationValidationUtils.validatePhoneUniqueness(request.getPhone());
 
             // Check if organization with same domain already exists
-            if (organizationRepository.existsByDomain(request.getDomain())) {
-                throw new ConflictException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
-                                request.getDomain()));
-            }
-
-            // Validate current user permissions
-            if (currentUser.getAccountType() != AccountType.USER) {
-                throw new UnauthorizedException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.USER_CANNOT_CREATE_ORGANIZATION.getMessage()));
-            }
-
-            if (currentUser.getStatus() != UserStatus.ACTIVE) {
-                throw new UnauthorizedException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ACTIVE.getMessage()));
-            }
+            organizationValidationUtils.validateDomainUniqueness(request.getDomain());
 
             Organization organization = Organization.builder()
                     .name(request.getName())
@@ -117,47 +106,30 @@ public class OrganizationService {
                 .orElseThrow(() -> new NotFoundException(localizedErrorService
                         .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage())));
 
-        // assert organization is active before updates
-        if (organization.getStatus() == OrganizationStatus.REJECTED
-                || organization.getStatus() == OrganizationStatus.SUSPENDED
-                || organization.getStatus() == OrganizationStatus.DELETED) {
-            throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_INACTIVE.getMessage()));
-        }
+        // Validate organization can be updated
+        organizationValidationUtils.validateOrganizationCanBeUpdated(organization);
 
-        if (request.getPhone() != null && !request.getPhone().equals(organization.getPhone())) {
-            if (organizationRepository.existsByPhone(request.getPhone())) {
-                throw new ConflictException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
-                                request.getPhone()));
-            }
-        }
+        // Validate organization data
+        organizationValidationUtils.validateOrganizationUpdateData(
+                request.getName(),
+                request.getDomain(),
+                request.getDescription(),
+                request.getAddress(),
+                request.getPhone());
 
-        if (request.getDomain() != null && !request.getDomain().equals(organization.getDomain())) {
-            if (organizationRepository.existsByDomain(request.getDomain())) {
-                throw new ConflictException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(),
-                                request.getDomain()));
-            }
-        }
+        // Validate phone and domain uniqueness for updates
+        organizationValidationUtils.validatePhoneUniquenessForUpdate(request.getPhone(), organization.getPhone());
+        organizationValidationUtils.validateDomainUniquenessForUpdate(request.getDomain(), organization.getDomain());
 
         // Get current authenticated user
         User currentUser = SecurityUtils.getCurrentUser();
 
         // Validate current user permissions
-        if (currentUser.getAccountType() != AccountType.USER) {
-            throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.USER_CANNOT_UPDATE_ORGANIZATION.getMessage()));
-        }
+        organizationValidationUtils.validateUserCanUpdateOrganization(currentUser, organization);
 
-        if (currentUser.getStatus() != UserStatus.ACTIVE) {
-            throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ACTIVE.getMessage()));
-        }
-
-        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
-            throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+        // Validate status transition if status is being updated
+        if (request.getStatus() != null && !request.getStatus().equals(organization.getStatus())) {
+            organizationValidationUtils.validateStatusTransition(organization.getStatus(), request.getStatus());
         }
 
         // Update organization fields
@@ -185,11 +157,7 @@ public class OrganizationService {
         User currentUser = SecurityUtils.getCurrentUser();
 
         // Check if user is the creator of the organization or has admin privileges
-        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
-            // TODO: Add admin role check here when role system is implemented
-            throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
-        }
+        organizationValidationUtils.validateUserCanAccessOrganization(currentUser, organization);
 
         return organization;
     }
@@ -206,10 +174,8 @@ public class OrganizationService {
      * Search organizations for the current user
      */
     public List<Organization> searchOrganizations(String searchTerm) {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.SEARCH_TERM_EMPTY.getMessage()));
-        }
+        // Validate search term
+        organizationValidationUtils.validateSearchTerm(searchTerm);
 
         User currentUser = SecurityUtils.getCurrentUser();
         return organizationRepository.searchOrganizationsByUser(searchTerm.trim(), currentUser.getId());

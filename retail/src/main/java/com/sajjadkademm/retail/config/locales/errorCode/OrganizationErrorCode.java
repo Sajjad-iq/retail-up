@@ -25,11 +25,8 @@ public enum OrganizationErrorCode {
     ORGANIZATION_CREATION_FAILED("ORG009", "organization.creation.failed"),
 
     // User-related Organization Errors
-    USER_NOT_FOUND("ORG010", "user.not.found"),
-    USER_NOT_ACTIVE("ORG011", "user.not.active"),
     USER_CANNOT_CREATE_ORGANIZATION("ORG012", "user.cannot.create.organization"),
     USER_CANNOT_UPDATE_ORGANIZATION("ORG013", "user.cannot.update.organization"),
-    USER_NOT_ORGANIZATION_CREATOR("ORG014", "user.not.organization.creator"),
 
     // Validation Errors
     SEARCH_TERM_EMPTY("ORG015", "search.term.empty");

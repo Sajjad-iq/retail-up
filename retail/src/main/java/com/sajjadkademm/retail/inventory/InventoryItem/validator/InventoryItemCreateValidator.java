@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.validator;
 
+import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -87,10 +88,10 @@ public class InventoryItemCreateValidator {
             inventory = inventoryService.getInventoryById(request.getInventoryId());
             if (inventory == null) {
                 errors.add(
-                        localizedErrorService.getLocalizedMessage(InventoryItemErrorCode.INVENTORY_NOT_FOUND.getMessage()));
+                        localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage()));
             }
         } catch (Exception e) {
-            errors.add(localizedErrorService.getLocalizedMessage(InventoryItemErrorCode.INVENTORY_NOT_FOUND.getMessage())
+            errors.add(localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage())
                     + ": " + e.getMessage());
         }
 
@@ -140,7 +141,7 @@ public class InventoryItemCreateValidator {
             // Guard: inventory must be active
             if (inventory.getIsActive() == false) {
                 errors.add(
-                        localizedErrorService.getLocalizedMessage(InventoryItemErrorCode.INVENTORY_DISABLED.getMessage()));
+                        localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_INACTIVE.getMessage()));
             }
         }
 
@@ -155,11 +156,11 @@ public class InventoryItemCreateValidator {
             // organization)
             if (inventory != null && !user.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
                 errors.add(localizedErrorService.getLocalizedMessage(
-                        InventoryItemErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+                        UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
             }
         } catch (Exception e) {
             errors.add(localizedErrorService.getLocalizedMessage(
-                    InventoryItemErrorCode.USER_NOT_AUTHENTICATED.getMessage()) + ": " + e.getMessage());
+                    UserErrorCode.USER_NOT_AUTHENTICATED.getMessage()) + ": " + e.getMessage());
         }
 
         // Normalize string inputs

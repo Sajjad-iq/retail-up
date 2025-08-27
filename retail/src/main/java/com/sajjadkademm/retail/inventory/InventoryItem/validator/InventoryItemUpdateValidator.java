@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.validator;
 
+import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
@@ -91,16 +92,16 @@ public class InventoryItemUpdateValidator {
             inventory = inventoryService.getInventoryById(existing.getInventoryId());
             if (inventory == null) {
                 errors.add(
-                        localizedErrorService.getLocalizedMessage(InventoryItemErrorCode.INVENTORY_NOT_FOUND.getMessage()));
+                        localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage()));
             } else {
                 // Guard: inventory must be active
                 if (Boolean.FALSE.equals(inventory.getIsActive())) {
                     errors.add(localizedErrorService
-                            .getLocalizedMessage(InventoryItemErrorCode.INVENTORY_DISABLED.getMessage()));
+                            .getLocalizedMessage(InventoryErrorCode.INVENTORY_INACTIVE.getMessage()));
                 }
             }
         } catch (Exception e) {
-            errors.add(localizedErrorService.getLocalizedMessage(InventoryItemErrorCode.INVENTORY_NOT_FOUND.getMessage())
+            errors.add(localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage())
                     + ": " + e.getMessage());
         }
 

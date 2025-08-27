@@ -20,16 +20,6 @@ public enum InventoryErrorCode {
     INVENTORY_NAME_DUPLICATE("INV007", "inventory.name.duplicate"),
     INVENTORY_INACTIVE("INV008", "inventory.inactive"),
 
-    // Organization-related Inventory Errors
-    ORGANIZATION_NOT_FOUND("INV009", "organization.not.found"),
-    ORGANIZATION_INACTIVE("INV010", "organization.inactive"),
-
-    // User-related Inventory Errors
-    USER_NOT_FOUND("INV011", "user.not.found"),
-    USER_NOT_ACTIVE("INV012", "user.not.active"),
-    USER_UNAUTHORIZED("INV013", "user.unauthorized"),
-    USER_NOT_ORGANIZATION_CREATOR("INV016", "user.not.organization.creator"),
-
     // Validation Errors
     INVALID_INVENTORY_DATA("INV014", "invalid.inventory.data"),
     INVALID_SEARCH_TERM("INV015", "invalid.search.term");
