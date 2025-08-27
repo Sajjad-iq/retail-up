@@ -134,11 +134,9 @@ class InventoryItemServiceIntegrationTest {
 
         private CreateInventoryItemRequest buildCreateRequest() {
                 CreateInventoryItemRequest req = new CreateInventoryItemRequest();
-                req.setUserId(testUser.getId());
                 req.setInventoryId(testInventory.getId());
                 req.setName("Laptop Computer");
                 req.setDescription("High-performance laptop");
-                req.setSku("SKU-001");
                 req.setProductCode("PRD-001");
                 req.setBarcode("1234567890123");
                 req.setCategory("Electronics");
