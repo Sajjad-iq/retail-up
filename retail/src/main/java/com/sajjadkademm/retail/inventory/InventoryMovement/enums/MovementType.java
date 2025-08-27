@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryMovement.dto;
+package com.sajjadkademm.retail.inventory.InventoryMovement.enums;
 
 /**
  * Enumeration of inventory movement types

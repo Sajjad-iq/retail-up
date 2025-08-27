@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryMovement.dto;
+package com.sajjadkademm.retail.inventory.InventoryMovement.enums;
 
 /**
  * Reference types for inventory movements (originating business process)

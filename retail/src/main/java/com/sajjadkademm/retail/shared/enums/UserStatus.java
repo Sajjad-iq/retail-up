@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.users.dto;
+package com.sajjadkademm.retail.shared.enums;
 
 public enum UserStatus {
     ACTIVE,

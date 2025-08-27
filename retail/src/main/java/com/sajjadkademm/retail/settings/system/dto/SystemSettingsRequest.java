@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.settings.system.dto;
 
 import jakarta.validation.constraints.Min;
 
-import com.sajjadkademm.retail.utils.dto.Currency;
+import com.sajjadkademm.retail.shared.enums.Currency;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Pattern;

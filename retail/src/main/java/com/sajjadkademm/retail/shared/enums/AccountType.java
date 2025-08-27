@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.users.dto;
+package com.sajjadkademm.retail.shared.enums;
 
 /**
  * Enum representing different types of user accounts in the system.

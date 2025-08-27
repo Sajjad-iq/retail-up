@@ -1,5 +1,7 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.dto;
 
+import com.sajjadkademm.retail.shared.enums.Money;
+import com.sajjadkademm.retail.shared.enums.Unit;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;

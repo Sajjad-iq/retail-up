@@ -7,13 +7,12 @@ import com.sajjadkademm.retail.inventory.dto.CreateInventoryRequest;
 import com.sajjadkademm.retail.inventory.dto.UpdateInventoryRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
+import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserService;
-import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.inventory.utils.InventoryErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;

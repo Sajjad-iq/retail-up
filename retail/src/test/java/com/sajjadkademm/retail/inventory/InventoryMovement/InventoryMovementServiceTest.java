@@ -4,11 +4,11 @@ import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.dto.AccountType;
-import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.shared.enums.AccountType;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.junit.jupiter.api.DisplayName;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 

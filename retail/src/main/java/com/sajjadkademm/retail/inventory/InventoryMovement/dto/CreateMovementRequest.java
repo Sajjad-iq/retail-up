@@ -1,6 +1,8 @@
 package com.sajjadkademm.retail.inventory.InventoryMovement.dto;
 
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
 import com.sajjadkademm.retail.users.User;
 
 import jakarta.validation.constraints.Min;

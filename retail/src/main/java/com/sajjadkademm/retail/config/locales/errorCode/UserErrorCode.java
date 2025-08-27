@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.users;
+package com.sajjadkademm.retail.config.locales.errorCode;
 
 /**
  * Centralized error codes for user operations.

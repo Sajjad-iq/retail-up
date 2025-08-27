@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.auth.dto;
 
-import com.sajjadkademm.retail.users.dto.AccountType;
-import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.shared.enums.AccountType;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

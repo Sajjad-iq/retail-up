@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.users;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.users.UserErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

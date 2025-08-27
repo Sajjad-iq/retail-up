@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.MovementType;
 
 import java.time.LocalDateTime;
 import java.util.List;

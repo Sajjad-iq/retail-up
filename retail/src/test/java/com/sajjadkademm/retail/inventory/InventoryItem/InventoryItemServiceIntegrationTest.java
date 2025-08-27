@@ -7,19 +7,20 @@ import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
+import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
+import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.users.UserRepository;
-import com.sajjadkademm.retail.users.dto.AccountType;
-import com.sajjadkademm.retail.users.dto.UserStatus;
-import com.sajjadkademm.retail.utils.dto.Currency;
+import com.sajjadkademm.retail.shared.enums.AccountType;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
+import com.sajjadkademm.retail.shared.enums.Currency;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 
@@ -149,9 +150,9 @@ class InventoryItemServiceIntegrationTest {
                 req.setCurrentStock(10);
                 req.setMinimumStock(2);
                 req.setMaximumStock(50);
-                req.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(new BigDecimal("800.00"),
+                req.setCostPrice(new Money(new BigDecimal("800.00"),
                                 Currency.USD));
-                req.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                req.setSellingPrice(new Money(
                                 new BigDecimal("1200.00"), Currency.USD));
                 req.setDiscountPrice(new BigDecimal("1000.00"));
                 req.setDiscountStartDate(LocalDateTime.now().minusDays(1));
@@ -366,9 +367,9 @@ class InventoryItemServiceIntegrationTest {
                 void update_ShouldWork_AndPreserveCurrency() {
                         // Given
                         InventoryItem existing = buildInventoryItemSaved("item-123");
-                        existing.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        existing.setSellingPrice(new Money(
                                         new BigDecimal("1200.00"), Currency.USD));
-                        existing.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        existing.setCostPrice(new Money(
                                         new BigDecimal("800.00"), Currency.USD));
 
                         UpdateInventoryItemRequest update = new UpdateInventoryItemRequest();
@@ -377,9 +378,9 @@ class InventoryItemServiceIntegrationTest {
                         update.setBarcode("NEW-BC-999");
                         update.setUnit(Unit.PIECES); // Provide required unit
                         update.setCurrentStock(10); // Provide required current stock
-                        update.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        update.setSellingPrice(new Money(
                                         new BigDecimal("1300.00"), Currency.USD));
-                        update.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        update.setCostPrice(new Money(
                                         new BigDecimal("850.00"), Currency.USD));
 
                         when(inventoryItemRepository.findById("item-123")).thenReturn(Optional.of(existing));
@@ -741,9 +742,9 @@ class InventoryItemServiceIntegrationTest {
                 @DisplayName("Create with cost price greater than selling price should fail")
                 void createWithCostPriceGreaterThanSellingPrice_ShouldFail() {
                         CreateInventoryItemRequest request = buildCreateRequest();
-                        request.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        request.setCostPrice(new Money(
                                         new BigDecimal("1500.00"), Currency.USD));
-                        request.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        request.setSellingPrice(new Money(
                                         new BigDecimal("1200.00"), Currency.USD));
                         assertThrows(BadRequestException.class,
                                         () -> inventoryItemService.createInventoryItem(request));
@@ -1051,9 +1052,9 @@ class InventoryItemServiceIntegrationTest {
                 @DisplayName("Create with mismatched currencies should fail validation")
                 void createWithMismatchedCurrencies_ShouldFail() {
                         CreateInventoryItemRequest request = buildCreateRequest();
-                        request.setCostPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        request.setCostPrice(new Money(
                                         new BigDecimal("800.00"), Currency.EUR));
-                        request.setSellingPrice(new com.sajjadkademm.retail.inventory.InventoryItem.dto.Money(
+                        request.setSellingPrice(new Money(
                                         new BigDecimal("1200.00"), Currency.USD));
                         assertThrows(BadRequestException.class,
                                         () -> inventoryItemService.createInventoryItem(request));

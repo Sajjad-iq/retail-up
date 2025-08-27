@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.users;
 
 import com.sajjadkademm.retail.exceptions.NotFoundException;
-import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

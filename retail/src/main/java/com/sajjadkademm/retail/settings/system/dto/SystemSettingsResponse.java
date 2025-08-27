@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import com.sajjadkademm.retail.utils.dto.Currency;
+import com.sajjadkademm.retail.shared.enums.Currency;
 
 @Data
 @Builder

@@ -2,6 +2,7 @@ package com.sajjadkademm.retail.organizations.dto;
 
 import java.time.LocalDateTime;
 
+import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

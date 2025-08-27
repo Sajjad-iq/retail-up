@@ -10,8 +10,8 @@ import jakarta.persistence.Enumerated;
 
 import java.time.LocalDateTime;
 
-import com.sajjadkademm.retail.users.dto.UserStatus;
-import com.sajjadkademm.retail.users.dto.AccountType;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
+import com.sajjadkademm.retail.shared.enums.AccountType;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;

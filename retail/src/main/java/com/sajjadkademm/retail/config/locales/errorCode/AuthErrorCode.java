@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.auth;
+package com.sajjadkademm.retail.config.locales.errorCode;
 
 /**
  * Simplified error codes for authentication operations

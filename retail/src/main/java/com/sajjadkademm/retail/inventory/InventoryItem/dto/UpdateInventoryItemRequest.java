@@ -1,18 +1,17 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.dto;
 
+import com.sajjadkademm.retail.shared.enums.Unit;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Pattern;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
+import com.sajjadkademm.retail.shared.enums.Money;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

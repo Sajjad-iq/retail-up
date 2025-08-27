@@ -21,7 +21,7 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
+import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.users.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

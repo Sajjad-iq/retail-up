@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.organizations.dto;
+package com.sajjadkademm.retail.shared.enums;
 
 public enum OrganizationStatus {
     ACTIVE,

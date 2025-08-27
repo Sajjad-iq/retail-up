@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.organizations.dto;
 
+import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

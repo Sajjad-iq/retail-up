@@ -1,7 +1,7 @@
-package com.sajjadkademm.retail.organizations.utils;
+package com.sajjadkademm.retail.organizations.validator;
 
 import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
+import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;

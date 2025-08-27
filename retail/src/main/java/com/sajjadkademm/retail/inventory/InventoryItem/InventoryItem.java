@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Money;
+import com.sajjadkademm.retail.shared.enums.Money;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
@@ -13,7 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Embedded;
@@ -31,12 +30,10 @@ import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.sajjadkademm.retail.inventory.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.Unit;
+import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovement;
 import com.sajjadkademm.retail.users.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

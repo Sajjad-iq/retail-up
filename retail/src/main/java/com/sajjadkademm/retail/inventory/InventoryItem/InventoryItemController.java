@@ -1,9 +1,9 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.*;
-import com.sajjadkademm.retail.inventory.InventoryItem.utils.InventoryErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
+import com.sajjadkademm.retail.shared.enums.Unit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;

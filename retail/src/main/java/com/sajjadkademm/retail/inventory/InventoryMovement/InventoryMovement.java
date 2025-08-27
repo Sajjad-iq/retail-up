@@ -23,8 +23,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
 import com.sajjadkademm.retail.users.User;
 
 import lombok.AllArgsConstructor;

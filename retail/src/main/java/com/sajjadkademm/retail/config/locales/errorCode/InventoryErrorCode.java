@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.utils;
+package com.sajjadkademm.retail.config.locales.errorCode;
 
 /**
  * Centralized error codes for inventory operations.

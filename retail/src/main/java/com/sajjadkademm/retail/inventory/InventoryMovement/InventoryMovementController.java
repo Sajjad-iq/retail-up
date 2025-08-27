@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.inventory.InventoryMovement;
 
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.MovementType;
-import com.sajjadkademm.retail.inventory.InventoryMovement.dto.ReferenceType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.MovementType;
+import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

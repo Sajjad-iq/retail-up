@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryItem.dto;
+package com.sajjadkademm.retail.shared.enums;
 
 /**
  * Common measurement units for retail inventory items

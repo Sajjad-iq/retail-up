@@ -6,7 +6,7 @@ import com.sajjadkademm.retail.auth.dto.LoginRequest;
 import com.sajjadkademm.retail.auth.dto.LoginResponse;
 import com.sajjadkademm.retail.auth.dto.RegisterRequest;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.auth.AuthErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;

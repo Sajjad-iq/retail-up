@@ -5,14 +5,14 @@ import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
-import com.sajjadkademm.retail.organizations.dto.OrganizationStatus;
+import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
-import com.sajjadkademm.retail.organizations.utils.OrganizationValidationUtils;
+import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserService;
-import com.sajjadkademm.retail.users.dto.AccountType;
-import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.shared.enums.AccountType;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.config.SecurityUtils;
 

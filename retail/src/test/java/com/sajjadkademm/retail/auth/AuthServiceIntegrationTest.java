@@ -10,8 +10,8 @@ import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.UserService;
-import com.sajjadkademm.retail.users.dto.AccountType;
-import com.sajjadkademm.retail.users.dto.UserStatus;
+import com.sajjadkademm.retail.shared.enums.AccountType;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

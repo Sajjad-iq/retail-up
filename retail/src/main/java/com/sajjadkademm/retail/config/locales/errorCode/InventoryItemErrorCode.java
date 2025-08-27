@@ -8,7 +8,7 @@ package com.sajjadkademm.retail.config.locales.errorCode;
  * @version 1.0
  * @since 2024-12-19
  */
-public enum InventoryErrorCode {
+public enum InventoryItemErrorCode {
 
     // Validation Errors (INV001-INV099)
     NAME_REQUIRED("INV001", "name.required"),
@@ -48,7 +48,7 @@ public enum InventoryErrorCode {
     private final String code;
     private final String message;
 
-    InventoryErrorCode(String code, String message) {
+    InventoryItemErrorCode(String code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -64,8 +64,8 @@ public enum InventoryErrorCode {
     /**
      * Get error code by code string
      */
-    public static InventoryErrorCode fromCode(String code) {
-        for (InventoryErrorCode errorCode : values()) {
+    public static InventoryItemErrorCode fromCode(String code) {
+        for (InventoryItemErrorCode errorCode : values()) {
             if (errorCode.code.equals(code)) {
                 return errorCode;
             }
