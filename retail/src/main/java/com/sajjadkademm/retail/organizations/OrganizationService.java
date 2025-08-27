@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.organizations;
 
+import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;

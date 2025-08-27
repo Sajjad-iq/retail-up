@@ -17,7 +17,7 @@ import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUti
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
 

@@ -20,7 +20,7 @@ import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
 
@@ -32,7 +32,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class InventoryItemUpdateUtils {
+public class InventoryItemUpdateValidator {
 
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryService inventoryService;

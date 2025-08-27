@@ -8,7 +8,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRe
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateUtils;
+import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
@@ -40,17 +40,17 @@ import java.util.Optional;
 public class ExcelUploadService {
     private final InventoryItemService inventoryItemService;
     private final InventoryItemRepository inventoryItemRepository;
-    private final InventoryItemUpdateUtils inventoryItemUpdateUtils;
+    private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
     private final InventoryMovementService inventoryMovementService;
 
     @Autowired
     public ExcelUploadService(InventoryItemService inventoryItemService,
             InventoryItemRepository inventoryItemRepository,
-            InventoryItemUpdateUtils inventoryItemUpdateUtils,
+            InventoryItemUpdateValidator inventoryItemUpdateValidator,
             InventoryMovementService inventoryMovementService) {
         this.inventoryItemService = inventoryItemService;
         this.inventoryItemRepository = inventoryItemRepository;
-        this.inventoryItemUpdateUtils = inventoryItemUpdateUtils;
+        this.inventoryItemUpdateValidator = inventoryItemUpdateValidator;
         this.inventoryMovementService = inventoryMovementService;
     }
 
@@ -306,7 +306,7 @@ public class ExcelUploadService {
         UpdateInventoryItemRequest updateRequest = convertCreateToUpdateRequest(itemRequest, user.getId());
 
         // Validate update request and collect all errors without throwing exceptions
-        InventoryItemUpdateUtils.ValidationResult validationResult = inventoryItemUpdateUtils
+        InventoryItemUpdateValidator.ValidationResult validationResult = inventoryItemUpdateValidator
                 .validateAndCollectErrors(existingItem, updateRequest);
 
         if (validationResult.hasErrors()) {
@@ -316,11 +316,11 @@ public class ExcelUploadService {
         } else {
             // Apply updates if validation passes
             Integer originalStock = existingItem.getCurrentStock();
-            inventoryItemUpdateUtils.applyUpdates(existingItem, updateRequest);
+            inventoryItemUpdateValidator.applyUpdates(existingItem, updateRequest);
             InventoryItem updated = inventoryItemRepository.save(existingItem);
 
             // Track inventory movements for audit trail
-            inventoryItemUpdateUtils.trackStockMovements(updated, updateRequest, inventoryMovementService,
+            inventoryItemUpdateValidator.trackStockMovements(updated, updateRequest, inventoryMovementService,
                     originalStock);
             createdItems.add(updated);
         }

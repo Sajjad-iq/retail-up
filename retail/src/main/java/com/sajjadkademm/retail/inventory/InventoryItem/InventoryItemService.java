@@ -8,7 +8,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.PagedResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemCreateValidator;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.ValidatedCreateInventoryItemContext;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateUtils;
+import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryItemCreateValidator inventoryItemCreateValidator;
-    private final InventoryItemUpdateUtils inventoryItemUpdateValidator;
+    private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
 
     private final InventoryMovementService inventoryMovementService;
     private final InventoryService inventoryService;
@@ -48,7 +48,7 @@ public class InventoryItemService {
     public InventoryItemService(InventoryItemRepository inventoryItemRepository,
             SystemSettingsService systemSettingsService,
             InventoryItemCreateValidator inventoryItemCreateValidator,
-            InventoryItemUpdateUtils inventoryItemUpdateValidator,
+            InventoryItemUpdateValidator inventoryItemUpdateValidator,
             InventoryMovementService inventoryMovementService,
             InventoryService inventoryService,
             LocalizedErrorService localizedErrorService) {

@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.organizations.validator;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.Organization;
-import com.sajjadkademm.retail.organizations.OrganizationErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

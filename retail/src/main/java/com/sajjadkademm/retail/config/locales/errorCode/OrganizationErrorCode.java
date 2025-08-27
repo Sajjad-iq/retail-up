@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.organizations;
+package com.sajjadkademm.retail.config.locales.errorCode;
 
 import lombok.Getter;
 
