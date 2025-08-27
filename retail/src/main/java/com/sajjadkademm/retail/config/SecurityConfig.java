@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +12,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import com.sajjadkademm.retail.config.filters.JwtAuthenticationFilter;
 
@@ -18,7 +22,7 @@ import java.util.Arrays;
 
 /**
  * Security configuration for the retail application.
- * Configures CORS, CSRF, and security policies.
+ * Configures CORS, CSRF, security policies, and locale interceptors.
  * 
  * @author Sajjad Kadem
  * @version 1.0
@@ -26,12 +30,15 @@ import java.util.Arrays;
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final LocaleChangeInterceptor localeChangeInterceptor;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+    @Autowired
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, LocaleChangeInterceptor localeChangeInterceptor) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.localeChangeInterceptor = localeChangeInterceptor;
     }
 
     /**
@@ -94,5 +101,16 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    /**
+     * Register locale change interceptor for dynamic locale switching
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // Add locale change interceptor
+        registry.addInterceptor(localeChangeInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/api-docs/**", "/swagger-ui/**", "/actuator/**");
     }
 }

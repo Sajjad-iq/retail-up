@@ -26,7 +26,7 @@ public enum AuthErrorCode {
     AUTH_LOGIN_SUCCESSFUL("AUTH009", "auth.login.successful"),
     AUTH_REGISTRATION_SUCCESSFUL("AUTH010", "auth.registration.successful"),
     AUTH_TOKEN_VALID("AUTH011", "auth.token.valid"),
-    AUTH_PASSWORD_CHANGED_SUCCESSFULLY("AUTH012", "auth.password.changed.successfully");
+    AUTH_PASSWORD_CHANGED_SUCCESSFULLY("AUTH012", "auth.password.changed.successfully"),;
 
     private final String code;
     private final String message;
