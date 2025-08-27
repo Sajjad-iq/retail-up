@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.inventory.InventoryItem.dto;
 
 import java.math.BigDecimal;
 
-import com.sajjadkademm.retail.utils.dto.Currency;
+import com.sajjadkademm.retail.shared.enums.Currency;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;

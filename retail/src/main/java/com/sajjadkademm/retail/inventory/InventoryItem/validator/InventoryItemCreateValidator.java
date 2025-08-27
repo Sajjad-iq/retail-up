@@ -1,11 +1,10 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.utils;
 
+import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.ConflictException;
-import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
