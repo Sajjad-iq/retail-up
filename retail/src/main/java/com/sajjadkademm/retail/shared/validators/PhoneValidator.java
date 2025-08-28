@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.shared.validators;
 
+import com.sajjadkademm.retail.config.locales.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
@@ -29,18 +30,14 @@ public class PhoneValidator {
      * @throws BadRequestException when phone validation fails
      */
     public void validatePhoneFormat(String phone) {
-        if (phone != null) {
-            if (phone.trim().length() < 8 || phone.trim().length() > 20) {
-                throw new BadRequestException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
-            }
+        if (phone.trim().length() < 10 || phone.trim().length() > 20) {
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(AuthErrorCode.AUTH_PHONE_TO_SHORT.getMessage()));
+        }
 
-            // Basic phone format validation (should contain only digits, spaces, dashes,
-            // and parentheses)
-            if (!phone.matches("^[\\d\\s\\-\\(\\)\\+]+$")) {
-                throw new BadRequestException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
-            }
+        if (!phone.matches("^[\\d\\s\\-\\(\\)\\+]+$")) {
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(AuthErrorCode.AUTH_PHONE_FORMAT_WRONG.getMessage()));
         }
     }
 
@@ -56,9 +53,9 @@ public class PhoneValidator {
     public void validatePhoneFormatAndUniqueness(String phone, PhoneExistsChecker existsChecker) {
         validatePhoneFormat(phone);
 
-        if (phone != null && existsChecker.exists(phone)) {
+        if (existsChecker.exists(phone)) {
             throw new ConflictException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(), phone));
+                    .getLocalizedMessage(AuthErrorCode.AUTH_PHONE_ALREADY_EXISTS.getMessage(), phone));
         }
     }
 
@@ -73,7 +70,7 @@ public class PhoneValidator {
      * @throws ConflictException   when phone already exists
      */
     public void validatePhoneForUpdate(String newPhone, String currentPhone, PhoneExistsChecker existsChecker) {
-        if (newPhone != null && !newPhone.equals(currentPhone)) {
+        if (!newPhone.equals(currentPhone)) {
             validatePhoneFormatAndUniqueness(newPhone, existsChecker);
         }
     }

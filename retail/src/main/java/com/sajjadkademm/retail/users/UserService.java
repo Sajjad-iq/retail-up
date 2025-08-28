@@ -7,6 +7,8 @@ import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
 import com.sajjadkademm.retail.shared.validators.UserValidator;
 import com.sajjadkademm.retail.shared.enums.AccountType;
+import com.sajjadkademm.retail.shared.validators.PhoneValidator;
+import com.sajjadkademm.retail.shared.validators.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +20,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final LocalizedErrorService localizedErrorService;
     private final UserValidator userValidator;
+    private final PhoneValidator phoneValidator;
+    private final EmailValidator emailValidator;
 
     @Autowired
     public UserService(UserRepository userRepository, LocalizedErrorService localizedErrorService,
-            UserValidator userValidator) {
+            UserValidator userValidator, PhoneValidator phoneValidator, EmailValidator emailValidator) {
         this.userRepository = userRepository;
         this.localizedErrorService = localizedErrorService;
         this.userValidator = userValidator;
+        this.phoneValidator = phoneValidator;
+        this.emailValidator = emailValidator;
+
     }
 
     /**
@@ -38,47 +45,9 @@ public class UserService {
     }
 
     /**
-     * Update current authenticated user's profile
-     * This method is secure and only allows users to update their own profile
-     */
-    public User updateCurrentUserProfile(User userDetails) {
-        User currentUser = SecurityUtils.getCurrentUser();
-        userValidator.assertUserIsActive(currentUser);
-
-        // Only allow updating own profile
-        if (!currentUser.getId().equals(userDetails.getId())) {
-            throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(UserErrorCode.INSUFFICIENT_PERMISSIONS.getMessage()));
-        }
-
-        // Update allowed fields (exclude sensitive fields like password, status,
-        // accountType)
-        currentUser.setName(userDetails.getName());
-        currentUser.setPhone(userDetails.getPhone());
-        // Note: Password changes should use the dedicated changePassword method in
-        // AuthService
-
-        return userRepository.save(currentUser);
-    }
-
-    // USER-only methods - these should only be accessible by USER users
-
-    /**
-     * Get all users (USER only)
-     */
-    public List<User> getAllUsers() {
-        User currentUser = SecurityUtils.getCurrentUser();
-        userValidator.assertUserIsActiveAndHasAccountType(currentUser, AccountType.USER);
-        return userRepository.findAll();
-    }
-
-    /**
      * Get user by ID (USER only)
      */
     public User getUserById(String id) {
-        User currentUser = SecurityUtils.getCurrentUser();
-        userValidator.assertUserIsActiveAndHasAccountType(currentUser, AccountType.USER);
-
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
             throw new NotFoundException(localizedErrorService
@@ -94,14 +63,17 @@ public class UserService {
      * Create user (USER only)
      */
     public User createUser(User user) {
-        User currentUser = SecurityUtils.getCurrentUser();
-        userValidator.assertUserIsActiveAndHasAccountType(currentUser, AccountType.USER);
-
         // Validate the new user data
         if (user.getName() == null || user.getName().trim().isEmpty()) {
             throw new IllegalArgumentException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.INVALID_USER_DATA.getMessage()));
         }
+
+        phoneValidator.validatePhoneFormatAndUniqueness(user.getPhone(),
+                (phone) -> userRepository.existsByPhone(phone));
+
+        emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
+                (email) -> userRepository.existsByEmail(email));
 
         return userRepository.save(user);
     }
@@ -110,9 +82,6 @@ public class UserService {
      * Update user (USER only)
      */
     public User updateUser(String id, User userDetails) {
-        User currentUser = SecurityUtils.getCurrentUser();
-        userValidator.assertUserIsActiveAndHasAccountType(currentUser, AccountType.USER);
-
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             throw new NotFoundException(localizedErrorService
@@ -120,6 +89,7 @@ public class UserService {
         }
 
         User user = optionalUser.get();
+
         userValidator.assertUserIsActive(user);
 
         // Validate the update data
@@ -128,33 +98,18 @@ public class UserService {
                     .getLocalizedMessage(UserErrorCode.INVALID_USER_DATA.getMessage()));
         }
 
+        if(userDetails.getEmail() != null){
+            emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
+                    (email) -> userRepository.existsByEmail(user.getEmail()));
+            user.setEmail(userDetails.getEmail());
+        }
+
+
         user.setName(userDetails.getName());
         user.setPhone(userDetails.getPhone());
         user.setStatus(userDetails.getStatus());
-        // Note: Password updates should be handled separately with proper validation
 
         return userRepository.save(user);
     }
 
-    /**
-     * Delete user (USER only)
-     */
-    public boolean deleteUser(String id) {
-        User currentUser = SecurityUtils.getCurrentUser();
-        userValidator.assertUserIsActiveAndHasAccountType(currentUser, AccountType.USER);
-
-        // Prevent USER from deleting themselves
-        if (currentUser.getId().equals(id)) {
-            throw new UnauthorizedException(localizedErrorService
-                    .getLocalizedMessage(UserErrorCode.CANNOT_DELETE_SELF.getMessage()));
-        }
-
-        if (!userRepository.existsById(id)) {
-            throw new NotFoundException(localizedErrorService
-                    .getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage(), id));
-        }
-
-        userRepository.deleteById(id);
-        return true;
-    }
 }

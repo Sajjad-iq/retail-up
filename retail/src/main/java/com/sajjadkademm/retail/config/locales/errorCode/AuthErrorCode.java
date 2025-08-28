@@ -14,6 +14,8 @@ public enum AuthErrorCode {
     // Registration Errors
     AUTH_EMAIL_ALREADY_EXISTS("AUTH004", "auth.email.already.exists"),
     AUTH_PHONE_ALREADY_EXISTS("AUTH005", "auth.phone.already.exists"),
+    AUTH_PHONE_FORMAT_WRONG("AUTH0013", "auth.phone.format.wrong"),
+    AUTH_PHONE_TO_SHORT("AUTH0014", "auth.phone.too.short"),
 
     // Password Change Errors
     AUTH_OLD_PASSWORD_INCORRECT("AUTH006", "auth.old.password.incorrect"),

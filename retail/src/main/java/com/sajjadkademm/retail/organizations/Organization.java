@@ -64,7 +64,7 @@ public class Organization {
     private String address;
 
     @Column(name = "phone", nullable = true, length = 20)
-    @Size(max = 20, min = 8)
+    @Size(max = 20, min = 10)
     private String phone;
 
     @Enumerated(EnumType.STRING)
