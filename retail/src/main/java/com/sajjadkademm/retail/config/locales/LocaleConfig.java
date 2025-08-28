@@ -6,7 +6,6 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,33 +15,32 @@ import java.util.Locale;
 public class LocaleConfig {
 
     /**
-     * Configure the locale resolver with session-based storage and Accept-Language
-     * header fallback
+     * Configure the locale resolver with Accept-Language header support
+     * Automatically detects user's preferred language from HTTP header
      */
     @Bean
     public LocaleResolver localeResolver() {
-        SessionLocaleResolver resolver = new SessionLocaleResolver();
+        AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
         resolver.setDefaultLocale(Locale.ENGLISH);
+        resolver.setSupportedLocales(getSupportedLocales());
         return resolver;
     }
 
     /**
-     * Configure the message source for internationalization with proper fallbacks
+     * Configure the message source for internationalization
      */
     @Bean
     public ResourceBundleMessageSource messageSource() {
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
-        source.setBasenames("messages"); // Base name for message properties files
-        source.setDefaultEncoding("UTF-8"); // Support Arabic characters
-        source.setUseCodeAsDefaultMessage(true); // Use code as fallback if message not found
-        source.setFallbackToSystemLocale(false); // Don't fall back to system locale
-        source.setCacheSeconds(3600); // Cache messages for 1 hour
+        source.setBasenames("messages");
+        source.setDefaultEncoding("UTF-8");
+        source.setUseCodeAsDefaultMessage(true);
+        source.setCacheSeconds(3600);
         return source;
     }
 
     /**
-     * Configure locale change interceptor for dynamic locale switching
-     * Allows changing locale via URL parameter (e.g., ?lang=ar)
+     * Configure locale change interceptor for URL-based locale switching
      */
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
@@ -57,8 +55,7 @@ public class LocaleConfig {
     public static List<Locale> getSupportedLocales() {
         return Arrays.asList(
                 Locale.ENGLISH,
-                new Locale("ar", "SA") // Arabic (Saudi Arabia)
-        );
+                new Locale("ar", "SA"));
     }
 
     /**
