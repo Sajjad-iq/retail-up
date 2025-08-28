@@ -9,5 +9,5 @@ package com.sajjadkademm.retail.shared.enums;
  */
 public enum AccountType {
     USER,
-    EMPLOYEE
+    EMPLOYEE,
 }

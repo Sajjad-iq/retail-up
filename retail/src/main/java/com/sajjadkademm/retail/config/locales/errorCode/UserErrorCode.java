@@ -22,7 +22,8 @@ public enum UserErrorCode {
     INSUFFICIENT_PERMISSIONS("USR010", "insufficient.permissions"),
     USER_NOT_ORGANIZATION_CREATOR("USR011", "user.not.organization.creator"),
     USER_NOT_AUTHENTICATED("USR012", "user.not.authenticated"),
-    USER_UNAUTHORIZED("USR013", "user.unauthorized");
+    USER_UNAUTHORIZED("USR013", "user.unauthorized"),
+    CANNOT_DELETE_SELF("USR014", "cannot.delete.self");
 
     private final String code;
     private final String message;
