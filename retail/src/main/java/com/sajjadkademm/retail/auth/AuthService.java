@@ -15,6 +15,7 @@ import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.shared.enums.AccountType;
 import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.auth.dto.AuthResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -229,5 +230,31 @@ public class AuthService {
             log.error("Error validating token and getting user info: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Validate JWT token from authorization header and return user information if
+     * valid
+     */
+    public LoginResponse validateTokenFromHeader(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        String token = authHeader.substring(7);
+        return validateTokenAndGetUserInfo(token);
+    }
+
+    /**
+     * Change current user password and return response
+     */
+    public AuthResponse changePasswordWithResponse(String oldPassword, String newPassword) {
+        changePassword(oldPassword, newPassword);
+
+        return AuthResponse.builder()
+                .success(true)
+                .message(localizedErrorService
+                        .getLocalizedMessage(AuthErrorCode.AUTH_PASSWORD_CHANGED_SUCCESSFULLY.getMessage()))
+                .build();
     }
 }
