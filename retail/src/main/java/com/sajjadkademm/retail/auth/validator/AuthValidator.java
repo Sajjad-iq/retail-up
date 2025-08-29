@@ -90,7 +90,7 @@ public class AuthValidator {
      * @throws NotFoundException     when user is not found
      * @throws UnauthorizedException when user is not active
      */
-    public User validateTokenUser(String userId) {
+    public User validateUserActive(String userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
             throw new NotFoundException(localizedErrorService

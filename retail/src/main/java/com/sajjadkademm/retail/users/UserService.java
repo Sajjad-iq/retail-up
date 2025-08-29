@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.users;
 
+import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
@@ -65,7 +66,7 @@ public class UserService {
     public User createUser(User user) {
         // Validate the new user data
         if (user.getName() == null || user.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException(localizedErrorService
+            throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.INVALID_USER_DATA.getMessage()));
         }
 
@@ -94,16 +95,15 @@ public class UserService {
 
         // Validate the update data
         if (userDetails.getName() == null || userDetails.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException(localizedErrorService
+            throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.INVALID_USER_DATA.getMessage()));
         }
 
-        if(userDetails.getEmail() != null){
+        if (userDetails.getEmail() != null) {
             emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
                     (email) -> userRepository.existsByEmail(user.getEmail()));
             user.setEmail(userDetails.getEmail());
         }
-
 
         user.setName(userDetails.getName());
         user.setPhone(userDetails.getPhone());
