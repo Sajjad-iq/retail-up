@@ -46,7 +46,7 @@ public class AuthService {
 
                 // Update last login time
                 user.setLastLoginAt(LocalDateTime.now());
-                userService.updateUser(user.getId(),user);
+                userService.updateUser(user.getId(), user);
 
                 // Generate JWT token
                 String token = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName(), user.getEmail());
