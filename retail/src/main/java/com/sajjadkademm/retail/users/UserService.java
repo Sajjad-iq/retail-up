@@ -12,6 +12,7 @@ import com.sajjadkademm.retail.shared.validators.PhoneValidator;
 import com.sajjadkademm.retail.shared.validators.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,6 +64,7 @@ public class UserService {
     /**
      * Create user (USER only)
      */
+    @Transactional(rollbackFor = Exception.class)
     public User createUser(User user) {
         // Validate the new user data
         if (user.getName() == null || user.getName().trim().isEmpty()) {
@@ -82,6 +84,7 @@ public class UserService {
     /**
      * Update user (USER only)
      */
+    @Transactional(rollbackFor = Exception.class)
     public User updateUser(String id, User userDetails) {
 
         User user = userValidator.validateUserActive(id);

@@ -125,10 +125,10 @@ public class AuthService {
         /**
          * Refresh/validate JWT token and return user information if valid
          */
-        public LoginResponse refreshToken(String authHeader) {
+        public LoginResponse refreshToken() {
 
                 try {
-                        // Extract user information from token
+                        // get current user id
                         String userId = SecurityUtils.getCurrentUser().getId();
 
                         if (userId == null) {
@@ -136,7 +136,7 @@ public class AuthService {
                                                 .getLocalizedMessage(AuthErrorCode.AUTH_INVALID_TOKEN.getMessage()));
                         }
 
-                        // Verify user still exists and is active using AuthValidator
+                        // validate user is active
                         User user = userValidator.validateUserActive(userId);
 
                         String newToken = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName());

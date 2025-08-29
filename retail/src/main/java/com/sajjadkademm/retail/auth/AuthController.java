@@ -119,8 +119,7 @@ public class AuthController {
                         @ApiResponse(responseCode = "400", description = "Bad request")
         })
         @GetMapping("/validate-token")
-        public LoginResponse validateToken(
-                        @Parameter(description = "Authorization header with Bearer token", required = true) @RequestHeader("Authorization") String authHeader) {
-                return authService.refreshToken(authHeader);
+        public LoginResponse validateToken() {
+                return authService.refreshToken();
         }
 }
