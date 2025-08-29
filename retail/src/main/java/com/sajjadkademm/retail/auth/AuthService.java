@@ -31,7 +31,6 @@ import java.time.LocalDateTime;
 public class AuthService {
 
         private final UserService userService;
-        private final UserRepository userRepository;
         private final BCryptPasswordEncoder passwordEncoder;
         private final JwtUtil jwtUtil;
         private final LocalizedErrorService localizedErrorService;
@@ -45,11 +44,9 @@ public class AuthService {
                 // Validate login credentials using AuthValidator
                 User user = authValidator.validateLoginCredentials(request.getEmailOrPhone(), request.getPassword());
 
-                userValidator.assertUserIsHasActiveStatus(user);
-
                 // Update last login time
                 user.setLastLoginAt(LocalDateTime.now());
-                userRepository.save(user);
+                userService.updateUser(user.getId(),user);
 
                 // Generate JWT token
                 String token = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName(), user.getEmail());
