@@ -159,7 +159,7 @@ public class AuthService {
 
                 } catch (Exception e) {
                         log.error("Error validating token and getting user info: {}", e.getMessage());
-                        throw new BadRequestException(localizedErrorService
+                        throw new UnauthorizedException(localizedErrorService
                                         .getLocalizedMessage(AuthErrorCode.AUTH_INVALID_TOKEN.getMessage()));
                 }
         }
