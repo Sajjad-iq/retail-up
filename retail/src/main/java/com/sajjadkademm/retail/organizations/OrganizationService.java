@@ -13,32 +13,21 @@ import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.config.SecurityUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final SystemSettingsService systemSettingsService;
     private final UserService userService;
     private final LocalizedErrorService localizedErrorService;
     private final OrganizationValidationUtils organizationValidationUtils;
-
-    @Autowired
-    public OrganizationService(OrganizationRepository organizationRepository,
-            SystemSettingsService systemSettingsService,
-            UserService userService,
-            LocalizedErrorService localizedErrorService,
-            OrganizationValidationUtils organizationValidationUtils) {
-        this.organizationRepository = organizationRepository;
-        this.systemSettingsService = systemSettingsService;
-        this.userService = userService;
-        this.localizedErrorService = localizedErrorService;
-        this.organizationValidationUtils = organizationValidationUtils;
-    }
 
     /**
      * Create a new organization with default settings

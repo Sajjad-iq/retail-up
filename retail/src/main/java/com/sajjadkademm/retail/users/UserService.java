@@ -10,7 +10,7 @@ import com.sajjadkademm.retail.shared.validators.UserValidator;
 import com.sajjadkademm.retail.shared.enums.AccountType;
 import com.sajjadkademm.retail.shared.validators.PhoneValidator;
 import com.sajjadkademm.retail.shared.validators.EmailValidator;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,23 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final LocalizedErrorService localizedErrorService;
     private final UserValidator userValidator;
     private final PhoneValidator phoneValidator;
     private final EmailValidator emailValidator;
-
-    @Autowired
-    public UserService(UserRepository userRepository, LocalizedErrorService localizedErrorService,
-            UserValidator userValidator, PhoneValidator phoneValidator, EmailValidator emailValidator) {
-        this.userRepository = userRepository;
-        this.localizedErrorService = localizedErrorService;
-        this.userValidator = userValidator;
-        this.phoneValidator = phoneValidator;
-        this.emailValidator = emailValidator;
-
-    }
 
     /**
      * Get current authenticated user's profile
