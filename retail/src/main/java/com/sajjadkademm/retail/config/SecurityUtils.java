@@ -1,5 +1,7 @@
 package com.sajjadkademm.retail.config;
 
+import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.users.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +28,7 @@ public class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("No authenticated user found");
+            throw new BadRequestException("No authenticated user found");
         }
 
         Object principal = authentication.getPrincipal();
@@ -34,7 +36,7 @@ public class SecurityUtils {
         if (principal instanceof User) {
             return (User) principal;
         } else {
-            throw new IllegalStateException("Principal is not a User instance");
+            throw new BadRequestException("Principal is not a User instance");
         }
     }
 

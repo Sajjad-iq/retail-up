@@ -7,6 +7,7 @@ import com.sajjadkademm.retail.config.locales.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.config.utils.JwtUtil;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.users.UserService;
@@ -18,6 +19,7 @@ import com.sajjadkademm.retail.shared.validators.UserValidator;
 import com.sajjadkademm.retail.auth.validator.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthService {
 
+        @Autowired
         private final UserService userService;
         private final UserRepository userRepository;
         private final BCryptPasswordEncoder passwordEncoder;
@@ -43,7 +46,7 @@ public class AuthService {
                 // Validate login credentials using AuthValidator
                 User user = authValidator.validateLoginCredentials(request.getEmailOrPhone(), request.getPassword());
 
-                userValidator.assertUserIsActive(user);
+                userValidator.assertUserIsHasActiveStatus(user);
 
                 // Update last login time
                 user.setLastLoginAt(LocalDateTime.now());
@@ -124,24 +127,17 @@ public class AuthService {
          */
         public LoginResponse refreshToken(String authHeader) {
 
-                if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                        throw new BadRequestException(localizedErrorService
-                                        .getLocalizedMessage(AuthErrorCode.AUTH_HEADER_INVALID.getMessage()));
-                }
-
-                String token = authHeader.substring(7);
-
                 try {
-                        if (!jwtUtil.validateToken(token)) {
-                                throw new BadRequestException(localizedErrorService
+                        // Extract user information from token
+                        String userId = SecurityUtils.getCurrentUser().getId();
+
+                        if (userId == null) {
+                                throw new UnauthorizedException(localizedErrorService
                                                 .getLocalizedMessage(AuthErrorCode.AUTH_INVALID_TOKEN.getMessage()));
                         }
 
-                        // Extract user information from token
-                        String userId = jwtUtil.extractUserId(token);
-
                         // Verify user still exists and is active using AuthValidator
-                        User user = authValidator.validateUserActive(userId);
+                        User user = userValidator.validateUserActive(userId);
 
                         String newToken = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName());
 

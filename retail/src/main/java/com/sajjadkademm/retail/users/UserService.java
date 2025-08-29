@@ -41,7 +41,7 @@ public class UserService {
      */
     public User getCurrentUserProfile() {
         User currentUser = SecurityUtils.getCurrentUser();
-        userValidator.assertUserIsActive(currentUser);
+        userValidator.assertUserIsHasActiveStatus(currentUser);
         return currentUser;
     }
 
@@ -56,7 +56,7 @@ public class UserService {
         }
 
         User targetUser = user.get();
-        userValidator.assertUserIsActive(targetUser);
+        userValidator.assertUserIsHasActiveStatus(targetUser);
         return targetUser;
     }
 
@@ -71,10 +71,10 @@ public class UserService {
         }
 
         phoneValidator.validatePhoneFormatAndUniqueness(user.getPhone(),
-                (phone) -> userRepository.existsByPhone(phone));
+                (phone) -> userRepository.existsByPhone(user.getPhone()));
 
         emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
-                (email) -> userRepository.existsByEmail(email));
+                (email) -> userRepository.existsByEmail(user.getEmail()));
 
         return userRepository.save(user);
     }
@@ -83,15 +83,8 @@ public class UserService {
      * Update user (USER only)
      */
     public User updateUser(String id, User userDetails) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException(localizedErrorService
-                    .getLocalizedMessage(UserErrorCode.USER_NOT_FOUND.getMessage(), id));
-        }
 
-        User user = optionalUser.get();
-
-        userValidator.assertUserIsActive(user);
+        User user = userValidator.validateUserActive(id);
 
         // Validate the update data
         if (userDetails.getName() == null || userDetails.getName().trim().isEmpty()) {

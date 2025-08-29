@@ -82,33 +82,6 @@ public class AuthValidator {
     }
 
     /**
-     * Validates JWT token and returns user information if valid.
-     * Checks if user still exists and is active.
-     *
-     * @param userId the user ID from token
-     * @return the validated user
-     * @throws NotFoundException     when user is not found
-     * @throws UnauthorizedException when user is not active
-     */
-    public User validateUserActive(String userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new NotFoundException(localizedErrorService
-                    .getLocalizedMessage(AuthErrorCode.AUTH_USER_NOT_FOUND.getMessage(), userId));
-        }
-
-        User user = userOpt.get();
-
-        // Verify user is still active
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new BadRequestException(
-                    localizedErrorService.getLocalizedMessage(AuthErrorCode.AUTH_ACCOUNT_NOT_ACTIVE.getMessage()));
-        }
-
-        return user;
-    }
-
-    /**
      * Find user by email or phone
      */
     private Optional<User> findUserByEmailOrPhone(String emailOrPhone) {
