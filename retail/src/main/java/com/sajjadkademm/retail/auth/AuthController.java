@@ -121,6 +121,6 @@ public class AuthController {
         @GetMapping("/validate-token")
         public LoginResponse validateToken(
                         @Parameter(description = "Authorization header with Bearer token", required = true) @RequestHeader("Authorization") String authHeader) {
-                return authService.validateTokenFromHeader(authHeader);
+                return authService.refreshToken(authHeader);
         }
 }

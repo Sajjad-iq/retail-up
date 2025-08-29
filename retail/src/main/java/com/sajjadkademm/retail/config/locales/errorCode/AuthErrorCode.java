@@ -22,6 +22,7 @@ public enum AuthErrorCode {
 
     // Token Validation Errors
     AUTH_TOKEN_INVALID("AUTH007", "auth.token.invalid"),
+    AUTH_INVALID_TOKEN("AUTH015", "auth.invalid.token"),
     AUTH_HEADER_INVALID("AUTH008", "auth.header.invalid"),
 
     // Success Messages
