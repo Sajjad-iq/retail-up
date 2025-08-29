@@ -28,13 +28,13 @@ public class JwtUtil {
     /**
      * Generate JWT token for user
      */
-    public String generateToken(String userId, String phone, String name) {
+    public String generateToken(String userId, String phone, String name, String email) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("phone", phone);
         claims.put("name", name);
-
-        return createToken(claims, phone);
+        claims.put("email", email);
+        return createToken(claims, userId);
     }
 
     /**
@@ -64,7 +64,7 @@ public class JwtUtil {
      * Extract email from token
      */
     public String extractPhone(String token) {
-        return extractSubject(token);
+        return extractClaim(token, "phone", String.class);
     }
 
     /**
@@ -132,8 +132,8 @@ public class JwtUtil {
      */
     public Boolean validateToken(String token, String phone) {
         try {
-            final String extractedPhone = extractPhone(token);
-            return (phone.equals(extractedPhone) && !isTokenExpired(token));
+            final String userId = extractUserId(token);
+            return (userId != null && !isTokenExpired(token));
         } catch (Exception e) {
             log.warn("Error validating token: {}", e.getMessage());
             return false;

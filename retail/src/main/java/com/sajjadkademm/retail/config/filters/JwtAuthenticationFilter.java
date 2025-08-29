@@ -40,12 +40,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             final String jwt = authHeader.substring(7);
-            final String userPhone = jwtUtil.extractPhone(jwt);
+            final String userId = jwtUtil.extractUserId(jwt);
 
-            if (userPhone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                Optional<User> userOpt = userRepository.findByPhone(userPhone);
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                Optional<User> userOpt = userRepository.findById(userId);
 
-                if (userOpt.isPresent() && jwtUtil.validateToken(jwt, userPhone)) {
+                if (userOpt.isPresent() && jwtUtil.validateToken(jwt)) {
                     User user = userOpt.get();
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    log.debug("JWT authentication successful for user: {}", userPhone);
+                    log.debug("JWT authentication successful for user: {}", userId);
                 }
             }
         } catch (Exception e) {

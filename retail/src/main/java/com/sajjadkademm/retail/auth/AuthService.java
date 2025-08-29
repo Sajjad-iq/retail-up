@@ -52,7 +52,7 @@ public class AuthService {
                 userRepository.save(user);
 
                 // Generate JWT token
-                String token = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName());
+                String token = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName(), user.getEmail());
 
                 return LoginResponse.builder()
                                 .token(token)
@@ -85,7 +85,8 @@ public class AuthService {
                 User savedUser = userService.createUser(newUser);
 
                 // Generate JWT token
-                String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getPhone(), savedUser.getName());
+                String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getPhone(), savedUser.getName(),
+                                savedUser.getEmail());
 
                 return LoginResponse.builder()
                                 .token(token)
@@ -140,7 +141,8 @@ public class AuthService {
                         // validate user is active
                         User user = userValidator.validateUserActive(userId);
 
-                        String newToken = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName());
+                        String newToken = jwtUtil.generateToken(user.getId(), user.getPhone(), user.getName(),
+                                        user.getEmail());
 
                         return LoginResponse.builder()
                                         .token(newToken)
