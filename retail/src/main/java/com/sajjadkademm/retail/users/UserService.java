@@ -75,8 +75,10 @@ public class UserService {
         phoneValidator.validatePhoneFormatAndUniqueness(user.getPhone(),
                 (phone) -> userRepository.existsByPhone(user.getPhone()));
 
-        emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
-                (email) -> userRepository.existsByEmail(user.getEmail()));
+        if (user.getEmail() != null) {
+            emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
+                    (email) -> userRepository.existsByEmail(user.getEmail()));
+        }
 
         return userRepository.save(user);
     }
@@ -95,15 +97,19 @@ public class UserService {
                     .getLocalizedMessage(UserErrorCode.INVALID_USER_DATA.getMessage()));
         }
 
-        if (userDetails.getEmail() != null) {
+        if (userDetails.getEmail() != null && !userDetails.getEmail().equals(user.getEmail())) {
             emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
                     (email) -> userRepository.existsByEmail(user.getEmail()));
             user.setEmail(userDetails.getEmail());
         }
 
+        if (userDetails.getPhone() != null && !userDetails.getPhone().equals(user.getPhone())) {
+            phoneValidator.validatePhoneFormatAndUniqueness(user.getPhone(),
+                    (phone) -> userRepository.existsByPhone(user.getPhone()));
+            user.setPhone(userDetails.getPhone());
+        }
+
         user.setName(userDetails.getName());
-        user.setPhone(userDetails.getPhone());
-        user.setStatus(userDetails.getStatus());
 
         return userRepository.save(user);
     }

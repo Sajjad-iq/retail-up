@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthService {
 
-        @Autowired
         private final UserService userService;
         private final UserRepository userRepository;
         private final BCryptPasswordEncoder passwordEncoder;
@@ -60,6 +59,7 @@ public class AuthService {
                                 .userId(user.getId())
                                 .name(user.getName())
                                 .phone(user.getPhone())
+                                .email(user.getEmail())
                                 .status(user.getStatus())
                                 .accountType(user.getAccountType())
                                 .message(localizedErrorService
@@ -92,6 +92,7 @@ public class AuthService {
                                 .userId(savedUser.getId())
                                 .name(savedUser.getName())
                                 .phone(savedUser.getPhone())
+                                .email(savedUser.getEmail())
                                 .status(savedUser.getStatus())
                                 .accountType(savedUser.getAccountType())
                                 .message(localizedErrorService
@@ -146,6 +147,7 @@ public class AuthService {
                                         .userId(user.getId())
                                         .name(user.getName())
                                         .phone(user.getPhone())
+                                        .email(user.getEmail())
                                         .status(user.getStatus())
                                         .accountType(user.getAccountType())
                                         .message(localizedErrorService
