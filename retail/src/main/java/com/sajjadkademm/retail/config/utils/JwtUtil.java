@@ -61,10 +61,17 @@ public class JwtUtil {
     }
 
     /**
-     * Extract email from token
+     * Extract phone from token
      */
     public String extractPhone(String token) {
         return extractClaim(token, "phone", String.class);
+    }
+
+    /**
+     * Extract email from token
+     */
+    public String extractEmail(String token) {
+        return extractClaim(token, "email", String.class);
     }
 
     /**
@@ -129,19 +136,6 @@ public class JwtUtil {
 
     /**
      * Validate token
-     */
-    public Boolean validateToken(String token, String phone) {
-        try {
-            final String userId = extractUserId(token);
-            return (userId != null && !isTokenExpired(token));
-        } catch (Exception e) {
-            log.warn("Error validating token: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Validate token without email check
      */
     public Boolean validateToken(String token) {
         try {

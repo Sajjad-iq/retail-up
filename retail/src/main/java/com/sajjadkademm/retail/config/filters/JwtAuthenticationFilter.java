@@ -2,7 +2,6 @@ package com.sajjadkademm.retail.config.filters;
 
 import com.sajjadkademm.retail.config.utils.JwtUtil;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -24,7 +22,6 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -40,24 +37,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             final String jwt = authHeader.substring(7);
+
+            // ✅ Extract all user data from JWT claims (no DB call)
             final String userId = jwtUtil.extractUserId(jwt);
+            final String userName = jwtUtil.extractName(jwt);
+            final String userPhone = jwtUtil.extractPhone(jwt);
+            final String userEmail = jwtUtil.extractEmail(jwt);
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                Optional<User> userOpt = userRepository.findById(userId);
+                // ✅ Create user object from JWT claims
+                User user = User.builder()
+                        .id(userId)
+                        .name(userName)
+                        .phone(userPhone)
+                        .email(userEmail)
+                        .build();
 
-                if (userOpt.isPresent() && jwtUtil.validateToken(jwt)) {
-                    User user = userOpt.get();
-
+                // ✅ Only validate token, not user existence
+                if (jwtUtil.validateToken(jwt)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            null // No authorities for now
-                    );
+                            user, null, null);
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    log.debug("JWT authentication successful for user: {}", userId);
+                    log.debug("JWT authentication successful for user: {} (from claims)", userId);
                 }
             }
         } catch (Exception e) {
