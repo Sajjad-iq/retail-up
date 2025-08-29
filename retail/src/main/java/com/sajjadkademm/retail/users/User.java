@@ -14,6 +14,7 @@ import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.shared.enums.AccountType;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Index;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +34,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        // Critical authentication indexes
+        @Index(name = "idx_users_email", columnList = "email"),
+        @Index(name = "idx_users_phone", columnList = "phone"),
+        @Index(name = "idx_users_status", columnList = "status"),
+        @Index(name = "idx_users_account_type", columnList = "account_type"),
+
+        // Composite indexes for better performance
+        @Index(name = "idx_users_auth", columnList = "email, phone, status"),
+        @Index(name = "idx_users_status_type", columnList = "status, account_type"),
+        @Index(name = "idx_users_created_at", columnList = "created_at"),
+        @Index(name = "idx_users_last_login", columnList = "last_login_at"),
+
+        // Advanced composite index for user management
+        @Index(name = "idx_users_management", columnList = "status, account_type, created_at")
+})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
