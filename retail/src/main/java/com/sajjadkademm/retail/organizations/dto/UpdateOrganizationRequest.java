@@ -2,6 +2,7 @@ package com.sajjadkademm.retail.organizations.dto;
 
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -13,30 +14,35 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateOrganizationRequest {
 
-    @NotBlank(message = "Organization name is required")
-    @Size(min = 2, max = 255, message = "Organization name must be between 2 and 255 characters")
+    @NotBlank(message = "{organization.name.empty}")
+    @Size(min = 2, max = 255, message = "{organization.name.invalid}")
     private String name;
 
-    @NotBlank(message = "Description is required")
-    @Size(max = 500, message = "Description must not exceed 500 characters")
+    @NotBlank(message = "{organization.description.invalid}")
+    @Size(max = 500, message = "{organization.description.invalid}")
     private String description;
 
-    @NotBlank(message = "Address is required")
-    @Size(max = 255, message = "Address must not exceed 255 characters")
+    @NotBlank(message = "{organization.address.invalid}")
+    @Size(max = 255, message = "{organization.address.invalid}")
     private String address;
 
-    @Size(max = 20, message = "Phone must not exceed 20 characters")
+    @Size(max = 20, message = "{auth.phone.too.short}")
     private String phone;
 
-    @Size(min = 3, max = 255, message = "Domain must be between 3 and 255 characters")
+    @Size(min = 3, max = 255, message = "{invalid.domain.format}")
     private String domain;
+
+    @Email(message = "{user.email.invalid.format}")
+    @Size(max = 255, message = "{user.email.invalid.format}")
+    private String email;
 
     private OrganizationStatus status;
 
-    public UpdateOrganizationRequest(String domain, String name, String description, String address) {
+    public UpdateOrganizationRequest(String domain, String name, String description, String address, String email) {
         this.name = name;
         this.description = description;
         this.address = address;
         this.domain = domain;
+        this.email = email;
     }
 }

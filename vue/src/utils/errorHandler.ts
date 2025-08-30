@@ -14,8 +14,23 @@ export class ErrorHandler {
 
             // Handle the backend GlobalExceptionHandler format
             if (data && typeof data === 'object') {
+              let  message =data.message
+              
+                // in case of dto based validation, we need to return the field errors
+              if(data.message == "Request validation failed"){
+                let fieldErrors = ""
+                // combine the field errors with a new line
+                for(let field in data.fieldErrors){
+                  fieldErrors += `${field}: ${data.fieldErrors[field]}\n`
+                  // for the global error, we need to return the global error
+                  if(data.fieldErrors.global){
+                    fieldErrors += `${data.fieldErrors.global}\n`
+                  }
+                }
+                message = fieldErrors
+              }
                 return {
-                    message: data.message || `Request failed with status ${status}`,
+                    message: message,
                     status,
                     code: data.error || `HTTP_${status}`,
                     error: data.error,

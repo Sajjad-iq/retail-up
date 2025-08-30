@@ -13,25 +13,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateOrganizationRequest {
 
-    @NotBlank(message = "Organization name is required")
-    @Size(min = 2, max = 100, message = "Organization name must be between 2 and 100 characters")
+    @NotBlank(message = "{organization.name.empty}")
+    @Size(min = 2, max = 100, message = "{organization.name.invalid}")
     private String name;
 
-    @NotBlank(message = "Organization domain is required")
-    @Size(min = 3, max = 255, message = "Domain must be between 3 and 255 characters")
+    @NotBlank(message = "{invalid.domain.format}")
+    @Size(min = 3, max = 255, message = "{invalid.domain.format}")
     private String domain;
 
-    @Size(max = 500, message = "Description must not exceed 500 characters")
+    @Size(max = 500, message = "{organization.description.invalid}")
     private String description;
 
-    @Size(max = 255, message = "Address must not exceed 255 characters")
+    @Size(max = 255, message = "{organization.address.invalid}")
     private String address;
 
-    @NotBlank(message = "Phone is required")
-    @Size(max = 20, message = "Phone must not exceed 20 characters")
+    @NotBlank(message = "{auth.phone.format.wrong}")
+    @Size(max = 20, message = "{auth.phone.too.short}")
     private String phone;
 
-    @Email(message = "Email should be valid")
-    @Size(max = 255, message = "Email must not exceed 255 characters")
+    @Email(message = "{user.email.invalid.format}")
+    @Size(max = 255, message = "{user.email.invalid.format}")
     private String email;
 }
