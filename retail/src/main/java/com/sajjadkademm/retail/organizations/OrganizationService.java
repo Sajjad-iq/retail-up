@@ -11,6 +11,7 @@ import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.shared.validators.UserValidator;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class OrganizationService {
     private final SystemSettingsService systemSettingsService;
     private final LocalizedErrorService localizedErrorService;
     private final OrganizationValidationUtils organizationValidationUtils;
+    private final UserValidator userValidator;
 
     /**
      * Create a new organization with default settings
@@ -36,10 +38,12 @@ public class OrganizationService {
     public Organization createOrganization(CreateOrganizationRequest request) {
         try {
             // Get current authenticated user
-            User currentUser = SecurityUtils.getCurrentUser();
+            User sessionUser = SecurityUtils.getCurrentUser();
+
+            User user = userValidator.validateUserActive(sessionUser.getId());
 
             // Validate current user permissions
-            organizationValidationUtils.validateUserCanCreateOrganization(currentUser);
+            organizationValidationUtils.validateUserCanCreateOrganization(user);
 
             // Validate organization data
             organizationValidationUtils.validateOrganizationCreationData(
@@ -62,7 +66,7 @@ public class OrganizationService {
                     .description(request.getDescription())
                     .address(request.getAddress())
                     .phone(request.getPhone())
-                    .createdBy(currentUser)
+                    .createdBy(user)
                     .build();
 
             // Save the organization first
@@ -70,7 +74,7 @@ public class OrganizationService {
 
             // Create and save default settings for the organization
             // If this fails, the entire transaction will be rolled back
-            systemSettingsService.createAndSaveDefaultSystemSettings(savedOrganization.getId(), currentUser.getId());
+            systemSettingsService.createAndSaveDefaultSystemSettings(savedOrganization.getId(), user.getId());
 
             return savedOrganization;
 
