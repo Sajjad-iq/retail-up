@@ -58,22 +58,6 @@ public class OrganizationStatusValidator {
     }
 
     /**
-     * Ensures the provided organization can be updated.
-     * Throws {@link BadRequestException} if the organization is deleted or
-     * suspended.
-     *
-     * @param organization the organization to validate
-     * @throws BadRequestException when the organization cannot be updated
-     */
-    public void assertOrganizationCanBeUpdated(Organization organization) {
-        if (organization.getStatus() == OrganizationStatus.DELETED
-                || organization.getStatus() == OrganizationStatus.SUSPENDED) {
-            throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_UPDATE_FAILED.getMessage()));
-        }
-    }
-
-    /**
      * Validates that the organization status transition is allowed.
      * Checks if the new status is valid for the current organization state.
      *
