@@ -192,12 +192,12 @@ public class OrganizationValidationUtils {
     public void validateOrganizationName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_EMPTY.getMessage()));
         }
 
         if (name.trim().length() < 2 || name.trim().length() > 255) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_INVALID.getMessage()));
         }
     }
 
@@ -211,7 +211,7 @@ public class OrganizationValidationUtils {
     public void validateOrganizationDescription(String description) {
         if (description != null && description.trim().length() > 500) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_DESCRIPTION_INVALID.getMessage()));
         }
     }
 
@@ -225,7 +225,7 @@ public class OrganizationValidationUtils {
     public void validateOrganizationAddress(String address) {
         if (address != null && address.trim().length() > 255) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ADDRESS_INVALID.getMessage()));
         }
     }
 

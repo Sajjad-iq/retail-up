@@ -33,7 +33,11 @@ public enum OrganizationErrorCode {
     USER_CANNOT_UPDATE_ORGANIZATION("ORG013", "user.cannot.update.organization"),
 
     // Validation Errors
-    SEARCH_TERM_EMPTY("ORG015", "search.term.empty");
+    SEARCH_TERM_EMPTY("ORG015", "search.term.empty"),
+    ORGANIZATION_NAME_EMPTY("ORG016", "organization.name.empty"),
+    ORGANIZATION_NAME_INVALID("ORG017", "organization.name.invalid"),
+    ORGANIZATION_ADDRESS_INVALID("ORG018", "organization.address.invalid"),
+    ORGANIZATION_DESCRIPTION_INVALID("ORG019", "organization.description.invalid");
 
     private final String code;
     private final String message;
