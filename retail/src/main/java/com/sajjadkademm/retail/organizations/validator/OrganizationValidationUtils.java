@@ -95,9 +95,9 @@ public class OrganizationValidationUtils {
      * @throws UnauthorizedException when user cannot update organization
      */
     public void validateUserCanUpdateOrganization(User currentUser, Organization organization) {
-        userValidator.assertUserIsActiveAndHasAccountType(currentUser, AccountType.USER);
+        User user = userValidator.validateUserActive(currentUser.getId());
 
-        if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
+        if (!user.getId().equals(organization.getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
