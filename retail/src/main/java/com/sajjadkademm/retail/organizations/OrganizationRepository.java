@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.organizations;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
+import com.sajjadkademm.retail.users.User;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +17,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
     List<Organization> searchOrganizations(@Param("searchTerm") String searchTerm);
 
     // Find organizations by creator
-    List<Organization> findByCreatedBy(com.sajjadkademm.retail.users.User createdBy);
+    List<Organization> findByCreatedBy(User createdBy);
 
     // Search organizations by name for a specific user
     @Query("SELECT o FROM Organization o WHERE o.name LIKE %:searchTerm% AND o.createdBy.id = :userId")
@@ -29,4 +29,6 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
 
     // Check if phone exists
     boolean existsByPhone(String phone);
+
+
 }

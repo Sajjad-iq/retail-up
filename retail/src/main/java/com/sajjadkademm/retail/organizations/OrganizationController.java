@@ -183,18 +183,4 @@ public class OrganizationController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Check if organization exists by domain
-     */
-    @Operation(summary = "Check Organization Exists by Domain", description = "Check if an organization exists with the specified domain", operationId = "organizationExistsByDomain")
-    @ApiResponse(responseCode = "200", description = "Organization existence check result", content = @Content(mediaType = "application/json", schema = @Schema(type = "boolean"), examples = {
-            @ExampleObject(name = "Organization Exists", value = "true"),
-            @ExampleObject(name = "Organization Not Found", value = "false")
-    }))
-    @GetMapping("/exists/domain/{domain}")
-    public ResponseEntity<Boolean> organizationExistsByDomain(
-            @Parameter(description = "Domain to check", required = true, example = "acme.com") @PathVariable String domain) {
-        boolean exists = organizationService.organizationExistsByDomain(domain);
-        return ResponseEntity.ok(exists);
-    }
 }

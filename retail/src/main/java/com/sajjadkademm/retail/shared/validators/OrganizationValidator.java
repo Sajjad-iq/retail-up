@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
  * Provides reusable checks to keep services/utilities consistent and DRY.
  */
 @Component
-public class OrganizationStatusValidator {
+public class OrganizationValidator {
 
     private final LocalizedErrorService localizedErrorService;
 
     @Autowired
-    public OrganizationStatusValidator(LocalizedErrorService localizedErrorService) {
+    public OrganizationValidator(LocalizedErrorService localizedErrorService) {
         this.localizedErrorService = localizedErrorService;
     }
 
@@ -57,21 +57,4 @@ public class OrganizationStatusValidator {
         }
     }
 
-    /**
-     * Validates that the organization status transition is allowed.
-     * Checks if the new status is valid for the current organization state.
-     *
-     * @param currentStatus the current organization status
-     * @param newStatus     the new status to validate
-     * @throws BadRequestException when status transition is not allowed
-     */
-    public void validateStatusTransition(OrganizationStatus currentStatus, OrganizationStatus newStatus) {
-        if (currentStatus == OrganizationStatus.DELETED) {
-            throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_UPDATE_FAILED.getMessage()));
-        }
-
-        // Add more specific status transition rules as needed
-        // For example, prevent certain status changes based on business rules
-    }
 }

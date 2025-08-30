@@ -32,17 +32,12 @@ public class UpdateOrganizationRequest {
     @Size(min = 3, max = 255, message = "{invalid.domain.format}")
     private String domain;
 
-    @Email(message = "{user.email.invalid.format}")
-    @Size(max = 255, message = "{user.email.invalid.format}")
-    private String email;
-
     private OrganizationStatus status;
 
-    public UpdateOrganizationRequest(String domain, String name, String description, String address, String email) {
+    public UpdateOrganizationRequest(String domain, String name, String description, String address) {
         this.name = name;
         this.description = description;
         this.address = address;
         this.domain = domain;
-        this.email = email;
     }
 }

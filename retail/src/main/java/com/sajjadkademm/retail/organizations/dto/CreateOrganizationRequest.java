@@ -30,8 +30,5 @@ public class CreateOrganizationRequest {
     @NotBlank(message = "{auth.phone.format.wrong}")
     @Size(max = 20, message = "{auth.phone.too.short}")
     private String phone;
-
-    @Email(message = "{user.email.invalid.format}")
-    @Size(max = 255, message = "{user.email.invalid.format}")
-    private String email;
+    
 }

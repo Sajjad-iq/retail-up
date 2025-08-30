@@ -2,6 +2,7 @@ package com.sajjadkademm.retail.inventory.InventoryItem.validator;
 
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
+import com.sajjadkademm.retail.shared.validators.OrganizationValidator;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +15,6 @@ import com.sajjadkademm.retail.shared.enums.Money;
 
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
@@ -36,7 +36,7 @@ public class InventoryItemCreateValidator {
     private final OrganizationService organizationService;
     private final InventoryItemRepository inventoryItemRepository;
     private final LocalizedErrorService localizedErrorService;
-    private final OrganizationValidationUtils organizationValidationUtils;
+    private final OrganizationValidator organizationValidationUtils;
 
     /**
      * Validation result containing errors and validated entities

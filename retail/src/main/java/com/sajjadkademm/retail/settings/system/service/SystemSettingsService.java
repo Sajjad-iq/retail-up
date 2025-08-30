@@ -8,8 +8,8 @@ import com.sajjadkademm.retail.shared.enums.Currency;
 import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationRepository;
-import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
 
+import com.sajjadkademm.retail.shared.validators.OrganizationValidator;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class SystemSettingsService {
 
         private final SystemSettingRepository systemSettingRepository;
         private final OrganizationRepository organizationRepository;
-        private final OrganizationValidationUtils organizationValidationUtils;
+        private final OrganizationValidator organizationValidationUtils;
 
         /**
          * Get system settings for an organization

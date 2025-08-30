@@ -9,7 +9,7 @@ import com.sajjadkademm.retail.inventory.dto.CreateInventoryRequest;
 import com.sajjadkademm.retail.inventory.dto.UpdateInventoryRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
+import com.sajjadkademm.retail.shared.validators.OrganizationValidator;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
@@ -27,13 +27,13 @@ import java.util.List;
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final OrganizationService organizationService;
-    private final OrganizationValidationUtils organizationValidationUtils;
+    private final OrganizationValidator organizationValidationUtils;
     private final LocalizedErrorService localizedErrorService;
 
     @Autowired
     public InventoryService(InventoryRepository inventoryRepository,
             OrganizationService organizationService,
-            OrganizationValidationUtils organizationValidationUtils,
+                            OrganizationValidator organizationValidationUtils,
             LocalizedErrorService localizedErrorService) {
         this.inventoryRepository = inventoryRepository;
         this.organizationService = organizationService;

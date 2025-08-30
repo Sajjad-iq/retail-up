@@ -39,11 +39,7 @@ public class UserValidator {
      * @throws UnauthorizedException when user is not active
      */
     public void assertUserIsHasActiveStatus(User user) {
-        // Add logging to help debug user status issues
         if (user.getStatus() != UserStatus.ACTIVE) {
-            System.out.println("DEBUG: User status validation failed. User ID: " + user.getId() +
-                    ", Current Status: " + user.getStatus() +
-                    ", Required Status: " + UserStatus.ACTIVE);
             throw new UnauthorizedException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.USER_NOT_ACTIVE.getMessage()));
         }

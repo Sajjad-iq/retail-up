@@ -1,6 +1,7 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.validator;
 
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
+import com.sajjadkademm.retail.shared.validators.OrganizationValidator;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +17,6 @@ import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
@@ -40,7 +40,7 @@ public class InventoryItemUpdateValidator {
     private final OrganizationService organizationService;
     private final UserRepository userRepository;
     private final LocalizedErrorService localizedErrorService;
-    private final OrganizationValidationUtils organizationValidationUtils;
+    private final OrganizationValidator organizationValidationUtils;
 
     /**
      * Validation result containing errors and validated entities
