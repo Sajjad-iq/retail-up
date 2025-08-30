@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.shared.validators;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
+import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,17 +29,20 @@ public class EmailValidator {
      * @throws BadRequestException when email validation fails
      */
     public void validateEmailFormat(String email) {
-        if (email != null && !email.trim().isEmpty()) {
-            if (email.trim().length() > 255) {
-                throw new BadRequestException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
-            }
+        if (email == null || email.trim().isEmpty()) {
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(UserErrorCode.USER_EMAIL_EMPTY.getMessage()));
+        }
 
-            // Basic email format validation
-            if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-                throw new BadRequestException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
-            }
+        if (email.trim().length() > 255) {
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(UserErrorCode.USER_EMAIL_INVALID_FORMAT.getMessage()));
+        }
+
+        // Basic email format validation
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(UserErrorCode.USER_EMAIL_INVALID_FORMAT.getMessage()));
         }
     }
 
@@ -57,7 +60,7 @@ public class EmailValidator {
 
         if (email != null && !email.trim().isEmpty() && existsChecker.exists(email)) {
             throw new ConflictException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(), email));
+                    .getLocalizedMessage(UserErrorCode.USER_EMAIL_ALREADY_EXISTS.getMessage(), email));
         }
     }
 

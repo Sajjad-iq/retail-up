@@ -23,7 +23,12 @@ public enum UserErrorCode {
     USER_NOT_ORGANIZATION_CREATOR("USR011", "user.not.organization.creator"),
     USER_NOT_AUTHENTICATED("USR012", "user.not.authenticated"),
     USER_UNAUTHORIZED("USR013", "user.unauthorized"),
-    CANNOT_DELETE_SELF("USR014", "cannot.delete.self");
+    CANNOT_DELETE_SELF("USR014", "cannot.delete.self"),
+
+    // Email Validation Errors
+    USER_EMAIL_EMPTY("USR015", "user.email.empty"),
+    USER_EMAIL_INVALID_FORMAT("USR016", "user.email.invalid.format"),
+    USER_EMAIL_ALREADY_EXISTS("USR017", "user.email.already.exists");
 
     private final String code;
     private final String message;
