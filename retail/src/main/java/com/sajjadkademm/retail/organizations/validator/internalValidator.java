@@ -5,9 +5,8 @@ import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.shared.validators.PhoneValidator;
-import com.sajjadkademm.retail.shared.validators.EmailValidator;
-import com.sajjadkademm.retail.shared.validators.DomainValidator;
 import com.sajjadkademm.retail.organizations.OrganizationRepository;
 import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 public class internalValidator {
     private final LocalizedErrorService localizedErrorService;
     private final PhoneValidator phoneValidator;
-    private final EmailValidator emailValidator;
     private final DomainValidator domainValidator;
     private final OrganizationRepository organizationRepository;
 
@@ -72,7 +70,6 @@ public class internalValidator {
                     (phone -> organizationRepository.existsByPhone(request.getPhone())));
         }
 
-
         // Validate domain uniqueness for updates
         if (request.getDomain() != null && !request.getDomain().equals(organization.getDomain())) {
             domainValidator.validateDomainFormatAndUniqueness(request.getDomain(),
@@ -104,4 +101,24 @@ public class internalValidator {
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ADDRESS_INVALID.getMessage()));
         }
     }
+
+
+
+    /**
+     * Ensures the provided organization is not disabled by the system.
+     * Throws {@link BadRequestException} if the organization is rejected,
+     * suspended, or deleted.
+     *
+     * @param organization the organization to validate
+     * @throws BadRequestException when the organization is disabled by system
+     */
+    public void assertOrganizationIsNotDisabledBySystem(Organization organization) {
+        if (organization.getStatus() == OrganizationStatus.REJECTED
+                || organization.getStatus() == OrganizationStatus.SUSPENDED
+                || organization.getStatus() == OrganizationStatus.DELETED) {
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_INACTIVE.getMessage()));
+        }
+    }
+
 }

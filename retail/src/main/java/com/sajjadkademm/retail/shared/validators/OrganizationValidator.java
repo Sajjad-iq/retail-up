@@ -40,21 +40,4 @@ public class OrganizationValidator {
         }
     }
 
-    /**
-     * Ensures the provided organization is not disabled by the system.
-     * Throws {@link BadRequestException} if the organization is rejected,
-     * suspended, or deleted.
-     *
-     * @param organization the organization to validate
-     * @throws BadRequestException when the organization is disabled by system
-     */
-    public void assertOrganizationIsNotDisabledBySystem(Organization organization) {
-        if (organization.getStatus() == OrganizationStatus.REJECTED
-                || organization.getStatus() == OrganizationStatus.SUSPENDED
-                || organization.getStatus() == OrganizationStatus.DELETED) {
-            throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_INACTIVE.getMessage()));
-        }
-    }
-
 }

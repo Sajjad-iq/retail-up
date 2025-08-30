@@ -59,21 +59,6 @@ public class PhoneValidator {
         }
     }
 
-    /**
-     * Validates phone uniqueness when updating.
-     * Only checks if the new phone is different from the current one.
-     *
-     * @param newPhone      the new phone number
-     * @param currentPhone  the current phone number
-     * @param existsChecker functional interface to check if phone exists
-     * @throws BadRequestException when phone validation fails
-     * @throws ConflictException   when phone already exists
-     */
-    public void validatePhoneForUpdate(String newPhone, String currentPhone, PhoneExistsChecker existsChecker) {
-        if (!newPhone.equals(currentPhone)) {
-            validatePhoneFormatAndUniqueness(newPhone, existsChecker);
-        }
-    }
 
     /**
      * Functional interface for checking if a phone number exists.

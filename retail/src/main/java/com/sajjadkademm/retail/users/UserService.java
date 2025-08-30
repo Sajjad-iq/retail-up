@@ -5,8 +5,10 @@ import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.shared.enums.AccountType;
 import com.sajjadkademm.retail.shared.validators.UserValidator;
 import com.sajjadkademm.retail.shared.validators.PhoneValidator;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.shared.validators.EmailValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -67,6 +69,14 @@ public class UserService {
                     (email) -> userRepository.existsByEmail(user.getEmail()));
         }
 
+        if (user.getStatus() == null) {
+            user.setStatus(UserStatus.ACTIVE);
+        }
+
+        if (user.getAccountType() == null) {
+            user.setAccountType(AccountType.USER);
+        }
+
         return userRepository.save(user);
     }
 
@@ -79,24 +89,22 @@ public class UserService {
         User user = userValidator.validateUserActive(id);
 
         // Validate the update data
-        if (userDetails.getName() == null || userDetails.getName().trim().isEmpty()) {
-            throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(UserErrorCode.INVALID_USER_DATA.getMessage()));
+        if (userDetails.getName() != null && !userDetails.getName().trim().isEmpty()
+                && !userDetails.getName().equals(user.getName())) {
+            user.setName(userDetails.getName());
         }
 
         if (userDetails.getEmail() != null && !userDetails.getEmail().equals(user.getEmail())) {
-            emailValidator.validateEmailFormatAndUniqueness(user.getEmail(),
-                    (email) -> userRepository.existsByEmail(user.getEmail()));
+            emailValidator.validateEmailFormatAndUniqueness(userDetails.getEmail(),
+                    (email) -> userRepository.existsByEmail(userDetails.getEmail()));
             user.setEmail(userDetails.getEmail());
         }
 
         if (userDetails.getPhone() != null && !userDetails.getPhone().equals(user.getPhone())) {
-            phoneValidator.validatePhoneFormatAndUniqueness(user.getPhone(),
-                    (phone) -> userRepository.existsByPhone(user.getPhone()));
+            phoneValidator.validatePhoneFormatAndUniqueness(userDetails.getPhone(),
+                    (phone) -> userRepository.existsByPhone(userDetails.getPhone()));
             user.setPhone(userDetails.getPhone());
         }
-
-        user.setName(userDetails.getName());
 
         return userRepository.save(user);
     }

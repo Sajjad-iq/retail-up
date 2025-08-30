@@ -74,8 +74,6 @@ public class AuthService {
                                 .email(request.getEmail())
                                 .phone(request.getPhone())
                                 .password(passwordEncoder.encode(request.getPassword()))
-                                .status(UserStatus.ACTIVE)
-                                .accountType(AccountType.USER)
                                 .build();
 
                 // Save user using UserService

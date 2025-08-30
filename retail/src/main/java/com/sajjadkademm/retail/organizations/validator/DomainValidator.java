@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.shared.validators;
+package com.sajjadkademm.retail.organizations.validator;
 
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
@@ -76,21 +76,6 @@ public class DomainValidator {
         }
     }
 
-    /**
-     * Validates domain uniqueness when updating.
-     * Only checks if the new domain is different from the current one.
-     *
-     * @param newDomain     the new domain
-     * @param currentDomain the current domain
-     * @param existsChecker functional interface to check if domain exists
-     * @throws BadRequestException when domain validation fails
-     * @throws ConflictException   when domain already exists
-     */
-    public void validateDomainForUpdate(String newDomain, String currentDomain, DomainExistsChecker existsChecker) {
-        if (newDomain != null && !newDomain.equals(currentDomain)) {
-            validateDomainFormatAndUniqueness(newDomain, existsChecker);
-        }
-    }
 
     /**
      * Functional interface for checking if a domain exists.

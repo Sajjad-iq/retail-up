@@ -90,12 +90,6 @@ public class OrganizationService {
                 .orElseThrow(() -> new NotFoundException(localizedErrorService
                         .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage())));
 
-        // Validate organization can be updated
-        organizationStatusValidator.assertOrganizationIsNotDisabledBySystem(organization);
-
-        // Validate organization data
-        internalValidator.validateOrganizationUpdateData(request, organization);
-
         // Get current authenticated user
         User currentUser = SecurityUtils.getCurrentUser();
         User user = userValidator.validateUserActive(currentUser.getId());
@@ -106,12 +100,28 @@ public class OrganizationService {
                     .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
 
+        // Validate organization can be updated and not disabled
+        internalValidator.assertOrganizationIsNotDisabledBySystem(organization);
+
+        // Validate update request data
+        internalValidator.validateOrganizationUpdateData(request, organization);
+
         // Update organization fields
-        organization.setName(request.getName());
-        organization.setDescription(request.getDescription());
-        organization.setAddress(request.getAddress());
-        organization.setPhone(request.getPhone());
-        organization.setDomain(request.getDomain());
+        if (request.getName() != null) {
+            organization.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            organization.setDescription(request.getDescription());
+        }
+        if (request.getAddress() != null) {
+            organization.setAddress(request.getAddress());
+        }
+        if (request.getPhone() != null) {
+            organization.setPhone(request.getPhone());
+        }
+        if (request.getDomain() != null) {
+            organization.setDomain(request.getDomain());
+        }
         if (request.getStatus() != null) {
             organization.setStatus(request.getStatus());
         }

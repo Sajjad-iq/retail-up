@@ -60,18 +60,6 @@ public class UserValidator {
         }
     }
 
-    /**
-     * Validates that the user is active and has the specified account type.
-     * Combines both validations for convenience.
-     *
-     * @param user                the user to validate
-     * @param expectedAccountType the expected account type
-     * @throws UnauthorizedException when user validation fails
-     */
-    public void assertUserIsActiveAndHasAccountType(User user, AccountType expectedAccountType) {
-        assertUserIsHasActiveStatus(user);
-        assertUserAccountType(user, expectedAccountType);
-    }
 
     /**
      * Validates JWT token and returns user information if valid.

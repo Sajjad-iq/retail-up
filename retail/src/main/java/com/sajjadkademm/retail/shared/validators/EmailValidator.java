@@ -65,22 +65,6 @@ public class EmailValidator {
     }
 
     /**
-     * Validates email uniqueness when updating.
-     * Only checks if the new email is different from the current one.
-     *
-     * @param newEmail      the new email
-     * @param currentEmail  the current email
-     * @param existsChecker functional interface to check if email exists
-     * @throws BadRequestException when email validation fails
-     * @throws ConflictException   when email already exists
-     */
-    public void validateEmailForUpdate(String newEmail, String currentEmail, EmailExistsChecker existsChecker) {
-        if (newEmail != null && !newEmail.equals(currentEmail)) {
-            validateEmailFormatAndUniqueness(newEmail, existsChecker);
-        }
-    }
-
-    /**
      * Functional interface for checking if an email exists.
      * This allows the validator to be decoupled from specific repository
      * implementations.
