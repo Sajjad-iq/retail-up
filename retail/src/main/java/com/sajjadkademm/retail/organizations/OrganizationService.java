@@ -9,7 +9,6 @@ import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.validator.OrganizationValidationUtils;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserService;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.config.SecurityUtils;
 
@@ -25,7 +24,6 @@ import java.util.List;
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final SystemSettingsService systemSettingsService;
-    private final UserService userService;
     private final LocalizedErrorService localizedErrorService;
     private final OrganizationValidationUtils organizationValidationUtils;
 

@@ -31,19 +31,30 @@ public class DomainValidator {
     public void validateDomainFormat(String domain) {
         if (domain == null || domain.trim().isEmpty()) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+                    .getLocalizedMessage(OrganizationErrorCode.INVALID_DOMAIN_FORMAT.getMessage()));
         }
 
         if (domain.trim().length() < 3 || domain.trim().length() > 255) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+                    .getLocalizedMessage(OrganizationErrorCode.INVALID_DOMAIN_FORMAT.getMessage()));
         }
 
-        // Basic domain format validation (should contain at least one dot and valid
-        // characters)
+        // Regex pattern for domain validation
+        // Allows: alphanumeric, hyphens, dots
+        // Prevents: starting/ending with hyphen or dot
+        // Requires at least one dot and valid TLD
+        String domainRegex = "^(?!-)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(?!-)$";
+
+        if (!domain.matches(domainRegex)) {
+            throw new BadRequestException(localizedErrorService
+                    .getLocalizedMessage(OrganizationErrorCode.INVALID_DOMAIN_FORMAT.getMessage()));
+        }
+
+        // Additional validation: must contain at least one dot and not start/end with
+        // dot
         if (!domain.contains(".") || domain.startsWith(".") || domain.endsWith(".")) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.INVALID_ORGANIZATION_DATA.getMessage()));
+                    .getLocalizedMessage(OrganizationErrorCode.INVALID_DOMAIN_FORMAT.getMessage()));
         }
     }
 
@@ -61,7 +72,7 @@ public class DomainValidator {
 
         if (existsChecker.exists(domain)) {
             throw new ConflictException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ALREADY_EXISTS.getMessage(), domain));
+                    .getLocalizedMessage(OrganizationErrorCode.DOMAIN_ALREADY_EXISTS.getMessage(), domain));
         }
     }
 

@@ -24,6 +24,10 @@ public enum OrganizationErrorCode {
     ORGANIZATION_UPDATE_FAILED("ORG008", "organization.update.failed"),
     ORGANIZATION_CREATION_FAILED("ORG009", "organization.creation.failed"),
 
+    // Domain-specific Errors
+    INVALID_DOMAIN_FORMAT("ORG010", "invalid.domain.format"),
+    DOMAIN_ALREADY_EXISTS("ORG011", "domain.already.exists"),
+
     // User-related Organization Errors
     USER_CANNOT_CREATE_ORGANIZATION("ORG012", "user.cannot.create.organization"),
     USER_CANNOT_UPDATE_ORGANIZATION("ORG013", "user.cannot.update.organization"),
