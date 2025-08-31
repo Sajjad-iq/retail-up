@@ -4,7 +4,6 @@ import com.sajjadkademm.retail.config.locales.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.exceptions.BadRequestException;
 import com.sajjadkademm.retail.exceptions.ConflictException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +57,6 @@ public class PhoneValidator {
                     .getLocalizedMessage(AuthErrorCode.AUTH_PHONE_ALREADY_EXISTS.getMessage(), phone));
         }
     }
-
 
     /**
      * Functional interface for checking if a phone number exists.

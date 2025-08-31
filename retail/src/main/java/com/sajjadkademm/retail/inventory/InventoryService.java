@@ -10,36 +10,27 @@ import com.sajjadkademm.retail.inventory.dto.UpdateInventoryRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.shared.validators.OrganizationValidator;
+import com.sajjadkademm.retail.shared.validators.UserValidator;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final OrganizationService organizationService;
     private final OrganizationValidator organizationValidationUtils;
     private final LocalizedErrorService localizedErrorService;
-
-    @Autowired
-    public InventoryService(InventoryRepository inventoryRepository,
-            OrganizationService organizationService,
-                            OrganizationValidator organizationValidationUtils,
-            LocalizedErrorService localizedErrorService) {
-        this.inventoryRepository = inventoryRepository;
-        this.organizationService = organizationService;
-        this.organizationValidationUtils = organizationValidationUtils;
-        this.localizedErrorService = localizedErrorService;
-    }
+    private final UserValidator userValidator;
 
     /**
      * Create a new inventory for an organization
@@ -49,6 +40,8 @@ public class InventoryService {
         try {
             // Get current authenticated user
             User currentUser = SecurityUtils.getCurrentUser();
+            // check if the user is active
+            User user = userValidator.validateUserActive(currentUser.getId());
 
             // Resolve organization and ensure it exists
             Organization organization = organizationService.getOrganizationById(request.getOrganizationId());
@@ -60,15 +53,9 @@ public class InventoryService {
             // Guard: only active organizations can create inventories
             organizationValidationUtils.assertOrganizationIsActive(organization);
 
-            // Validate current user permissions
-            if (currentUser.getStatus() != UserStatus.ACTIVE) {
-                throw new UnauthorizedException(localizedErrorService
-                        .getLocalizedMessage(UserErrorCode.USER_NOT_ACTIVE.getMessage()));
-            }
-
             // Check if user has access to the organization (user must be the creator of the
             // organization)
-            if (!currentUser.getId().equals(organization.getCreatedBy().getId())) {
+            if (!user.getId().equals(organization.getCreatedBy().getId())) {
                 throw new UnauthorizedException(localizedErrorService
                         .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
             }
@@ -87,7 +74,7 @@ public class InventoryService {
                     .location(request.getLocation())
                     .organizationId(request.getOrganizationId())
                     .isActive(true)
-                    .createdBy(currentUser)
+                    .createdBy(user)
                     .build();
 
             return inventoryRepository.save(inventory);
@@ -112,10 +99,10 @@ public class InventoryService {
 
         // Get current authenticated user
         User currentUser = SecurityUtils.getCurrentUser();
-
+        User user = userValidator.validateUserActive(currentUser.getId());
         // Check if user has access to the inventory (user must be the creator of the
         // organization)
-        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+        if (!user.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
             throw new UnauthorizedException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
         }
