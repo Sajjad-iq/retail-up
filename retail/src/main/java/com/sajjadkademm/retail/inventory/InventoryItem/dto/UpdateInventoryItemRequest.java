@@ -22,70 +22,70 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateInventoryItemRequest {
 
-    @NotBlank(message = "User ID is required")
+    @NotBlank(message = "{inventoryItem.user.id.required}")
     private String userId;
 
     // Basic Product Information
-    @Size(min = 2, max = 200, message = "Item name must be between 2 and 200 characters")
+    @Size(min = 2, max = 200, message = "{inventory.name.invalid}")
     private String name;
 
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
+    @Size(max = 1000, message = "{inventory.description.invalid}")
     private String description;
 
-    @Size(max = 300, message = "Product code must not exceed 300 characters")
+    @Size(max = 300, message = "{inventoryItem.product.code.too.long}")
     private String productCode;
 
     // Product Identification
-    @Size(max = 300, message = "Barcode must not exceed 300 characters")
+    @Size(max = 300, message = "{inventoryItem.barcode.too.long}")
     private String barcode;
 
     // Product Classification
-    @Size(max = 200, message = "Category must not exceed 200 characters")
+    @Size(max = 200, message = "{inventoryItem.category.too.long}")
     private String category;
 
-    @Size(max = 200, message = "Brand must not exceed 200 characters")
+    @Size(max = 200, message = "{inventoryItem.brand.too.long}")
     private String brand;
 
     private Unit unit;
 
     // Physical Attributes
-    @DecimalMin(value = "0.0", message = "Weight cannot be negative")
+    @DecimalMin(value = "0.0", message = "{inventoryItem.weight.negative}")
     private BigDecimal weight;
 
-    @Size(max = 50, message = "Dimensions must not exceed 50 characters")
+    @Size(max = 50, message = "{inventoryItem.dimensions.too.long}")
     private String dimensions;
 
     // Product Variants
-    @Size(max = 50, message = "Color must not exceed 50 characters")
+    @Size(max = 50, message = "{inventoryItem.color.too.long}")
     private String color;
 
-    @Size(max = 20, message = "Size must not exceed 20 characters")
+    @Size(max = 20, message = "{inventoryItem.size.too.long}")
     private String size;
 
     // Stock Management
-    @Min(value = 0, message = "Current stock cannot be negative")
+    @Min(value = 0, message = "{stock.cannot.be.negative}")
     private Integer currentStock;
 
-    @Min(value = 0, message = "Minimum stock cannot be negative")
+    @Min(value = 0, message = "{stock.cannot.be.negative}")
     private Integer minimumStock;
 
-    @Min(value = 0, message = "Maximum stock cannot be negative")
+    @Min(value = 0, message = "{stock.cannot.be.negative}")
     private Integer maximumStock;
 
     // Pricing Information
     private Money costPrice;
 
-    @NotNull(message = "Selling price is required")
+    @NotNull(message = "{inventoryItem.selling.price.required}")
     private Money sellingPrice;
 
-    @DecimalMin(value = "0.0", message = "Discount price cannot be negative")
+    @DecimalMin(value = "0.0", message = "{inventoryItem.discount.price.negative}")
     private BigDecimal discountPrice;
 
     private LocalDateTime discountStartDate;
 
     private LocalDateTime discountEndDate;
 
-    @Size(max = 200, message = "Supplier name must not exceed 200 characters")
+    @Size(max = 200, message = "{inventoryItem.supplier.name.too.long}")
     private String supplierName;
 
     // Expiry and Perishability
