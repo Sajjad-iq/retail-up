@@ -9,6 +9,7 @@ import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
+import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
@@ -306,7 +307,7 @@ public class ExcelUploadService {
         UpdateInventoryItemRequest updateRequest = convertCreateToUpdateRequest(itemRequest, user.getId());
 
         // Validate update request and collect all errors without throwing exceptions
-        InventoryItemUpdateValidator.ValidationResult validationResult = inventoryItemUpdateValidator
+        ValidationResult validationResult = inventoryItemUpdateValidator
                 .validateAndCollectErrors(existingItem, updateRequest);
 
         if (validationResult.hasErrors()) {

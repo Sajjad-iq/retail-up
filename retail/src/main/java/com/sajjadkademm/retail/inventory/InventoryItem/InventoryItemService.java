@@ -10,6 +10,7 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRe
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemCreateValidator;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.ValidatedCreateInventoryItemContext;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
+import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
@@ -21,6 +22,7 @@ import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,30 +38,15 @@ import org.springframework.transaction.annotation.Transactional;
  * dedicated utility components to keep the service focused on orchestration.
  */
 @Service
+@RequiredArgsConstructor
 public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryItemCreateValidator inventoryItemCreateValidator;
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
-
     private final InventoryMovementService inventoryMovementService;
     private final InventoryService inventoryService;
     private final LocalizedErrorService localizedErrorService;
 
-    @Autowired
-    public InventoryItemService(InventoryItemRepository inventoryItemRepository,
-            SystemSettingsService systemSettingsService,
-            InventoryItemCreateValidator inventoryItemCreateValidator,
-            InventoryItemUpdateValidator inventoryItemUpdateValidator,
-            InventoryMovementService inventoryMovementService,
-            InventoryService inventoryService,
-            LocalizedErrorService localizedErrorService) {
-        this.inventoryItemRepository = inventoryItemRepository;
-        this.inventoryItemCreateValidator = inventoryItemCreateValidator;
-        this.inventoryItemUpdateValidator = inventoryItemUpdateValidator;
-        this.inventoryMovementService = inventoryMovementService;
-        this.inventoryService = inventoryService;
-        this.localizedErrorService = localizedErrorService;
-    }
 
     /**
      * Create a new inventory item
@@ -95,7 +82,7 @@ public class InventoryItemService {
         User currentUser = SecurityUtils.getCurrentUser();
 
         // Validate request and collect all errors without throwing exceptions
-        InventoryItemCreateValidator.ValidationResult validationResult = inventoryItemCreateValidator
+        ValidationResult validationResult = inventoryItemCreateValidator
                 .validateAndCollectErrors(request);
 
         // Return failure result if validation errors exist
@@ -170,7 +157,6 @@ public class InventoryItemService {
         // Persist inventory item to database
         return inventoryItemRepository.save(item);
     }
-
 
     /**
      * Record initial stock movement for newly created item.
