@@ -6,7 +6,9 @@ import com.sajjadkademm.retail.config.locales.errorCode.InventoryErrorCode;
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
 import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
+import com.sajjadkademm.retail.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.inventory.Inventory;
+import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.organizations.Organization;
@@ -338,6 +340,86 @@ public class InventoryItemValidationUtils {
                 errors.add(localizedErrorService.getLocalizedMessage(
                         InventoryItemErrorCode.EXPIRY_DATE_MUST_BE_NULL_FOR_NON_PERISHABLE.getMessage()));
             }
+        }
+    }
+
+    // Security helper methods (moved from InventoryItemService)
+
+    /**
+     * Check if current user has access to the inventory item
+     * Gets user ID from SecurityUtils and validates access through organization
+     * creator check
+     */
+    public void checkUserAccessToInventoryItem(InventoryItem item) {
+        try {
+            // Get current authenticated user ID and fetch from database
+            String userId = SecurityUtils.getCurrentUserId();
+            User currentUser = userValidator.validateUserActive(userId);
+
+            // Get inventory and check if user has access to it
+            Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
+            if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+                throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
+                        UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+            }
+        } catch (UnauthorizedException e) {
+            throw e; // Re-throw authorization exceptions
+        } catch (Exception e) {
+            throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
+                    UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()) + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Check if current user has access to the inventory
+     * Gets user ID from SecurityUtils and validates access through organization
+     * creator check
+     */
+    public void checkUserAccessToInventory(String inventoryId) {
+        try {
+            // Get current authenticated user ID and fetch from database
+            String userId = SecurityUtils.getCurrentUserId();
+            User currentUser = userValidator.validateUserActive(userId);
+
+            // Get inventory and check access
+            Inventory inventory = inventoryService.getInventoryById(inventoryId);
+            if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
+                throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
+                        UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
+            }
+        } catch (UnauthorizedException e) {
+            throw e; // Re-throw authorization exceptions
+        } catch (Exception e) {
+            throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
+                    UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()) + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Validate user access to inventory item with error collection (non-throwing
+     * version)
+     * Adds access validation errors to the provided error list instead of throwing
+     * exceptions
+     */
+    public void validateUserAccessToInventoryItem(InventoryItem item, List<String> errors) {
+        try {
+            checkUserAccessToInventoryItem(item);
+        } catch (Exception e) {
+            errors.add(e.getMessage());
+        }
+    }
+
+    /**
+     * Validate user access to inventory with error collection (non-throwing
+     * version)
+     * Adds access validation errors to the provided error list instead of throwing
+     * exceptions
+     */
+    public void validateUserAccessToInventory(String inventoryId, List<String> errors) {
+        try {
+            checkUserAccessToInventory(inventoryId);
+        } catch (Exception e) {
+            errors.add(e.getMessage());
         }
     }
 }

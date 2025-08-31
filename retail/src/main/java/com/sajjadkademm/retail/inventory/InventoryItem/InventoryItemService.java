@@ -10,15 +10,15 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRe
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemCreateValidator;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.ValidatedCreateInventoryItemContext;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
+import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.config.SecurityUtils;
-import com.sajjadkademm.retail.exceptions.UnauthorizedException;
-import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryService;
+import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.shared.validators.UserValidator;
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
@@ -46,7 +46,8 @@ public class InventoryItemService {
     private final InventoryMovementService inventoryMovementService;
     private final InventoryService inventoryService;
     private final LocalizedErrorService localizedErrorService;
-
+    private final InventoryItemValidationUtils validationUtils;
+    private final UserValidator userValidator;
 
     /**
      * Create a new inventory item
@@ -78,8 +79,9 @@ public class InventoryItemService {
      */
     @Transactional(rollbackFor = { Exception.class })
     public CreateInventoryItemResult createInventoryItemWithErrorCollection(CreateInventoryItemRequest request) {
-        // Get current authenticated user
-        User currentUser = SecurityUtils.getCurrentUser();
+        // Get current authenticated user using validation utils pattern
+        String userId = SecurityUtils.getCurrentUserId();
+        User currentUser = userValidator.validateUserActive(userId);
 
         // Validate request and collect all errors without throwing exceptions
         ValidationResult validationResult = inventoryItemCreateValidator
@@ -214,7 +216,7 @@ public class InventoryItemService {
 
         // Check if user has access to the inventory item (user must be the creator of
         // the organization)
-        checkUserAccessToInventoryItem(item);
+        validationUtils.checkUserAccessToInventoryItem(item);
 
         return item;
     }
@@ -229,7 +231,7 @@ public class InventoryItemService {
                         InventoryItemErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage()) + " with barcode: " + barcode));
 
         // Check if user has access to the inventory item
-        checkUserAccessToInventoryItem(item);
+        validationUtils.checkUserAccessToInventoryItem(item);
 
         return item;
     }
@@ -247,7 +249,7 @@ public class InventoryItemService {
                         InventoryItemErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage())));
 
         // Check if user has access to the inventory item
-        checkUserAccessToInventoryItem(item);
+        validationUtils.checkUserAccessToInventoryItem(item);
 
         // Delete the inventory item - related movements are automatically deleted via
         // cascade
@@ -260,7 +262,7 @@ public class InventoryItemService {
      */
     public long getItemCountByInventory(String inventoryId) {
         // Check if user has access to the inventory
-        checkUserAccessToInventory(inventoryId);
+        validationUtils.checkUserAccessToInventory(inventoryId);
 
         return inventoryItemRepository.countByInventoryId(inventoryId);
     }
@@ -271,7 +273,7 @@ public class InventoryItemService {
      */
     public long getActiveItemCountByInventory(String inventoryId) {
         // Check if user has access to the inventory
-        checkUserAccessToInventory(inventoryId);
+        validationUtils.checkUserAccessToInventory(inventoryId);
 
         return inventoryItemRepository.countByInventoryIdAndIsActiveTrue(inventoryId);
     }
@@ -285,7 +287,7 @@ public class InventoryItemService {
     public PagedResponse<InventoryItem> filterItemsPaginated(String inventoryId, FilterRequest filterRequest, int page,
             int size, String sortBy, String sortDirection) {
         // Check if user has access to the inventory
-        checkUserAccessToInventory(inventoryId);
+        validationUtils.checkUserAccessToInventory(inventoryId);
 
         Pageable pageable = createPageable(page, size, sortBy, sortDirection);
 
@@ -353,35 +355,5 @@ public class InventoryItemService {
                 .build();
     }
 
-    // Security helper methods
-
-    /**
-     * Check if current user has access to the inventory item
-     */
-    private void checkUserAccessToInventoryItem(InventoryItem item) {
-        // Get current authenticated user
-        User currentUser = SecurityUtils.getCurrentUser();
-
-        // Get inventory and check if user has access to it
-        Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
-        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
-            throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
-                    UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
-        }
-    }
-
-    /**
-     * Check if current user has access to the inventory
-     */
-    private void checkUserAccessToInventory(String inventoryId) {
-        // Get current authenticated user
-        User currentUser = SecurityUtils.getCurrentUser();
-
-        // Get inventory and check access
-        Inventory inventory = inventoryService.getInventoryById(inventoryId);
-        if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
-            throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
-                    UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
-        }
-    }
+    // Security helper methods have been moved to InventoryItemValidationUtils
 }

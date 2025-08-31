@@ -14,9 +14,7 @@ import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.config.SecurityUtils;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
