@@ -36,9 +36,13 @@ import lombok.Builder;
 @AllArgsConstructor
 @Builder
 @Table(name = "organizations", indexes = {
+        @Index(name = "idx_organizations_id", columnList = "id"),
         @Index(name = "idx_organizations_name", columnList = "name"),
         @Index(name = "idx_organizations_domain", columnList = "domain"),
-        @Index(name = "idx_organizations_name_domain", columnList = "name,domain")
+        @Index(name = "idx_organizations_name_domain", columnList = "name,domain"),
+        @Index(name = "idx_organizations_created_at", columnList = "created_at"),
+        @Index(name = "idx_organizations_status", columnList = "status"),
+        @Index(name = "idx_organizations_created_by", columnList = "created_by")
 })
 public class Organization {
     @Id
