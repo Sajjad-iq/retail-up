@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChangePasswordRequest {
-    @NotBlank(message = "Old password is required")
-    @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
+    @NotBlank(message = "auth.password.size")
+    @Size(min = 8, max = 32, message = "auth.password.size")
     private String oldPassword;
-    @NotBlank(message = "New password is required")
-    @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
+    @NotBlank(message = "auth.password.size")
+    @Size(min = 8, max = 32, message = "auth.password.size")
     private String newPassword;
 }

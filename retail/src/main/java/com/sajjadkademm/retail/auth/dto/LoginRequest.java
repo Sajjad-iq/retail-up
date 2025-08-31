@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequest {
-    @NotBlank(message = "Email or phone is required")
+    @NotBlank(message = "auth.email.or.phone.required")
     private String emailOrPhone;
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "auth.password.size")
     @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
     private String password;
 }

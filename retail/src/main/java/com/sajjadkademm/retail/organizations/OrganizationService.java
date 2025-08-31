@@ -30,7 +30,6 @@ public class OrganizationService {
     private final UserService userService;
     private final LocalizedErrorService localizedErrorService;
     private final UserValidator userValidator;
-    private final OrganizationValidator organizationStatusValidator;
     private final internalValidator internalValidator;
 
     /**
