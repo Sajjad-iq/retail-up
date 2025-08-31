@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateInventoryRequest {
 
-    @Size(min = 2, max = 100, message = "Inventory name must be between 2 and 100 characters")
+    @Size(min = 2, max = 100, message = "inventory.name.invalid")
     private String name;
 
-    @Size(max = 500, message = "Description must not exceed 500 characters")
+    @Size(max = 500, message = "inventory.description.invalid")
     private String description;
 
-    @Size(max = 255, message = "Location must not exceed 255 characters")
+    @Size(max = 255, message = "inventory.location.invalid")
     private String location;
 
     private Boolean isActive;
