@@ -260,6 +260,11 @@ public class ExcelUploadService {
             return inventoryItemRepository.findByProductCodeAndInventoryId(itemRequest.getProductCode(), inventoryId);
         }
 
+        // Check by name
+        if (itemRequest.getName() != null && !itemRequest.getName().trim().isEmpty()) {
+            return inventoryItemRepository.findByNameAndInventoryId(itemRequest.getName(), inventoryId);
+        }
+
         return Optional.empty();
     }
 

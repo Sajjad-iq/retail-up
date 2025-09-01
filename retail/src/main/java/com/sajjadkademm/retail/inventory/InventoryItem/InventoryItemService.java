@@ -1,6 +1,5 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
-import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
@@ -14,16 +13,13 @@ import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemVa
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
 import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
 import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
-import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.config.SecurityUtils;
 import com.sajjadkademm.retail.shared.validators.UserValidator;
 import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +40,6 @@ public class InventoryItemService {
     private final InventoryItemCreateValidator inventoryItemCreateValidator;
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
     private final InventoryMovementService inventoryMovementService;
-    private final InventoryService inventoryService;
     private final LocalizedErrorService localizedErrorService;
     private final InventoryItemValidationUtils validationUtils;
     private final UserValidator userValidator;
@@ -188,7 +183,8 @@ public class InventoryItemService {
     @Transactional(rollbackFor = { Exception.class })
     public InventoryItem updateInventoryItem(String id, UpdateInventoryItemRequest request) {
         InventoryItem item = inventoryItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Inventory item not found"));
+                .orElseThrow(() -> new NotFoundException(localizedErrorService.getLocalizedMessage(
+                        InventoryItemErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage())));
 
         // Use validator utility for validation
         inventoryItemUpdateValidator.validate(item, request);

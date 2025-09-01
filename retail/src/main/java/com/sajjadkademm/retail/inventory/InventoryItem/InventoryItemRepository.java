@@ -23,6 +23,9 @@ public interface InventoryItemRepository
        // Find all items in an inventory
        List<InventoryItem> findByInventoryId(String inventoryId);
 
+       // Find item by name within an inventory
+       Optional<InventoryItem> findByNameAndInventoryId(String name, String inventoryId);
+
        // Find active items in an inventory
        List<InventoryItem> findByInventoryIdAndIsActiveTrue(String inventoryId);
 
