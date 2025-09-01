@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Builder;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -23,16 +22,16 @@ public class ExcelUploadRequest {
     /**
      * Inventory ID where the items will be created
      */
-    @NotBlank(message = "Inventory ID is required")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Inventory ID must contain only alphanumeric characters, hyphens, and underscores")
-    @Size(min = 20, max = 255, message = "Inventory ID must be between 20 and 255 characters")
+    @NotBlank(message = "inventory.id.required")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "inventory.id.invalid")
+    @Size(min = 20, max = 255, message = "inventory.id.invalid")
     private String inventoryId;
 
     /**
      * User ID performing the upload operation
      */
-    @NotBlank(message = "User ID is required")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "User ID must contain only alphanumeric characters, hyphens, and underscores")
-    @Size(min = 20, max = 255, message = "User ID must be between 20 and 255 characters")
+    @NotBlank(message = "user.id.required")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "user.id.invalid")
+    @Size(min = 20, max = 255, message = "user.id.invalid")
     private String userId;
 }
