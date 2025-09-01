@@ -10,7 +10,6 @@ import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRe
 // REMOVED: Old InventoryMovement imports - now using GlobalAuditService
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.config.SecurityUtils;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
 
 import java.time.LocalDate;
@@ -169,24 +168,6 @@ public class InventoryItemUpdateValidator {
         if (request.getIsActive() != null) {
             item.setIsActive(request.getIsActive());
         }
-    }
-
-    /**
-     * DEPRECATED: trackStockMovements method no longer needed
-     * 
-     * This method has been replaced by GlobalAuditService in InventoryItemService.
-     * Stock movements and field changes are now tracked automatically via global
-     * audit.
-     * 
-     * MIGRATION: Remove calls to this method and use GlobalAuditService instead:
-     * globalAuditService.auditInventoryChange(...) for stock changes
-     * globalAuditService.auditEntityChange(...) for field changes
-     */
-    @Deprecated
-    public void trackStockMovements(InventoryItem item, UpdateInventoryItemRequest request,
-            Object inventoryMovementService, Integer originalStock) {
-        // NO-OP: This method is deprecated and replaced by GlobalAuditService
-        // All tracking is now handled automatically in InventoryItemService
     }
 
 }
