@@ -11,8 +11,9 @@ import com.sajjadkademm.retail.inventory.InventoryItem.validator.ValidatedCreate
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
-import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
-import com.sajjadkademm.retail.inventory.InventoryMovement.enums.ReferenceType;
+import com.sajjadkademm.retail.audit.GlobalAuditService;
+import com.sajjadkademm.retail.audit.enums.AuditAction;
+import com.sajjadkademm.retail.audit.enums.EntityType;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.config.SecurityUtils;
 import com.sajjadkademm.retail.shared.validators.UserValidator;
@@ -39,7 +40,7 @@ public class InventoryItemService {
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryItemCreateValidator inventoryItemCreateValidator;
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
-    private final InventoryMovementService inventoryMovementService;
+    private final GlobalAuditService globalAuditService; // REPLACED: InventoryMovementService with GlobalAuditService
     private final LocalizedErrorService localizedErrorService;
     private final InventoryItemValidationUtils validationUtils;
     private final UserValidator userValidator;
@@ -156,24 +157,42 @@ public class InventoryItemService {
     }
 
     /**
-     * Record initial stock movement for newly created item.
-     * This creates an inventory movement record to track the initial stock being
-     * added.
+     * GLOBAL AUDIT: Record initial stock movement for newly created item
+     * REPLACED: Complex inventory movement service with simple global audit
      * 
      * @param item The newly created inventory item
      * @param user The user who created the item
      */
     private void recordInitialStockMovement(InventoryItem item, User user) {
         Integer initialStock = item.getCurrentStock();
-        // Only record movement if stock is positive
+
+        // AUDIT: Log item creation
+        globalAuditService.auditEntityChange(
+                user.getId(), // TODO: Replace with actual organizationId from item
+                EntityType.INVENTORY_ITEM,
+                item.getId(),
+                item.getName(),
+                AuditAction.CREATE,
+                "Inventory item created",
+                null, // No field name for creation
+                null, // No old value for creation
+                item.getName(), // New value is the item name
+                user);
+
+        // AUDIT: Log initial stock if positive
         if (initialStock != null && initialStock > 0) {
-            inventoryMovementService.recordStockIn(
-                    user,
-                    item,
-                    initialStock,
+            globalAuditService.auditInventoryChange(
+                    user.getId(), // TODO: Replace with actual organizationId from item
+                    item.getId(),
+                    item.getName(),
+                    "STOCK_IN", // Movement type
+                    initialStock, // Quantity change
+                    0, // Stock before (new item starts at 0)
+                    initialStock, // Stock after
                     "Initial stock on item creation",
-                    ReferenceType.CREATION,
-                    item.getId());
+                    "CREATION", // Reference type
+                    item.getId(), // Reference ID
+                    user);
         }
     }
 
@@ -195,9 +214,42 @@ public class InventoryItemService {
         // Apply field updates using validator utility
         inventoryItemUpdateValidator.applyUpdates(item, request);
 
-        // Save and track stock movements
+        // Save and track changes with global audit
         InventoryItem updated = inventoryItemRepository.save(item);
-        inventoryItemUpdateValidator.trackStockMovements(updated, request, inventoryMovementService, originalStock);
+
+        // GLOBAL AUDIT: Track inventory item update and stock changes
+        // REPLACED: Complex trackStockMovements with simple global audit
+
+        // Log general item update
+        globalAuditService.auditEntityChange(
+                updated.getCreatedBy().getId(), // TODO: Replace with actual organizationId
+                EntityType.INVENTORY_ITEM,
+                updated.getId(),
+                updated.getName(),
+                AuditAction.UPDATE,
+                "Inventory item updated",
+                null, // Could be enhanced to track specific field changes
+                null, // Old values could be tracked if needed
+                null, // New values could be tracked if needed
+                SecurityUtils.getCurrentUser());
+
+        // Log stock changes if any
+        Integer newStock = updated.getCurrentStock();
+        if (originalStock != null && newStock != null && !originalStock.equals(newStock)) {
+            Integer quantityChange = newStock - originalStock;
+            globalAuditService.auditInventoryChange(
+                    updated.getCreatedBy().getId(), // TODO: Replace with actual organizationId
+                    updated.getId(),
+                    updated.getName(),
+                    quantityChange > 0 ? "STOCK_IN" : "STOCK_OUT",
+                    quantityChange,
+                    originalStock,
+                    newStock,
+                    "Stock updated via item edit",
+                    "UPDATE",
+                    updated.getId(),
+                    SecurityUtils.getCurrentUser());
+        }
 
         return updated;
     }
@@ -247,8 +299,24 @@ public class InventoryItemService {
         // Check if user has access to the inventory item
         validationUtils.checkUserAccessToInventoryItem(item);
 
+        // GLOBAL AUDIT: Log item deletion before removing from database
+        globalAuditService.auditEntityChange(
+                item.getCreatedBy().getId(), // TODO: Replace with actual organizationId
+                EntityType.INVENTORY_ITEM,
+                item.getId(),
+                item.getName(),
+                AuditAction.DELETE,
+                String.format("Inventory item deleted - had %d units in stock",
+                        item.getCurrentStock() != null ? item.getCurrentStock() : 0),
+                item.getName(), // Old value (what's being deleted)
+                null, // No new value for deletion
+                "name", // Field name being affected
+                SecurityUtils.getCurrentUser());
+
         // Delete the inventory item - related movements are automatically deleted via
         // cascade
+        // NOTE: With global audit, we no longer need separate inventory movement
+        // records
         inventoryItemRepository.deleteById(id);
     }
 

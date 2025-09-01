@@ -31,7 +31,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.sajjadkademm.retail.shared.enums.Unit;
-import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovement;
+// REMOVED: InventoryMovement import - now using GlobalAuditService for tracking
 import com.sajjadkademm.retail.users.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -206,10 +206,9 @@ public class InventoryItem {
         @NotNull(message = "Inventory ID is required")
         private String inventoryId;
 
-        // Inventory Movements (One-to-Many relationship)
-        @OneToMany(mappedBy = "inventoryItem", cascade = CascadeType.ALL, orphanRemoval = true)
-        @JsonIgnoreProperties("inventoryItem")
-        private List<InventoryMovement> inventoryMovements;
+        // REMOVED: Inventory Movements relationship - now using GlobalAuditService
+        // All inventory tracking is handled by global_audit_logs table
+        // Use GlobalAuditRepository to query inventory movement history
 
         // Audit Trail
         // Timestamp when the record was created (auto-generated)

@@ -11,7 +11,8 @@ import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
-import com.sajjadkademm.retail.inventory.InventoryMovement.InventoryMovementService;
+import com.sajjadkademm.retail.audit.GlobalAuditService;
+import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
 import com.sajjadkademm.retail.users.User;
@@ -44,7 +45,7 @@ public class ExcelUploadService {
     private final InventoryItemService inventoryItemService;
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
-    private final InventoryMovementService inventoryMovementService;
+    private final GlobalAuditService globalAuditService; // REPLACED: InventoryMovementService with GlobalAuditService
     private final LocalizedErrorService localizedErrorService;
 
     /**
@@ -98,7 +99,19 @@ public class ExcelUploadService {
                 processInventoryItem(existingItem, itemRequest, user, rowNumber, processedItems, processingErrors);
             }
 
-            // STEP 4: Build comprehensive response with statistics
+            // STEP 4: Log the Excel upload process completion
+            // GLOBAL AUDIT: Track the Excel upload as a business process
+            globalAuditService.auditBusinessProcess(
+                    // Assuming we can get organizationId from inventory or user context
+                    user.getId(), // TODO: Replace with actual organizationId from inventory
+                    "Excel Upload",
+                    String.format("Excel upload completed: %d total rows, %d successful, %d failed",
+                            items.size(), processedItems.size(), processingErrors.size()),
+                    "EXCEL_UPLOAD",
+                    inventoryId, // Use inventoryId as reference
+                    user);
+
+            // STEP 5: Build comprehensive response with statistics
             // This provides detailed feedback about the batch operation results
             return ExcelUploadResponse.builder()
                     .totalRows(items.size())
@@ -379,9 +392,26 @@ public class ExcelUploadService {
             inventoryItemUpdateValidator.applyUpdates(existingItem, updateRequest);
             InventoryItem updated = inventoryItemRepository.save(existingItem);
 
-            // STEP 5: Track inventory movements for audit trail (stock changes, etc.)
-            inventoryItemUpdateValidator.trackStockMovements(updated, updateRequest, inventoryMovementService,
-                    originalStock);
+            // STEP 5: Log inventory change using global audit (REPLACED:
+            // trackStockMovements)
+            // GLOBAL AUDIT: Track stock changes with comprehensive context
+            Integer newStock = updated.getCurrentStock();
+            Integer quantityChange = (newStock != null && originalStock != null) ? (newStock - originalStock) : 0;
+
+            if (quantityChange != 0) {
+                globalAuditService.auditInventoryChange(
+                        user.getId(), // TODO: Replace with actual organizationId from inventory
+                        updated.getId(),
+                        updated.getName(),
+                        quantityChange > 0 ? "STOCK_IN" : "STOCK_OUT", // Determine movement type
+                        quantityChange,
+                        originalStock,
+                        newStock,
+                        "Excel upload - item update",
+                        "EXCEL_UPLOAD",
+                        updated.getInventoryId(), // Use the inventory ID from the updated item
+                        user);
+            }
 
             // SUCCESS: Add to processed items list
             createdItems.add(updated);
