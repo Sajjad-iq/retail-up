@@ -15,6 +15,8 @@ import com.sajjadkademm.retail.audit.GlobalAuditService;
 import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
+import com.sajjadkademm.retail.inventory.Inventory;
+import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.shared.enums.Currency;
 
@@ -47,6 +49,19 @@ public class ExcelUploadService {
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
     private final GlobalAuditService globalAuditService; // REPLACED: InventoryMovementService with GlobalAuditService
     private final LocalizedErrorService localizedErrorService;
+    private final InventoryService inventoryService;
+
+    /**
+     * Get organization ID from inventory
+     */
+    private String getOrganizationIdFromInventory(String inventoryId, User user) {
+        try {
+            Inventory inventory = inventoryService.getInventoryById(inventoryId);
+            return inventory.getOrganizationId();
+        } catch (Exception e) {
+            return user.getId(); // Fallback to user ID
+        }
+    }
 
     /**
      * MAIN ENTRY POINT: Process Excel file and batch create/update inventory items.
@@ -66,63 +81,161 @@ public class ExcelUploadService {
      * @return ExcelUploadResponse with summary of results and any errors
      * @throws BadRequestException if file processing fails
      */
-    @Transactional(rollbackFor = { BadRequestException.class })
     public ExcelUploadResponse processExcelFile(MultipartFile file, String inventoryId, User user) {
         try {
-            // STEP 1: Parse the Excel/CSV file into inventory item requests
-            // This converts raw CSV data into structured objects for processing
-            List<CreateInventoryItemRequest> items = parseExcelFile(file, inventoryId);
-
-            if (items.isEmpty()) {
-                throw new BadRequestException(
-                        localizedErrorService.getLocalizedMessage("no.valid.rows.found"));
-            }
-
-            // STEP 2: Initialize tracking collections for batch processing
-            // We collect both successes and failures to provide comprehensive feedback
-            List<InventoryItem> processedItems = new ArrayList<>();
-            List<String> processingErrors = new ArrayList<>();
-
-            // STEP 3: Process each item individually with error isolation
-            // This ensures one bad row doesn't stop the entire batch
-            for (int i = 0; i < items.size(); i++) {
-                CreateInventoryItemRequest itemRequest = items.get(i);
-
-                int rowNumber = i + 2; // CSV row number (accounting for header row)
-
-                // STEP 3A: Check for duplicates based on unique identifiers
-                // Priority: Barcode -> Product Code -> Name
-                Optional<InventoryItem> existingItem = findExistingItemByIdentifiers(itemRequest, inventoryId);
-
-                // STEP 3B: Route to create or update based on existence
-                // This is the key decision point that determines the operation type
-                processInventoryItem(existingItem, itemRequest, user, rowNumber, processedItems, processingErrors);
-            }
-
-            // STEP 4: Log the Excel upload process completion
-            // GLOBAL AUDIT: Track the Excel upload as a business process
-            globalAuditService.auditBusinessProcess(
-                    // Assuming we can get organizationId from inventory or user context
-                    user.getId(), // TODO: Replace with actual organizationId from inventory
-                    "Excel Upload",
-                    String.format("Excel upload completed: %d total rows, %d successful, %d failed",
-                            items.size(), processedItems.size(), processingErrors.size()),
-                    "EXCEL_UPLOAD",
-                    inventoryId, // Use inventoryId as reference
-                    user);
-
-            // STEP 5: Build comprehensive response with statistics
-            // This provides detailed feedback about the batch operation results
-            return ExcelUploadResponse.builder()
-                    .totalRows(items.size())
-                    .successfulItems(processedItems.size())
-                    .failedItems(processingErrors.size())
-                    .createdItems(processedItems)
-                    .errors(processingErrors)
-                    .build();
+            // STEP 1: Stream process file in batches to avoid memory issues
+            return processExcelFileInBatches(file, inventoryId, user);
 
         } catch (Exception e) {
             throw new BadRequestException("Failed to process Excel file: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * BATCH PROCESSING: Stream process Excel file in small batches
+     * Fixes memory issues and transaction boundary problems
+     */
+    private ExcelUploadResponse processExcelFileInBatches(MultipartFile file, String inventoryId, User user) throws IOException {
+        final int BATCH_SIZE = 50; // Process 50 rows at a time
+        final int EXPECTED_COLUMNS = 25;
+        
+        List<InventoryItem> allProcessedItems = new ArrayList<>();
+        List<String> allProcessingErrors = new ArrayList<>();
+        int totalRows = 0;
+        int rowNumber = 2; // Start after header
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean isFirstLine = true;
+            List<CreateInventoryItemRequest> currentBatch = new ArrayList<>();
+
+            while ((line = reader.readLine()) != null) {
+                // Skip header row
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                // Skip empty lines
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
+                totalRows++;
+
+                // Parse current row
+                CreateInventoryItemRequest itemRequest = parseRowToRequest(line, inventoryId, EXPECTED_COLUMNS);
+                if (itemRequest != null) {
+                    currentBatch.add(itemRequest);
+                } else {
+                    allProcessingErrors.add(String.format("Row %d: Invalid data format", rowNumber));
+                }
+
+                rowNumber++;
+
+                // Process batch when it reaches the size limit
+                if (currentBatch.size() >= BATCH_SIZE) {
+                    ExcelUploadResponse batchResponse = processBatch(currentBatch, inventoryId, user, rowNumber - currentBatch.size());
+                    allProcessedItems.addAll(batchResponse.getCreatedItems());
+                    allProcessingErrors.addAll(batchResponse.getErrors());
+                    currentBatch.clear();
+                }
+            }
+
+            // Process remaining items in the last batch
+            if (!currentBatch.isEmpty()) {
+                ExcelUploadResponse batchResponse = processBatch(currentBatch, inventoryId, user, rowNumber - currentBatch.size());
+                allProcessedItems.addAll(batchResponse.getCreatedItems());
+                allProcessingErrors.addAll(batchResponse.getErrors());
+            }
+        }
+
+        if (totalRows == 0) {
+            throw new BadRequestException(localizedErrorService.getLocalizedMessage("no.valid.rows.found"));
+        }
+
+        // Log the Excel upload process completion
+        String organizationId = getOrganizationIdFromInventory(inventoryId, user);
+        globalAuditService.auditBusinessProcess(
+                organizationId,
+                "Excel Upload",
+                String.format("Excel upload completed: %d total rows, %d successful, %d failed",
+                        totalRows, allProcessedItems.size(), allProcessingErrors.size()),
+                "EXCEL_UPLOAD",
+                inventoryId,
+                user);
+
+        return ExcelUploadResponse.builder()
+                .totalRows(totalRows)
+                .successfulItems(allProcessedItems.size())
+                .failedItems(allProcessingErrors.size())
+                .createdItems(allProcessedItems)
+                .errors(allProcessingErrors)
+                .build();
+    }
+
+    /**
+     * BATCH TRANSACTION: Process a batch of items in a separate transaction
+     * Each batch succeeds or fails independently
+     */
+    @Transactional(rollbackFor = Exception.class)
+    private ExcelUploadResponse processBatch(List<CreateInventoryItemRequest> batch, String inventoryId, 
+                                           User user, int startRowNumber) {
+        List<InventoryItem> processedItems = new ArrayList<>();
+        List<String> processingErrors = new ArrayList<>();
+
+        for (int i = 0; i < batch.size(); i++) {
+            CreateInventoryItemRequest itemRequest = batch.get(i);
+            int currentRowNumber = startRowNumber + i;
+
+            try {
+                // Check for duplicates based on unique identifiers
+                Optional<InventoryItem> existingItem = findExistingItemByIdentifiers(itemRequest, inventoryId);
+
+                // Route to create or update based on existence
+                processInventoryItem(existingItem, itemRequest, user, currentRowNumber, processedItems, processingErrors);
+
+            } catch (Exception e) {
+                processingErrors.add(String.format("Row %d: %s", currentRowNumber, e.getMessage()));
+            }
+        }
+
+        return ExcelUploadResponse.builder()
+                .totalRows(batch.size())
+                .successfulItems(processedItems.size())
+                .failedItems(processingErrors.size())
+                .createdItems(processedItems)
+                .errors(processingErrors)
+                .build();
+    }
+
+    /**
+     * SINGLE ROW PARSING: Extract row parsing logic for streaming
+     */
+    private CreateInventoryItemRequest parseRowToRequest(String line, String inventoryId, int expectedColumns) {
+        try {
+            // Parse CSV line handling quotes and commas
+            String[] values = parseCsvLine(line);
+
+            // Normalize column count
+            if (values.length < expectedColumns) {
+                String[] paddedValues = new String[expectedColumns];
+                System.arraycopy(values, 0, paddedValues, 0, values.length);
+                for (int j = values.length; j < expectedColumns; j++) {
+                    paddedValues[j] = "";
+                }
+                values = paddedValues;
+            } else if (values.length > expectedColumns) {
+                String[] truncatedValues = new String[expectedColumns];
+                System.arraycopy(values, 0, truncatedValues, 0, expectedColumns);
+                values = truncatedValues;
+            }
+
+            // Convert to request object
+            return parseRow(values, inventoryId);
+            
+        } catch (Exception e) {
+            return null; // Invalid row
         }
     }
 
@@ -399,8 +512,9 @@ public class ExcelUploadService {
             Integer quantityChange = (newStock != null && originalStock != null) ? (newStock - originalStock) : 0;
 
             if (quantityChange != 0) {
+                String organizationId = getOrganizationIdFromInventory(updated.getInventoryId(), user);
                 globalAuditService.auditInventoryChange(
-                        user.getId(), // TODO: Replace with actual organizationId from inventory
+                        organizationId,
                         updated.getId(),
                         updated.getName(),
                         quantityChange > 0 ? "STOCK_IN" : "STOCK_OUT", // Determine movement type

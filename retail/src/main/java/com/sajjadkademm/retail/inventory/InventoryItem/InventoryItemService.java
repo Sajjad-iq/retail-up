@@ -11,6 +11,9 @@ import com.sajjadkademm.retail.inventory.InventoryItem.validator.ValidatedCreate
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
+import com.sajjadkademm.retail.inventory.InventoryItem.events.InventoryItemCreatedEvent;
+import com.sajjadkademm.retail.inventory.Inventory;
+import com.sajjadkademm.retail.inventory.InventoryService;
 import com.sajjadkademm.retail.audit.GlobalAuditService;
 import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.audit.enums.EntityType;
@@ -21,6 +24,7 @@ import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
 import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +48,20 @@ public class InventoryItemService {
     private final LocalizedErrorService localizedErrorService;
     private final InventoryItemValidationUtils validationUtils;
     private final UserValidator userValidator;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final InventoryService inventoryService;
+
+    /**
+     * Get organization ID from inventory item
+     */
+    private String getOrganizationId(InventoryItem item) {
+        try {
+            Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
+            return inventory.getOrganizationId();
+        } catch (Exception e) {
+            return item.getCreatedBy().getId(); // Fallback to user ID
+        }
+    }
 
     /**
      * Create a new inventory item
@@ -56,8 +74,8 @@ public class InventoryItemService {
         // Create and save the inventory item
         InventoryItem saved = createInventoryItemInternal(request, context.getUser());
 
-        // Record initial stock movement
-        recordInitialStockMovement(saved, context.getUser());
+        // Publish event for audit logging (decoupled from business transaction)
+        applicationEventPublisher.publishEvent(new InventoryItemCreatedEvent(this, saved, context.getUser()));
 
         return saved;
     }
@@ -104,8 +122,8 @@ public class InventoryItemService {
             // Create and save the inventory item
             InventoryItem saved = createInventoryItemInternal(request, user);
 
-            // Record initial stock movement
-            recordInitialStockMovement(saved, user);
+            // Publish event for audit logging (decoupled from business transaction)
+            applicationEventPublisher.publishEvent(new InventoryItemCreatedEvent(this, saved, user));
 
             return CreateInventoryItemResult.success(saved);
         } catch (Exception e) {
@@ -156,45 +174,6 @@ public class InventoryItemService {
         return inventoryItemRepository.save(item);
     }
 
-    /**
-     * GLOBAL AUDIT: Record initial stock movement for newly created item
-     * REPLACED: Complex inventory movement service with simple global audit
-     * 
-     * @param item The newly created inventory item
-     * @param user The user who created the item
-     */
-    private void recordInitialStockMovement(InventoryItem item, User user) {
-        Integer initialStock = item.getCurrentStock();
-
-        // AUDIT: Log item creation
-        globalAuditService.auditEntityChange(
-                user.getId(), // TODO: Replace with actual organizationId from item
-                EntityType.INVENTORY_ITEM,
-                item.getId(),
-                item.getName(),
-                AuditAction.CREATE,
-                "Inventory item created",
-                null, // No field name for creation
-                null, // No old value for creation
-                item.getName(), // New value is the item name
-                user);
-
-        // AUDIT: Log initial stock if positive
-        if (initialStock != null && initialStock > 0) {
-            globalAuditService.auditInventoryChange(
-                    user.getId(), // TODO: Replace with actual organizationId from item
-                    item.getId(),
-                    item.getName(),
-                    "STOCK_IN", // Movement type
-                    initialStock, // Quantity change
-                    0, // Stock before (new item starts at 0)
-                    initialStock, // Stock after
-                    "Initial stock on item creation",
-                    "CREATION", // Reference type
-                    item.getId(), // Reference ID
-                    user);
-        }
-    }
 
     /**
      * Update an existing inventory item
@@ -221,8 +200,9 @@ public class InventoryItemService {
         // REPLACED: Complex trackStockMovements with simple global audit
 
         // Log general item update
+        String organizationId = getOrganizationId(updated);
         globalAuditService.auditEntityChange(
-                updated.getCreatedBy().getId(), // TODO: Replace with actual organizationId
+                organizationId,
                 EntityType.INVENTORY_ITEM,
                 updated.getId(),
                 updated.getName(),
@@ -238,7 +218,7 @@ public class InventoryItemService {
         if (originalStock != null && newStock != null && !originalStock.equals(newStock)) {
             Integer quantityChange = newStock - originalStock;
             globalAuditService.auditInventoryChange(
-                    updated.getCreatedBy().getId(), // TODO: Replace with actual organizationId
+                    organizationId, // Already calculated above
                     updated.getId(),
                     updated.getName(),
                     quantityChange > 0 ? "STOCK_IN" : "STOCK_OUT",
@@ -300,8 +280,9 @@ public class InventoryItemService {
         validationUtils.checkUserAccessToInventoryItem(item);
 
         // GLOBAL AUDIT: Log item deletion before removing from database
+        String organizationId = getOrganizationId(item);
         globalAuditService.auditEntityChange(
-                item.getCreatedBy().getId(), // TODO: Replace with actual organizationId
+                organizationId,
                 EntityType.INVENTORY_ITEM,
                 item.getId(),
                 item.getName(),

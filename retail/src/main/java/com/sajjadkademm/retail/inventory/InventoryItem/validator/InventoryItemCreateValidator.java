@@ -82,14 +82,16 @@ public class InventoryItemCreateValidator {
     }
 
     /**
-     * Original validate method for backward compatibility (throws exceptions)
+     * Validate request and return context or throw exception
+     * Consolidates validation to use single approach
      */
     public ValidatedCreateInventoryItemContext validate(CreateInventoryItemRequest request) {
         ValidationResult result = validateAndCollectErrors(request);
 
         if (result.hasErrors()) {
-            // For backward compatibility, throw the first error
-            throw new BadRequestException(result.getErrors().get(0));
+            // Throw exception with all errors combined for better user experience
+            String combinedErrors = String.join("; ", result.getErrors());
+            throw new BadRequestException(combinedErrors);
         }
 
         return new ValidatedCreateInventoryItemContext(result.getInventory(), result.getUser());
