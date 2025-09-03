@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.inventory.events;
+package com.sajjadkademm.retail.application.events;
 
 import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
@@ -6,6 +6,7 @@ import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.inventory.events.InventoryItemCreatedEvent;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Handles audit logging for inventory item events.
- * Decoupled from business logic via Spring events.
+ * Application layer event handler for inventory item audit logging.
+ * Located in application layer because it orchestrates multiple services
+ * for cross-cutting concerns like auditing.
  */
 @Component
 @RequiredArgsConstructor

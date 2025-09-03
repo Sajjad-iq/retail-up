@@ -34,6 +34,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
+
 /**
  * Application service that handles CRUD operations for `InventoryItem` and
  * orchestrates related behaviors such as initial stock movements and stock
@@ -369,9 +371,9 @@ public class InventoryItemService {
         if (page < 0)
             page = 0;
         if (size <= 0)
-            size = 20;
-        if (size > 100)
-            size = 100; // Max page size limit
+            size = DEFAULT_PAGE_SIZE;
+        if (size > MAX_PAGE_SIZE)
+            size = MAX_PAGE_SIZE; // Max page size limit
         if (sortBy == null || sortBy.trim().isEmpty())
             sortBy = "createdAt";
         if (sortDirection == null || sortDirection.trim().isEmpty())

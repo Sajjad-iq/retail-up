@@ -27,7 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class InventoryService {
+public class InventoryService implements InventoryServiceInterface {
     private final InventoryRepository inventoryRepository;
     private final OrganizationService organizationService;
     private final OrganizationValidator organizationValidationUtils;
@@ -246,5 +246,25 @@ public class InventoryService {
      */
     public long getInventoryCountByOrganization(String organizationId) {
         return inventoryRepository.countByOrganizationId(organizationId);
+    }
+
+    /**
+     * Get all inventories for current authenticated user
+     */
+    @Override
+    public List<Inventory> getCurrentUserInventories() {
+        // Get current authenticated user
+        User currentUser = SecurityUtils.getCurrentUser();
+        
+        // Get user's organizations through organization service
+        // For now, get the user's primary organization - this could be enhanced
+        // to support multiple organizations per user if needed
+        try {
+            // Find inventories where the organization was created by current user
+            return inventoryRepository.findByOrganizationCreatedByUserId(currentUser.getId());
+        } catch (Exception e) {
+            // Fallback to empty list if there are issues
+            return List.of();
+        }
     }
 }

@@ -10,9 +10,9 @@ import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
-import com.sajjadkademm.retail.application.services.inventory.InventoryService;
+import com.sajjadkademm.retail.domain.inventory.services.InventoryDomainService;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
-import com.sajjadkademm.retail.application.services.organizations.OrganizationService;
+import com.sajjadkademm.retail.domain.organization.services.OrganizationDomainService;
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.domain.organization.validation.OrganizationValidator;
 import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
@@ -32,8 +32,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InventoryItemValidationUtils {
 
-    private final InventoryService inventoryService;
-    private final OrganizationService organizationService;
+    private final InventoryDomainService inventoryDomainService;
+    private final OrganizationDomainService organizationDomainService;
     private final InventoryItemRepository inventoryItemRepository;
     private final LocalizedErrorService localizedErrorService;
     private final OrganizationValidator organizationValidationUtils;
@@ -81,7 +81,7 @@ public class InventoryItemValidationUtils {
      */
     public Inventory validateAndResolveInventory(String inventoryId, List<String> errors) {
         try {
-            Inventory inventory = inventoryService.getInventoryById(inventoryId);
+            Inventory inventory = inventoryDomainService.getInventoryById(inventoryId);
             if (inventory == null) {
                 errors.add(
                         localizedErrorService.getLocalizedMessage(InventoryErrorCode.INVENTORY_NOT_FOUND.getMessage()));
@@ -136,7 +136,7 @@ public class InventoryItemValidationUtils {
     public void validateOrganization(Inventory inventory, List<String> errors) {
         if (inventory != null) {
             try {
-                Organization organization = organizationService.getOrganizationById(inventory.getOrganizationId());
+                Organization organization = organizationDomainService.getOrganizationById(inventory.getOrganizationId());
                 if (organization == null) {
                     errors.add(localizedErrorService
                             .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage()));
@@ -357,7 +357,7 @@ public class InventoryItemValidationUtils {
             User currentUser = userValidator.validateUserActive(userId);
 
             // Get inventory and check if user has access to it
-            Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
+            Inventory inventory = inventoryDomainService.getInventoryById(item.getInventoryId());
             if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
                 throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
                         UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));
@@ -382,7 +382,7 @@ public class InventoryItemValidationUtils {
             User currentUser = userValidator.validateUserActive(userId);
 
             // Get inventory and check access
-            Inventory inventory = inventoryService.getInventoryById(inventoryId);
+            Inventory inventory = inventoryDomainService.getInventoryById(inventoryId);
             if (!currentUser.getId().equals(inventory.getOrganization().getCreatedBy().getId())) {
                 throw new UnauthorizedException(localizedErrorService.getLocalizedMessage(
                         UserErrorCode.USER_NOT_ORGANIZATION_CREATOR.getMessage()));

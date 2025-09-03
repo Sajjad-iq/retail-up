@@ -29,4 +29,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, String> {
 
     // Count inventories by organization ID
     long countByOrganizationId(String organizationId);
+
+    // Find inventories where the organization was created by a specific user
+    @Query("SELECT i FROM Inventory i WHERE i.organization.createdBy.id = :userId")
+    List<Inventory> findByOrganizationCreatedByUserId(@Param("userId") String userId);
 }

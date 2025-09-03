@@ -8,20 +8,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateOrganizationRequest {
 
     @NotBlank(message = "{organization.name.empty}")
-    @Size(min = 2, max = 100, message = "{organization.name.invalid}")
+    @Size(min = MIN_ORGANIZATION_NAME_LENGTH, max = MAX_ORGANIZATION_NAME_LENGTH, message = "{organization.name.invalid}")
     private String name;
 
     @NotBlank(message = "{invalid.domain.format}")
     @Size(min = 3, max = 255, message = "{invalid.domain.format}")
     private String domain;
 
-    @Size(max = 500, message = "{organization.description.invalid}")
+    @Size(max = MAX_DESCRIPTION_LENGTH, message = "{organization.description.invalid}")
     private String description;
 
     @Size(max = 255, message = "{organization.address.invalid}")

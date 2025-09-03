@@ -22,6 +22,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
+
 /**
  * Inventory item management controller providing CRUD operations for
  * inventory items within inventories. All operations are scoped to the current
@@ -118,7 +120,7 @@ public class InventoryItemController {
 
                         // Pagination parameters
                         @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
-                        @Parameter(description = "Page size (max 100)", example = "20") @RequestParam(defaultValue = "20") int size,
+                        @Parameter(description = "Page size (max " + MAX_PAGE_SIZE + ")", example = "" + DEFAULT_PAGE_SIZE) @RequestParam(defaultValue = "" + DEFAULT_PAGE_SIZE) int size,
                         @Parameter(description = "Sort field", example = "createdAt") @RequestParam(defaultValue = "createdAt") String sortBy,
                         @Parameter(description = "Sort direction (asc/desc)", example = "desc") @RequestParam(defaultValue = "desc") String sortDirection,
 
