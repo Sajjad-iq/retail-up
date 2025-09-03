@@ -38,6 +38,11 @@ public final class ValidationConstants {
     public static final int MAX_ORGANIZATION_NAME_LENGTH = 100;
     public static final int MAX_FILE_UPLOAD_SIZE_MB = 10;
     
+    // Excel Upload Constants
+    public static final int EXCEL_BATCH_SIZE = 50;
+    public static final int EXCEL_EXPECTED_COLUMNS = 25;
+    public static final int AUDIT_SIGNIFICANT_CHANGE_THRESHOLD = 100;
+    
     // Domain Constraints
     public static final int MIN_DOMAIN_LENGTH = 3;
     public static final int MAX_DOMAIN_LENGTH = 255;

@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.config.web;
 
+import com.sajjadkademm.retail.shared.constants.SecurityConstants;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -77,7 +78,7 @@ public class OpenApiConfig {
                                                                                 .scheme("bearer")
                                                                                 .bearerFormat("JWT")
                                                                                 .in(SecurityScheme.In.HEADER)
-                                                                                .name("Authorization")
+                                                                                .name(SecurityConstants.JWT_HEADER)
                                                                                 .description("JWT token for authentication")));
         }
 }

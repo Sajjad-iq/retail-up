@@ -1,6 +1,7 @@
 package com.sajjadkademm.retail.application.services.inventory;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
@@ -97,8 +98,8 @@ public class ExcelUploadService {
      * Fixes memory issues and transaction boundary problems
      */
     private ExcelUploadResponse processExcelFileInBatches(MultipartFile file, String inventoryId, User user) throws IOException {
-        final int BATCH_SIZE = 50; // Process 50 rows at a time
-        final int EXPECTED_COLUMNS = 25;
+        final int BATCH_SIZE = ValidationConstants.EXCEL_BATCH_SIZE; // Process rows in batches
+        final int EXPECTED_COLUMNS = ValidationConstants.EXCEL_EXPECTED_COLUMNS;
         
         List<InventoryItem> allProcessedItems = new ArrayList<>();
         List<String> allProcessingErrors = new ArrayList<>();
@@ -245,13 +246,13 @@ public class ExcelUploadService {
      * 
      * PARSING STRATEGY:
      * - Skip header row and empty lines
-     * - Handle variable column counts (pad/truncate to expected 25 columns)
+     * - Handle variable column counts (pad/truncate to expected columns)
      * - Parse each row individually, skip invalid rows without failing entire file
      * - Use fault-tolerant approach: malformed rows return null and are ignored
      */
     private List<CreateInventoryItemRequest> parseExcelFile(MultipartFile file, String inventoryId) throws IOException {
         List<CreateInventoryItemRequest> items = new ArrayList<>();
-        final int EXPECTED_COLUMNS = 25; // Based on the CSV template structure
+        final int EXPECTED_COLUMNS = ValidationConstants.EXCEL_EXPECTED_COLUMNS; // Based on the CSV template structure
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;

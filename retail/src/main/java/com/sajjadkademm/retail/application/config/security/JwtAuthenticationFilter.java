@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.config.security;
 
+import com.sajjadkademm.retail.shared.constants.SecurityConstants;
 import com.sajjadkademm.retail.application.config.security.JwtUtil;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import jakarta.servlet.FilterChain;
@@ -29,14 +30,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            final String authHeader = request.getHeader("Authorization");
+            final String authHeader = request.getHeader(SecurityConstants.JWT_HEADER);
 
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (authHeader == null || !authHeader.startsWith(SecurityConstants.JWT_PREFIX)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            final String jwt = authHeader.substring(7);
+            final String jwt = authHeader.substring(SecurityConstants.JWT_PREFIX_LENGTH);
 
             // ✅ Extract all user data from JWT claims (no DB call)
             final String userId = jwtUtil.extractUserId(jwt);

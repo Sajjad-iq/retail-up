@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.config.web;
 
+import com.sajjadkademm.retail.shared.constants.SecurityConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -47,7 +48,7 @@ public class CorsConfig {
 
         // Expose necessary headers to client
         configuration.setExposedHeaders(Arrays.asList(
-                "Authorization",
+                SecurityConstants.JWT_HEADER,
                 "Content-Type", 
                 "X-Requested-With", 
                 "Access-Control-Allow-Origin", 

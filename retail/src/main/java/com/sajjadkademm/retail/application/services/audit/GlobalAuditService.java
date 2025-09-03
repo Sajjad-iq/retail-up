@@ -1,4 +1,5 @@
 package com.sajjadkademm.retail.application.services.audit;
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 
 import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
@@ -285,7 +286,7 @@ public class GlobalAuditService {
     }
 
     private boolean isLargeInventoryChange(Integer quantityChange) {
-        return quantityChange != null && Math.abs(quantityChange) > 100;
+        return quantityChange != null && Math.abs(quantityChange) > ValidationConstants.AUDIT_SIGNIFICANT_CHANGE_THRESHOLD;
     }
 
     private String getClientIp() {

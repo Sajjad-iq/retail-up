@@ -12,9 +12,10 @@ public final class SecurityConstants {
     
     // JWT Constants
     public static final long JWT_EXPIRATION = 86400000L; // 24 hours in milliseconds
-    public static final String JWT_SECRET_DEFAULT = "retail-app-jwt-secret-key-2024";
+    public static final String JWT_SECRET_DEFAULT = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
     public static final String JWT_HEADER = "Authorization";
     public static final String JWT_PREFIX = "Bearer ";
+    public static final int JWT_PREFIX_LENGTH = 7; // "Bearer ".length()
     
     // Security Headers
     public static final String USER_ID_HEADER = "X-User-ID";

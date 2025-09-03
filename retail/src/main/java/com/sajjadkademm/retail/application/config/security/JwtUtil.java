@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.config.security;
 
+import com.sajjadkademm.retail.shared.constants.SecurityConstants;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,10 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
+    @Value("${jwt.secret:" + SecurityConstants.JWT_SECRET_DEFAULT + "}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}")
+    @Value("${jwt.expiration:" + SecurityConstants.JWT_EXPIRATION + "}")
     private long expiration;
 
     private SecretKey getSigningKey() {
