@@ -7,23 +7,21 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import com.sajjadkademm.retail.application.config.security.JwtAuthenticationFilter;
 
-import java.util.Arrays;
-
 /**
  * Security configuration for the retail application.
- * Configures CORS, CSRF, security policies, and locale interceptors.
+ * Handles security filter chain, authentication, and authorization.
+ * 
+ * Separation of Concerns:
+ * - Only handles core security configurations
+ * - CORS configuration separated to CorsConfig
+ * - Password encoding separated to PasswordConfig
+ * - Locale interceptors handled by WebMvcConfig
  * 
  * @author Sajjad Kadem
  * @version 1.0
@@ -31,15 +29,15 @@ import java.util.Arrays;
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig implements WebMvcConfigurer {
+public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final LocaleChangeInterceptor localeChangeInterceptor;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, LocaleChangeInterceptor localeChangeInterceptor) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CorsConfigurationSource corsConfigurationSource) {
         this.jwtAuthFilter = jwtAuthFilter;
-        this.localeChangeInterceptor = localeChangeInterceptor;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     /**
@@ -51,8 +49,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                 // Disable CSRF for API usage
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Configure CORS
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Configure CORS using injected configuration source
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
 
                 // Configure session management
                 .sessionManagement(session -> session
@@ -75,51 +73,4 @@ public class SecurityConfig implements WebMvcConfigurer {
         return http.build();
     }
 
-    /**
-     * Configure CORS to allow all origins
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        // Allow all origins
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-
-        // Allow all methods
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-
-        // Allow all headers
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // Allow credentials
-        configuration.setAllowCredentials(true);
-
-        // Expose headers
-        configuration.setExposedHeaders(Arrays.asList("Authorization",
-                "Content-Type", "X-Requested-With", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials",
-                "Allowed-Origins"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    /**
-     * Provide BCryptPasswordEncoder bean for password encoding
-     */
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * Register locale change interceptor for dynamic locale switching
-     */
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        // Add locale change interceptor
-        registry.addInterceptor(localeChangeInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/api-docs/**", "/swagger-ui/**", "/actuator/**");
-    }
 }
