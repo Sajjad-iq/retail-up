@@ -4,7 +4,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(./gradlew:*)",
       "Bash(./mvnw:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Read(c:\\Users\\sajja\\Documents\\retail-up/**)"
     ],
     "deny": [],
     "ask": []
