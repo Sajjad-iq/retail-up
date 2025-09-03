@@ -6,8 +6,8 @@ import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
-import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.users.UserRepository;
+import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.auth.repositories.UserRepository;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
 
 import org.springframework.beans.factory.annotation.Autowired;

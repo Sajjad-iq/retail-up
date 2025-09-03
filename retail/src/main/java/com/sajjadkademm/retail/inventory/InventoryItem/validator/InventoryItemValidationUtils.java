@@ -1,22 +1,22 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.validator;
 
-import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryErrorCode;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryItemErrorCode;
 import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
-import com.sajjadkademm.retail.inventory.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.inventory.model.Inventory;
+import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryService;
-import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
 import com.sajjadkademm.retail.shared.common.validators.UserValidator;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.auth.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

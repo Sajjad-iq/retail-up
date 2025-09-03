@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.audit.enums.EntityType;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.auth.model.User;
 
 import java.time.LocalDateTime;
 

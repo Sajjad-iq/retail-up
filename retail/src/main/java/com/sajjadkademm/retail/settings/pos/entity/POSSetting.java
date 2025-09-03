@@ -13,7 +13,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
 import java.time.LocalDateTime;
 
-import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.domain.organization.model.Organization;
 
 import jakarta.validation.constraints.NotNull;
 

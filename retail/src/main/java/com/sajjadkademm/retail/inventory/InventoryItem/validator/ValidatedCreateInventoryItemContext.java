@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.validator;
 
-import com.sajjadkademm.retail.inventory.Inventory;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.inventory.model.Inventory;
+import com.sajjadkademm.retail.domain.auth.model.User;
 
 /**
  * Holder for validated dependencies needed to create an InventoryItem

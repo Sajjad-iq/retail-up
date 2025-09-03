@@ -1,16 +1,18 @@
 package com.sajjadkademm.retail.organizations;
 
+import com.sajjadkademm.retail.domain.organization.model.Organization;
+import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
 import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
-import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
-import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
+import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
+import com.sajjadkademm.retail.application.dto.organizations.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
-import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.shared.common.validators.UserValidator;
 import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
 import com.sajjadkademm.retail.shared.enums.AccountType;

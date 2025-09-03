@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.events;
 
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.auth.model.User;
 import org.springframework.context.ApplicationEvent;
 
 /**

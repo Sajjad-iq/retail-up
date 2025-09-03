@@ -7,7 +7,13 @@
       "Bash(powershell:*)",
       "Read(c:\\Users\\sajja\\Documents\\retail-up/**)",
       "Bash(sed:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(for:*)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then echo \"Processing $file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

@@ -16,7 +16,7 @@ import jakarta.persistence.EnumType;
 
 import java.time.LocalDateTime;
 
-import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.shared.enums.Currency;
 
 import jakarta.validation.constraints.Max;

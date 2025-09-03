@@ -1,21 +1,23 @@
 package com.sajjadkademm.retail.inventory;
 
+import com.sajjadkademm.retail.domain.inventory.model.Inventory;
+import com.sajjadkademm.retail.domain.inventory.repositories.InventoryRepository;
 import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
-import com.sajjadkademm.retail.inventory.dto.CreateInventoryRequest;
-import com.sajjadkademm.retail.inventory.dto.UpdateInventoryRequest;
-import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
+import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryRequest;
+import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationService;
 import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
 import com.sajjadkademm.retail.shared.common.validators.UserValidator;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryErrorCode;
-import com.sajjadkademm.retail.config.SecurityUtils;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

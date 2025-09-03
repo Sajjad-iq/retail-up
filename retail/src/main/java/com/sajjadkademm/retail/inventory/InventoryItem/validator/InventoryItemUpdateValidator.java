@@ -4,12 +4,12 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
+import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.shared.enums.Money;
-import com.sajjadkademm.retail.inventory.InventoryItem.dto.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
 // REMOVED: Old InventoryMovement imports - now using GlobalAuditService
-import com.sajjadkademm.retail.inventory.Inventory;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.inventory.model.Inventory;
+import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
 
 import java.time.LocalDate;

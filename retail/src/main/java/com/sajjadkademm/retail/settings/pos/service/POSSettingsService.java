@@ -3,8 +3,8 @@ package com.sajjadkademm.retail.settings.pos.service;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
-import com.sajjadkademm.retail.settings.pos.repository.POSSettingRepository;
-import com.sajjadkademm.retail.settings.pos.dto.POSSettingsRequest;
+import com.sajjadkademm.retail.domain.settings.repositories.POSSettingRepository;
+import com.sajjadkademm.retail.application.dto.settings.POSSettingsRequest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

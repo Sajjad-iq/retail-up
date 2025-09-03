@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.shared.common.validators;
 
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
-import com.sajjadkademm.retail.organizations.Organization;
+import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;

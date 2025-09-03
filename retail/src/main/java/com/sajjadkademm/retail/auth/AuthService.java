@@ -1,16 +1,16 @@
 package com.sajjadkademm.retail.auth;
 
-import com.sajjadkademm.retail.auth.dto.LoginRequest;
-import com.sajjadkademm.retail.auth.dto.LoginResponse;
-import com.sajjadkademm.retail.auth.dto.RegisterRequest;
+import com.sajjadkademm.retail.application.dto.auth.LoginRequest;
+import com.sajjadkademm.retail.application.dto.auth.LoginResponse;
+import com.sajjadkademm.retail.application.dto.auth.RegisterRequest;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
-import com.sajjadkademm.retail.config.utils.JwtUtil;
+import com.sajjadkademm.retail.application.config.security.JwtUtil;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
-import com.sajjadkademm.retail.users.User;
+import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.users.UserService;
-import com.sajjadkademm.retail.config.SecurityUtils;
-import com.sajjadkademm.retail.auth.dto.AuthResponse;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
+import com.sajjadkademm.retail.application.dto.auth.AuthResponse;
 import com.sajjadkademm.retail.shared.common.validators.UserValidator;
 import com.sajjadkademm.retail.auth.validator.AuthValidator;
 import lombok.RequiredArgsConstructor;
