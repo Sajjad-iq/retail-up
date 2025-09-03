@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.settings.system.service;
 
-import com.sajjadkademm.retail.exceptions.NotFoundException;
-import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
 import com.sajjadkademm.retail.settings.system.repository.SystemSettingRepository;
 import com.sajjadkademm.retail.shared.enums.Currency;
@@ -9,7 +9,7 @@ import com.sajjadkademm.retail.settings.system.dto.SystemSettingsRequest;
 import com.sajjadkademm.retail.organizations.Organization;
 import com.sajjadkademm.retail.organizations.OrganizationRepository;
 
-import com.sajjadkademm.retail.shared.validators.OrganizationValidator;
+import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;

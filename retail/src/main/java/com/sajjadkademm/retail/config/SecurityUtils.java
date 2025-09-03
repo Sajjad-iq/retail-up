@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.config;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.UnauthorizedException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.users.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.exceptions;
+package com.sajjadkademm.retail.shared.common.exceptions;
 
 /**
  * Exception thrown when a permission is not found.

@@ -1,9 +1,9 @@
 package com.sajjadkademm.retail.organizations.validator;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.ConflictException;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

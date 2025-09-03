@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryMovement;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 
 import com.sajjadkademm.retail.inventory.InventoryMovement.dto.CreateMovementRequest;

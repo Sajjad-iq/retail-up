@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.exceptions;
+package com.sajjadkademm.retail.shared.common.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

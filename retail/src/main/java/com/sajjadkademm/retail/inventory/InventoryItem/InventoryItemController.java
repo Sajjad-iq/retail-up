@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.*;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 
 import com.sajjadkademm.retail.shared.enums.Unit;
 import lombok.RequiredArgsConstructor;

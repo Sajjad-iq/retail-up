@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.config.locales;
+package com.sajjadkademm.retail.shared.localization;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

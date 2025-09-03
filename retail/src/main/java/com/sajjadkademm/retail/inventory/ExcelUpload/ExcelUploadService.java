@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.inventory.ExcelUpload;
 
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItem;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemRepository;
 import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;

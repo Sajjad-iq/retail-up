@@ -6,7 +6,7 @@ class HttpService {
 
     private constructor() {
         this.axiosInstance = axios.create({
-            baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082/api',
+            baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8083/api',
             timeout: 10000,
             headers: {
                 'Content-Type': 'application/json',

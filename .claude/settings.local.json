@@ -5,7 +5,9 @@
       "Bash(./gradlew:*)",
       "Bash(./mvnw:*)",
       "Bash(powershell:*)",
-      "Read(c:\\Users\\sajja\\Documents\\retail-up/**)"
+      "Read(c:\\Users\\sajja\\Documents\\retail-up/**)",
+      "Bash(sed:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

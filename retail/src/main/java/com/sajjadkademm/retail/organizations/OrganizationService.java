@@ -1,18 +1,18 @@
 package com.sajjadkademm.retail.organizations;
 
-import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
-import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
-import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.ConflictException;
-import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
+import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
 import com.sajjadkademm.retail.users.User;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.config.SecurityUtils;
-import com.sajjadkademm.retail.shared.validators.UserValidator;
-import com.sajjadkademm.retail.shared.validators.OrganizationValidator;
+import com.sajjadkademm.retail.shared.common.validators.UserValidator;
+import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
 import com.sajjadkademm.retail.shared.enums.AccountType;
 import com.sajjadkademm.retail.organizations.validator.internalValidator;
 import com.sajjadkademm.retail.users.UserService;

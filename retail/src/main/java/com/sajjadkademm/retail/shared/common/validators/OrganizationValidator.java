@@ -1,10 +1,10 @@
-package com.sajjadkademm.retail.shared.validators;
+package com.sajjadkademm.retail.shared.common.validators;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.organizations.Organization;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

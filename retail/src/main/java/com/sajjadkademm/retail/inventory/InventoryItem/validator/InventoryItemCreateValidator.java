@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.inventory.InventoryItem.validator;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.Inventory;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.shared.enums.Money;

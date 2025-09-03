@@ -1,8 +1,8 @@
 package com.sajjadkademm.retail.organizations;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.ConflictException;
-import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.settings.system.entity.SystemSetting;

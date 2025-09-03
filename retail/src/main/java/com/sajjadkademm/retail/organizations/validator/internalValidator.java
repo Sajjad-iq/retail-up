@@ -1,14 +1,14 @@
 package com.sajjadkademm.retail.organizations.validator;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.organizations.dto.CreateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.dto.UpdateOrganizationRequest;
 import com.sajjadkademm.retail.organizations.Organization;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
-import com.sajjadkademm.retail.shared.validators.PhoneValidator;
+import com.sajjadkademm.retail.shared.common.validators.PhoneValidator;
 import com.sajjadkademm.retail.organizations.OrganizationRepository;
-import com.sajjadkademm.retail.config.locales.errorCode.OrganizationErrorCode;
+import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

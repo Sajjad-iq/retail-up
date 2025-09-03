@@ -1,11 +1,11 @@
 package com.sajjadkademm.retail.auth.validator;
 
-import com.sajjadkademm.retail.exceptions.ConflictException;
-import com.sajjadkademm.retail.exceptions.NotFoundException;
-import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.UnauthorizedException;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.config.locales.errorCode.AuthErrorCode;
+import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.users.UserRepository;
 import com.sajjadkademm.retail.shared.enums.UserStatus;

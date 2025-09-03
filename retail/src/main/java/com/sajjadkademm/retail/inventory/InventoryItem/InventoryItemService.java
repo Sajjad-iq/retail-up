@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.inventory.InventoryItem;
 
-import com.sajjadkademm.retail.exceptions.NotFoundException;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.CreateInventoryItemResult;
 import com.sajjadkademm.retail.inventory.InventoryItem.dto.FilterRequest;
@@ -19,9 +19,9 @@ import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.audit.enums.EntityType;
 import com.sajjadkademm.retail.users.User;
 import com.sajjadkademm.retail.config.SecurityUtils;
-import com.sajjadkademm.retail.shared.validators.UserValidator;
-import com.sajjadkademm.retail.config.locales.errorCode.InventoryItemErrorCode;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.common.validators.UserValidator;
+import com.sajjadkademm.retail.shared.localization.errorCode.InventoryItemErrorCode;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;

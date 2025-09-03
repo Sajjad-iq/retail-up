@@ -1,15 +1,15 @@
 package com.sajjadkademm.retail.users;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
-import com.sajjadkademm.retail.exceptions.NotFoundException;
-import com.sajjadkademm.retail.config.locales.LocalizedErrorService;
-import com.sajjadkademm.retail.config.locales.errorCode.UserErrorCode;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.config.SecurityUtils;
 import com.sajjadkademm.retail.shared.enums.AccountType;
-import com.sajjadkademm.retail.shared.validators.UserValidator;
-import com.sajjadkademm.retail.shared.validators.PhoneValidator;
+import com.sajjadkademm.retail.shared.common.validators.UserValidator;
+import com.sajjadkademm.retail.shared.common.validators.PhoneValidator;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
-import com.sajjadkademm.retail.shared.validators.EmailValidator;
+import com.sajjadkademm.retail.shared.common.validators.EmailValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

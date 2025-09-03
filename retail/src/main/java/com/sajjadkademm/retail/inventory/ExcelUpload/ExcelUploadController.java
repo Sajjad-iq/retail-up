@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.inventory.ExcelUpload;
 
-import com.sajjadkademm.retail.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.inventory.ExcelUpload.dto.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.ExcelUpload.utils.ExcelUploadUtils;
 import com.sajjadkademm.retail.users.User;
