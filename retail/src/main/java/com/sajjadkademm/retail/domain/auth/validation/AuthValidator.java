@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.auth.validator;
+package com.sajjadkademm.retail.domain.auth.validation;
 
 import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;

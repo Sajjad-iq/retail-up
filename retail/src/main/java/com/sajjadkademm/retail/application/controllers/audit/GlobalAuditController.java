@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.application.controllers.audit;
 
-import com.sajjadkademm.retail.audit.GlobalAuditService;
+import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.audit.GlobalAuditLog;
 import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.audit.enums.EntityType;

@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryItem;
+package com.sajjadkademm.retail.application.services.inventory;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
 
@@ -8,20 +8,20 @@ import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemResu
 import com.sajjadkademm.retail.application.dto.inventory.FilterRequest;
 import com.sajjadkademm.retail.application.dto.inventory.PagedResponse;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemCreateValidator;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.ValidatedCreateInventoryItemContext;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemCreateValidator;
+import com.sajjadkademm.retail.domain.inventory.validation.ValidatedCreateInventoryItemContext;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemUpdateValidator;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
 import com.sajjadkademm.retail.inventory.InventoryItem.events.InventoryItemCreatedEvent;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryService;
-import com.sajjadkademm.retail.audit.GlobalAuditService;
+import com.sajjadkademm.retail.application.services.inventory.InventoryService;
+import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.shared.common.validators.UserValidator;
+import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryItemErrorCode;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 

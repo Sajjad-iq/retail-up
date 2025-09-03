@@ -1,13 +1,13 @@
 package com.sajjadkademm.retail.application.controllers.auth;
 
-import com.sajjadkademm.retail.auth.AuthService;
+import com.sajjadkademm.retail.application.services.auth.AuthService;
 import com.sajjadkademm.retail.application.dto.auth.AuthResponse;
 import com.sajjadkademm.retail.application.dto.auth.ChangePasswordRequest;
 import com.sajjadkademm.retail.application.dto.auth.LoginRequest;
 import com.sajjadkademm.retail.application.dto.auth.LoginResponse;
 import com.sajjadkademm.retail.application.dto.auth.RegisterRequest;
 import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.application.services.users.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.application.controllers.inventory;
 
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryService;
+import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryRequest;
 

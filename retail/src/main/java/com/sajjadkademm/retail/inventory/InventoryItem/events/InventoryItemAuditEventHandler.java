@@ -1,10 +1,10 @@
 package com.sajjadkademm.retail.inventory.InventoryItem.events;
 
-import com.sajjadkademm.retail.audit.GlobalAuditService;
+import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryService;
+import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import lombok.RequiredArgsConstructor;

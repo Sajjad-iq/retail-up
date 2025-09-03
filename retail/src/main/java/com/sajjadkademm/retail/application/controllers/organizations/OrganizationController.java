@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.application.controllers.organizations;
 
 import com.sajjadkademm.retail.domain.organization.model.Organization;
-import com.sajjadkademm.retail.organizations.OrganizationService;
+import com.sajjadkademm.retail.application.services.organizations.OrganizationService;
 import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
 import com.sajjadkademm.retail.application.dto.organizations.UpdateOrganizationRequest;
 

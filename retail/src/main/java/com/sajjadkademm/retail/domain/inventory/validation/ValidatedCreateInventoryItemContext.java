@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryItem.validator;
+package com.sajjadkademm.retail.domain.inventory.validation;
 
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.domain.auth.model.User;

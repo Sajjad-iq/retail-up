@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.organizations.validator;
+package com.sajjadkademm.retail.domain.organization.validation;
 
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
@@ -6,7 +6,7 @@ import com.sajjadkademm.retail.application.dto.organizations.UpdateOrganizationR
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
-import com.sajjadkademm.retail.shared.common.validators.PhoneValidator;
+import com.sajjadkademm.retail.domain.shared.validation.PhoneValidator;
 import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
 import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import lombok.RequiredArgsConstructor;

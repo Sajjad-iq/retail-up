@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.settings.system.service;
+package com.sajjadkademm.retail.application.services.settings;
 
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
@@ -9,7 +9,7 @@ import com.sajjadkademm.retail.application.dto.settings.SystemSettingsRequest;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
 
-import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
+import com.sajjadkademm.retail.domain.organization.validation.OrganizationValidator;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;

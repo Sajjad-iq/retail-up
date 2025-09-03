@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryItem.validator;
+package com.sajjadkademm.retail.domain.inventory.validation;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

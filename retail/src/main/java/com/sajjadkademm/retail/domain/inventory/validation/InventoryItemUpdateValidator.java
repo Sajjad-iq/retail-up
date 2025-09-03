@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.InventoryItem.validator;
+package com.sajjadkademm.retail.domain.inventory.validation;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,7 @@ import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequ
 // REMOVED: Old InventoryMovement imports - now using GlobalAuditService
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.shared.common.validators;
+package com.sajjadkademm.retail.domain.auth.validation;
 
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;

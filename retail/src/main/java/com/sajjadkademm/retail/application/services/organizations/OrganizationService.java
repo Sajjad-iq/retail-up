@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.organizations;
+package com.sajjadkademm.retail.application.services.organizations;
 
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
@@ -9,15 +9,15 @@ import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
 import com.sajjadkademm.retail.application.dto.organizations.UpdateOrganizationRequest;
-import com.sajjadkademm.retail.settings.system.service.SystemSettingsService;
+import com.sajjadkademm.retail.application.services.settings.SystemSettingsService;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.shared.common.validators.UserValidator;
-import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
+import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
+import com.sajjadkademm.retail.domain.organization.validation.OrganizationValidator;
 import com.sajjadkademm.retail.shared.enums.AccountType;
-import com.sajjadkademm.retail.organizations.validator.internalValidator;
-import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.domain.organization.validation.internalValidator;
+import com.sajjadkademm.retail.application.services.users.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;

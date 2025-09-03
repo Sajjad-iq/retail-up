@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.users;
+package com.sajjadkademm.retail.application.services.users;
 
 import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.domain.auth.repositories.UserRepository;
@@ -8,10 +8,10 @@ import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.shared.enums.AccountType;
-import com.sajjadkademm.retail.shared.common.validators.UserValidator;
-import com.sajjadkademm.retail.shared.common.validators.PhoneValidator;
+import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
+import com.sajjadkademm.retail.domain.shared.validation.PhoneValidator;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
-import com.sajjadkademm.retail.shared.common.validators.EmailValidator;
+import com.sajjadkademm.retail.domain.shared.validation.EmailValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

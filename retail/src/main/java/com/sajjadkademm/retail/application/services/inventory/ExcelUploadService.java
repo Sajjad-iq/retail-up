@@ -1,23 +1,23 @@
-package com.sajjadkademm.retail.inventory.ExcelUpload;
+package com.sajjadkademm.retail.application.services.inventory;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;
+import com.sajjadkademm.retail.application.services.inventory.InventoryItemService;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemUpdateValidator;
-import com.sajjadkademm.retail.inventory.InventoryItem.validator.InventoryItemValidationUtils.ValidationResult;
-import com.sajjadkademm.retail.audit.GlobalAuditService;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemUpdateValidator;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
+import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.audit.enums.AuditAction;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemResult;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.inventory.InventoryService;
+import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.shared.enums.Currency;
 

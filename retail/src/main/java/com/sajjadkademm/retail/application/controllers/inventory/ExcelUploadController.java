@@ -1,11 +1,11 @@
 package com.sajjadkademm.retail.application.controllers.inventory;
 
-import com.sajjadkademm.retail.inventory.ExcelUpload.ExcelUploadService;
+import com.sajjadkademm.retail.application.services.inventory.ExcelUploadService;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.inventory.ExcelUpload.utils.ExcelUploadUtils;
 import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.users.UserService;
+import com.sajjadkademm.retail.application.services.users.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

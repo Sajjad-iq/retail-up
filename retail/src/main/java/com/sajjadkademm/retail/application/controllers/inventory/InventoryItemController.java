@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.application.controllers.inventory;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
-import com.sajjadkademm.retail.inventory.InventoryItem.InventoryItemService;
+import com.sajjadkademm.retail.application.services.inventory.InventoryItemService;
 
 import com.sajjadkademm.retail.application.dto.inventory.*;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;

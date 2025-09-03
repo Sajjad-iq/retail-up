@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory;
+package com.sajjadkademm.retail.application.services.inventory;
 
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryRepository;
@@ -10,9 +10,9 @@ import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryRequest;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
-import com.sajjadkademm.retail.organizations.OrganizationService;
-import com.sajjadkademm.retail.shared.common.validators.OrganizationValidator;
-import com.sajjadkademm.retail.shared.common.validators.UserValidator;
+import com.sajjadkademm.retail.application.services.organizations.OrganizationService;
+import com.sajjadkademm.retail.domain.organization.validation.OrganizationValidator;
+import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;

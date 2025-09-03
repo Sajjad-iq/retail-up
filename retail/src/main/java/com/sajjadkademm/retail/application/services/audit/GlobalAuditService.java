@@ -1,4 +1,5 @@
-package com.sajjadkademm.retail.audit;
+package com.sajjadkademm.retail.application.services.audit;
+import com.sajjadkademm.retail.audit.GlobalAuditLog;
 
 import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 import com.sajjadkademm.retail.audit.enums.AuditAction;

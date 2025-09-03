@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.shared.common.validators;
+package com.sajjadkademm.retail.domain.organization.validation;
 
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
