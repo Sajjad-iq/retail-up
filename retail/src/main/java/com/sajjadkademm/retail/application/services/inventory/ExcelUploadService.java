@@ -13,7 +13,7 @@ import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequ
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
 import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
-import com.sajjadkademm.retail.audit.enums.AuditAction;
+import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemResult;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;

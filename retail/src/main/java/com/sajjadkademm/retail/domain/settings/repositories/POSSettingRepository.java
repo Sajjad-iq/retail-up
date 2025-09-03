@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.domain.settings.repositories;
 
-import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
+import com.sajjadkademm.retail.domain.settings.model.POSSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

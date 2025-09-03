@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.application.services.settings;
 
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
-import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
+import com.sajjadkademm.retail.domain.settings.model.SystemSetting;
 import com.sajjadkademm.retail.domain.settings.repositories.SystemSettingRepository;
 import com.sajjadkademm.retail.shared.enums.Currency;
 import com.sajjadkademm.retail.application.dto.settings.SystemSettingsRequest;

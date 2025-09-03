@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.settings.inventory.entity;
+package com.sajjadkademm.retail.domain.settings.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

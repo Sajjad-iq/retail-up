@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.inventory.ExcelUpload.utils;
+package com.sajjadkademm.retail.shared.utils.excel;
 
 import org.springframework.web.multipart.MultipartFile;
 

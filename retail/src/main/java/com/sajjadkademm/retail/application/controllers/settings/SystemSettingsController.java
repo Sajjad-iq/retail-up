@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.application.controllers.settings;
 import com.sajjadkademm.retail.application.services.settings.SystemSettingsService;
 import com.sajjadkademm.retail.application.config.security.JwtUtil;
 import com.sajjadkademm.retail.application.dto.settings.SystemSettingsRequest;
-import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
+import com.sajjadkademm.retail.domain.settings.model.SystemSetting;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

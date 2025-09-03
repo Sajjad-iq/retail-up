@@ -1,9 +1,9 @@
 package com.sajjadkademm.retail.application.services.audit;
-import com.sajjadkademm.retail.audit.GlobalAuditLog;
+import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 
 import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
-import com.sajjadkademm.retail.audit.enums.AuditAction;
-import com.sajjadkademm.retail.audit.enums.EntityType;
+import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
+import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import lombok.RequiredArgsConstructor;

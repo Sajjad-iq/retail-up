@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.domain.settings.repositories;
 
-import com.sajjadkademm.retail.settings.system.entity.SystemSetting;
+import com.sajjadkademm.retail.domain.settings.model.SystemSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

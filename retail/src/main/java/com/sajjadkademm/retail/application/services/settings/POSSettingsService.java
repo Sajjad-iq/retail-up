@@ -1,8 +1,8 @@
-package com.sajjadkademm.retail.settings.pos.service;
+package com.sajjadkademm.retail.application.services.settings;
 
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
-import com.sajjadkademm.retail.settings.pos.entity.POSSetting;
+import com.sajjadkademm.retail.domain.settings.model.POSSetting;
 import com.sajjadkademm.retail.domain.settings.repositories.POSSettingRepository;
 import com.sajjadkademm.retail.application.dto.settings.POSSettingsRequest;
 

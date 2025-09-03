@@ -1,8 +1,8 @@
 package com.sajjadkademm.retail.domain.audit.repositories;
 
-import com.sajjadkademm.retail.audit.GlobalAuditLog;
-import com.sajjadkademm.retail.audit.enums.AuditAction;
-import com.sajjadkademm.retail.audit.enums.EntityType;
+import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
+import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
+import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

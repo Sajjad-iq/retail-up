@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.audit.enums;
+package com.sajjadkademm.retail.domain.audit.enums;
 
 /**
  * ENTITY TYPES: Categories of entities that can be audited

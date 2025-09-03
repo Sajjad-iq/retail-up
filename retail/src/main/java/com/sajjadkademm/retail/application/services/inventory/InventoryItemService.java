@@ -13,12 +13,12 @@ import com.sajjadkademm.retail.domain.inventory.validation.ValidatedCreateInvent
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils;
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
-import com.sajjadkademm.retail.inventory.InventoryItem.events.InventoryItemCreatedEvent;
+import com.sajjadkademm.retail.domain.inventory.events.InventoryItemCreatedEvent;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
-import com.sajjadkademm.retail.audit.enums.AuditAction;
-import com.sajjadkademm.retail.audit.enums.EntityType;
+import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
+import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.domain.auth.validation.UserValidator;

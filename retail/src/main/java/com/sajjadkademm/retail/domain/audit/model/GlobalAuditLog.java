@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.audit;
+package com.sajjadkademm.retail.domain.audit.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sajjadkademm.retail.audit.enums.AuditAction;
-import com.sajjadkademm.retail.audit.enums.EntityType;
+import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
+import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.auth.model.User;
 
 import java.time.LocalDateTime;

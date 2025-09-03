@@ -1,8 +1,8 @@
-package com.sajjadkademm.retail.settings.inventory.service;
+package com.sajjadkademm.retail.application.services.settings;
 
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
-import com.sajjadkademm.retail.settings.inventory.entity.InventorySetting;
+import com.sajjadkademm.retail.domain.settings.model.InventorySetting;
 import com.sajjadkademm.retail.domain.settings.repositories.InventorySettingRepository;
 import com.sajjadkademm.retail.application.dto.settings.InventorySettingsRequest;
 

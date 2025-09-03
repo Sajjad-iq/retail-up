@@ -1,8 +1,8 @@
-package com.sajjadkademm.retail.inventory.InventoryItem.events;
+package com.sajjadkademm.retail.domain.inventory.events;
 
 import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
-import com.sajjadkademm.retail.audit.enums.AuditAction;
-import com.sajjadkademm.retail.audit.enums.EntityType;
+import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
+import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;

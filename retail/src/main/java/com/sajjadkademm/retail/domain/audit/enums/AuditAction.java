@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.audit.enums;
+package com.sajjadkademm.retail.domain.audit.enums;
 
 /**
  * AUDIT ACTIONS: Types of actions that can be audited
