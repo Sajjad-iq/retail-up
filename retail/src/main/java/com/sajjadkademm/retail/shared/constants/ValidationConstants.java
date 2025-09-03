@@ -21,6 +21,23 @@ public final class ValidationConstants {
     public static final int MAX_CATEGORY_LENGTH = 100;
     public static final int MAX_BRAND_LENGTH = 100;
     public static final int MAX_SUPPLIER_LENGTH = 100;
+
+
+    // Language and Currency Patterns
+    public static final String LANGUAGE_PATTERN = "^[a-z]{2}$";
+    public static final String CURRENCY_PATTERN = "^[A-Z]{3}$";
+    public static final String TIMEZONE_PATTERN = "^[A-Za-z_]+/[A-Za-z_]+$";
+    
+    // POS Method Pattern
+    public static final String CHANGE_CALCULATION_METHOD_PATTERN = "^(automatic|manual)$";
+    
+    // Domain Pattern
+    public static final String DOMAIN_PATTERN = "^(?!-)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(?!-)$";
+    
+    // Regex Patterns
+    public static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+    public static final String PHONE_PATTERN = "^[+]?[0-9]{10,15}$";
+    public static final String BARCODE_PATTERN = "^[0-9]{8,13}$";
     
     // Numeric Constraints
     public static final int MIN_STOCK_VALUE = 0;
@@ -78,19 +95,5 @@ public final class ValidationConstants {
     public static final int MIN_ID_LENGTH = 20;
     public static final int MAX_ID_LENGTH = 255;
     
-    // Language and Currency Patterns
-    public static final String LANGUAGE_PATTERN = "^[a-z]{2}$";
-    public static final String CURRENCY_PATTERN = "^[A-Z]{3}$";
-    public static final String TIMEZONE_PATTERN = "^[A-Za-z_]+/[A-Za-z_]+$";
-    
-    // POS Method Pattern
-    public static final String CHANGE_CALCULATION_METHOD_PATTERN = "^(automatic|manual)$";
-    
-    // Domain Pattern
-    public static final String DOMAIN_PATTERN = "^(?!-)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(?!-)$";
-    
-    // Regex Patterns
-    public static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-    public static final String PHONE_PATTERN = "^[+]?[0-9]{10,15}$";
-    public static final String BARCODE_PATTERN = "^[0-9]{8,13}$";
+
 }

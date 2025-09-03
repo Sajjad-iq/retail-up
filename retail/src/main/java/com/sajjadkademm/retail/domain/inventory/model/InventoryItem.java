@@ -197,7 +197,7 @@ public class InventoryItem {
 
         // Whether the item is active in the system (soft delete)
         @Column(name = "is_active", nullable = false)
-        @NotNull(message = \"{invalid.inventory.data}\")
+        @NotNull(message = "{invalid.inventory.data}")
         @Builder.Default
         private Boolean isActive = true;
 
