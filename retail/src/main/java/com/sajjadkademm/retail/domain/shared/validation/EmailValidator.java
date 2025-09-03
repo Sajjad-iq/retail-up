@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.shared.validation;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
@@ -34,13 +35,13 @@ public class EmailValidator {
                     .getLocalizedMessage(UserErrorCode.USER_EMAIL_EMPTY.getMessage()));
         }
 
-        if (email.trim().length() > 255) {
+        if (email.trim().length() > ValidationConstants.MAX_EMAIL_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.USER_EMAIL_INVALID_FORMAT.getMessage()));
         }
 
         // Basic email format validation
-        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+        if (!email.matches(ValidationConstants.EMAIL_PATTERN)) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(UserErrorCode.USER_EMAIL_INVALID_FORMAT.getMessage()));
         }

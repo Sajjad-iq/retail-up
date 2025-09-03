@@ -81,6 +81,9 @@ public final class ValidationConstants {
     // POS Method Pattern
     public static final String CHANGE_CALCULATION_METHOD_PATTERN = "^(automatic|manual)$";
     
+    // Domain Pattern
+    public static final String DOMAIN_PATTERN = "^(?!-)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(?!-)$";
+    
     // Regex Patterns
     public static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     public static final String PHONE_PATTERN = "^[+]?[0-9]{10,15}$";

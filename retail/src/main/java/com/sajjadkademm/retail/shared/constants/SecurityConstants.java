@@ -20,9 +20,6 @@ public final class SecurityConstants {
     public static final String USER_ID_HEADER = "X-User-ID";
     public static final String ORGANIZATION_ID_HEADER = "X-Organization-ID";
     
-    // Password Policy
-    public static final int MIN_PASSWORD_LENGTH = 8;
-    public static final int MAX_PASSWORD_LENGTH = 100;
     
     // Rate Limiting
     public static final int MAX_LOGIN_ATTEMPTS = 5;

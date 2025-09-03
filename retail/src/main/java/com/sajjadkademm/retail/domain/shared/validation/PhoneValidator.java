@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.shared.validation;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
@@ -29,12 +30,12 @@ public class PhoneValidator {
      * @throws BadRequestException when phone validation fails
      */
     public void validatePhoneFormat(String phone) {
-        if (phone.trim().length() < 10 || phone.trim().length() > 20) {
+        if (phone.trim().length() < ValidationConstants.MIN_PHONE_LENGTH || phone.trim().length() > ValidationConstants.MAX_PHONE_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(AuthErrorCode.AUTH_PHONE_TO_SHORT.getMessage()));
         }
 
-        if (!phone.matches("^[\\d\\s\\-\\(\\)\\+]+$")) {
+        if (!phone.matches(ValidationConstants.PHONE_PATTERN)) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(AuthErrorCode.AUTH_PHONE_FORMAT_WRONG.getMessage()));
         }

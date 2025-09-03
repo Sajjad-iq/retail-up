@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.inventory.validation;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryErrorCode;
@@ -118,13 +119,13 @@ public class InventoryItemValidationUtils {
         }
 
         // current stock must be greater than or equal to 0
-        if (currentStock == null || currentStock < 0) {
+        if (currentStock == null || currentStock < ValidationConstants.MIN_STOCK_VALUE) {
             errors.add(localizedErrorService
                     .getLocalizedMessage(InventoryItemErrorCode.STOCK_CANNOT_BE_NEGATIVE.getMessage()));
         }
 
         // minimum stock must be greater than or equal to 0
-        if (minimumStock != null && minimumStock < 0) {
+        if (minimumStock != null && minimumStock < ValidationConstants.MIN_STOCK_VALUE) {
             errors.add(localizedErrorService
                     .getLocalizedMessage(InventoryItemErrorCode.STOCK_CANNOT_BE_NEGATIVE.getMessage()));
         }

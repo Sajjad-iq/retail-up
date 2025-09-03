@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.organization.validation;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.common.exceptions.ConflictException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
@@ -34,18 +35,16 @@ public class DomainValidator {
                     .getLocalizedMessage(OrganizationErrorCode.INVALID_DOMAIN_FORMAT.getMessage()));
         }
 
-        if (domain.trim().length() < 3 || domain.trim().length() > 255) {
+        if (domain.trim().length() < ValidationConstants.MIN_DOMAIN_LENGTH || domain.trim().length() > ValidationConstants.MAX_DOMAIN_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.INVALID_DOMAIN_FORMAT.getMessage()));
         }
 
-        // Regex pattern for domain validation
+        // Regex pattern for domain validation using ValidationConstants
         // Allows: alphanumeric, hyphens, dots
         // Prevents: starting/ending with hyphen or dot
         // Requires at least one dot and valid TLD
-        String domainRegex = "^(?!-)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(?!-)$";
-
-        if (!domain.matches(domainRegex)) {
+        if (!domain.matches(ValidationConstants.DOMAIN_PATTERN)) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.INVALID_DOMAIN_FORMAT.getMessage()));
         }

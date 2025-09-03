@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.validation;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
 import com.sajjadkademm.retail.application.dto.organizations.UpdateOrganizationRequest;
@@ -38,19 +39,19 @@ public class OrganizationValidationService {
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_EMPTY.getMessage()));
         }
         // Validate organization name length
-        if (request.getName().trim().length() < 2 || request.getName().trim().length() > 255) {
+        if (request.getName().trim().length() < ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH || request.getName().trim().length() > ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_INVALID.getMessage()));
         }
 
         // Validate description
-        if (request.getDescription() == null || request.getDescription().trim().length() > 500) {
+        if (request.getDescription() == null || request.getDescription().trim().length() > ValidationConstants.MAX_DESCRIPTION_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_DESCRIPTION_INVALID.getMessage()));
         }
 
         // Validate address
-        if (request.getAddress() == null || request.getAddress().trim().length() > 255) {
+        if (request.getAddress() == null || request.getAddress().trim().length() > ValidationConstants.MAX_ADDRESS_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ADDRESS_INVALID.getMessage()));
         }
@@ -89,20 +90,20 @@ public class OrganizationValidationService {
         }
 
         // Validate organization name length
-        if (request.getName() != null && request.getName().trim().length() < 2
-                || request.getName().trim().length() > 255) {
+        if (request.getName() != null && request.getName().trim().length() < ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH
+                || request.getName().trim().length() > ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_INVALID.getMessage()));
         }
 
         // Validate description
-        if (request.getDescription() != null && request.getDescription().trim().length() > 500) {
+        if (request.getDescription() != null && request.getDescription().trim().length() > ValidationConstants.MAX_DESCRIPTION_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_DESCRIPTION_INVALID.getMessage()));
         }
 
         // Validate address
-        if (request.getAddress() != null && request.getAddress().trim().length() > 255) {
+        if (request.getAddress() != null && request.getAddress().trim().length() > ValidationConstants.MAX_ADDRESS_LENGTH) {
             throw new BadRequestException(localizedErrorService
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_ADDRESS_INVALID.getMessage()));
         }
