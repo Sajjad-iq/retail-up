@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.dto.settings;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
@@ -30,8 +31,8 @@ public class InventorySettingsRequest {
     @NotNull(message = "Low stock alerts enabled is required")
     private Boolean lowStockAlertsEnabled;
 
-    @Min(value = 1, message = "Low stock threshold must be at least 1")
-    @Max(value = 1000, message = "Low stock threshold cannot exceed 1000")
+    @Min(value = ValidationConstants.MIN_LOW_STOCK_THRESHOLD, message = "Low stock threshold must be at least 1")
+    @Max(value = ValidationConstants.MAX_LOW_STOCK_THRESHOLD, message = "Low stock threshold cannot exceed 1000")
     private Integer lowStockThreshold;
 
     @NotNull(message = "Out of stock alerts enabled is required")
@@ -40,8 +41,8 @@ public class InventorySettingsRequest {
     @NotNull(message = "Expiry alerts enabled is required")
     private Boolean expiryAlertsEnabled;
 
-    @Min(value = 1, message = "Expiry alert days must be at least 1")
-    @Max(value = 365, message = "Expiry alert days cannot exceed 365")
+    @Min(value = ValidationConstants.MIN_EXPIRY_ALERT_DAYS, message = "Expiry alert days must be at least 1")
+    @Max(value = ValidationConstants.MAX_EXPIRY_ALERT_DAYS, message = "Expiry alert days cannot exceed 365")
     private Integer expiryAlertDays;
 
     // Tracking Settings

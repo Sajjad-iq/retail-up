@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.dto.settings;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Pattern;
@@ -23,7 +24,7 @@ public class POSSettingsRequest {
     @NotNull(message = "Card payment enabled is required")
     private Boolean cardPaymentEnabled;
 
-    @Pattern(regexp = "^(automatic|manual)$", message = "Change calculation method must be automatic or manual")
+    @Pattern(regexp = ValidationConstants.CHANGE_CALCULATION_METHOD_PATTERN, message = "Change calculation method must be automatic or manual")
     @NotNull(message = "Change calculation method is required")
     private String changeCalculationMethod;
 
@@ -46,8 +47,8 @@ public class POSSettingsRequest {
     @NotNull(message = "Receipt footer template HTML is required")
     private String receiptFooterTemplateHtml;
 
-    @Min(value = 58, message = "Receipt paper width must be at least 58mm")
-    @Max(value = 112, message = "Receipt paper width cannot exceed 112mm")
+    @Min(value = ValidationConstants.MIN_RECEIPT_PAPER_WIDTH, message = "Receipt paper width must be at least 58mm")
+    @Max(value = ValidationConstants.MAX_RECEIPT_PAPER_WIDTH, message = "Receipt paper width cannot exceed 112mm")
     @NotNull(message = "Receipt paper width is required")
     private Integer receiptPaperWidthMm;
 

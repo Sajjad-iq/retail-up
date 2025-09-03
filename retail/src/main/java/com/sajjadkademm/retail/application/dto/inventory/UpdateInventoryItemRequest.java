@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.application.dto.inventory;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.enums.Unit;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,24 +27,24 @@ public class UpdateInventoryItemRequest {
     private String userId;
 
     // Basic Product Information
-    @Size(min = 2, max = 200, message = "{inventory.name.invalid}")
+    @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_NAME_LENGTH, message = "{inventory.name.invalid}")
     private String name;
 
-    @Size(max = 1000, message = "{inventory.description.invalid}")
+    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH, message = "{inventory.description.invalid}")
     private String description;
 
-    @Size(max = 300, message = "{inventoryItem.product.code.too.long}")
+    @Size(max = ValidationConstants.MAX_PRODUCT_CODE_LENGTH, message = "{inventoryItem.product.code.too.long}")
     private String productCode;
 
     // Product Identification
-    @Size(max = 300, message = "{inventoryItem.barcode.too.long}")
+    @Size(max = ValidationConstants.MAX_BARCODE_LENGTH, message = "{inventoryItem.barcode.too.long}")
     private String barcode;
 
     // Product Classification
-    @Size(max = 200, message = "{inventoryItem.category.too.long}")
+    @Size(max = ValidationConstants.MAX_CATEGORY_LENGTH, message = "{inventoryItem.category.too.long}")
     private String category;
 
-    @Size(max = 200, message = "{inventoryItem.brand.too.long}")
+    @Size(max = ValidationConstants.MAX_BRAND_LENGTH, message = "{inventoryItem.brand.too.long}")
     private String brand;
 
     private Unit unit;
@@ -52,24 +53,24 @@ public class UpdateInventoryItemRequest {
     @DecimalMin(value = "0.0", message = "{inventoryItem.weight.negative}")
     private BigDecimal weight;
 
-    @Size(max = 50, message = "{inventoryItem.dimensions.too.long}")
+    @Size(max = ValidationConstants.MAX_DIMENSIONS_LENGTH, message = "{inventoryItem.dimensions.too.long}")
     private String dimensions;
 
     // Product Variants
-    @Size(max = 50, message = "{inventoryItem.color.too.long}")
+    @Size(max = ValidationConstants.MAX_COLOR_LENGTH, message = "{inventoryItem.color.too.long}")
     private String color;
 
-    @Size(max = 20, message = "{inventoryItem.size.too.long}")
+    @Size(max = ValidationConstants.MAX_SIZE_LENGTH, message = "{inventoryItem.size.too.long}")
     private String size;
 
     // Stock Management
-    @Min(value = 0, message = "{stock.cannot.be.negative}")
+    @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "{stock.cannot.be.negative}")
     private Integer currentStock;
 
-    @Min(value = 0, message = "{stock.cannot.be.negative}")
+    @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "{stock.cannot.be.negative}")
     private Integer minimumStock;
 
-    @Min(value = 0, message = "{stock.cannot.be.negative}")
+    @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "{stock.cannot.be.negative}")
     private Integer maximumStock;
 
     // Pricing Information
@@ -85,7 +86,7 @@ public class UpdateInventoryItemRequest {
 
     private LocalDateTime discountEndDate;
 
-    @Size(max = 200, message = "{inventoryItem.supplier.name.too.long}")
+    @Size(max = ValidationConstants.MAX_SUPPLIER_LENGTH, message = "{inventoryItem.supplier.name.too.long}")
     private String supplierName;
 
     // Expiry and Perishability

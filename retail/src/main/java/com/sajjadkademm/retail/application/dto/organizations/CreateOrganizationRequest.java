@@ -20,17 +20,17 @@ public class CreateOrganizationRequest {
     private String name;
 
     @NotBlank(message = "{invalid.domain.format}")
-    @Size(min = 3, max = 255, message = "{invalid.domain.format}")
+    @Size(min = MIN_DOMAIN_LENGTH, max = MAX_DOMAIN_LENGTH, message = "{invalid.domain.format}")
     private String domain;
 
     @Size(max = MAX_DESCRIPTION_LENGTH, message = "{organization.description.invalid}")
     private String description;
 
-    @Size(max = 255, message = "{organization.address.invalid}")
+    @Size(max = MAX_ADDRESS_LENGTH, message = "{organization.address.invalid}")
     private String address;
 
     @NotBlank(message = "{auth.phone.format.wrong}")
-    @Size(max = 20, message = "{auth.phone.too.short}")
+    @Size(max = MAX_PHONE_LENGTH, message = "{auth.phone.too.short}")
     private String phone;
     
 }
