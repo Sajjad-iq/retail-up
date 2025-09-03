@@ -8,7 +8,9 @@ import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.shared.cqrs.CommandBus;
+import com.sajjadkademm.retail.shared.cqrs.QueryBus;
 import com.sajjadkademm.retail.domain.inventory.commands.CreateInventoryItemCommand;
+import com.sajjadkademm.retail.domain.inventory.queries.GetInventoryByIdQuery;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.shared.enums.Unit;
@@ -20,7 +22,6 @@ import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemResult;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.shared.enums.Currency;
 
@@ -49,18 +50,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ExcelUploadService {
     private final CommandBus commandBus;
+    private final QueryBus queryBus;
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
     private final GlobalAuditService globalAuditService; // REPLACED: InventoryMovementService with GlobalAuditService
     private final LocalizedErrorService localizedErrorService;
-    private final InventoryService inventoryService;
 
     /**
      * Get organization ID from inventory
      */
     private String getOrganizationIdFromInventory(String inventoryId, User user) {
         try {
-            Inventory inventory = inventoryService.getInventoryById(inventoryId);
+            GetInventoryByIdQuery query = GetInventoryByIdQuery.builder()
+                    .userId(SecurityUtils.getCurrentUserId())
+                    .inventoryId(inventoryId)
+                    .build();
+            
+            Inventory inventory = queryBus.execute(query);
             return inventory.getOrganizationId();
         } catch (Exception e) {
             return user.getId(); // Fallback to user ID

@@ -4,7 +4,9 @@ import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.application.services.inventory.InventoryService;
+import com.sajjadkademm.retail.shared.cqrs.QueryBus;
+import com.sajjadkademm.retail.domain.inventory.queries.GetInventoryByIdQuery;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.domain.inventory.events.InventoryItemCreatedEvent;
 import com.sajjadkademm.retail.domain.auth.model.User;
@@ -24,14 +26,19 @@ import org.springframework.stereotype.Component;
 public class InventoryItemAuditEventHandler {
 
     private final GlobalAuditService globalAuditService;
-    private final InventoryService inventoryService;
+    private final QueryBus queryBus;
 
     /**
      * Get organization ID from inventory item
      */
     private String getOrganizationId(InventoryItem item) {
         try {
-            Inventory inventory = inventoryService.getInventoryById(item.getInventoryId());
+            GetInventoryByIdQuery query = GetInventoryByIdQuery.builder()
+                    .userId(SecurityUtils.getCurrentUserId())
+                    .inventoryId(item.getInventoryId())
+                    .build();
+            
+            Inventory inventory = queryBus.execute(query);
             return inventory.getOrganizationId();
         } catch (Exception e) {
             log.error("Failed to get organization ID for inventory item: {}", item.getId(), e);
