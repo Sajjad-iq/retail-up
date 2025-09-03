@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.organization.model;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
@@ -51,24 +52,24 @@ public class Organization {
 
     @Column(name = "name", nullable = false)
     @NotBlank
-    @Size(min = 2, max = 255)
+    @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH)
     private String name;
 
     @Column(name = "domain", nullable = false, unique = true)
     @NotBlank
-    @Size(min = 3, max = 255)
+    @Size(min = ValidationConstants.MIN_DOMAIN_LENGTH, max = ValidationConstants.MAX_DOMAIN_LENGTH)
     private String domain;
 
-    @Column(name = "description", length = 500)
-    @Size(max = 500)
+    @Column(name = "description", length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
+    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH)
     private String description;
 
-    @Column(name = "address", length = 255)
-    @Size(max = 255)
+    @Column(name = "address", length = ValidationConstants.MAX_ADDRESS_LENGTH)
+    @Size(max = ValidationConstants.MAX_ADDRESS_LENGTH)
     private String address;
 
-    @Column(name = "phone", nullable = true, length = 20)
-    @Size(max = 20, min = 10)
+    @Column(name = "phone", nullable = true, length = ValidationConstants.MAX_PHONE_LENGTH)
+    @Size(max = ValidationConstants.MAX_PHONE_LENGTH, min = ValidationConstants.MIN_PHONE_LENGTH)
     private String phone;
 
     @Enumerated(EnumType.STRING)

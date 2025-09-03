@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.settings.model;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -53,8 +54,8 @@ public class SystemSetting {
     private Boolean autoBackupEnabled = true;
 
     @Column(name = "backup_retention_days", nullable = false)
-    @Min(value = 1, message = "Backup retention days must be at least 1")
-    @Max(value = 365, message = "Backup retention days cannot exceed 365")
+    @Min(value = ValidationConstants.MIN_BACKUP_RETENTION_DAYS, message = "Backup retention days must be at least 1")
+    @Max(value = ValidationConstants.MAX_BACKUP_RETENTION_DAYS, message = "Backup retention days cannot exceed 365")
     private Integer backupRetentionDays = 30;
 
     // General Settings

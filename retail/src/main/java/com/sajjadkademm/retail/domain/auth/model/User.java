@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.auth.model;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -60,7 +61,7 @@ public class User {
     private String name;
 
     @Column(name = "phone", nullable = true, unique = true)
-    @Size(min = 10, max = 20)
+    @Size(min = ValidationConstants.MIN_PHONE_LENGTH, max = ValidationConstants.MAX_PHONE_LENGTH)
     @JsonIgnore
     private String phone;
 

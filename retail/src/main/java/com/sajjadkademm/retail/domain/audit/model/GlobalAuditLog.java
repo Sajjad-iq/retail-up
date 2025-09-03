@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 
 import java.time.LocalDateTime;
 
@@ -65,7 +66,7 @@ public class GlobalAuditLog {
     @NotNull
     private String entityId; // ID of the entity that was changed
 
-    @Column(name = "entity_name", length = 255)
+    @Column(name = "entity_name", length = ValidationConstants.MAX_NAME_LENGTH)
     private String entityName; // Human-readable name (e.g., "iPhone 13", "John Doe")
 
     // ACTION DETAILS: What happened
@@ -74,8 +75,8 @@ public class GlobalAuditLog {
     @NotNull
     private AuditAction action; // CREATE, UPDATE, DELETE, STOCK_IN, STOCK_OUT, etc.
 
-    @Column(name = "description", length = 500)
-    @Size(max = 500)
+    @Column(name = "description", length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
+    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH)
     private String description; // Human-readable description of what happened
 
     // CHANGE TRACKING: What changed (simple approach)

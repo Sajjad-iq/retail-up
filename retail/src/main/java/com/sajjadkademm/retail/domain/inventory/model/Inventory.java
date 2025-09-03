@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.inventory.model;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
@@ -50,15 +51,15 @@ public class Inventory {
 
     @Column(name = "name", nullable = false)
     @NotBlank
-    @Size(min = 2, max = 100)
+    @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_NAME_LENGTH)
     private String name;
 
-    @Column(name = "description", length = 500)
-    @Size(max = 500)
+    @Column(name = "description", length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
+    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH)
     private String description;
 
-    @Column(name = "location", length = 255)
-    @Size(max = 255)
+    @Column(name = "location", length = ValidationConstants.MAX_ADDRESS_LENGTH)
+    @Size(max = ValidationConstants.MAX_ADDRESS_LENGTH)
     private String location;
 
     @Column(name = "is_active", nullable = false)

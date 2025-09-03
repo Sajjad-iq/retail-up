@@ -14,6 +14,7 @@ import jakarta.persistence.Index;
 import java.time.LocalDateTime;
 
 import com.sajjadkademm.retail.domain.organization.model.Organization;
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -67,8 +68,8 @@ public class InventorySetting {
 
     @Column(name = "low_stock_threshold", nullable = false)
     @NotNull(message = "Low stock threshold is required")
-    @Min(value = 1, message = "Low stock threshold must be at least 1")
-    @Max(value = 1000, message = "Low stock threshold cannot exceed 1000")
+    @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Low stock threshold must be at least 1")
+    @Max(value = ValidationConstants.MAX_LOW_STOCK_THRESHOLD, message = "Low stock threshold cannot exceed 1000")
     private Integer lowStockThreshold = 10;
 
     @Column(name = "out_of_stock_alerts_enabled", nullable = false)
@@ -81,8 +82,8 @@ public class InventorySetting {
 
     @Column(name = "expiry_alert_days", nullable = false)
     @NotNull(message = "Expiry alert days is required")
-    @Min(value = 1, message = "Expiry alert days must be at least 1")
-    @Max(value = 365, message = "Expiry alert days cannot exceed 365")
+    @Min(value = ValidationConstants.MIN_EXPIRY_ALERT_DAYS, message = "Expiry alert days must be at least 1")
+    @Max(value = ValidationConstants.MAX_EXPIRY_ALERT_DAYS, message = "Expiry alert days cannot exceed 365")
     private Integer expiryAlertDays = 30;
 
     // Tracking Settings

@@ -1,5 +1,6 @@
 package com.sajjadkademm.retail.domain.inventory.model;
 
+import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.enums.Money;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -73,34 +74,34 @@ public class InventoryItem {
         // Product name as displayed to customers and in the system
         @Column(name = "name", nullable = false)
         @NotBlank
-        @Size(min = 2, max = 200)
+        @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_NAME_LENGTH)
         private String name;
 
         // Detailed product description for customer information and internal reference
-        @Column(name = "description", length = 1000)
-        @Size(max = 1000)
+        @Column(name = "description", length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
+        @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH)
         private String description;
 
         // Internal product code for business operations
-        @Column(name = "product_code", length = 50)
-        @Size(max = 50)
+        @Column(name = "product_code", length = ValidationConstants.MAX_PRODUCT_CODE_LENGTH)
+        @Size(max = ValidationConstants.MAX_PRODUCT_CODE_LENGTH)
         private String productCode;
 
         // Product Identification
         // Barcode for POS scanning and quick identification
-        @Column(name = "barcode", length = 100)
-        @Size(max = 100)
+        @Column(name = "barcode", length = ValidationConstants.MAX_BARCODE_LENGTH)
+        @Size(max = ValidationConstants.MAX_BARCODE_LENGTH)
         private String barcode;
 
         // Product Classification
         // Category for organizing products (e.g., Electronics, Clothing, Food)
-        @Column(name = "category", length = 100)
-        @Size(max = 100)
+        @Column(name = "category", length = ValidationConstants.MAX_CATEGORY_LENGTH)
+        @Size(max = ValidationConstants.MAX_CATEGORY_LENGTH)
         private String category;
 
         // Brand name for filtering and customer preference
-        @Column(name = "brand", length = 100)
-        @Size(max = 100)
+        @Column(name = "brand", length = ValidationConstants.MAX_BRAND_LENGTH)
+        @Size(max = ValidationConstants.MAX_BRAND_LENGTH)
         private String brand;
 
         // Measurement unit for the product (pieces, kg, liters, etc.)
@@ -116,36 +117,36 @@ public class InventoryItem {
         private BigDecimal weight;
 
         // Product dimensions in format "Length x Width x Height" (in cm)
-        @Column(name = "dimensions", length = 50)
-        @Size(max = 50)
+        @Column(name = "dimensions", length = ValidationConstants.MAX_DIMENSIONS_LENGTH)
+        @Size(max = ValidationConstants.MAX_DIMENSIONS_LENGTH)
         private String dimensions;
 
         // Product Variants
         // Color variant for products available in multiple colors
-        @Column(name = "color", length = 50)
-        @Size(max = 50)
+        @Column(name = "color", length = ValidationConstants.MAX_COLOR_LENGTH)
+        @Size(max = ValidationConstants.MAX_COLOR_LENGTH)
         private String color;
 
         // Size variant for clothing, shoes, etc. (S, M, L, XL, or numeric sizes)
-        @Column(name = "size", length = 20)
-        @Size(max = 20)
+        @Column(name = "size", length = ValidationConstants.MAX_SIZE_LENGTH)
+        @Size(max = ValidationConstants.MAX_SIZE_LENGTH)
         private String size;
 
         // Stock Management
         // Current available stock quantity
         @Column(name = "current_stock", nullable = false)
         @NotNull
-        @Min(value = 0, message = "Current stock cannot be negative")
+        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Current stock cannot be negative")
         private Integer currentStock;
 
         // Minimum stock level before reordering alert
         @Column(name = "minimum_stock")
-        @Min(value = 0, message = "Minimum stock cannot be negative")
+        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Minimum stock cannot be negative")
         private Integer minimumStock;
 
         // Maximum stock capacity for storage optimization
         @Column(name = "maximum_stock")
-        @Min(value = 0, message = "Maximum stock cannot be negative")
+        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Maximum stock cannot be negative")
         private Integer maximumStock;
 
         // Pricing Information
@@ -180,8 +181,8 @@ public class InventoryItem {
         private LocalDateTime discountEndDate;
 
         // Supplier name for quick reference without joining tables
-        @Column(name = "supplier_name", length = 200)
-        @Size(max = 200)
+        @Column(name = "supplier_name", length = ValidationConstants.MAX_SUPPLIER_LENGTH)
+        @Size(max = ValidationConstants.MAX_SUPPLIER_LENGTH)
         private String supplierName;
 
         // Expiry and Perishability
