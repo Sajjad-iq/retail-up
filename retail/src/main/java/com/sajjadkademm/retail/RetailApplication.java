@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * Main Spring Boot application class for the Retail Management System.
  * 
+ * 
  * @author Sajjad Kadem
  * @version 1.0
  * @since 2024-12-19

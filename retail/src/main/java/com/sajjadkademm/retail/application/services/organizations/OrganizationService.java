@@ -16,7 +16,7 @@ import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
 import com.sajjadkademm.retail.domain.organization.validation.OrganizationValidator;
 import com.sajjadkademm.retail.shared.enums.AccountType;
-import com.sajjadkademm.retail.domain.organization.validation.internalValidator;
+import com.sajjadkademm.retail.application.validation.OrganizationValidationService;
 import com.sajjadkademm.retail.application.services.users.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ public class OrganizationService {
     private final UserService userService;
     private final LocalizedErrorService localizedErrorService;
     private final UserValidator userValidator;
-    private final internalValidator internalValidator;
+    private final OrganizationValidationService organizationValidationService;
 
     /**
      * Create a new organization with default settings
@@ -52,7 +52,7 @@ public class OrganizationService {
             userValidator.assertUserAccountType(user, AccountType.USER);
 
             // Validate organization data
-            internalValidator.validateOrganizationCreationData(request);
+            organizationValidationService.validateOrganizationCreationData(request);
 
             Organization organization = Organization.builder()
                     .name(request.getName())
@@ -102,10 +102,10 @@ public class OrganizationService {
         }
 
         // Validate organization can be updated and not disabled
-        internalValidator.assertOrganizationIsNotDisabledBySystem(organization);
+        organizationValidationService.assertOrganizationIsNotDisabledBySystem(organization);
 
         // Validate update request data
-        internalValidator.validateOrganizationUpdateData(request, organization);
+        organizationValidationService.validateOrganizationUpdateData(request, organization);
 
         // Update organization fields
         if (request.getName() != null) {

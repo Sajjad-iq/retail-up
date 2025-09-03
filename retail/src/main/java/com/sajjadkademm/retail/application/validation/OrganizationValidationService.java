@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.organization.validation;
+package com.sajjadkademm.retail.application.validation;
 
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
@@ -8,13 +8,19 @@ import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.enums.OrganizationStatus;
 import com.sajjadkademm.retail.domain.shared.validation.PhoneValidator;
 import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
+import com.sajjadkademm.retail.domain.organization.validation.DomainValidator;
 import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/**
+ * Application layer validation service for organization operations.
+ * This service handles validation that involves DTOs and coordination between domain services.
+ * Located in application layer because it depends on DTOs from application layer.
+ */
 @Component
 @RequiredArgsConstructor
-public class internalValidator {
+public class OrganizationValidationService {
     private final LocalizedErrorService localizedErrorService;
     private final PhoneValidator phoneValidator;
     private final DomainValidator domainValidator;
@@ -102,8 +108,6 @@ public class internalValidator {
         }
     }
 
-
-
     /**
      * Ensures the provided organization is not disabled by the system.
      * Throws {@link BadRequestException} if the organization is rejected,
@@ -120,5 +124,4 @@ public class internalValidator {
                     .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_INACTIVE.getMessage()));
         }
     }
-
 }
