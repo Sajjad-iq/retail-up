@@ -1,7 +1,5 @@
 package com.sajjadkademm.retail.application.controllers.inventory;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
-import com.sajjadkademm.retail.application.services.inventory.InventoryItemService;
-
 import com.sajjadkademm.retail.application.dto.inventory.*;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.cqrs.CommandBus;
@@ -45,7 +43,6 @@ import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
 @Tag(name = "Inventory Items", description = "Inventory item management endpoints (user-scoped)")
 public class InventoryItemController {
 
-        private final InventoryItemService inventoryItemService; // Fallback for complex operations
         private final LocalizedErrorService localizedErrorService;
         private final CommandBus commandBus;
         private final QueryBus queryBus;
@@ -203,7 +200,7 @@ public class InventoryItemController {
 
                         // Expiry status filters
                         @Parameter(description = "Expiry status (expiring, expired, fresh)", example = "expiring") @RequestParam(required = false) String expiryStatus,
-                        @Parameter(description = "Days for expiry calculation", example = "7") @RequestParam(defaultValue = "7") int expiryDays) {
+                        @Parameter(description = "Days for expiry calculation", example = "7") @RequestParam(defaultValue = "7") int expiryDays) throws Exception {
 
                 // Create filter request from parameters
                 FilterRequest filterRequest = new FilterRequest();
@@ -249,10 +246,7 @@ public class InventoryItemController {
                     return ResponseEntity.ok(response);
                 } catch (Exception e) {
                     log.error("Error executing GetInventoryItemsQuery", e);
-                    // Fallback to existing service for complex queries
-                    PagedResponse<InventoryItem> response = inventoryItemService.filterItemsPaginated(inventoryId,
-                                    filterRequest, page, size, sortBy, sortDirection);
-                    return ResponseEntity.ok(response);
+                    throw e; // Pure CQRS - no fallback
                 }
         }
 
@@ -263,8 +257,16 @@ public class InventoryItemController {
         @ApiResponse(responseCode = "200", description = "Item count retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(type = "integer", format = "int64", example = "150")))
         @GetMapping("/inventory/{inventoryId}/count")
         public ResponseEntity<Long> getItemCountByInventory(
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                long count = inventoryItemService.getItemCountByInventory(inventoryId);
+                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) throws Exception {
+                
+                // CQRS: Use query for read operations
+                GetInventoryItemCountQuery query = GetInventoryItemCountQuery.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .inventoryId(inventoryId)
+                        .activeOnly(false) // Get all items count
+                        .build();
+                
+                Long count = queryBus.execute(query);
                 return ResponseEntity.ok(count);
         }
 
@@ -275,8 +277,16 @@ public class InventoryItemController {
         @ApiResponse(responseCode = "200", description = "Active item count retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(type = "integer", format = "int64", example = "120")))
         @GetMapping("/inventory/{inventoryId}/count/active")
         public ResponseEntity<Long> getActiveItemCountByInventory(
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                long count = inventoryItemService.getActiveItemCountByInventory(inventoryId);
+                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) throws Exception {
+                
+                // CQRS: Use query for read operations
+                GetInventoryItemCountQuery query = GetInventoryItemCountQuery.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .inventoryId(inventoryId)
+                        .activeOnly(true) // Get only active items count
+                        .build();
+                
+                Long count = queryBus.execute(query);
                 return ResponseEntity.ok(count);
         }
 
@@ -290,34 +300,35 @@ public class InventoryItemController {
         @GetMapping("/inventory/{inventoryId}/summary")
         public ResponseEntity<?> getInventorySummary(
                         @Parameter(description = "Inventory ID", required = true, example = "inv123") 
-                        @PathVariable String inventoryId) {
+                        @PathVariable String inventoryId) throws Exception {
                 
                 try {
-                    // CQRS: Use optimized query for reporting
-                    GetInventorySummaryQuery query = GetInventorySummaryQuery.builder()
+                    // CQRS: Use count queries for basic summary
+                    GetInventoryItemCountQuery totalQuery = GetInventoryItemCountQuery.builder()
                             .userId(SecurityUtils.getCurrentUserId())
                             .inventoryId(inventoryId)
+                            .activeOnly(false)
                             .build();
                     
-                    Object summary = queryBus.execute(query);
-                    return ResponseEntity.ok(summary);
+                    GetInventoryItemCountQuery activeQuery = GetInventoryItemCountQuery.builder()
+                            .userId(SecurityUtils.getCurrentUserId())
+                            .inventoryId(inventoryId)
+                            .activeOnly(true)
+                            .build();
+                    
+                    Long totalCount = queryBus.execute(totalQuery);
+                    Long activeCount = queryBus.execute(activeQuery);
+                    
+                    return ResponseEntity.ok(java.util.Map.of(
+                        "inventoryId", inventoryId,
+                        "totalItems", totalCount,
+                        "activeItems", activeCount,
+                        "reportGeneratedAt", java.time.LocalDateTime.now(),
+                        "source", "cqrs"
+                    ));
                 } catch (Exception e) {
                     log.error("Error getting inventory summary via CQRS", e);
-                    // Fallback: return basic counts using existing service
-                    try {
-                        long totalCount = inventoryItemService.getItemCountByInventory(inventoryId);
-                        long activeCount = inventoryItemService.getActiveItemCountByInventory(inventoryId);
-                        
-                        return ResponseEntity.ok(java.util.Map.of(
-                            "inventoryId", inventoryId,
-                            "totalItems", totalCount,
-                            "activeItems", activeCount,
-                            "reportGeneratedAt", java.time.LocalDateTime.now(),
-                            "source", "fallback"
-                        ));
-                    } catch (Exception fallbackError) {
-                        return ResponseEntity.internalServerError().body("Failed to generate inventory summary");
-                    }
+                    throw e; // Pure CQRS - no fallback
                 }
         }
 

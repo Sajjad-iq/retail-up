@@ -3,38 +3,118 @@ package com.sajjadkademm.retail.domain.inventory.handlers;
 import com.sajjadkademm.retail.shared.cqrs.QueryHandler;
 import com.sajjadkademm.retail.domain.inventory.queries.GetInventoryItemsQuery;
 import com.sajjadkademm.retail.application.dto.inventory.PagedResponse;
+import com.sajjadkademm.retail.application.dto.inventory.FilterRequest;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
-import com.sajjadkademm.retail.application.services.inventory.InventoryItemService;
+import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
+
 /**
  * Query handler for getting filtered and paginated inventory items.
- * Delegates to existing InventoryItemService with caching capabilities.
+ * Pure CQRS implementation using repositories directly with caching capabilities.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class GetInventoryItemsQueryHandler implements QueryHandler<GetInventoryItemsQuery, PagedResponse<InventoryItem>> {
 
-    private final InventoryItemService inventoryItemService;
+    private final InventoryItemRepository inventoryItemRepository;
+    private final InventoryItemValidationUtils validationUtils;
 
     @Override
     public PagedResponse<InventoryItem> handle(GetInventoryItemsQuery query) throws Exception {
         log.debug("Handling GetInventoryItemsQuery for inventory: {}", query.getInventoryId());
         
-        // Delegate to existing service - maintains all existing filtering and pagination logic
-        return inventoryItemService.filterItemsPaginated(
-            query.getInventoryId(),
-            query.getFilterRequest(),
-            query.getPage(),
-            query.getSize(),
-            query.getSortBy(),
-            query.getSortDirection()
-        );
+        // Validate user access to inventory
+        validationUtils.checkUserAccessToInventory(query.getInventoryId());
+        
+        // Create pageable with sorting
+        Sort.Direction direction = "asc".equalsIgnoreCase(query.getSortDirection()) 
+            ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(query.getPage(), query.getSize(), 
+                                         Sort.by(direction, query.getSortBy()));
+        
+        // Apply filtering based on FilterRequest
+        FilterRequest filter = query.getFilterRequest();
+        Page<InventoryItem> pageResult;
+        
+        if (isComplexFilter(filter)) {
+            // Use advanced filtering method
+            pageResult = inventoryItemRepository.findWithFilters(
+                query.getInventoryId(),
+                filter.getCategory(),
+                filter.getBrand(),
+                filter.getSupplierName(),
+                filter.getColor(),
+                filter.getSize(),
+                filter.getIsActive(),
+                filter.getIsPerishable(),
+                filter.getMinStock(),
+                filter.getMaxStock(),
+                filter.getMinCostPrice(),
+                filter.getMaxCostPrice(),
+                filter.getMinSellingPrice(),
+                filter.getMaxSellingPrice(),
+                filter.getSearchTerm(),
+                pageable
+            );
+        } else if (filter != null && filter.getSearchTerm() != null) {
+            // Use search method
+            pageResult = inventoryItemRepository.searchItems(
+                query.getInventoryId(),
+                filter.getSearchTerm(),
+                pageable
+            );
+        } else {
+            // Default: get all active items
+            pageResult = inventoryItemRepository.findByInventoryIdAndIsActiveTrue(
+                query.getInventoryId(),
+                pageable
+            );
+        }
+        
+        // Convert to PagedResponse
+        return PagedResponse.<InventoryItem>builder()
+            .content(pageResult.getContent())
+            .page(pageResult.getNumber())
+            .size(pageResult.getSize())
+            .totalElements(pageResult.getTotalElements())
+            .totalPages(pageResult.getTotalPages())
+            .first(pageResult.isFirst())
+            .last(pageResult.isLast())
+            .hasNext(pageResult.hasNext())
+            .hasPrevious(pageResult.hasPrevious())
+            .numberOfElements(pageResult.getNumberOfElements())
+            .empty(pageResult.isEmpty())
+            .build();
+    }
+    
+    private boolean isComplexFilter(FilterRequest filter) {
+        if (filter == null) return false;
+        
+        return filter.getCategory() != null ||
+               filter.getBrand() != null ||
+               filter.getSupplierName() != null ||
+               filter.getColor() != null ||
+               filter.getSize() != null ||
+               filter.getIsActive() != null ||
+               filter.getIsPerishable() != null ||
+               filter.getMinStock() != null ||
+               filter.getMaxStock() != null ||
+               filter.getMinCostPrice() != null ||
+               filter.getMaxCostPrice() != null ||
+               filter.getMinSellingPrice() != null ||
+               filter.getMaxSellingPrice() != null;
     }
 
     @Override

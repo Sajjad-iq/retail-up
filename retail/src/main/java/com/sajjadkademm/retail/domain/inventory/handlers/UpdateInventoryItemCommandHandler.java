@@ -3,7 +3,17 @@ package com.sajjadkademm.retail.domain.inventory.handlers;
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
 import com.sajjadkademm.retail.domain.inventory.commands.UpdateInventoryItemCommand;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
-import com.sajjadkademm.retail.application.services.inventory.InventoryItemService;
+import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
+import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemUpdateValidator;
+import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils;
+import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
+import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
+import com.sajjadkademm.retail.domain.audit.enums.EntityType;
+import com.sajjadkademm.retail.domain.inventory.services.InventoryDomainService;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
+import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.localization.errorCode.InventoryItemErrorCode;
 
 import org.springframework.stereotype.Component;
 
@@ -12,21 +22,150 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Command handler for updating inventory items.
- * Delegates to existing InventoryItemService to maintain compatibility.
+ * Pure CQRS implementation using repositories and domain services directly.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class UpdateInventoryItemCommandHandler implements CommandHandler<UpdateInventoryItemCommand, InventoryItem> {
 
-    private final InventoryItemService inventoryItemService;
+    private final InventoryItemRepository inventoryItemRepository;
+    private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
+    private final InventoryItemValidationUtils validationUtils;
+    private final GlobalAuditService globalAuditService;
+    private final InventoryDomainService inventoryDomainService;
+    private final LocalizedErrorService localizedErrorService;
 
     @Override
     public InventoryItem handle(UpdateInventoryItemCommand command) throws Exception {
         log.debug("Handling UpdateInventoryItemCommand for item: {}", command.getItemId());
         
-        // Delegate to existing service - maintains all existing validation and business logic
-        return inventoryItemService.updateInventoryItem(command.getItemId(), command.getRequest());
+        // Find existing inventory item
+        InventoryItem existingItem = inventoryItemRepository.findById(command.getItemId())
+                .orElseThrow(() -> new NotFoundException(localizedErrorService
+                        .getLocalizedMessage(InventoryItemErrorCode.INVENTORY_ITEM_NOT_FOUND.getMessage(), command.getItemId())));
+
+        // Validate user access
+        validationUtils.checkUserAccessToInventoryItem(existingItem);
+        
+        // Validate update request
+        inventoryItemUpdateValidator.validate(existingItem, command.getRequest());
+        
+        // Apply updates to existing item
+        UpdateInventoryItemRequest request = command.getRequest();
+        applyUpdates(existingItem, request);
+        
+        // Save updated item
+        InventoryItem savedItem = inventoryItemRepository.save(existingItem);
+        
+        // Get organization ID for audit
+        String organizationId = getOrganizationId(savedItem);
+        
+        // Log audit trail
+        globalAuditService.auditEntityChange(
+                organizationId,
+                EntityType.INVENTORY_ITEM,
+                savedItem.getId(),
+                savedItem.getName(),
+                AuditAction.UPDATE,
+                "Updated inventory item: " + savedItem.getName(),
+                null, // fieldName
+                null, // oldValue
+                null, // newValue
+                savedItem.getCreatedBy()
+        );
+        
+        log.info("Successfully updated inventory item: {} for user: {}", 
+                savedItem.getId(), command.getUserId());
+        
+        return savedItem;
+    }
+    
+    /**
+     * Apply updates from request to existing item
+     */
+    private void applyUpdates(InventoryItem existingItem, UpdateInventoryItemRequest request) {
+        // Update basic fields if provided
+        if (request.getName() != null) {
+            existingItem.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            existingItem.setDescription(request.getDescription());
+        }
+        if (request.getProductCode() != null) {
+            existingItem.setProductCode(request.getProductCode());
+        }
+        if (request.getBarcode() != null) {
+            existingItem.setBarcode(request.getBarcode());
+        }
+        if (request.getCategory() != null) {
+            existingItem.setCategory(request.getCategory());
+        }
+        if (request.getBrand() != null) {
+            existingItem.setBrand(request.getBrand());
+        }
+        if (request.getUnit() != null) {
+            existingItem.setUnit(request.getUnit());
+        }
+        if (request.getWeight() != null) {
+            existingItem.setWeight(request.getWeight());
+        }
+        if (request.getDimensions() != null) {
+            existingItem.setDimensions(request.getDimensions());
+        }
+        if (request.getColor() != null) {
+            existingItem.setColor(request.getColor());
+        }
+        if (request.getSize() != null) {
+            existingItem.setSize(request.getSize());
+        }
+        if (request.getCurrentStock() != null) {
+            existingItem.setCurrentStock(request.getCurrentStock());
+        }
+        if (request.getMinimumStock() != null) {
+            existingItem.setMinimumStock(request.getMinimumStock());
+        }
+        if (request.getMaximumStock() != null) {
+            existingItem.setMaximumStock(request.getMaximumStock());
+        }
+        if (request.getCostPrice() != null) {
+            existingItem.setCostPrice(request.getCostPrice());
+        }
+        if (request.getSellingPrice() != null) {
+            existingItem.setSellingPrice(request.getSellingPrice());
+        }
+        if (request.getDiscountPrice() != null) {
+            existingItem.setDiscountPrice(request.getDiscountPrice());
+        }
+        if (request.getDiscountStartDate() != null) {
+            existingItem.setDiscountStartDate(request.getDiscountStartDate());
+        }
+        if (request.getDiscountEndDate() != null) {
+            existingItem.setDiscountEndDate(request.getDiscountEndDate());
+        }
+        if (request.getSupplierName() != null) {
+            existingItem.setSupplierName(request.getSupplierName());
+        }
+        if (request.getIsPerishable() != null) {
+            existingItem.setIsPerishable(request.getIsPerishable());
+        }
+        if (request.getExpiryDate() != null) {
+            existingItem.setExpiryDate(request.getExpiryDate());
+        }
+        if (request.getIsActive() != null) {
+            existingItem.setIsActive(request.getIsActive());
+        }
+    }
+    
+    /**
+     * Get organization ID from inventory item
+     */
+    private String getOrganizationId(InventoryItem item) {
+        try {
+            return inventoryDomainService.getOrganizationIdByInventory(item.getInventoryId());
+        } catch (Exception e) {
+            return item.getCreatedBy().getId(); // Fallback to user ID
+        }
     }
 
     @Override
