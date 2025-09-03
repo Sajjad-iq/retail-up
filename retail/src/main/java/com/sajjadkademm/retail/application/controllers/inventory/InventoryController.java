@@ -1,9 +1,13 @@
 package com.sajjadkademm.retail.application.controllers.inventory;
 
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryRequest;
+import com.sajjadkademm.retail.shared.cqrs.CommandBus;
+import com.sajjadkademm.retail.shared.cqrs.QueryBus;
+import com.sajjadkademm.retail.domain.inventory.commands.*;
+import com.sajjadkademm.retail.domain.inventory.queries.*;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +41,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Inventories", description = "Inventory management endpoints (user-scoped)")
 public class InventoryController {
 
-    private final InventoryService inventoryService;
+    private final CommandBus commandBus;
+    private final QueryBus queryBus;
 
     /**
      * Create inventory endpoint
@@ -67,8 +72,15 @@ public class InventoryController {
                         "description": "Primary storage facility for all products",
                         "location": "123 Warehouse St, Industrial District"
                     }
-                    """))) @Valid @RequestBody CreateInventoryRequest request) {
-        Inventory response = inventoryService.createInventory(request);
+                    """))) @Valid @RequestBody CreateInventoryRequest request) throws Exception {
+        
+        // CQRS: Use command for write operations
+        CreateInventoryCommand command = CreateInventoryCommand.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .request(request)
+                .build();
+        
+        Inventory response = commandBus.execute(command);
         return ResponseEntity.ok(response);
     }
 
@@ -99,8 +111,16 @@ public class InventoryController {
                         "description": "Updated primary storage facility",
                         "location": "456 Updated Warehouse Ave, Industrial District"
                     }
-                    """))) @Valid @RequestBody UpdateInventoryRequest request) {
-        Inventory response = inventoryService.updateInventory(id, request);
+                    """))) @Valid @RequestBody UpdateInventoryRequest request) throws Exception {
+        
+        // CQRS: Use command for write operations
+        UpdateInventoryCommand command = UpdateInventoryCommand.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .inventoryId(id)
+                .request(request)
+                .build();
+        
+        Inventory response = commandBus.execute(command);
         return ResponseEntity.ok(response);
     }
 
@@ -125,8 +145,15 @@ public class InventoryController {
             """)))
     @GetMapping("/{id}")
     public ResponseEntity<Inventory> getInventoryById(
-            @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String id) {
-        Inventory response = inventoryService.getInventoryById(id);
+            @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String id) throws Exception {
+        
+        // CQRS: Use query for read operations
+        GetInventoryByIdQuery query = GetInventoryByIdQuery.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .inventoryId(id)
+                .build();
+        
+        Inventory response = queryBus.execute(query);
         return ResponseEntity.ok(response);
     }
 
@@ -163,8 +190,16 @@ public class InventoryController {
             """)))
     @GetMapping("/organization/{organizationId}")
     public ResponseEntity<List<Inventory>> getInventoriesByOrganization(
-            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        List<Inventory> response = inventoryService.getInventoriesByOrganization(organizationId);
+            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
+        
+        // CQRS: Use query for read operations
+        GetInventoriesByOrganizationQuery query = GetInventoriesByOrganizationQuery.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .organizationId(organizationId)
+                .activeOnly(false) // Get all inventories
+                .build();
+        
+        List<Inventory> response = queryBus.execute(query);
         return ResponseEntity.ok(response);
     }
 
@@ -177,8 +212,16 @@ public class InventoryController {
     @ApiResponse(responseCode = "200", description = "List of active inventories retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Inventory.class, type = "array")))
     @GetMapping("/organization/{organizationId}/active")
     public ResponseEntity<List<Inventory>> getActiveInventoriesByOrganization(
-            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        List<Inventory> response = inventoryService.getActiveInventoriesByOrganization(organizationId);
+            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
+        
+        // CQRS: Use query for read operations
+        GetInventoriesByOrganizationQuery query = GetInventoriesByOrganizationQuery.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .organizationId(organizationId)
+                .activeOnly(true) // Get only active inventories
+                .build();
+        
+        List<Inventory> response = queryBus.execute(query);
         return ResponseEntity.ok(response);
     }
 
@@ -205,8 +248,16 @@ public class InventoryController {
     @GetMapping("/organization/{organizationId}/search")
     public ResponseEntity<List<Inventory>> searchInventories(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
-            @Parameter(description = "Search query for inventory name", required = true, example = "warehouse") @RequestParam String q) {
-        List<Inventory> response = inventoryService.searchInventories(organizationId, q);
+            @Parameter(description = "Search query for inventory name", required = true, example = "warehouse") @RequestParam String q) throws Exception {
+        
+        // CQRS: Use query for read operations
+        SearchInventoriesQuery query = SearchInventoriesQuery.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .organizationId(organizationId)
+                .searchTerm(q)
+                .build();
+        
+        List<Inventory> response = queryBus.execute(query);
         return ResponseEntity.ok(response);
     }
 
@@ -218,8 +269,15 @@ public class InventoryController {
     @ApiResponse(responseCode = "200", description = "Inventory deleted successfully")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInventory(
-            @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String id) {
-        inventoryService.deleteInventory(id);
+            @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String id) throws Exception {
+        
+        // CQRS: Use command for write operations
+        DeleteInventoryCommand command = DeleteInventoryCommand.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .inventoryId(id)
+                .build();
+        
+        commandBus.execute(command);
         return ResponseEntity.ok().build();
     }
 
@@ -234,8 +292,16 @@ public class InventoryController {
     @GetMapping("/exists/name/{name}/organization/{organizationId}")
     public ResponseEntity<Boolean> inventoryExistsByName(
             @Parameter(description = "Inventory name to check", required = true, example = "Main Warehouse") @PathVariable String name,
-            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        boolean exists = inventoryService.inventoryExistsByName(name, organizationId);
+            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
+        
+        // CQRS: Use query for read operations
+        InventoryExistsByNameQuery query = InventoryExistsByNameQuery.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .name(name)
+                .organizationId(organizationId)
+                .build();
+        
+        Boolean exists = queryBus.execute(query);
         return ResponseEntity.ok(exists);
     }
 
@@ -246,8 +312,15 @@ public class InventoryController {
     @ApiResponse(responseCode = "200", description = "Inventory count retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(type = "integer"), examples = @ExampleObject(name = "Inventory Count", value = "5")))
     @GetMapping("/organization/{organizationId}/count")
     public ResponseEntity<Long> getInventoryCountByOrganization(
-            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        long count = inventoryService.getInventoryCountByOrganization(organizationId);
+            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
+        
+        // CQRS: Use query for read operations
+        GetInventoryCountByOrganizationQuery query = GetInventoryCountByOrganizationQuery.builder()
+                .userId(SecurityUtils.getCurrentUserId())
+                .organizationId(organizationId)
+                .build();
+        
+        Long count = queryBus.execute(query);
         return ResponseEntity.ok(count);
     }
 }
