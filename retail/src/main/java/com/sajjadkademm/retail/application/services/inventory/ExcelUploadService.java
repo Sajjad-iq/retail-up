@@ -6,8 +6,10 @@ import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
-import com.sajjadkademm.retail.application.services.inventory.InventoryItemService;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemRequest;
+import com.sajjadkademm.retail.shared.cqrs.CommandBus;
+import com.sajjadkademm.retail.domain.inventory.commands.CreateInventoryItemCommand;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
@@ -46,7 +48,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ExcelUploadService {
-    private final InventoryItemService inventoryItemService;
+    private final CommandBus commandBus;
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
     private final GlobalAuditService globalAuditService; // REPLACED: InventoryMovementService with GlobalAuditService
@@ -554,17 +556,19 @@ public class ExcelUploadService {
      */
     private void createNewItem(CreateInventoryItemRequest itemRequest, User user, int rowNumber,
             List<InventoryItem> createdItems, List<String> errors) {
-        // DELEGATE TO SERVICE: Use inventory service method designed for batch
-        // operations
-        // This method returns success/failure results instead of throwing exceptions
-        CreateInventoryItemResult result = inventoryItemService.createInventoryItemWithErrorCollection(itemRequest);
-
-        if (result.isSuccess()) {
+        // CQRS: Use command bus for creating inventory item
+        try {
+            CreateInventoryItemCommand command = CreateInventoryItemCommand.builder()
+                    .userId(SecurityUtils.getCurrentUserId())
+                    .request(itemRequest)
+                    .build();
+            
+            InventoryItem createdItem = commandBus.execute(command);
             // SUCCESS: Item created successfully, add to results
-            createdItems.add(result.getItem());
-        } else {
+            createdItems.add(createdItem);
+        } catch (Exception e) {
             // FAILURE: Capture specific error message with row context
-            errors.add("Row " + rowNumber + ": " + result.getErrorMessage());
+            errors.add("Row " + rowNumber + ": " + e.getMessage());
         }
     }
 
