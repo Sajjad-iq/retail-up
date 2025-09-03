@@ -73,24 +73,24 @@ public class InventoryItem {
         // Basic Product Information
         // Product name as displayed to customers and in the system
         @Column(name = "name", nullable = false)
-        @NotBlank
-        @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_NAME_LENGTH)
+        @NotBlank(message = "{name.required}")
+        @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_NAME_LENGTH, message = "{name.required}")
         private String name;
 
         // Detailed product description for customer information and internal reference
         @Column(name = "description", length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
-        @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH)
+        @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH, message = "{inventory.description.invalid}")
         private String description;
 
         // Internal product code for business operations
         @Column(name = "product_code", length = ValidationConstants.MAX_PRODUCT_CODE_LENGTH)
-        @Size(max = ValidationConstants.MAX_PRODUCT_CODE_LENGTH)
+        @Size(max = ValidationConstants.MAX_PRODUCT_CODE_LENGTH, message = "{inventoryItem.product.code.too.long}")
         private String productCode;
 
         // Product Identification
         // Barcode for POS scanning and quick identification
         @Column(name = "barcode", length = ValidationConstants.MAX_BARCODE_LENGTH)
-        @Size(max = ValidationConstants.MAX_BARCODE_LENGTH)
+        @Size(max = ValidationConstants.MAX_BARCODE_LENGTH, message = "{inventoryItem.barcode.too.long}")
         private String barcode;
 
         // Product Classification
@@ -107,13 +107,13 @@ public class InventoryItem {
         // Measurement unit for the product (pieces, kg, liters, etc.)
         @Column(name = "unit", nullable = false)
         @Enumerated(EnumType.STRING)
-        @NotNull
+        @NotNull(message = "{unit.required}")
         private Unit unit;
 
         // Physical Attributes
         // Product weight in grams for shipping calculations and specifications
         @Column(name = "weight", precision = 8, scale = 2)
-        @DecimalMin(value = "0.0", message = "Weight cannot be negative")
+        @DecimalMin(value = "0.0", message = "{inventoryItem.weight.negative}")
         private BigDecimal weight;
 
         // Product dimensions in format "Length x Width x Height" (in cm)
@@ -135,18 +135,18 @@ public class InventoryItem {
         // Stock Management
         // Current available stock quantity
         @Column(name = "current_stock", nullable = false)
-        @NotNull
-        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Current stock cannot be negative")
+        @NotNull(message = "{inventoryItem.current.stock.required}")
+        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "{stock.cannot.be.negative}")
         private Integer currentStock;
 
         // Minimum stock level before reordering alert
         @Column(name = "minimum_stock")
-        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Minimum stock cannot be negative")
+        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "{stock.cannot.be.negative}")
         private Integer minimumStock;
 
         // Maximum stock capacity for storage optimization
         @Column(name = "maximum_stock")
-        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Maximum stock cannot be negative")
+        @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "{stock.cannot.be.negative}")
         private Integer maximumStock;
 
         // Pricing Information
@@ -169,7 +169,7 @@ public class InventoryItem {
 
         // Discounted price during promotions or sales
         @Column(name = "discount_price", precision = 10, scale = 2)
-        @DecimalMin(value = "0.0", message = "Discount price cannot be negative")
+        @DecimalMin(value = "0.0", message = "{inventoryItem.discount.price.negative}")
         private BigDecimal discountPrice;
 
         // Start date for discount pricing
@@ -197,14 +197,14 @@ public class InventoryItem {
 
         // Whether the item is active in the system (soft delete)
         @Column(name = "is_active", nullable = false)
-        @NotNull
+        @NotNull(message = \"{invalid.inventory.data}\")
         @Builder.Default
         private Boolean isActive = true;
 
         // Inventory Association
         // Foreign key reference to the inventory this item belongs to
         @Column(name = "inventory_id", nullable = false)
-        @NotNull(message = "Inventory ID is required")
+        @NotNull(message = "{inventory.id.required}")
         private String inventoryId;
 
         // REMOVED: Inventory Movements relationship - now using GlobalAuditService

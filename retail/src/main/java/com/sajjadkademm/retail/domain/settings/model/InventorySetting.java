@@ -41,58 +41,58 @@ public class InventorySetting {
     private String id;
 
     @Column(name = "organization_id", nullable = false)
-    @NotNull(message = "Organization ID is required")
+    @NotNull(message = "{inventory.id.required}")
     private String organizationId;
 
     // Stock Management Settings
     @Column(name = "negative_stock_allowed", nullable = false)
-    @NotNull(message = "Negative stock allowed is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean negativeStockAllowed = false;
 
     @Column(name = "barcode_required", nullable = false)
-    @NotNull(message = "Barcode required is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean barcodeRequired = true;
 
     @Column(name = "sku_required", nullable = false)
-    @NotNull(message = "SKU required is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean skuRequired = true;
 
     @Column(name = "require_cost_price", nullable = false)
-    @NotNull(message = "Require cost price is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean requireCostPrice = true;
 
     // Alert Settings
     @Column(name = "low_stock_alerts_enabled", nullable = false)
-    @NotNull(message = "Low stock alerts enabled is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean lowStockAlertsEnabled = true;
 
     @Column(name = "low_stock_threshold", nullable = false)
-    @NotNull(message = "Low stock threshold is required")
-    @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "Low stock threshold must be at least 1")
-    @Max(value = ValidationConstants.MAX_LOW_STOCK_THRESHOLD, message = "Low stock threshold cannot exceed 1000")
+    @NotNull(message = "{invalid.inventory.data}")
+    @Min(value = ValidationConstants.MIN_STOCK_VALUE, message = "{stock.cannot.be.negative}")
+    @Max(value = ValidationConstants.MAX_LOW_STOCK_THRESHOLD, message = "{invalid.inventory.data}")
     private Integer lowStockThreshold = 10;
 
     @Column(name = "out_of_stock_alerts_enabled", nullable = false)
-    @NotNull(message = "Out of stock alerts enabled is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean outOfStockAlertsEnabled = true;
 
     @Column(name = "expiry_alerts_enabled", nullable = false)
-    @NotNull(message = "Expiry alerts enabled is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean expiryAlertsEnabled = true;
 
     @Column(name = "expiry_alert_days", nullable = false)
-    @NotNull(message = "Expiry alert days is required")
-    @Min(value = ValidationConstants.MIN_EXPIRY_ALERT_DAYS, message = "Expiry alert days must be at least 1")
-    @Max(value = ValidationConstants.MAX_EXPIRY_ALERT_DAYS, message = "Expiry alert days cannot exceed 365")
+    @NotNull(message = "{invalid.inventory.data}")
+    @Min(value = ValidationConstants.MIN_EXPIRY_ALERT_DAYS, message = "{invalid.inventory.data}")
+    @Max(value = ValidationConstants.MAX_EXPIRY_ALERT_DAYS, message = "{invalid.inventory.data}")
     private Integer expiryAlertDays = 30;
 
     // Tracking Settings
     @Column(name = "batch_tracking_enabled", nullable = false)
-    @NotNull(message = "Batch tracking enabled is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean batchTrackingEnabled = true;
 
     @Column(name = "expiry_date_tracking_enabled", nullable = false)
-    @NotNull(message = "Expiry date tracking enabled is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean expiryDateTrackingEnabled = true;
 
     // Audit Fields

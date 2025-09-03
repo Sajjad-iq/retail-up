@@ -45,36 +45,36 @@ public class SystemSetting {
     private String id;
 
     @Column(name = "organization_id", nullable = false)
-    @NotNull(message = "Organization ID is required")
+    @NotNull(message = "{inventory.id.required}")
     private String organizationId;
 
     // Backup Settings
     @Column(name = "auto_backup_enabled", nullable = false)
-    @NotNull(message = "Auto backup enabled is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean autoBackupEnabled = true;
 
     @Column(name = "backup_retention_days", nullable = false)
-    @Min(value = ValidationConstants.MIN_BACKUP_RETENTION_DAYS, message = "Backup retention days must be at least 1")
-    @Max(value = ValidationConstants.MAX_BACKUP_RETENTION_DAYS, message = "Backup retention days cannot exceed 365")
+    @Min(value = ValidationConstants.MIN_BACKUP_RETENTION_DAYS, message = "{invalid.inventory.data}")
+    @Max(value = ValidationConstants.MAX_BACKUP_RETENTION_DAYS, message = "{invalid.inventory.data}")
     private Integer backupRetentionDays = 30;
 
     // General Settings
     @Column(name = "timezone", nullable = false)
-    @NotNull(message = "Timezone is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private String timezone = "UTC";
 
     @Column(name = "language", nullable = false)
-    @NotNull(message = "Language is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private String language = "en";
 
     @Column(name = "currency", nullable = false)
-    @NotNull(message = "Currency is required")
+    @NotNull(message = "{invalid.inventory.data}")
     @Enumerated(EnumType.STRING)
     private Currency currency;
 
     // Notification Settings
     @Column(name = "email_notifications_enabled", nullable = false)
-    @NotNull(message = "Email notifications enabled is required")
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean emailNotificationsEnabled = true;
 
     // Audit Fields

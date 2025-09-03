@@ -50,24 +50,24 @@ public class Inventory {
     private String id;
 
     @Column(name = "name", nullable = false)
-    @NotBlank
-    @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_NAME_LENGTH)
+    @NotBlank(message = "{inventory.name.required}")
+    @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_NAME_LENGTH, message = "{inventory.name.invalid}")
     private String name;
 
     @Column(name = "description", length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
-    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH)
+    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH, message = "{inventory.description.invalid}")
     private String description;
 
     @Column(name = "location", length = ValidationConstants.MAX_ADDRESS_LENGTH)
-    @Size(max = ValidationConstants.MAX_ADDRESS_LENGTH)
+    @Size(max = ValidationConstants.MAX_ADDRESS_LENGTH, message = "{inventory.location.invalid}")
     private String location;
 
     @Column(name = "is_active", nullable = false)
-    @NotNull
+    @NotNull(message = "{invalid.inventory.data}")
     private Boolean isActive;
 
     @Column(name = "organization_id", nullable = false)
-    @NotNull(message = "Organization ID is required")
+    @NotNull(message = "{inventory.id.required}")
     private String organizationId;
 
     @CreationTimestamp

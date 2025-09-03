@@ -51,25 +51,25 @@ public class Organization {
     private String id;
 
     @Column(name = "name", nullable = false)
-    @NotBlank
-    @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH)
+    @NotBlank(message = "{organization.name.empty}")
+    @Size(min = ValidationConstants.MIN_ORGANIZATION_NAME_LENGTH, max = ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH, message = "{organization.name.invalid}")
     private String name;
 
     @Column(name = "domain", nullable = false, unique = true)
-    @NotBlank
-    @Size(min = ValidationConstants.MIN_DOMAIN_LENGTH, max = ValidationConstants.MAX_DOMAIN_LENGTH)
+    @NotBlank(message = "{invalid.domain.format}")
+    @Size(min = ValidationConstants.MIN_DOMAIN_LENGTH, max = ValidationConstants.MAX_DOMAIN_LENGTH, message = "{invalid.domain.format}")
     private String domain;
 
     @Column(name = "description", length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
-    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH)
+    @Size(max = ValidationConstants.MAX_DESCRIPTION_LENGTH, message = "{organization.description.invalid}")
     private String description;
 
     @Column(name = "address", length = ValidationConstants.MAX_ADDRESS_LENGTH)
-    @Size(max = ValidationConstants.MAX_ADDRESS_LENGTH)
+    @Size(max = ValidationConstants.MAX_ADDRESS_LENGTH, message = "{organization.address.invalid}")
     private String address;
 
     @Column(name = "phone", nullable = true, length = ValidationConstants.MAX_PHONE_LENGTH)
-    @Size(max = ValidationConstants.MAX_PHONE_LENGTH, min = ValidationConstants.MIN_PHONE_LENGTH)
+    @Size(max = ValidationConstants.MAX_PHONE_LENGTH, min = ValidationConstants.MIN_PHONE_LENGTH, message = "{auth.phone.too.short}")
     private String phone;
 
     @Enumerated(EnumType.STRING)

@@ -57,7 +57,7 @@ public class User {
     private String id;
 
     @Column(name = "name", nullable = false)
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = "{user.name.empty}")
     private String name;
 
     @Column(name = "phone", nullable = true, unique = true)
@@ -66,22 +66,22 @@ public class User {
     private String phone;
 
     @Column(name = "email", nullable = true)
-    @Email(message = "Invalid email address")
+    @Email(message = "{user.email.invalid.format}")
     private String email;
 
     @Column(name = "password", nullable = false)
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "{auth.password.size}")
     @JsonIgnore
     private String password;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Status is required")
+    @NotNull(message = "{user.not.active}")
     private UserStatus status;
 
     @Column(name = "account_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Account type is required")
+    @NotNull(message = "{invalid.user.data}")
     private AccountType accountType;
 
     @CreationTimestamp
