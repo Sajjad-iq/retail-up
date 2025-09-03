@@ -25,11 +25,21 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
     List<Organization> searchOrganizationsByUser(@Param("searchTerm") String searchTerm,
             @Param("userId") String userId);
 
+    // Check if organization name exists
+    boolean existsByName(String name);
+
     // Check if domain exists
     boolean existsByDomain(String domain);
 
     // Check if phone exists
     boolean existsByPhone(String phone);
+
+    // Find organizations by creator ID
+    List<Organization> findByCreatedById(String createdById);
+
+    // Search organizations by user ID and search term
+    @Query("SELECT o FROM Organization o WHERE (o.name LIKE %:searchTerm% OR o.description LIKE %:searchTerm%) AND o.createdBy.id = :userId")
+    List<Organization> searchByUserIdAndTerm(@Param("userId") String userId, @Param("searchTerm") String searchTerm);
 
 
 }

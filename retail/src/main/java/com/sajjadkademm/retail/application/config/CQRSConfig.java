@@ -40,7 +40,7 @@ public class CQRSConfig {
     @Bean
     public CacheManager cacheManager() {
         ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-        cacheManager.setCacheNames(java.util.Arrays.asList("query-cache", "report-cache", "inventory-cache"));
+        cacheManager.setCacheNames(java.util.Arrays.asList("query-cache", "report-cache", "inventory-cache", "organizations", "userOrganizations", "organizationSearch"));
         cacheManager.setAllowNullValues(false);
         return cacheManager;
     }
