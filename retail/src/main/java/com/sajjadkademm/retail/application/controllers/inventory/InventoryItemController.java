@@ -4,6 +4,11 @@ import com.sajjadkademm.retail.application.services.inventory.InventoryItemServi
 
 import com.sajjadkademm.retail.application.dto.inventory.*;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
+import com.sajjadkademm.retail.shared.cqrs.CommandBus;
+import com.sajjadkademm.retail.shared.cqrs.QueryBus;
+import com.sajjadkademm.retail.domain.inventory.commands.*;
+import com.sajjadkademm.retail.domain.inventory.queries.*;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 
 import com.sajjadkademm.retail.shared.enums.Unit;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +35,7 @@ import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
  * authenticated user.
  * 
  * @author Sajjad Kadem
- * @version 1.0
+ * @version 2.0 (CQRS Refactored)
  * @since 2024-12-19
  */
 @Slf4j
@@ -40,8 +45,10 @@ import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
 @Tag(name = "Inventory Items", description = "Inventory item management endpoints (user-scoped)")
 public class InventoryItemController {
 
-        private final InventoryItemService inventoryItemService;
+        private final InventoryItemService inventoryItemService; // Fallback for complex operations
         private final LocalizedErrorService localizedErrorService;
+        private final CommandBus commandBus;
+        private final QueryBus queryBus;
 
         /**
          * Create inventory item endpoint
@@ -52,8 +59,15 @@ public class InventoryItemController {
         @ApiResponse(responseCode = "200", description = "Inventory item created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class), examples = @ExampleObject(name = "Created Inventory Item", value = "{\"id\": \"item123\", \"name\": \"Laptop Computer\", \"description\": \"High-performance laptop for business use\", \"barcode\": \"1234567890123\", \"category\": \"Electronics\", \"brand\": \"TechCorp\", \"unit\": \"PIECES\", \"currentStock\": 50, \"minimumStock\": 10, \"maximumStock\": 100, \"costPrice\": 800.00, \"sellingPrice\": 1200.00, \"isActive\": true, \"inventoryId\": \"inv123\", \"createdAt\": \"2024-12-19T10:30:00\", \"updatedAt\": \"2024-12-19T10:30:00\", \"createdBy\": \"user123\"}")))
         @PostMapping
         public ResponseEntity<InventoryItem> createInventoryItem(
-                        @Parameter(description = "Inventory item creation request", required = true, content = @Content(schema = @Schema(implementation = CreateInventoryItemRequest.class), examples = @ExampleObject(name = "Create Inventory Item Request", value = "{\"inventoryId\": \"inv123\", \"name\": \"Laptop Computer\", \"description\": \"High-performance laptop for business use\", \"barcode\": \"1234567890123\", \"category\": \"Electronics\", \"brand\": \"TechCorp\", \"unit\": \"PIECES\", \"currentStock\": 50, \"minimumStock\": 10, \"maximumStock\": 100, \"costPrice\": 800.00, \"sellingPrice\": 1200.00}"))) @Valid @RequestBody CreateInventoryItemRequest request) {
-                InventoryItem response = inventoryItemService.createInventoryItem(request);
+                        @Parameter(description = "Inventory item creation request", required = true, content = @Content(schema = @Schema(implementation = CreateInventoryItemRequest.class), examples = @ExampleObject(name = "Create Inventory Item Request", value = "{\"inventoryId\": \"inv123\", \"name\": \"Laptop Computer\", \"description\": \"High-performance laptop for business use\", \"barcode\": \"1234567890123\", \"category\": \"Electronics\", \"brand\": \"TechCorp\", \"unit\": \"PIECES\", \"currentStock\": 50, \"minimumStock\": 10, \"maximumStock\": 100, \"costPrice\": 800.00, \"sellingPrice\": 1200.00}"))) @Valid @RequestBody CreateInventoryItemRequest request) throws Exception {
+                
+                // CQRS: Use command for write operations
+                CreateInventoryItemCommand command = CreateInventoryItemCommand.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .request(request)
+                        .build();
+                
+                InventoryItem response = commandBus.execute(command);
                 return ResponseEntity.ok(response);
         }
 
@@ -67,8 +81,16 @@ public class InventoryItemController {
         @PutMapping("/{id}")
         public ResponseEntity<InventoryItem> updateInventoryItem(
                         @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id,
-                        @Parameter(description = "Inventory item update request", required = true, content = @Content(schema = @Schema(implementation = UpdateInventoryItemRequest.class))) @Valid @RequestBody UpdateInventoryItemRequest request) {
-                InventoryItem response = inventoryItemService.updateInventoryItem(id, request);
+                        @Parameter(description = "Inventory item update request", required = true, content = @Content(schema = @Schema(implementation = UpdateInventoryItemRequest.class))) @Valid @RequestBody UpdateInventoryItemRequest request) throws Exception {
+                
+                // CQRS: Use command for write operations
+                UpdateInventoryItemCommand command = UpdateInventoryItemCommand.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .itemId(id)
+                        .request(request)
+                        .build();
+                
+                InventoryItem response = commandBus.execute(command);
                 return ResponseEntity.ok(response);
         }
 
@@ -79,8 +101,15 @@ public class InventoryItemController {
         @ApiResponse(responseCode = "200", description = "Inventory item found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InventoryItem.class)))
         @GetMapping("/{id}")
         public ResponseEntity<InventoryItem> getInventoryItemById(
-                        @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id) {
-                InventoryItem response = inventoryItemService.getInventoryItemById(id);
+                        @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id) throws Exception {
+                
+                // CQRS: Use query for read operations
+                GetInventoryItemByIdQuery query = GetInventoryItemByIdQuery.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .itemId(id)
+                        .build();
+                
+                InventoryItem response = queryBus.execute(query);
                 return ResponseEntity.ok(response);
         }
 
@@ -91,8 +120,15 @@ public class InventoryItemController {
         @ApiResponse(responseCode = "200", description = "Inventory item deleted successfully")
         @DeleteMapping("/{id}")
         public ResponseEntity<Void> deleteInventoryItem(
-                        @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id) {
-                inventoryItemService.deleteInventoryItem(id);
+                        @Parameter(description = "Inventory item ID", required = true, example = "item123") @PathVariable String id) throws Exception {
+                
+                // CQRS: Use command for write operations
+                DeleteInventoryItemCommand command = DeleteInventoryItemCommand.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .itemId(id)
+                        .build();
+                
+                commandBus.execute(command);
                 return ResponseEntity.ok().build();
         }
 
@@ -104,8 +140,16 @@ public class InventoryItemController {
         @GetMapping("/barcode/{barcode}/inventory/{inventoryId}")
         public ResponseEntity<InventoryItem> getInventoryItemByBarcode(
                         @Parameter(description = "Barcode", required = true, example = "1234567890123") @PathVariable String barcode,
-                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
-                InventoryItem response = inventoryItemService.getInventoryItemByBarcode(barcode, inventoryId);
+                        @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) throws Exception {
+                
+                // CQRS: Use query for read operations
+                GetInventoryItemByBarcodeQuery query = GetInventoryItemByBarcodeQuery.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .barcode(barcode)
+                        .inventoryId(inventoryId)
+                        .build();
+                
+                InventoryItem response = queryBus.execute(query);
                 return ResponseEntity.ok(response);
         }
 
@@ -189,9 +233,27 @@ public class InventoryItemController {
                 filterRequest.setSortBy(sortBy);
                 filterRequest.setSortDirection(sortDirection);
 
-                PagedResponse<InventoryItem> response = inventoryItemService.filterItemsPaginated(inventoryId,
-                                filterRequest, page, size, sortBy, sortDirection);
-                return ResponseEntity.ok(response);
+                // CQRS: Use query for read operations with filtering
+                GetInventoryItemsQuery query = GetInventoryItemsQuery.builder()
+                        .userId(SecurityUtils.getCurrentUserId())
+                        .inventoryId(inventoryId)
+                        .filterRequest(filterRequest)
+                        .page(page)
+                        .size(size)
+                        .sortBy(sortBy)
+                        .sortDirection(sortDirection)
+                        .build();
+                
+                try {
+                    PagedResponse<InventoryItem> response = queryBus.execute(query);
+                    return ResponseEntity.ok(response);
+                } catch (Exception e) {
+                    log.error("Error executing GetInventoryItemsQuery", e);
+                    // Fallback to existing service for complex queries
+                    PagedResponse<InventoryItem> response = inventoryItemService.filterItemsPaginated(inventoryId,
+                                    filterRequest, page, size, sortBy, sortDirection);
+                    return ResponseEntity.ok(response);
+                }
         }
 
         /**
@@ -216,6 +278,47 @@ public class InventoryItemController {
                         @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String inventoryId) {
                 long count = inventoryItemService.getActiveItemCountByInventory(inventoryId);
                 return ResponseEntity.ok(count);
+        }
+
+        /**
+         * Get inventory summary report endpoint (CQRS optimized)
+         * NEW: CQRS-optimized endpoint for fast inventory summaries
+         */
+        @Operation(summary = "Get Inventory Summary Report", 
+                   description = "Get cached inventory summary with key metrics (CQRS optimized)")
+        @ApiResponse(responseCode = "200", description = "Inventory summary retrieved successfully")
+        @GetMapping("/inventory/{inventoryId}/summary")
+        public ResponseEntity<?> getInventorySummary(
+                        @Parameter(description = "Inventory ID", required = true, example = "inv123") 
+                        @PathVariable String inventoryId) {
+                
+                try {
+                    // CQRS: Use optimized query for reporting
+                    GetInventorySummaryQuery query = GetInventorySummaryQuery.builder()
+                            .userId(SecurityUtils.getCurrentUserId())
+                            .inventoryId(inventoryId)
+                            .build();
+                    
+                    Object summary = queryBus.execute(query);
+                    return ResponseEntity.ok(summary);
+                } catch (Exception e) {
+                    log.error("Error getting inventory summary via CQRS", e);
+                    // Fallback: return basic counts using existing service
+                    try {
+                        long totalCount = inventoryItemService.getItemCountByInventory(inventoryId);
+                        long activeCount = inventoryItemService.getActiveItemCountByInventory(inventoryId);
+                        
+                        return ResponseEntity.ok(java.util.Map.of(
+                            "inventoryId", inventoryId,
+                            "totalItems", totalCount,
+                            "activeItems", activeCount,
+                            "reportGeneratedAt", java.time.LocalDateTime.now(),
+                            "source", "fallback"
+                        ));
+                    } catch (Exception fallbackError) {
+                        return ResponseEntity.internalServerError().body("Failed to generate inventory summary");
+                    }
+                }
         }
 
         /**
