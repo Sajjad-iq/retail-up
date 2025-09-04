@@ -32,7 +32,12 @@
       "Bash(grep:*)",
       "Bash(git checkout:*)",
       "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\auth\\model\\User.java\")",
-      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\services\\audit\\GlobalAuditService.java\")"
+      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\services\\audit\\GlobalAuditService.java\")",
+      "Read(c:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\controllers\\auth/**)",
+      "Read(c:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\shared\\cqrs/**)",
+      "Read(c:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\shared\\cqrs/**)",
+      "Read(c:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\shared\\cqrs/**)",
+      "Read(c:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\auth\\commands/**)"
     ],
     "deny": [],
     "ask": []

@@ -3,14 +3,7 @@ package com.sajjadkademm.retail.application.controllers.organizations;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
 import com.sajjadkademm.retail.application.dto.organizations.UpdateOrganizationRequest;
-import com.sajjadkademm.retail.domain.organization.commands.CreateOrganizationCommand;
-import com.sajjadkademm.retail.domain.organization.commands.UpdateOrganizationCommand;
-import com.sajjadkademm.retail.domain.organization.queries.GetOrganizationByIdQuery;
-import com.sajjadkademm.retail.domain.organization.queries.GetUserOrganizationsQuery;
-import com.sajjadkademm.retail.domain.organization.queries.SearchUserOrganizationsQuery;
-import com.sajjadkademm.retail.shared.cqrs.CommandBus;
-import com.sajjadkademm.retail.shared.cqrs.QueryBus;
-import com.sajjadkademm.retail.application.config.security.SecurityUtils;
+import com.sajjadkademm.retail.application.services.organizations.OrganizationService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +36,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Organizations", description = "Organization management endpoints (user-scoped)")
 public class OrganizationController {
 
-    private final CommandBus commandBus;
-    private final QueryBus queryBus;
+    private final OrganizationService organizationService;
 
     /**
      * Create organization endpoint
@@ -76,12 +68,7 @@ public class OrganizationController {
                         "phone": "+1-555-123-4567"
                     }
                     """))) @Valid @RequestBody CreateOrganizationRequest request) throws Exception {
-        CreateOrganizationCommand command = CreateOrganizationCommand.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .request(request)
-                .build();
-        
-        Organization response = commandBus.execute(command);
+        Organization response = organizationService.createOrganization(request);
         return ResponseEntity.ok(response);
     }
 
@@ -115,13 +102,7 @@ public class OrganizationController {
                         "status": "DISABLED"
                     }
                     """))) @Valid @RequestBody UpdateOrganizationRequest request) throws Exception {
-        UpdateOrganizationCommand command = UpdateOrganizationCommand.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .organizationId(id)
-                .request(request)
-                .build();
-        
-        Organization response = commandBus.execute(command);
+        Organization response = organizationService.updateOrganization(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -147,12 +128,7 @@ public class OrganizationController {
     @GetMapping("/{id}")
     public ResponseEntity<Organization> getOrganizationById(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String id) throws Exception {
-        GetOrganizationByIdQuery query = GetOrganizationByIdQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .organizationId(id)
-                .build();
-        
-        Organization response = queryBus.execute(query);
+        Organization response = organizationService.getOrganizationById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -178,11 +154,7 @@ public class OrganizationController {
             """)))
     @GetMapping
     public ResponseEntity<List<Organization>> getUserOrganizations() throws Exception {
-        GetUserOrganizationsQuery query = GetUserOrganizationsQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .build();
-        
-        List<Organization> response = queryBus.execute(query);
+        List<Organization> response = organizationService.getUserOrganizations();
         return ResponseEntity.ok(response);
     }
 
@@ -209,12 +181,7 @@ public class OrganizationController {
     @GetMapping("/search")
     public ResponseEntity<List<Organization>> searchUserOrganizations(
             @Parameter(description = "Search query for organization name or domain", required = true, example = "acme") @RequestParam String q) throws Exception {
-        SearchUserOrganizationsQuery query = SearchUserOrganizationsQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .searchTerm(q)
-                .build();
-        
-        List<Organization> response = queryBus.execute(query);
+        List<Organization> response = organizationService.searchUserOrganizations(q);
         return ResponseEntity.ok(response);
     }
 

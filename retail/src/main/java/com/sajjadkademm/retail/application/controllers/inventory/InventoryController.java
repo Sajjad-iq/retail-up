@@ -3,11 +3,7 @@ package com.sajjadkademm.retail.application.controllers.inventory;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryRequest;
-import com.sajjadkademm.retail.shared.cqrs.CommandBus;
-import com.sajjadkademm.retail.shared.cqrs.QueryBus;
-import com.sajjadkademm.retail.domain.inventory.commands.*;
-import com.sajjadkademm.retail.domain.inventory.queries.*;
-import com.sajjadkademm.retail.application.config.security.SecurityUtils;
+import com.sajjadkademm.retail.application.services.inventory.InventoryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +37,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Inventories", description = "Inventory management endpoints (user-scoped)")
 public class InventoryController {
 
-    private final CommandBus commandBus;
-    private final QueryBus queryBus;
+    private final InventoryService inventoryService;
 
     /**
      * Create inventory endpoint
@@ -74,13 +69,7 @@ public class InventoryController {
                     }
                     """))) @Valid @RequestBody CreateInventoryRequest request) throws Exception {
         
-        // CQRS: Use command for write operations
-        CreateInventoryCommand command = CreateInventoryCommand.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .request(request)
-                .build();
-        
-        Inventory response = commandBus.execute(command);
+        Inventory response = inventoryService.createInventory(request);
         return ResponseEntity.ok(response);
     }
 
@@ -113,14 +102,7 @@ public class InventoryController {
                     }
                     """))) @Valid @RequestBody UpdateInventoryRequest request) throws Exception {
         
-        // CQRS: Use command for write operations
-        UpdateInventoryCommand command = UpdateInventoryCommand.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .inventoryId(id)
-                .request(request)
-                .build();
-        
-        Inventory response = commandBus.execute(command);
+        Inventory response = inventoryService.updateInventory(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -147,13 +129,7 @@ public class InventoryController {
     public ResponseEntity<Inventory> getInventoryById(
             @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String id) throws Exception {
         
-        // CQRS: Use query for read operations
-        GetInventoryByIdQuery query = GetInventoryByIdQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .inventoryId(id)
-                .build();
-        
-        Inventory response = queryBus.execute(query);
+        Inventory response = inventoryService.getInventoryById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -192,14 +168,7 @@ public class InventoryController {
     public ResponseEntity<List<Inventory>> getInventoriesByOrganization(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
         
-        // CQRS: Use query for read operations
-        GetInventoriesByOrganizationQuery query = GetInventoriesByOrganizationQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .organizationId(organizationId)
-                .activeOnly(false) // Get all inventories
-                .build();
-        
-        List<Inventory> response = queryBus.execute(query);
+        List<Inventory> response = inventoryService.getInventoriesByOrganization(organizationId);
         return ResponseEntity.ok(response);
     }
 
@@ -214,14 +183,7 @@ public class InventoryController {
     public ResponseEntity<List<Inventory>> getActiveInventoriesByOrganization(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
         
-        // CQRS: Use query for read operations
-        GetInventoriesByOrganizationQuery query = GetInventoriesByOrganizationQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .organizationId(organizationId)
-                .activeOnly(true) // Get only active inventories
-                .build();
-        
-        List<Inventory> response = queryBus.execute(query);
+        List<Inventory> response = inventoryService.getActiveInventoriesByOrganization(organizationId);
         return ResponseEntity.ok(response);
     }
 
@@ -250,14 +212,7 @@ public class InventoryController {
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId,
             @Parameter(description = "Search query for inventory name", required = true, example = "warehouse") @RequestParam String q) throws Exception {
         
-        // CQRS: Use query for read operations
-        SearchInventoriesQuery query = SearchInventoriesQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .organizationId(organizationId)
-                .searchTerm(q)
-                .build();
-        
-        List<Inventory> response = queryBus.execute(query);
+        List<Inventory> response = inventoryService.searchInventories(organizationId, q);
         return ResponseEntity.ok(response);
     }
 
@@ -271,13 +226,7 @@ public class InventoryController {
     public ResponseEntity<Void> deleteInventory(
             @Parameter(description = "Inventory ID", required = true, example = "inv123") @PathVariable String id) throws Exception {
         
-        // CQRS: Use command for write operations
-        DeleteInventoryCommand command = DeleteInventoryCommand.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .inventoryId(id)
-                .build();
-        
-        commandBus.execute(command);
+        inventoryService.deleteInventory(id);
         return ResponseEntity.ok().build();
     }
 
@@ -294,14 +243,7 @@ public class InventoryController {
             @Parameter(description = "Inventory name to check", required = true, example = "Main Warehouse") @PathVariable String name,
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
         
-        // CQRS: Use query for read operations
-        InventoryExistsByNameQuery query = InventoryExistsByNameQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .name(name)
-                .organizationId(organizationId)
-                .build();
-        
-        Boolean exists = queryBus.execute(query);
+        Boolean exists = inventoryService.inventoryExistsByName(name, organizationId);
         return ResponseEntity.ok(exists);
     }
 
@@ -314,13 +256,7 @@ public class InventoryController {
     public ResponseEntity<Long> getInventoryCountByOrganization(
             @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
         
-        // CQRS: Use query for read operations
-        GetInventoryCountByOrganizationQuery query = GetInventoryCountByOrganizationQuery.builder()
-                .userId(SecurityUtils.getCurrentUserId())
-                .organizationId(organizationId)
-                .build();
-        
-        Long count = queryBus.execute(query);
+        Long count = inventoryService.getInventoryCountByOrganization(organizationId);
         return ResponseEntity.ok(count);
     }
 }

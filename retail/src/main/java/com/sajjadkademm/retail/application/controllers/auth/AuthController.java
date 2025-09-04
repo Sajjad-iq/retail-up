@@ -6,11 +6,7 @@ import com.sajjadkademm.retail.application.dto.auth.LoginRequest;
 import com.sajjadkademm.retail.application.dto.auth.LoginResponse;
 import com.sajjadkademm.retail.application.dto.auth.RegisterRequest;
 import com.sajjadkademm.retail.domain.user.model.User;
-import com.sajjadkademm.retail.shared.cqrs.CommandBus;
-import com.sajjadkademm.retail.shared.cqrs.QueryBus;
-import com.sajjadkademm.retail.domain.auth.commands.*;
-import com.sajjadkademm.retail.domain.auth.queries.*;
-import com.sajjadkademm.retail.application.config.security.SecurityUtils;
+import com.sajjadkademm.retail.application.services.auth.AuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +40,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @Tag(name = "Authentication", description = "Authentication and authorization endpoints")
 public class AuthController {
 
-        private final CommandBus commandBus;
-        private final QueryBus queryBus;
+        private final AuthService authService;
 
         /**
          * User login endpoint
@@ -61,14 +56,7 @@ public class AuthController {
                         @Parameter(description = "Login credentials", required = true) @Valid @RequestBody LoginRequest request,
                         HttpServletRequest httpRequest) throws Exception {
                 
-                // CQRS: Use command for login operation
-                LoginCommand command = LoginCommand.builder()
-                        .request(request)
-                        .clientIp(getClientIpAddress(httpRequest))
-                        .userAgent(httpRequest.getHeader("User-Agent"))
-                        .build();
-                
-                return commandBus.execute(command);
+                return authService.login(request, httpRequest);
         }
 
         /**
@@ -85,14 +73,7 @@ public class AuthController {
                         @Parameter(description = "Registration information", required = true) @Valid @RequestBody RegisterRequest request,
                         HttpServletRequest httpRequest) throws Exception {
                 
-                // CQRS: Use command for registration operation
-                RegisterCommand command = RegisterCommand.builder()
-                        .request(request)
-                        .clientIp(getClientIpAddress(httpRequest))
-                        .userAgent(httpRequest.getHeader("User-Agent"))
-                        .build();
-                
-                return commandBus.execute(command);
+                return authService.register(request, httpRequest);
         }
 
         /**
@@ -103,12 +84,7 @@ public class AuthController {
         @GetMapping("/me")
         public User getCurrentUserProfile() throws Exception {
                 
-                // CQRS: Use query for read operation
-                GetCurrentUserQuery query = GetCurrentUserQuery.builder()
-                        .userId(SecurityUtils.getCurrentUserId())
-                        .build();
-                
-                return queryBus.execute(query);
+                return authService.getCurrentUserProfile();
         }
 
         /**
@@ -120,12 +96,7 @@ public class AuthController {
         public boolean userExists(
                         @Parameter(description = "Email or phone number to check", required = true) @RequestParam String emailOrPhone) throws Exception {
                 
-                // CQRS: Use query for read operation
-                UserExistsQuery query = UserExistsQuery.builder()
-                        .emailOrPhone(emailOrPhone)
-                        .build();
-                
-                return queryBus.execute(query);
+                return authService.userExists(emailOrPhone);
         }
 
         /**
@@ -142,16 +113,7 @@ public class AuthController {
                         @Parameter(description = "Password change request", required = true) @Valid @RequestBody ChangePasswordRequest request,
                         HttpServletRequest httpRequest) throws Exception {
                 
-                // CQRS: Use command for password change operation
-                ChangePasswordCommand command = ChangePasswordCommand.builder()
-                        .userId(SecurityUtils.getCurrentUserId())
-                        .oldPassword(request.getOldPassword())
-                        .newPassword(request.getNewPassword())
-                        .clientIp(getClientIpAddress(httpRequest))
-                        .userAgent(httpRequest.getHeader("User-Agent"))
-                        .build();
-                
-                return commandBus.execute(command);
+                return authService.changePassword(request, httpRequest);
         }
 
         /**
@@ -165,30 +127,7 @@ public class AuthController {
         @GetMapping("/validate-token")
         public LoginResponse validateToken(HttpServletRequest httpRequest) throws Exception {
                 
-                // CQRS: Use query for token validation operation
-                ValidateTokenQuery query = ValidateTokenQuery.builder()
-                        .userId(SecurityUtils.getCurrentUserId())
-                        .clientIp(getClientIpAddress(httpRequest))
-                        .userAgent(httpRequest.getHeader("User-Agent"))
-                        .build();
-                
-                return queryBus.execute(query);
+                return authService.validateToken(httpRequest);
         }
 
-        /**
-         * Helper method to get client IP address
-         */
-        private String getClientIpAddress(HttpServletRequest request) {
-                String xForwardedFor = request.getHeader("X-Forwarded-For");
-                if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
-                        return xForwardedFor.split(",")[0].trim();
-                }
-                
-                String xRealIp = request.getHeader("X-Real-IP");
-                if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
-                        return xRealIp;
-                }
-                
-                return request.getRemoteAddr();
-        }
 }

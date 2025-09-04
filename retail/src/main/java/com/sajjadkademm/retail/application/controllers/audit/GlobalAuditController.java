@@ -1,13 +1,8 @@
 package com.sajjadkademm.retail.application.controllers.audit;
 
-import com.sajjadkademm.retail.shared.cqrs.CommandBus;
-import com.sajjadkademm.retail.shared.cqrs.QueryBus;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
-import com.sajjadkademm.retail.domain.audit.queries.*;
-import com.sajjadkademm.retail.domain.audit.commands.*;
-import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.application.services.audit.AuditService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -41,8 +36,7 @@ import static com.sajjadkademm.retail.shared.constants.ValidationConstants.*;
 @Tag(name = "Global Audit", description = "Organization-wide audit trail and activity tracking")
 public class GlobalAuditController {
 
-    private final CommandBus commandBus;
-    private final QueryBus queryBus;
+    private final AuditService auditService;
 
     /**
      * RECENT ACTIVITY: Get recent audit activity for dashboard
@@ -54,16 +48,7 @@ public class GlobalAuditController {
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "" + DEFAULT_PAGE_SIZE) int size) throws Exception {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-        
-        GetRecentActivityQuery query = GetRecentActivityQuery.builder()
-            .organizationId(organizationId)
-            .page(page)
-            .size(size)
-            .userId(currentUser.getId())
-            .build();
-            
-        Page<GlobalAuditLog> activity = queryBus.execute(query);
+        Page<GlobalAuditLog> activity = auditService.getRecentActivity(organizationId, page, size);
         return ResponseEntity.ok(activity);
     }
 
@@ -77,16 +62,7 @@ public class GlobalAuditController {
             @Parameter(description = "Entity type") @PathVariable EntityType entityType,
             @Parameter(description = "Entity ID") @PathVariable String entityId) throws Exception {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-        
-        GetEntityHistoryQuery query = GetEntityHistoryQuery.builder()
-            .organizationId(organizationId)
-            .entityType(entityType)
-            .entityId(entityId)
-            .userId(currentUser.getId())
-            .build();
-            
-        List<GlobalAuditLog> history = queryBus.execute(query);
+        List<GlobalAuditLog> history = auditService.getEntityHistory(organizationId, entityType, entityId);
         return ResponseEntity.ok(history);
     }
 
@@ -101,17 +77,7 @@ public class GlobalAuditController {
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "" + DEFAULT_PAGE_SIZE) int size) throws Exception {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-        
-        GetUserActivityQuery query = GetUserActivityQuery.builder()
-            .organizationId(organizationId)
-            .targetUserId(userId)
-            .page(page)
-            .size(size)
-            .userId(currentUser.getId())
-            .build();
-            
-        Page<GlobalAuditLog> activity = queryBus.execute(query);
+        Page<GlobalAuditLog> activity = auditService.getUserActivity(organizationId, userId, page, size);
         return ResponseEntity.ok(activity);
     }
 
@@ -126,16 +92,7 @@ public class GlobalAuditController {
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "" + DEFAULT_PAGE_SIZE) int size) throws Exception {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-        
-        GetInventoryMovementsQuery query = GetInventoryMovementsQuery.builder()
-            .organizationId(organizationId)
-            .page(page)
-            .size(size)
-            .userId(currentUser.getId())
-            .build();
-            
-        Page<GlobalAuditLog> movements = queryBus.execute(query);
+        Page<GlobalAuditLog> movements = auditService.getInventoryMovements(organizationId, page, size);
         return ResponseEntity.ok(movements);
     }
 
@@ -150,17 +107,7 @@ public class GlobalAuditController {
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "" + DEFAULT_PAGE_SIZE) int size) throws Exception {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-        
-        SearchAuditLogsQuery query = SearchAuditLogsQuery.builder()
-            .organizationId(organizationId)
-            .searchTerm(searchTerm)
-            .page(page)
-            .size(size)
-            .userId(currentUser.getId())
-            .build();
-            
-        Page<GlobalAuditLog> results = queryBus.execute(query);
+        Page<GlobalAuditLog> results = auditService.searchAuditLogs(organizationId, searchTerm, page, size);
         return ResponseEntity.ok(results);
     }
 
@@ -173,15 +120,7 @@ public class GlobalAuditController {
             @Parameter(description = "Organization ID") @RequestParam String organizationId,
             @Parameter(description = "Event description") @RequestParam String description) throws Exception {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-
-        LogSecurityEventCommand command = LogSecurityEventCommand.builder()
-            .organizationId(organizationId)
-            .description(description)
-            .userId(currentUser.getId())
-            .build();
-
-        String result = commandBus.execute(command);
+        String result = auditService.logSecurityEvent(organizationId, description);
         return ResponseEntity.ok(result);
     }
 
@@ -196,17 +135,7 @@ public class GlobalAuditController {
             @Parameter(description = "Process description") @RequestParam String description,
             @Parameter(description = "Reference ID") @RequestParam String referenceId) throws Exception {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-
-        LogBusinessProcessCommand command = LogBusinessProcessCommand.builder()
-            .organizationId(organizationId)
-            .processName(processName)
-            .description(description)
-            .referenceId(referenceId)
-            .userId(currentUser.getId())
-            .build();
-
-        String result = commandBus.execute(command);
+        String result = auditService.logBusinessProcess(organizationId, processName, description, referenceId);
         return ResponseEntity.ok(result);
     }
 }
