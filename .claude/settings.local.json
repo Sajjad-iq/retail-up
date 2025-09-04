@@ -27,7 +27,10 @@
       "Bash(dir \"C:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\organization\\validation\")",
       "Bash(dir \"C:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\services\\organizations\")",
       "Bash(dir:*)",
-      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\controllers\\debug\\CacheDebugController.java\")"
+      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\controllers\\debug\\CacheDebugController.java\")",
+      "Bash(tree:*)",
+      "Bash(grep:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

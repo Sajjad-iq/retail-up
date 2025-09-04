@@ -1,7 +1,11 @@
 package com.sajjadkademm.retail.application.controllers.settings;
 
-import com.sajjadkademm.retail.application.services.settings.SystemSettingsService;
-import com.sajjadkademm.retail.application.config.security.JwtUtil;
+import com.sajjadkademm.retail.shared.cqrs.CommandBus;
+import com.sajjadkademm.retail.shared.cqrs.QueryBus;
+import com.sajjadkademm.retail.domain.settings.queries.GetSystemSettingsQuery;
+import com.sajjadkademm.retail.domain.settings.commands.*;
+import com.sajjadkademm.retail.application.config.security.SecurityUtils;
+import com.sajjadkademm.retail.domain.auth.model.User;
 import com.sajjadkademm.retail.application.dto.settings.SystemSettingsRequest;
 import com.sajjadkademm.retail.domain.settings.model.SystemSetting;
 
@@ -37,7 +41,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @Tag(name = "System Settings", description = "System settings management endpoints")
 public class SystemSettingsController {
 
-    private final SystemSettingsService systemSettingsService;
+    private final CommandBus commandBus;
+    private final QueryBus queryBus;
 
     /**
      * Get system settings for an organization
@@ -60,8 +65,16 @@ public class SystemSettingsController {
             """)))
     @GetMapping("/{organizationId}")
     public ResponseEntity<SystemSetting> getSystemSettings(
-            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        SystemSetting response = systemSettingsService.getSystemSettings(organizationId);
+            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
+        
+        User currentUser = SecurityUtils.getCurrentUser();
+        
+        GetSystemSettingsQuery query = GetSystemSettingsQuery.builder()
+            .organizationId(organizationId)
+            .userId(currentUser.getId())
+            .build();
+            
+        SystemSetting response = queryBus.execute(query);
         return ResponseEntity.ok(response);
     }
 
@@ -97,9 +110,17 @@ public class SystemSettingsController {
                         "currency": "EUR",
                         "emailNotificationsEnabled": false
                     }
-                    """))) @Valid @RequestBody SystemSettingsRequest request) {
+                    """))) @Valid @RequestBody SystemSettingsRequest request) throws Exception {
 
-        SystemSetting response = systemSettingsService.updateSystemSettings(organizationId, request);
+        User currentUser = SecurityUtils.getCurrentUser();
+        
+        UpdateSystemSettingsCommand command = UpdateSystemSettingsCommand.builder()
+            .organizationId(organizationId)
+            .request(request)
+            .userId(currentUser.getId())
+            .build();
+            
+        SystemSetting response = commandBus.execute(command);
         return ResponseEntity.ok(response);
     }
 
@@ -124,8 +145,16 @@ public class SystemSettingsController {
             """)))
     @PostMapping("/{organizationId}/reset")
     public ResponseEntity<SystemSetting> resetSystemSettingsToDefaults(
-            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) {
-        SystemSetting response = systemSettingsService.resetToDefaults(organizationId);
+            @Parameter(description = "Organization ID", required = true, example = "org123") @PathVariable String organizationId) throws Exception {
+        
+        User currentUser = SecurityUtils.getCurrentUser();
+        
+        ResetSystemSettingsCommand command = ResetSystemSettingsCommand.builder()
+            .organizationId(organizationId)
+            .userId(currentUser.getId())
+            .build();
+            
+        SystemSetting response = commandBus.execute(command);
         return ResponseEntity.ok(response);
     }
 }
