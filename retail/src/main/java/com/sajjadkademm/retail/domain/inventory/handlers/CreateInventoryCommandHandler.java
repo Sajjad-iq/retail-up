@@ -9,7 +9,8 @@ import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
-import com.sajjadkademm.retail.application.services.users.UserService;
+import com.sajjadkademm.retail.domain.user.repositories.UserRepository;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
@@ -28,7 +29,7 @@ public class CreateInventoryCommandHandler implements CommandHandler<CreateInven
     private final InventoryRepository inventoryRepository;
     private final InventoryValidationUtils validationUtils;
     private final GlobalAuditService globalAuditService;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final CacheInvalidationService cacheInvalidationService;
 
     @Override
@@ -41,7 +42,8 @@ public class CreateInventoryCommandHandler implements CommandHandler<CreateInven
         validationUtils.validateCreateRequest(request, command.getUserId());
         
         // Get the current user for createdBy field
-        User currentUser = userService.getUserById(command.getUserId());
+        User currentUser = userRepository.findById(command.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found: " + command.getUserId()));
         
         // Build inventory from request
         Inventory inventory = Inventory.builder()

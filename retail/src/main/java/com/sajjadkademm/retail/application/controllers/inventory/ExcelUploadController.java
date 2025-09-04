@@ -5,7 +5,8 @@ import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.shared.utils.excel.ExcelUploadUtils;
 import com.sajjadkademm.retail.domain.user.model.User;
-import com.sajjadkademm.retail.application.services.users.UserService;
+import com.sajjadkademm.retail.domain.user.repositories.UserRepository;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,12 +31,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ExcelUploadController {
 
     private final ExcelUploadService excelUploadService;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public ExcelUploadController(ExcelUploadService excelUploadService, UserService userService) {
+    public ExcelUploadController(ExcelUploadService excelUploadService, UserRepository userRepository) {
         this.excelUploadService = excelUploadService;
-        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -60,7 +61,8 @@ public class ExcelUploadController {
             }
 
             // Get user
-            User user = userService.getUserById(userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("User not found: " + userId));
 
             // Process file
             ExcelUploadResponse response = excelUploadService.processExcelFile(file, inventoryId, user);
