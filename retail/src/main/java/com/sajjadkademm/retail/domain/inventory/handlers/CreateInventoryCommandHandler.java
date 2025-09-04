@@ -9,6 +9,8 @@ import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
+import com.sajjadkademm.retail.application.services.users.UserService;
+import com.sajjadkademm.retail.domain.auth.model.User;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class CreateInventoryCommandHandler implements CommandHandler<CreateInven
     private final InventoryRepository inventoryRepository;
     private final InventoryValidationUtils validationUtils;
     private final GlobalAuditService globalAuditService;
+    private final UserService userService;
 
     @Override
     public Inventory handle(CreateInventoryCommand command) throws Exception {
@@ -35,6 +38,9 @@ public class CreateInventoryCommandHandler implements CommandHandler<CreateInven
         // Validate request and access permissions
         validationUtils.validateCreateRequest(request, command.getUserId());
         
+        // Get the current user for createdBy field
+        User currentUser = userService.getUserById(command.getUserId());
+        
         // Build inventory from request
         Inventory inventory = Inventory.builder()
                 .name(request.getName())
@@ -42,6 +48,7 @@ public class CreateInventoryCommandHandler implements CommandHandler<CreateInven
                 .location(request.getLocation())
                 .organizationId(request.getOrganizationId())
                 .isActive(true)
+                .createdBy(currentUser)
                 .build();
         
         // Save inventory
