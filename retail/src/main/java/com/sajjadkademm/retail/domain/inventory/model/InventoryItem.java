@@ -33,7 +33,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.sajjadkademm.retail.shared.enums.Unit;
 // REMOVED: InventoryMovement import - now using GlobalAuditService for tracking
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;

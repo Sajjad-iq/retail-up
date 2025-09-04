@@ -1,8 +1,8 @@
-package com.sajjadkademm.retail.domain.auth.repositories;
+package com.sajjadkademm.retail.domain.user.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 
 public interface UserRepository extends JpaRepository<User, String> {
     // Find user by email for authentication

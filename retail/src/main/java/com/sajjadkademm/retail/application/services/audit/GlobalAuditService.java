@@ -6,7 +6,7 @@ import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

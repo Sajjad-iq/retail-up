@@ -7,7 +7,7 @@ import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemRequest;
 import com.sajjadkademm.retail.shared.enums.Money;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
 
 import java.math.BigDecimal;

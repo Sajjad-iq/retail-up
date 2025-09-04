@@ -1,15 +1,15 @@
-package com.sajjadkademm.retail.domain.auth.validation;
+package com.sajjadkademm.retail.domain.user.validation;
 
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.shared.enums.AccountType;
 import com.sajjadkademm.retail.shared.enums.UserStatus;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
-import com.sajjadkademm.retail.domain.auth.repositories.UserRepository;
+import com.sajjadkademm.retail.domain.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

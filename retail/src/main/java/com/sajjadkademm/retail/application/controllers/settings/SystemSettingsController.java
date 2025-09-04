@@ -5,7 +5,7 @@ import com.sajjadkademm.retail.shared.cqrs.QueryBus;
 import com.sajjadkademm.retail.domain.settings.queries.GetSystemSettingsQuery;
 import com.sajjadkademm.retail.domain.settings.commands.*;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.application.dto.settings.SystemSettingsRequest;
 import com.sajjadkademm.retail.domain.settings.model.SystemSetting;
 

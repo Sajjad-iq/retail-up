@@ -5,7 +5,7 @@ import com.sajjadkademm.retail.application.dto.auth.ChangePasswordRequest;
 import com.sajjadkademm.retail.application.dto.auth.LoginRequest;
 import com.sajjadkademm.retail.application.dto.auth.LoginResponse;
 import com.sajjadkademm.retail.application.dto.auth.RegisterRequest;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.shared.cqrs.CommandBus;
 import com.sajjadkademm.retail.shared.cqrs.QueryBus;
 import com.sajjadkademm.retail.domain.auth.commands.*;

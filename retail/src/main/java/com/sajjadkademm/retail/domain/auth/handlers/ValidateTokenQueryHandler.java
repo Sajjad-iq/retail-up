@@ -3,12 +3,12 @@ package com.sajjadkademm.retail.domain.auth.handlers;
 import com.sajjadkademm.retail.domain.auth.queries.ValidateTokenQuery;
 import com.sajjadkademm.retail.application.dto.auth.LoginResponse;
 import com.sajjadkademm.retail.shared.cqrs.QueryHandler;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.application.config.security.JwtUtil;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
-import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
+import com.sajjadkademm.retail.domain.user.validation.UserValidator;
 import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 
@@ -39,7 +39,7 @@ public class ValidateTokenQueryHandler implements QueryHandler<ValidateTokenQuer
                         .getLocalizedMessage(AuthErrorCode.AUTH_INVALID_TOKEN.getMessage()));
             }
 
-            // Validate user is active
+            // Validate user is active directly to avoid circular dependency
             User user = userValidator.validateUserActive(query.getUserId());
 
             // Generate new token

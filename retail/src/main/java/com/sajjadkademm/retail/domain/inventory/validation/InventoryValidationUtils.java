@@ -11,8 +11,8 @@ import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryRepository;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.services.OrganizationDomainService;
-import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
+import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.domain.user.validation.UserValidator;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryRequest;
 

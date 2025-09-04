@@ -8,8 +8,8 @@ import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
-import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
+import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.domain.user.validation.UserValidator;
 import com.sajjadkademm.retail.application.dto.organizations.CreateOrganizationRequest;
 import com.sajjadkademm.retail.application.dto.organizations.UpdateOrganizationRequest;
 

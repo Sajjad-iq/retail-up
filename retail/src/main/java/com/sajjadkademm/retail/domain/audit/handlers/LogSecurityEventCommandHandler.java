@@ -5,7 +5,7 @@ import com.sajjadkademm.retail.domain.audit.commands.LogSecurityEventCommand;
 import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;

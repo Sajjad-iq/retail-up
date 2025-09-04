@@ -2,7 +2,7 @@ package com.sajjadkademm.retail.application.config.security;
 
 import com.sajjadkademm.retail.shared.constants.SecurityConstants;
 import com.sajjadkademm.retail.application.config.security.JwtUtil;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

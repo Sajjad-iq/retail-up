@@ -3,8 +3,15 @@ package com.sajjadkademm.retail.domain.auth.handlers;
 import com.sajjadkademm.retail.domain.auth.commands.RegisterCommand;
 import com.sajjadkademm.retail.application.dto.auth.LoginResponse;
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
-import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.application.services.users.UserService;
+import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.domain.user.repositories.UserRepository;
+import com.sajjadkademm.retail.domain.user.validation.UserValidator;
+import com.sajjadkademm.retail.domain.shared.validation.PhoneValidator;
+import com.sajjadkademm.retail.domain.shared.validation.EmailValidator;
+import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
+import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.enums.UserStatus;
+import com.sajjadkademm.retail.shared.enums.AccountType;
 import com.sajjadkademm.retail.application.config.security.JwtUtil;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
@@ -24,7 +31,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RegisterCommandHandler implements CommandHandler<RegisterCommand, LoginResponse> {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
+    private final PhoneValidator phoneValidator;
+    private final EmailValidator emailValidator;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final LocalizedErrorService localizedErrorService;
@@ -35,16 +44,34 @@ public class RegisterCommandHandler implements CommandHandler<RegisterCommand, L
         log.debug("Processing registration command for user: {}", command.getRequest().getName());
 
         try {
+            // Validate user data (same as CreateUserCommandHandler)
+            if (command.getRequest().getName() == null || command.getRequest().getName().trim().isEmpty()) {
+                throw new BadRequestException(localizedErrorService
+                        .getLocalizedMessage(UserErrorCode.INVALID_USER_DATA.getMessage()));
+            }
+
+            // Validate phone format and uniqueness
+            phoneValidator.validatePhoneFormatAndUniqueness(command.getRequest().getPhone(),
+                    (phone) -> userRepository.existsByPhone(command.getRequest().getPhone()));
+
+            // Validate email format and uniqueness if provided
+            if (command.getRequest().getEmail() != null) {
+                emailValidator.validateEmailFormatAndUniqueness(command.getRequest().getEmail(),
+                        (email) -> userRepository.existsByEmail(command.getRequest().getEmail()));
+            }
+
             // Create new user
             User newUser = User.builder()
                     .name(command.getRequest().getName())
                     .email(command.getRequest().getEmail())
                     .phone(command.getRequest().getPhone())
                     .password(passwordEncoder.encode(command.getRequest().getPassword()))
+                    .status(UserStatus.ACTIVE)
+                    .accountType(AccountType.USER)
                     .build();
 
-            // Save user using UserService
-            User savedUser = userService.createUser(newUser);
+            // Save user directly to avoid circular dependency
+            User savedUser = userRepository.save(newUser);
 
             // Generate JWT token
             String token = jwtUtil.generateToken(

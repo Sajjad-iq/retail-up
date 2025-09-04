@@ -4,7 +4,7 @@ import com.sajjadkademm.retail.domain.organization.model.Organization;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import java.util.List;
 import java.util.Optional;
 

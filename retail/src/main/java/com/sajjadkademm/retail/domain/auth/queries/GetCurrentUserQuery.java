@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.domain.auth.queries;
 
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.shared.cqrs.Query;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -10,7 +10,7 @@ import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
 import com.sajjadkademm.retail.application.services.users.UserService;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import org.springframework.stereotype.Component;

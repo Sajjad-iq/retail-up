@@ -9,7 +9,7 @@ import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
 // REMOVED: Old InventoryMovement imports - now using GlobalAuditService
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
 
 import java.time.LocalDate;

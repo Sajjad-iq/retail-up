@@ -30,7 +30,8 @@
       "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\controllers\\debug\\CacheDebugController.java\")",
       "Bash(tree:*)",
       "Bash(grep:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\auth\\model\\User.java\")"
     ],
     "deny": [],
     "ask": []

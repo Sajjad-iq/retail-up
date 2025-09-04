@@ -4,7 +4,7 @@ import com.sajjadkademm.retail.application.services.inventory.ExcelUploadService
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.shared.utils.excel.ExcelUploadUtils;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.application.services.users.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;

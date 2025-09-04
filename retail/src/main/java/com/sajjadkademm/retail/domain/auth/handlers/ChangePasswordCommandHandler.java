@@ -3,8 +3,9 @@ package com.sajjadkademm.retail.domain.auth.handlers;
 import com.sajjadkademm.retail.domain.auth.commands.ChangePasswordCommand;
 import com.sajjadkademm.retail.application.dto.auth.AuthResponse;
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
-import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.application.services.users.UserService;
+import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.domain.user.repositories.UserRepository;
+import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
 import com.sajjadkademm.retail.domain.auth.validation.AuthValidator;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChangePasswordCommandHandler implements CommandHandler<ChangePasswordCommand, AuthResponse> {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final LocalizedErrorService localizedErrorService;
     private final AuthValidator authValidator;
@@ -35,15 +36,16 @@ public class ChangePasswordCommandHandler implements CommandHandler<ChangePasswo
         log.debug("Processing change password command for user: {}", command.getUserId());
 
         try {
-            // Get current user
-            User currentUser = userService.getUserById(command.getUserId());
+            // Get current user directly from repository to avoid circular dependency
+            User currentUser = userRepository.findById(command.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found: " + command.getUserId()));
 
             // Validate old password using AuthValidator
             authValidator.validateOldPassword(command.getOldPassword(), currentUser);
 
-            // Update password
+            // Update password directly
             currentUser.setPassword(passwordEncoder.encode(command.getNewPassword()));
-            userService.updateUser(currentUser.getId(), currentUser);
+            userRepository.save(currentUser);
 
             // Audit password change
             globalAuditService.auditSecurityEvent(

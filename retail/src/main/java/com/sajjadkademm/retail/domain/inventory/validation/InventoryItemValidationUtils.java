@@ -16,8 +16,8 @@ import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.services.OrganizationDomainService;
 import com.sajjadkademm.retail.shared.enums.Money;
 import com.sajjadkademm.retail.domain.organization.validation.OrganizationValidator;
-import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.validation.UserValidator;
+import com.sajjadkademm.retail.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -7,7 +7,7 @@ import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.audit.queries.*;
 import com.sajjadkademm.retail.domain.audit.commands.*;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;

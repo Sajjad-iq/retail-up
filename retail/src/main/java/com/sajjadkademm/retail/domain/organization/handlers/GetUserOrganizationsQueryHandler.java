@@ -4,7 +4,7 @@ import com.sajjadkademm.retail.shared.cqrs.QueryHandler;
 import com.sajjadkademm.retail.domain.organization.queries.GetUserOrganizationsQuery;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
-import com.sajjadkademm.retail.domain.auth.validation.UserValidator;
+import com.sajjadkademm.retail.domain.user.validation.UserValidator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;

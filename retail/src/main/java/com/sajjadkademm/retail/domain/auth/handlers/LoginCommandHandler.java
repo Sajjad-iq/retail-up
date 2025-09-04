@@ -3,8 +3,8 @@ package com.sajjadkademm.retail.domain.auth.handlers;
 import com.sajjadkademm.retail.domain.auth.commands.LoginCommand;
 import com.sajjadkademm.retail.application.dto.auth.LoginResponse;
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
-import com.sajjadkademm.retail.domain.auth.model.User;
-import com.sajjadkademm.retail.application.services.users.UserService;
+import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.domain.user.repositories.UserRepository;
 import com.sajjadkademm.retail.application.config.security.JwtUtil;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginResponse> {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final LocalizedErrorService localizedErrorService;
     private final AuthValidator authValidator;
@@ -43,9 +43,9 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
                     command.getRequest().getPassword()
             );
 
-            // Update last login time
+            // Update last login time directly to avoid circular dependency
             user.setLastLoginAt(LocalDateTime.now());
-            userService.updateUser(user.getId(), user);
+            userRepository.save(user);
 
             // Generate JWT token
             String token = jwtUtil.generateToken(

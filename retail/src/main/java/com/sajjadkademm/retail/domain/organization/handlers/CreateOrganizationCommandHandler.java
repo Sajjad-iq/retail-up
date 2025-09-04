@@ -5,7 +5,7 @@ import com.sajjadkademm.retail.domain.organization.commands.CreateOrganizationCo
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.repositories.OrganizationRepository;
 import com.sajjadkademm.retail.domain.organization.validation.OrganizationValidationUtils;
-import com.sajjadkademm.retail.domain.auth.repositories.UserRepository;
+import com.sajjadkademm.retail.domain.user.repositories.UserRepository;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;

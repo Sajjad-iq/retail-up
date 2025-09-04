@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.auth.model;
+package com.sajjadkademm.retail.domain.user.model;
 
 import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import jakarta.persistence.Entity;

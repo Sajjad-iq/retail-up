@@ -4,7 +4,7 @@ import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
 import com.sajjadkademm.retail.domain.audit.commands.LogBusinessProcessCommand;
 import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;

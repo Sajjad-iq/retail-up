@@ -22,7 +22,7 @@ import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemResult;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.shared.enums.Currency;
 
 import lombok.RequiredArgsConstructor;
