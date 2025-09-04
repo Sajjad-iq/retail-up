@@ -26,7 +26,6 @@ public class  RetailApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(RetailApplication.class, args);
 	}
-
 	/**
 	 * Health check endpoint
 	 */

@@ -25,7 +25,8 @@
       "Bash(dir \"C:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\organization\")",
       "Bash(dir \"C:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\organization\\repositories\")",
       "Bash(dir \"C:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\organization\\validation\")",
-      "Bash(dir \"C:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\services\\organizations\")"
+      "Bash(dir \"C:\\Users\\sajjad\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\services\\organizations\")",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
