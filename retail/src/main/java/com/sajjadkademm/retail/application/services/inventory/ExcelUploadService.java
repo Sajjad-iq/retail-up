@@ -17,7 +17,8 @@ import com.sajjadkademm.retail.shared.enums.Unit;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemUpdateValidator;
 import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils.ValidationResult;
-import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
+import com.sajjadkademm.retail.domain.audit.commands.LogBusinessProcessCommand;
+import com.sajjadkademm.retail.domain.audit.commands.LogInventoryChangeCommand;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.application.dto.inventory.ExcelUploadResponse;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemResult;
@@ -26,6 +27,7 @@ import com.sajjadkademm.retail.domain.user.model.User;
 import com.sajjadkademm.retail.shared.enums.Currency;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,12 +50,12 @@ import java.util.Optional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExcelUploadService {
     private final CommandBus commandBus;
     private final QueryBus queryBus;
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryItemUpdateValidator inventoryItemUpdateValidator;
-    private final GlobalAuditService globalAuditService; // REPLACED: InventoryMovementService with GlobalAuditService
     private final LocalizedErrorService localizedErrorService;
 
     /**
@@ -166,14 +168,20 @@ public class ExcelUploadService {
 
         // Log the Excel upload process completion
         String organizationId = getOrganizationIdFromInventory(inventoryId, user);
-        globalAuditService.auditBusinessProcess(
-                organizationId,
-                "Excel Upload",
-                String.format("Excel upload completed: %d total rows, %d successful, %d failed",
-                        totalRows, allProcessedItems.size(), allProcessingErrors.size()),
-                "EXCEL_UPLOAD",
-                inventoryId,
-                user);
+        LogBusinessProcessCommand businessProcessCommand = LogBusinessProcessCommand.builder()
+                .organizationId(organizationId)
+                .processName("Excel Upload")
+                .description(String.format("Excel upload completed: %d total rows, %d successful, %d failed",
+                        totalRows, allProcessedItems.size(), allProcessingErrors.size()))
+                .referenceId(inventoryId)
+                .userId(user.getId())
+                .build();
+        try {
+            commandBus.execute(businessProcessCommand);
+        } catch (Exception e) {
+            log.error("Failed to log business process audit for Excel upload: {}", e.getMessage(), e);
+            // Don't fail the entire upload process due to audit logging failure
+        }
 
         return ExcelUploadResponse.builder()
                 .totalRows(totalRows)
@@ -523,18 +531,26 @@ public class ExcelUploadService {
 
             if (quantityChange != 0) {
                 String organizationId = getOrganizationIdFromInventory(updated.getInventoryId(), user);
-                globalAuditService.auditInventoryChange(
-                        organizationId,
-                        updated.getId(),
-                        updated.getName(),
-                        quantityChange > 0 ? "STOCK_IN" : "STOCK_OUT", // Determine movement type
-                        quantityChange,
-                        originalStock,
-                        newStock,
-                        "Excel upload - item update",
-                        "EXCEL_UPLOAD",
-                        updated.getInventoryId(), // Use the inventory ID from the updated item
-                        user);
+                LogInventoryChangeCommand inventoryChangeCommand = LogInventoryChangeCommand.builder()
+                        .organizationId(organizationId)
+                        .itemId(updated.getId())
+                        .itemName(updated.getName())
+                        .movementType(quantityChange > 0 ? "STOCK_IN" : "STOCK_OUT")
+                        .quantityChange(quantityChange)
+                        .stockBefore(originalStock)
+                        .stockAfter(newStock)
+                        .reason("Excel upload - item update")
+                        .referenceType("EXCEL_UPLOAD")
+                        .referenceId(updated.getInventoryId())
+                        .user(user)
+                        .userId(user.getId())
+                        .build();
+                try {
+                    commandBus.execute(inventoryChangeCommand);
+                } catch (Exception e) {
+                    log.error("Failed to log inventory change audit for item {}: {}", updated.getName(), e.getMessage(), e);
+                    // Don't fail the item update due to audit logging failure
+                }
             }
 
             // SUCCESS: Add to processed items list

@@ -1,13 +1,9 @@
 package com.sajjadkademm.retail.domain.audit.handlers;
 
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
-import com.sajjadkademm.retail.domain.audit.commands.LogSecurityEventCommand;
+import com.sajjadkademm.retail.domain.audit.commands.LogEntityChangeCommand;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
-import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
-import com.sajjadkademm.retail.domain.audit.enums.EntityType;
-import com.sajjadkademm.retail.application.config.security.SecurityUtils;
-import com.sajjadkademm.retail.domain.user.model.User;
 
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Async;
@@ -15,62 +11,63 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Command handler for logging security events
- */
+import jakarta.servlet.http.HttpServletRequest;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class LogSecurityEventCommandHandler implements CommandHandler<LogSecurityEventCommand, String> {
+public class LogEntityChangeCommandHandler implements CommandHandler<LogEntityChangeCommand, String> {
 
     private final GlobalAuditRepository auditRepository;
 
     @Override
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String handle(LogSecurityEventCommand command) throws Exception {
-        log.debug("Handling LogSecurityEventCommand for organization: {}", command.getOrganizationId());
+    public String handle(LogEntityChangeCommand command) throws Exception {
+        log.debug("Handling LogEntityChangeCommand for entity: {} in organization: {}", 
+            command.getEntityName(), command.getOrganizationId());
 
         try {
-            // For security events, user might be null (e.g., failed login)
-            User currentUser = null;
-            try {
-                currentUser = SecurityUtils.getCurrentUser();
-            } catch (Exception e) {
-                // User not authenticated - that's okay for security events
-            }
-
             GlobalAuditLog auditLog = GlobalAuditLog.builder()
                     .organizationId(command.getOrganizationId())
-                    .entityType(EntityType.USER)
-                    .entityId(currentUser != null ? currentUser.getId() : null)
-                    .entityName(currentUser != null ? currentUser.getEmail() : "Unknown")
-                    .action(AuditAction.SUSPICIOUS_ACTIVITY)
+                    .entityType(command.getEntityType())
+                    .entityId(command.getEntityId())
+                    .entityName(command.getEntityName())
+                    .action(command.getAction())
                     .description(command.getDescription())
-                    .businessProcess("Security Management")
-                    .oldValue("Manual security event logged via API") // Store additional security context
-                    .performedBy(currentUser) // May be null for failed logins
+                    .fieldName(command.getFieldName())
+                    .oldValue(command.getOldValue())
+                    .newValue(command.getNewValue())
+                    .businessProcess("Entity Management")
+                    .performedBy(command.getUser())
                     .sourceIp(getClientIp())
                     .userAgent(getUserAgent())
-                    .isSensitive(true) // All security events are sensitive
+                    .isSensitive(command.getAction().isHighRisk() || command.getEntityType().isSensitiveByDefault())
                     .build();
 
             auditRepository.save(auditLog);
 
-            log.info("Security event logged for organization: {} by user: {}", 
-                command.getOrganizationId(), command.getUserId());
+            log.debug("Audit logged: {} {} by {}", command.getAction(), command.getEntityName(), command.getUser().getEmail());
 
-            return "Security event logged successfully";
+            return "Entity change logged successfully";
 
         } catch (Exception e) {
-            log.error("Failed to log security audit for action {}: {}", AuditAction.SUSPICIOUS_ACTIVITY, e.getMessage(), e);
+            log.error("Failed to log entity audit for {} {}: {}", command.getEntityType(), command.getEntityId(), e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    public Class<LogEntityChangeCommand> getCommandType() {
+        return LogEntityChangeCommand.class;
+    }
+
+    @Override
+    public boolean requiresTransaction() {
+        return true;
     }
 
     private String getClientIp() {
@@ -102,15 +99,5 @@ public class LogSecurityEventCommandHandler implements CommandHandler<LogSecurit
             // Ignore - audit context may not have request
         }
         return "unknown";
-    }
-
-    @Override
-    public Class<LogSecurityEventCommand> getCommandType() {
-        return LogSecurityEventCommand.class;
-    }
-
-    @Override
-    public boolean requiresTransaction() {
-        return true;
     }
 }

@@ -1,6 +1,8 @@
 package com.sajjadkademm.retail.application.events;
 
-import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
+import com.sajjadkademm.retail.shared.cqrs.CommandBus;
+import com.sajjadkademm.retail.domain.audit.commands.LogEntityChangeCommand;
+import com.sajjadkademm.retail.domain.audit.commands.LogInventoryChangeCommand;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
@@ -25,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class InventoryItemAuditEventHandler {
 
-    private final GlobalAuditService globalAuditService;
+    private final CommandBus commandBus;
     private final QueryBus queryBus;
 
     /**
@@ -62,33 +64,49 @@ public class InventoryItemAuditEventHandler {
             }
 
             // AUDIT: Log item creation
-            globalAuditService.auditEntityChange(
-                    organizationId,
-                    EntityType.INVENTORY_ITEM,
-                    item.getId(),
-                    item.getName(),
-                    AuditAction.CREATE,
-                    "Inventory item created",
-                    null, // No field name for creation
-                    null, // No old value for creation
-                    item.getName(), // New value is the item name
-                    user);
+            LogEntityChangeCommand entityChangeCommand = LogEntityChangeCommand.builder()
+                    .organizationId(organizationId)
+                    .entityType(EntityType.INVENTORY_ITEM)
+                    .entityId(item.getId())
+                    .entityName(item.getName())
+                    .action(AuditAction.CREATE)
+                    .description("Inventory item created")
+                    .fieldName(null) // No field name for creation
+                    .oldValue(null) // No old value for creation
+                    .newValue(item.getName()) // New value is the item name
+                    .user(user)
+                    .userId(user.getId())
+                    .build();
+            try {
+                commandBus.execute(entityChangeCommand);
+            } catch (Exception e) {
+                log.error("Failed to log entity change audit for item {}: {}", item.getName(), e.getMessage(), e);
+                // Don't fail the event processing due to audit logging failure
+            }
 
             // AUDIT: Log initial stock if positive
             Integer initialStock = item.getCurrentStock();
             if (initialStock != null && initialStock > 0) {
-                globalAuditService.auditInventoryChange(
-                        organizationId,
-                        item.getId(),
-                        item.getName(),
-                        "INITIAL_STOCK", // Movement type for initial stock
-                        initialStock, // Quantity change
-                        0, // Stock before (new item starts with 0)
-                        initialStock, // Stock after
-                        "Initial stock set during item creation",
-                        "INVENTORY_ITEM", // Reference type
-                        item.getId(), // Reference ID
-                        user);
+                LogInventoryChangeCommand inventoryChangeCommand = LogInventoryChangeCommand.builder()
+                        .organizationId(organizationId)
+                        .itemId(item.getId())
+                        .itemName(item.getName())
+                        .movementType("INITIAL_STOCK") // Movement type for initial stock
+                        .quantityChange(initialStock) // Quantity change
+                        .stockBefore(0) // Stock before (new item starts with 0)
+                        .stockAfter(initialStock) // Stock after
+                        .reason("Initial stock set during item creation")
+                        .referenceType("INVENTORY_ITEM") // Reference type
+                        .referenceId(item.getId()) // Reference ID
+                        .user(user)
+                        .userId(user.getId())
+                        .build();
+                try {
+                    commandBus.execute(inventoryChangeCommand);
+                } catch (Exception e) {
+                    log.error("Failed to log inventory change audit for item {}: {}", item.getName(), e.getMessage(), e);
+                    // Don't fail the event processing due to audit logging failure
+                }
             }
 
             log.debug("Audit logging completed for inventory item: {}", item.getName());

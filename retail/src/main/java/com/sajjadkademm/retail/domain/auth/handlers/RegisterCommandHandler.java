@@ -15,7 +15,12 @@ import com.sajjadkademm.retail.shared.enums.AccountType;
 import com.sajjadkademm.retail.application.config.security.JwtUtil;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.AuthErrorCode;
-import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
+import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
+import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
+import com.sajjadkademm.retail.domain.audit.enums.EntityType;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 
 import lombok.RequiredArgsConstructor;
@@ -37,7 +42,7 @@ public class RegisterCommandHandler implements CommandHandler<RegisterCommand, L
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final LocalizedErrorService localizedErrorService;
-    private final GlobalAuditService globalAuditService;
+    private final GlobalAuditRepository auditRepository;
 
     @Override
     public LoginResponse handle(RegisterCommand command) throws Exception {
@@ -82,14 +87,16 @@ public class RegisterCommandHandler implements CommandHandler<RegisterCommand, L
             );
 
             // Audit successful registration
-            globalAuditService.auditSecurityEvent(
+            auditSecurityEvent(
                     null, // No organization context for registration
                     AuditAction.USER_CREATE,
                     String.format("New user registered: %s (%s) from IP %s", 
                             savedUser.getName(), savedUser.getEmail(), command.getClientIp()),
                     savedUser.getId(),
                     savedUser.getName(),
-                    String.format("User-Agent: %s", command.getUserAgent())
+                    String.format("User-Agent: %s", command.getUserAgent()),
+                    command.getClientIp(),
+                    command.getUserAgent()
             );
 
             log.info("User registration successful: {} ({})", savedUser.getName(), savedUser.getEmail());
@@ -111,14 +118,16 @@ public class RegisterCommandHandler implements CommandHandler<RegisterCommand, L
             log.error("Registration failed for user: {} - {}", command.getRequest().getName(), e.getMessage());
             
             // Audit failed registration attempt
-            globalAuditService.auditSecurityEvent(
+            auditSecurityEvent(
                     null,
                     AuditAction.SUSPICIOUS_ACTIVITY,
                     String.format("Failed registration attempt for %s from IP %s: %s", 
                             command.getRequest().getName(), command.getClientIp(), e.getMessage()),
                     null, // No user ID for failed registration
                     command.getRequest().getName(),
-                    String.format("User-Agent: %s", command.getUserAgent())
+                    String.format("User-Agent: %s", command.getUserAgent()),
+                    command.getClientIp(),
+                    command.getUserAgent()
             );
             
             throw e;
@@ -128,5 +137,34 @@ public class RegisterCommandHandler implements CommandHandler<RegisterCommand, L
     @Override
     public Class<RegisterCommand> getCommandType() {
         return RegisterCommand.class;
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private void auditSecurityEvent(String organizationId, AuditAction action, String description,
+            String userId, String userName, String additionalInfo, String clientIp, String userAgent) {
+        try {
+            GlobalAuditLog auditLog = GlobalAuditLog.builder()
+                    .organizationId(organizationId)
+                    .entityType(EntityType.USER)
+                    .entityId(userId)
+                    .entityName(userName)
+                    .action(action)
+                    .description(description)
+                    .businessProcess("Security Management")
+                    .oldValue(additionalInfo) // Store additional security context
+                    .performedBy(null) // May be null for failed logins
+                    .sourceIp(clientIp)
+                    .userAgent(userAgent)
+                    .isSensitive(true) // All security events are sensitive
+                    .build();
+
+            auditRepository.save(auditLog);
+
+            log.info("Security audit logged: {} for user {} from IP {}", action, userName, clientIp);
+
+        } catch (Exception e) {
+            log.error("Failed to log security audit for action {}: {}", action, e.getMessage(), e);
+        }
     }
 }

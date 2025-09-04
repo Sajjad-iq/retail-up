@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.domain.audit.handlers;
 import com.sajjadkademm.retail.shared.cqrs.QueryHandler;
 import com.sajjadkademm.retail.domain.audit.queries.GetEntityHistoryQuery;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
-import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
+import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +19,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetEntityHistoryQueryHandler implements QueryHandler<GetEntityHistoryQuery, List<GlobalAuditLog>> {
 
-    private final GlobalAuditService globalAuditService;
+    private final GlobalAuditRepository auditRepository;
 
     @Override
     public List<GlobalAuditLog> handle(GetEntityHistoryQuery query) throws Exception {
         log.debug("Handling GetEntityHistoryQuery for entity: {} - {}", 
             query.getEntityType(), query.getEntityId());
 
-        List<GlobalAuditLog> history = globalAuditService.getEntityHistory(
+        List<GlobalAuditLog> history = auditRepository.findByOrganizationIdAndEntityTypeAndEntityIdOrderByCreatedAtDesc(
             query.getOrganizationId(), 
             query.getEntityType(), 
             query.getEntityId()

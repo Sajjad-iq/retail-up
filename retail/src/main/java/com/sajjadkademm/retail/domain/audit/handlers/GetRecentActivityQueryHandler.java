@@ -3,9 +3,11 @@ package com.sajjadkademm.retail.domain.audit.handlers;
 import com.sajjadkademm.retail.shared.cqrs.QueryHandler;
 import com.sajjadkademm.retail.domain.audit.queries.GetRecentActivityQuery;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
-import com.sajjadkademm.retail.application.services.audit.GlobalAuditService;
+import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,17 +20,16 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class GetRecentActivityQueryHandler implements QueryHandler<GetRecentActivityQuery, Page<GlobalAuditLog>> {
 
-    private final GlobalAuditService globalAuditService;
+    private final GlobalAuditRepository auditRepository;
 
     @Override
     public Page<GlobalAuditLog> handle(GetRecentActivityQuery query) throws Exception {
         log.debug("Handling GetRecentActivityQuery for organization: {}", query.getOrganizationId());
 
         // TODO: Add organization access validation
-        Page<GlobalAuditLog> activity = globalAuditService.getRecentActivity(
+        Page<GlobalAuditLog> activity = auditRepository.findByOrganizationIdOrderByCreatedAtDesc(
             query.getOrganizationId(), 
-            query.getPage(), 
-            query.getSize()
+            PageRequest.of(query.getPage(), query.getSize())
         );
         
         return activity;

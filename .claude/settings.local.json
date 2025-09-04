@@ -31,7 +31,8 @@
       "Bash(tree:*)",
       "Bash(grep:*)",
       "Bash(git checkout:*)",
-      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\auth\\model\\User.java\")"
+      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\domain\\auth\\model\\User.java\")",
+      "Bash(del \"C:\\Users\\sajja\\Documents\\retail-up\\retail\\src\\main\\java\\com\\sajjadkademm\\retail\\application\\services\\audit\\GlobalAuditService.java\")"
     ],
     "deny": [],
     "ask": []
