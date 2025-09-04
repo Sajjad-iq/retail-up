@@ -8,6 +8,7 @@ import com.sajjadkademm.retail.domain.organization.validation.OrganizationValida
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ public class UpdateOrganizationCommandHandler implements CommandHandler<UpdateOr
     private final OrganizationRepository organizationRepository;
     private final OrganizationValidationUtils validationUtils;
     private final LocalizedErrorService localizedErrorService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     @Override
     @Transactional
@@ -50,7 +52,15 @@ public class UpdateOrganizationCommandHandler implements CommandHandler<UpdateOr
             existingOrganization.setStatus(command.getRequest().getStatus());
         }
 
-        return organizationRepository.save(existingOrganization);
+        Organization updatedOrganization = organizationRepository.save(existingOrganization);
+        
+        // Invalidate organization-related caches
+        cacheInvalidationService.invalidateOrganizationCaches(
+                updatedOrganization.getId(), 
+                command.getUserId()
+        );
+        
+        return updatedOrganization;
     }
 
     @Override

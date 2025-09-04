@@ -13,6 +13,7 @@ import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.domain.inventory.services.InventoryDomainService;
+import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ public class CreateInventoryItemCommandHandler implements CommandHandler<CreateI
     private final GlobalAuditService globalAuditService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final InventoryDomainService inventoryDomainService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     @Override
     public InventoryItem handle(CreateInventoryItemCommand command) throws Exception {
@@ -79,6 +81,13 @@ public class CreateInventoryItemCommandHandler implements CommandHandler<CreateI
         
         // Get organization ID for audit
         String organizationId = getOrganizationId(savedItem);
+        
+        // Invalidate inventory item-related caches
+        cacheInvalidationService.invalidateInventoryItemCaches(
+                savedItem.getId(),
+                savedItem.getInventoryId(),
+                organizationId
+        );
         
         // Log audit trail
         globalAuditService.auditEntityChange(

@@ -9,6 +9,7 @@ import com.sajjadkademm.retail.domain.auth.repositories.UserRepository;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.BadRequestException;
+import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ public class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
     private final UserRepository userRepository;
     private final OrganizationValidationUtils validationUtils;
     private final LocalizedErrorService localizedErrorService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     @Override
     @Transactional
@@ -42,7 +44,15 @@ public class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
                 .createdBy(user)
                 .build();
 
-        return organizationRepository.save(organization);
+        Organization savedOrganization = organizationRepository.save(organization);
+        
+        // Invalidate organization-related caches
+        cacheInvalidationService.invalidateOrganizationCaches(
+                savedOrganization.getId(), 
+                command.getUserId()
+        );
+        
+        return savedOrganization;
     }
 
     @Override

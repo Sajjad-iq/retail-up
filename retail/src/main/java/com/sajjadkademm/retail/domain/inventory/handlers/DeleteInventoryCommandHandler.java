@@ -11,6 +11,7 @@ import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryErrorCode;
+import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class DeleteInventoryCommandHandler implements CommandHandler<DeleteInven
     private final InventoryValidationUtils validationUtils;
     private final GlobalAuditService globalAuditService;
     private final LocalizedErrorService localizedErrorService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     @Override
     public Void handle(DeleteInventoryCommand command) throws Exception {
@@ -46,6 +48,9 @@ public class DeleteInventoryCommandHandler implements CommandHandler<DeleteInven
         
         // Delete inventory
         inventoryRepository.delete(existingInventory);
+        
+        // Invalidate caches
+        cacheInvalidationService.invalidateInventoryCaches(command.getInventoryId(), organizationId);
         
         // Log audit trail
         globalAuditService.auditEntityChange(

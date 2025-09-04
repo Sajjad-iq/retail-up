@@ -11,6 +11,7 @@ import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryRequest;
 import com.sajjadkademm.retail.application.services.users.UserService;
 import com.sajjadkademm.retail.domain.auth.model.User;
+import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class CreateInventoryCommandHandler implements CommandHandler<CreateInven
     private final InventoryValidationUtils validationUtils;
     private final GlobalAuditService globalAuditService;
     private final UserService userService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     @Override
     public Inventory handle(CreateInventoryCommand command) throws Exception {
@@ -53,6 +55,12 @@ public class CreateInventoryCommandHandler implements CommandHandler<CreateInven
         
         // Save inventory
         Inventory savedInventory = inventoryRepository.save(inventory);
+        
+        // Invalidate inventory-related caches
+        cacheInvalidationService.invalidateInventoryCaches(
+                savedInventory.getId(), 
+                request.getOrganizationId()
+        );
         
         // Log audit trail
         globalAuditService.auditEntityChange(

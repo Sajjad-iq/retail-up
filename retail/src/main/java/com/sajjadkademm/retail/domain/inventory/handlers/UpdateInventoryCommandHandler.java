@@ -12,6 +12,7 @@ import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryRequest;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryErrorCode;
+import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class UpdateInventoryCommandHandler implements CommandHandler<UpdateInven
     private final InventoryValidationUtils validationUtils;
     private final GlobalAuditService globalAuditService;
     private final LocalizedErrorService localizedErrorService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     @Override
     public Inventory handle(UpdateInventoryCommand command) throws Exception {
@@ -49,6 +51,12 @@ public class UpdateInventoryCommandHandler implements CommandHandler<UpdateInven
         
         // Save updated inventory
         Inventory savedInventory = inventoryRepository.save(existingInventory);
+        
+        // Invalidate inventory-related caches
+        cacheInvalidationService.invalidateInventoryCaches(
+                savedInventory.getId(), 
+                savedInventory.getOrganizationId()
+        );
         
         // Log audit trail
         globalAuditService.auditEntityChange(

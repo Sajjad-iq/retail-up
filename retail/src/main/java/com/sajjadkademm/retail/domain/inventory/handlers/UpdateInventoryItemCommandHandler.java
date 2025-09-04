@@ -14,6 +14,7 @@ import com.sajjadkademm.retail.domain.inventory.services.InventoryDomainService;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryItemErrorCode;
+import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,7 @@ public class UpdateInventoryItemCommandHandler implements CommandHandler<UpdateI
     private final GlobalAuditService globalAuditService;
     private final InventoryDomainService inventoryDomainService;
     private final LocalizedErrorService localizedErrorService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     @Override
     public InventoryItem handle(UpdateInventoryItemCommand command) throws Exception {
@@ -60,6 +62,13 @@ public class UpdateInventoryItemCommandHandler implements CommandHandler<UpdateI
         
         // Get organization ID for audit
         String organizationId = getOrganizationId(savedItem);
+        
+        // Invalidate inventory item-related caches
+        cacheInvalidationService.invalidateInventoryItemCaches(
+                savedItem.getId(),
+                savedItem.getInventoryId(),
+                organizationId
+        );
         
         // Log audit trail
         globalAuditService.auditEntityChange(
