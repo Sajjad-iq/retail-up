@@ -1,8 +1,8 @@
-package com.sajjadkademm.retail.domain.inventory.commands;
+package com.sajjadkademm.retail.domain.InventoryItem.commands;
 
 import com.sajjadkademm.retail.shared.cqrs.Command;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemRequest;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 
 import lombok.Builder;
 import lombok.Data;

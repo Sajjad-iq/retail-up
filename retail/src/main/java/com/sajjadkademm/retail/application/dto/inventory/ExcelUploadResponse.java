@@ -1,6 +1,6 @@
 package com.sajjadkademm.retail.application.dto.inventory;
 
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

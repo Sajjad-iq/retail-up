@@ -1,11 +1,16 @@
 package com.sajjadkademm.retail.application.controllers.inventory;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.commands.CreateInventoryItemCommand;
+import com.sajjadkademm.retail.domain.InventoryItem.commands.DeleteInventoryItemCommand;
+import com.sajjadkademm.retail.domain.InventoryItem.commands.UpdateInventoryItemCommand;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 import com.sajjadkademm.retail.application.dto.inventory.*;
+import com.sajjadkademm.retail.domain.InventoryItem.queries.GetInventoryItemByBarcodeQuery;
+import com.sajjadkademm.retail.domain.InventoryItem.queries.GetInventoryItemByIdQuery;
+import com.sajjadkademm.retail.domain.InventoryItem.queries.GetInventoryItemCountQuery;
+import com.sajjadkademm.retail.domain.InventoryItem.queries.GetInventoryItemsQuery;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.cqrs.CommandBus;
 import com.sajjadkademm.retail.shared.cqrs.QueryBus;
-import com.sajjadkademm.retail.domain.inventory.commands.*;
-import com.sajjadkademm.retail.domain.inventory.queries.*;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 
 import com.sajjadkademm.retail.shared.enums.Unit;

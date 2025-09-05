@@ -1,6 +1,6 @@
-package com.sajjadkademm.retail.domain.inventory.events;
+package com.sajjadkademm.retail.domain.InventoryItem.events;
 
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 import com.sajjadkademm.retail.domain.user.model.User;
 import org.springframework.context.ApplicationEvent;
 

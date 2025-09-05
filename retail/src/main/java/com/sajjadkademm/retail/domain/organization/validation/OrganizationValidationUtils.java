@@ -33,11 +33,11 @@ public class OrganizationValidationUtils {
     public void validateCreateRequest(CreateOrganizationRequest request, String userId) {
         // Validate user is active
         User user = userValidator.validateUserActive(userId);
-        
-        // Validate unique name
-        if (organizationRepository.existsByName(request.getName())) {
+
+        // Validate unique Phone
+        if (organizationRepository.existsByPhone(request.getPhone())) {
             throw new BadRequestException(localizedErrorService
-                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_DUPLICATE.getMessage(), request.getName()));
+                    .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_DUPLICATE.getMessage(), request.getPhone()));
         }
         
         // Validate unique domain if provided
@@ -53,14 +53,15 @@ public class OrganizationValidationUtils {
      * Validate update organization request
      */
     public void validateUpdateRequest(UpdateOrganizationRequest request, Organization existingOrganization) {
-        // If name is being changed, validate uniqueness
-        if (request.getName() != null && !request.getName().equals(existingOrganization.getName())) {
-            if (organizationRepository.existsByName(request.getName())) {
+
+        if (request.getPhone() != null && !request.getPhone().equals(existingOrganization.getPhone())) {
+            // Validate unique Phone
+            if (organizationRepository.existsByPhone(request.getPhone())) {
                 throw new BadRequestException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_DUPLICATE.getMessage(), request.getName()));
+                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NAME_DUPLICATE.getMessage(), request.getPhone()));
             }
         }
-        
+
         // If domain is being changed, validate uniqueness
         if (request.getDomain() != null && !request.getDomain().equals(existingOrganization.getDomain())) {
             if (organizationRepository.existsByDomain(request.getDomain())) {
@@ -84,16 +85,4 @@ public class OrganizationValidationUtils {
         }
     }
 
-    /**
-     * Validate user has access to organization by ID
-     */
-    public void validateUserAccessById(String organizationId, String userId) {
-        // Find the organization first
-        Organization organization = organizationRepository.findById(organizationId)
-                .orElseThrow(() -> new BadRequestException(localizedErrorService
-                        .getLocalizedMessage(OrganizationErrorCode.ORGANIZATION_NOT_FOUND.getMessage())));
-        
-        // Validate access
-        validateUserAccess(organization, userId);
-    }
 }

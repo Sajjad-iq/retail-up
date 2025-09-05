@@ -3,9 +3,9 @@ package com.sajjadkademm.retail.domain.inventory.handlers;
 import com.sajjadkademm.retail.shared.cqrs.QueryHandler;
 import com.sajjadkademm.retail.domain.inventory.queries.GetInventorySummaryQuery;
 import com.sajjadkademm.retail.domain.inventory.readmodels.InventorySummaryReport;
-import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.InventoryItem.repositories.InventoryItemRepository;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryRepository;
-import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils;
+import com.sajjadkademm.retail.domain.InventoryItem.validation.InventoryItemValidationUtils;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 
 import org.springframework.stereotype.Component;

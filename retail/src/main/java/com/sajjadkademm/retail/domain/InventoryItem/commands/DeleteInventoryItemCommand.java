@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.inventory.commands;
+package com.sajjadkademm.retail.domain.InventoryItem.commands;
 
 import com.sajjadkademm.retail.shared.cqrs.Command;
 

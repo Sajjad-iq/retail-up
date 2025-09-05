@@ -1,10 +1,10 @@
-package com.sajjadkademm.retail.domain.inventory.handlers;
+package com.sajjadkademm.retail.domain.InventoryItem.handlers;
 
 import com.sajjadkademm.retail.shared.cqrs.QueryHandler;
-import com.sajjadkademm.retail.domain.inventory.queries.GetInventoryItemByIdQuery;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
-import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
-import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils;
+import com.sajjadkademm.retail.domain.InventoryItem.queries.GetInventoryItemByIdQuery;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.repositories.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.InventoryItem.validation.InventoryItemValidationUtils;
 import com.sajjadkademm.retail.shared.common.exceptions.NotFoundException;
 import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryItemErrorCode;

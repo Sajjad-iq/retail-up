@@ -1,13 +1,13 @@
-package com.sajjadkademm.retail.domain.inventory.handlers;
+package com.sajjadkademm.retail.domain.InventoryItem.handlers;
 
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
-import com.sajjadkademm.retail.domain.inventory.commands.CreateInventoryItemCommand;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.commands.CreateInventoryItemCommand;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 import com.sajjadkademm.retail.application.dto.inventory.CreateInventoryItemRequest;
-import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
-import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemCreateValidator;
+import com.sajjadkademm.retail.domain.InventoryItem.repositories.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.InventoryItem.validation.InventoryItemCreateValidator;
 import com.sajjadkademm.retail.domain.inventory.validation.ValidatedCreateInventoryItemContext;
-import com.sajjadkademm.retail.domain.inventory.events.InventoryItemCreatedEvent;
+import com.sajjadkademm.retail.domain.InventoryItem.events.InventoryItemCreatedEvent;
 import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;

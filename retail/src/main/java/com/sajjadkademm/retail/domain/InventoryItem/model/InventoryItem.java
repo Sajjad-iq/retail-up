@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.inventory.model;
+package com.sajjadkademm.retail.domain.InventoryItem.model;
 
 import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.shared.enums.Money;
@@ -12,8 +12,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Embedded;
@@ -24,7 +22,6 @@ import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.math.BigDecimal;
-import java.util.List;
 
 import jakarta.validation.constraints.*;
 

@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.inventory.validation;
+package com.sajjadkademm.retail.domain.InventoryItem.validation;
 
 import com.sajjadkademm.retail.shared.constants.ValidationConstants;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;

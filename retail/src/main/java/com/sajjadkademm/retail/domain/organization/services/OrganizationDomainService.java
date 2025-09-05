@@ -26,20 +26,4 @@ public class OrganizationDomainService {
         return organizationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found with id: " + id));
     }
-
-    /**
-     * Check if organization exists and is active
-     */
-    public boolean isOrganizationActiveById(String id) {
-        return organizationRepository.findById(id)
-                .map(org -> org.getStatus() == com.sajjadkademm.retail.shared.enums.OrganizationStatus.ACTIVE)
-                .orElse(false);
-    }
-
-    /**
-     * Get organization creator ID (domain logic)
-     */
-    public String getOrganizationCreatorId(String organizationId) {
-        return getOrganizationById(organizationId).getCreatedBy().getId();
-    }
 }

@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.inventory.queries;
+package com.sajjadkademm.retail.domain.InventoryItem.queries;
 
 import com.sajjadkademm.retail.shared.cqrs.Query;
 import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;

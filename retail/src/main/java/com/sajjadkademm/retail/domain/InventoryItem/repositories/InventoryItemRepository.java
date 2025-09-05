@@ -1,4 +1,4 @@
-package com.sajjadkademm.retail.domain.inventory.repositories;
+package com.sajjadkademm.retail.domain.InventoryItem.repositories;
 import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 
 import org.springframework.data.domain.Page;

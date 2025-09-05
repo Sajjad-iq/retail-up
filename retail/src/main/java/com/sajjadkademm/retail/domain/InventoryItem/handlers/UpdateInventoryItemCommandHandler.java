@@ -1,12 +1,12 @@
-package com.sajjadkademm.retail.domain.inventory.handlers;
+package com.sajjadkademm.retail.domain.InventoryItem.handlers;
 
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
 import com.sajjadkademm.retail.domain.InventoryItem.commands.UpdateInventoryItemCommand;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
-import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
-import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemUpdateValidator;
-import com.sajjadkademm.retail.domain.inventory.validation.InventoryItemValidationUtils;
+import com.sajjadkademm.retail.domain.InventoryItem.repositories.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.InventoryItem.validation.InventoryItemUpdateValidator;
+import com.sajjadkademm.retail.domain.InventoryItem.validation.InventoryItemValidationUtils;
 import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
