@@ -50,10 +50,7 @@ public class UpdateUserCommandHandler implements CommandHandler<UpdateUserComman
             existingUser.setPhone(updatedData.getPhone());
         }
 
-        // For sensitive fields like password, status, accountType - only update if explicitly provided
-        if (updatedData.getPassword() != null) {
-            existingUser.setPassword(updatedData.getPassword());
-        }
+
         if (updatedData.getStatus() != null) {
             existingUser.setStatus(updatedData.getStatus());
         }

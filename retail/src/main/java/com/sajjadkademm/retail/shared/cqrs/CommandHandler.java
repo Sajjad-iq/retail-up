@@ -27,8 +27,9 @@ public interface CommandHandler<C extends Command<R>, R> {
     
     /**
      * Indicate if this handler requires transaction management
+     * All commands are transactional by default to ensure data consistency
      * 
-     * @return true if the handler should run in a transaction
+     * @return true - all commands require transactions
      */
     default boolean requiresTransaction() {
         return true;
