@@ -7,6 +7,7 @@ import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.shared.utils.RequestContextUtils;
 
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Async;

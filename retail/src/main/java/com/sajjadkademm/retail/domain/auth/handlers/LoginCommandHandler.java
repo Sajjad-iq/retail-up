@@ -13,6 +13,7 @@ import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
+import com.sajjadkademm.retail.shared.utils.RequestContextUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

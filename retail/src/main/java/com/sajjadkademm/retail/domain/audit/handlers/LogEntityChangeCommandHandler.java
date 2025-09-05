@@ -4,17 +4,15 @@ import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
 import com.sajjadkademm.retail.domain.audit.commands.LogEntityChangeCommand;
 import com.sajjadkademm.retail.domain.audit.model.GlobalAuditLog;
 import com.sajjadkademm.retail.domain.audit.repositories.GlobalAuditRepository;
+import com.sajjadkademm.retail.shared.utils.RequestContextUtils;
 
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Component
@@ -43,8 +41,8 @@ public class LogEntityChangeCommandHandler implements CommandHandler<LogEntityCh
                     .newValue(command.getNewValue())
                     .businessProcess("Entity Management")
                     .performedBy(command.getUser())
-                    .sourceIp(getClientIp())
-                    .userAgent(getUserAgent())
+                    .sourceIp(RequestContextUtils.getClientIp())
+                    .userAgent(RequestContextUtils.getUserAgent())
                     .isSensitive(command.getAction().isHighRisk() || command.getEntityType().isSensitiveByDefault())
                     .build();
 
@@ -70,34 +68,4 @@ public class LogEntityChangeCommandHandler implements CommandHandler<LogEntityCh
         return true;
     }
 
-    private String getClientIp() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                HttpServletRequest request = attributes.getRequest();
-                String xForwardedFor = request.getHeader("X-Forwarded-For");
-                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                    return xForwardedFor.split(",")[0].trim();
-                }
-                return request.getRemoteAddr();
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
-
-    private String getUserAgent() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                return attributes.getRequest().getHeader("User-Agent");
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
 }

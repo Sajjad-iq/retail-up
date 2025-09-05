@@ -16,12 +16,10 @@ import com.sajjadkademm.retail.domain.user.model.User;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import jakarta.servlet.http.HttpServletRequest;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
 import com.sajjadkademm.retail.domain.inventory.services.InventoryDomainService;
 import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
+import com.sajjadkademm.retail.shared.utils.RequestContextUtils;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -151,8 +149,8 @@ public class CreateInventoryItemCommandHandler implements CommandHandler<CreateI
                     .newValue(newValue)
                     .businessProcess("Entity Management")
                     .performedBy(user)
-                    .sourceIp(getClientIp())
-                    .userAgent(getUserAgent())
+                    .sourceIp(RequestContextUtils.getClientIp())
+                    .userAgent(RequestContextUtils.getUserAgent())
                     .isSensitive(action.isHighRisk() || entityType.isSensitiveByDefault())
                     .build();
 
@@ -165,34 +163,4 @@ public class CreateInventoryItemCommandHandler implements CommandHandler<CreateI
         }
     }
 
-    private String getClientIp() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                HttpServletRequest request = attributes.getRequest();
-                String xForwardedFor = request.getHeader("X-Forwarded-For");
-                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                    return xForwardedFor.split(",")[0].trim();
-                }
-                return request.getRemoteAddr();
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
-
-    private String getUserAgent() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                return attributes.getRequest().getHeader("User-Agent");
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
 }

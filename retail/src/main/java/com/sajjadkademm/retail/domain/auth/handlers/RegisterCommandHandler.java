@@ -22,6 +22,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
+import com.sajjadkademm.retail.shared.utils.RequestContextUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -8,15 +8,12 @@ import com.sajjadkademm.retail.domain.audit.enums.AuditAction;
 import com.sajjadkademm.retail.domain.audit.enums.EntityType;
 import com.sajjadkademm.retail.application.config.security.SecurityUtils;
 import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.shared.utils.RequestContextUtils;
 
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,8 +48,8 @@ public class LogBusinessProcessCommandHandler implements CommandHandler<LogBusin
                     .referenceType("API_CALL")
                     .referenceId(command.getReferenceId())
                     .performedBy(currentUser)
-                    .sourceIp(getClientIp())
-                    .userAgent(getUserAgent())
+                    .sourceIp(RequestContextUtils.getClientIp())
+                    .userAgent(RequestContextUtils.getUserAgent())
                     .isSensitive(false)
                     .build();
 
@@ -69,36 +66,6 @@ public class LogBusinessProcessCommandHandler implements CommandHandler<LogBusin
         }
     }
 
-    private String getClientIp() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                HttpServletRequest request = attributes.getRequest();
-                String xForwardedFor = request.getHeader("X-Forwarded-For");
-                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                    return xForwardedFor.split(",")[0].trim();
-                }
-                return request.getRemoteAddr();
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
-
-    private String getUserAgent() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                return attributes.getRequest().getHeader("User-Agent");
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
 
     @Override
     public Class<LogBusinessProcessCommand> getCommandType() {

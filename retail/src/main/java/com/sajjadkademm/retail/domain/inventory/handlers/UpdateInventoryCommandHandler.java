@@ -21,6 +21,7 @@ import com.sajjadkademm.retail.shared.localization.LocalizedErrorService;
 import com.sajjadkademm.retail.shared.localization.errorCode.InventoryErrorCode;
 import com.sajjadkademm.retail.shared.cache.CacheInvalidationService;
 import com.sajjadkademm.retail.domain.user.model.User;
+import com.sajjadkademm.retail.shared.utils.RequestContextUtils;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -132,8 +133,8 @@ public class UpdateInventoryCommandHandler implements CommandHandler<UpdateInven
                     .newValue(newValue)
                     .businessProcess("Entity Management")
                     .performedBy(user)
-                    .sourceIp(getClientIp())
-                    .userAgent(getUserAgent())
+                    .sourceIp(RequestContextUtils.getClientIp())
+                    .userAgent(RequestContextUtils.getUserAgent())
                     .isSensitive(action.isHighRisk() || entityType.isSensitiveByDefault())
                     .build();
 
@@ -146,34 +147,4 @@ public class UpdateInventoryCommandHandler implements CommandHandler<UpdateInven
         }
     }
 
-    private String getClientIp() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                HttpServletRequest request = attributes.getRequest();
-                String xForwardedFor = request.getHeader("X-Forwarded-For");
-                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                    return xForwardedFor.split(",")[0].trim();
-                }
-                return request.getRemoteAddr();
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
-
-    private String getUserAgent() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                return attributes.getRequest().getHeader("User-Agent");
-            }
-        } catch (Exception e) {
-            // Ignore - audit context may not have request
-        }
-        return "unknown";
-    }
 }
