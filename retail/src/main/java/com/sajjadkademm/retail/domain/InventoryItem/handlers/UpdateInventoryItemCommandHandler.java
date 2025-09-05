@@ -1,7 +1,7 @@
 package com.sajjadkademm.retail.domain.inventory.handlers;
 
 import com.sajjadkademm.retail.shared.cqrs.CommandHandler;
-import com.sajjadkademm.retail.domain.inventory.commands.UpdateInventoryItemCommand;
+import com.sajjadkademm.retail.domain.InventoryItem.commands.UpdateInventoryItemCommand;
 import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
 import com.sajjadkademm.retail.application.dto.inventory.UpdateInventoryItemRequest;
 import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;

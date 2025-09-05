@@ -1,5 +1,5 @@
 package com.sajjadkademm.retail.domain.inventory.repositories;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

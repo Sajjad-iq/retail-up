@@ -9,8 +9,8 @@ import com.sajjadkademm.retail.shared.localization.errorCode.OrganizationErrorCo
 import com.sajjadkademm.retail.shared.localization.errorCode.UserErrorCode;
 import com.sajjadkademm.retail.shared.common.exceptions.UnauthorizedException;
 import com.sajjadkademm.retail.domain.inventory.model.Inventory;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
-import com.sajjadkademm.retail.domain.inventory.repositories.InventoryItemRepository;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.repositories.InventoryItemRepository;
 import com.sajjadkademm.retail.domain.inventory.services.InventoryDomainService;
 import com.sajjadkademm.retail.domain.organization.model.Organization;
 import com.sajjadkademm.retail.domain.organization.services.OrganizationDomainService;

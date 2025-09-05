@@ -3,7 +3,7 @@ package com.sajjadkademm.retail.domain.inventory.queries;
 import com.sajjadkademm.retail.shared.cqrs.Query;
 import com.sajjadkademm.retail.application.dto.inventory.FilterRequest;
 import com.sajjadkademm.retail.application.dto.inventory.PagedResponse;
-import com.sajjadkademm.retail.domain.inventory.model.InventoryItem;
+import com.sajjadkademm.retail.domain.InventoryItem.model.InventoryItem;
 
 import lombok.Builder;
 import lombok.Data;
