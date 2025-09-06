@@ -28,7 +28,7 @@ public class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new BadRequestException("No authenticated user found");
+            throw new UnauthorizedException("No authenticated user found");
         }
 
         Object principal = authentication.getPrincipal();
@@ -36,7 +36,7 @@ public class SecurityUtils {
         if (principal instanceof User) {
             return (User) principal;
         } else {
-            throw new BadRequestException("Principal is not a User instance");
+            throw new UnauthorizedException("Principal is not a User instance");
         }
     }
 

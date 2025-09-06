@@ -137,7 +137,6 @@ public class AuthService {
      * @throws Exception if token validation fails
      */
     public LoginResponse validateToken(HttpServletRequest httpRequest) throws Exception {
-        log.debug("Validating token for userId: {}", SecurityUtils.getCurrentUserId());
         
         ValidateTokenQuery query = ValidateTokenQuery.builder()
                 .userId(SecurityUtils.getCurrentUserId())
